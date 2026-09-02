@@ -1,0 +1,301 @@
+<script lang="ts">
+	import PublicHeader from '$lib/components/PublicHeader.svelte';
+	import PublicFooter from '$lib/components/PublicFooter.svelte';
+	import {
+		Mail,
+		User,
+		Send,
+		CheckCircle2,
+		Sparkles,
+		ChevronLeft,
+		Clock,
+		ShieldCheck,
+		HelpCircle,
+		BookOpen,
+		MessageSquareText
+	} from 'lucide-svelte';
+
+	// Internal destination email: contact@djrakademi.net
+	const TARGET_EMAIL = 'contact@djrakademi.net';
+
+	let fullName = $state('');
+	let userEmail = $state('');
+	let subject = $state('Question sur une formation');
+	let message = $state('');
+
+	let isSubmitting = $state(false);
+	let successMessage = $state<string | null>(null);
+	let errorMessage = $state<string | null>(null);
+
+	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault();
+		isSubmitting = true;
+		successMessage = null;
+		errorMessage = null;
+
+		try {
+			const response = await fetch('/api/contact', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ name: fullName, email: userEmail, subject, message })
+			});
+			const data = await response.json().catch(() => ({}));
+			if (!response.ok) throw new Error(data.message || 'Impossible d’envoyer le message.');
+			isSubmitting = false;
+			successMessage = 'Votre message a bien été envoyé ! Notre équipe vous répondra à votre adresse email sous 24h.';
+			fullName = '';
+			userEmail = '';
+			message = '';
+		} catch (error) {
+			errorMessage = error instanceof Error ? error.message : 'Impossible d’envoyer le message.';
+		} finally {
+			isSubmitting = false;
+		}
+	}
+</script>
+
+<svelte:head>
+	<title>Nous contacter · DJR Akademi</title>
+	<meta
+		name="description"
+		content="Contactez l'équipe de DJR Akademi pour toute question sur nos formations, nos ebooks PDF ou nos coachings."
+	/>
+</svelte:head>
+
+<div class="min-h-screen bg-zinc-50 flex flex-col font-sans text-zinc-900">
+	<PublicHeader />
+
+	<main class="flex-1 py-12 sm:py-16">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+
+			<!-- Back button -->
+			<div>
+				<a
+					href="/"
+					class="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-950 transition-colors"
+				>
+					<ChevronLeft size={16} />
+					Tounen nan akèy
+				</a>
+			</div>
+
+			<!-- Success Notification Banner -->
+			{#if successMessage}
+				<div class="p-6 bg-emerald-950 text-white rounded-3xl border border-emerald-800 shadow-xl flex items-start justify-between gap-4 animate-fade-in">
+					<div class="flex items-start gap-4">
+						<div class="size-10 bg-emerald-500/20 text-emerald-400 rounded-2xl grid place-items-center shrink-0">
+							<CheckCircle2 size={22} />
+						</div>
+						<div>
+							<h3 class="font-black text-base text-white">Mesaj la voye ak siksè !</h3>
+							<p class="text-xs text-emerald-200/80 mt-1 leading-relaxed">{successMessage}</p>
+						</div>
+					</div>
+					<button
+						type="button"
+						onclick={() => (successMessage = null)}
+						class="text-xs font-bold text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg bg-white/10"
+					>
+						Fèmen
+					</button>
+				</div>
+			{/if}
+			{#if errorMessage}
+				<div class="p-4 bg-red-50 text-red-700 rounded-2xl border border-red-200 text-sm font-semibold">
+					{errorMessage}
+				</div>
+			{/if}
+
+			<!-- MAIN TWO-COLUMN CONTAINER -->
+			<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+				<!-- LEFT COLUMN: HERO INFORMATION CARD -->
+				<div class="lg:col-span-5 space-y-6">
+
+					<!-- Dark Hero Card -->
+					<div class="bg-zinc-950 text-white rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden space-y-6 border border-zinc-800">
+						<div class="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+						<div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/10 rounded-full text-xs font-bold text-amber-400 border border-white/10">
+							<Sparkles size={14} />
+							Sèvis Sipò Kliyan
+						</div>
+
+						<h1 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
+							Ou gen yon kesyon ? Kontakte nou
+						</h1>
+
+						<p class="text-white/60 text-sm leading-relaxed">
+							Ekip nou an la pou ede w nan aprantisaj ou, reponn kesyon w sou kontni nou yo oswa rezoud nenpòt pwoblèm teknik.
+						</p>
+
+						<div class="pt-4 border-t border-white/10 space-y-4">
+							<div class="flex items-center gap-3">
+								<div class="size-9 bg-amber-400/20 text-amber-400 rounded-xl grid place-items-center shrink-0">
+									<Clock size={18} />
+								</div>
+								<div>
+									<p class="text-xs font-bold text-white">Repons rapid garanti</p>
+									<p class="text-[11px] text-white/50">N ap reponn mesaj ou an mwens ke 24h</p>
+								</div>
+							</div>
+
+							<div class="flex items-center gap-3">
+								<div class="size-9 bg-emerald-400/20 text-emerald-400 rounded-xl grid place-items-center shrink-0">
+									<ShieldCheck size={18} />
+								</div>
+								<div>
+									<p class="text-xs font-bold text-white">Sipò pèsonalize</p>
+									<p class="text-[11px] text-white/50">Yon moun pou ede w nan chak demand</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Secondary Quick FAQ Card -->
+					<div class="bg-white rounded-3xl border border-zinc-200/80 p-6 sm:p-8 shadow-sm space-y-4">
+						<div class="flex items-center gap-3">
+							<div class="size-8 bg-zinc-100 text-zinc-950 rounded-xl grid place-items-center">
+								<HelpCircle size={18} />
+							</div>
+							<h3 class="font-black text-sm text-zinc-950">Kesyon moun poze souvan</h3>
+						</div>
+
+						<ul class="space-y-3 text-xs text-zinc-600">
+							<li class="flex items-start gap-2">
+								<span class="text-amber-500 font-black">·</span>
+								<span><strong>Aksè fòmasyon :</strong> Disponib dirèkteman apre peman an konfime.</span>
+							</li>
+							<li class="flex items-start gap-2">
+								<span class="text-amber-500 font-black">·</span>
+								<span><strong>Ebook PDF :</strong> Telechajman dirèk nan bon kalite.</span>
+							</li>
+							<li class="flex items-start gap-2">
+								<span class="text-amber-500 font-black">·</span>
+								<span><strong>Mwayen peman :</strong> MonCash, Natcash ak kat entènasyonal yo aksepte.</span>
+							</li>
+						</ul>
+					</div>
+
+				</div>
+
+				<!-- RIGHT COLUMN: THE CONTACT FORM CARD -->
+				<div class="lg:col-span-7">
+					<div class="bg-white rounded-3xl border border-zinc-200/80 p-8 sm:p-10 shadow-sm space-y-8">
+
+						<div class="flex items-center justify-between pb-6 border-b border-zinc-100">
+							<div class="flex items-center gap-3">
+								<div class="size-10 bg-zinc-950 text-amber-400 rounded-2xl grid place-items-center">
+									<MessageSquareText size={20} />
+								</div>
+								<div>
+									<h2 class="text-xl font-black text-zinc-950">Voye yon mesaj pou nou</h2>
+									<p class="text-xs text-zinc-400">Rempli fòm sa a n ap reponn demand ou an</p>
+								</div>
+							</div>
+							<span class="text-xs font-bold text-zinc-400 uppercase tracking-wider hidden sm:inline-block">
+								DJR Support
+							</span>
+						</div>
+
+						<form onsubmit={handleSubmit} class="space-y-6">
+
+							<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+								<!-- Full Name -->
+								<div>
+									<label for="full-name" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+										Non konplè ou *
+									</label>
+									<div class="relative">
+										<input
+											id="full-name"
+											type="text"
+											bind:value={fullName}
+											placeholder="Ex: Jean Pierre"
+											required
+											class="w-full h-12 pl-11 pr-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
+										/>
+										<User size={18} class="absolute left-4 top-3.5 text-zinc-400" />
+									</div>
+								</div>
+
+								<!-- Email Address -->
+								<div>
+									<label for="user-email" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+										Adrès Imèl ou *
+									</label>
+									<div class="relative">
+										<input
+											id="user-email"
+											type="email"
+											bind:value={userEmail}
+											placeholder="jean.pierre@example.com"
+											required
+											class="w-full h-12 pl-11 pr-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
+										/>
+										<Mail size={18} class="absolute left-4 top-3.5 text-zinc-400" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Subject Dropdown -->
+							<div>
+								<label for="subject" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+									Sijè mesaj ou a *
+								</label>
+								<select
+									id="subject"
+									bind:value={subject}
+									class="w-full h-12 px-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all bg-white"
+								>
+									<option value="Question sur une formation">Kesyon sou yon fòmasyon videyo</option>
+									<option value="Question sur un ebook">Achte oswa telechaje yon Ebook PDF</option>
+									<option value="Coaching individuel">Sesyon Coaching 1:1</option>
+									<option value="Support technique">Sipò teknik / Aksè nan kont</option>
+									<option value="Autre demande">Lòt demand</option>
+								</select>
+							</div>
+
+							<!-- Message Textarea -->
+							<div>
+								<label for="message" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+									Mesaj ou a *
+								</label>
+								<textarea
+									id="message"
+									bind:value={message}
+									rows="5"
+									placeholder="Ekri sa w bezwen an ak tout detay..."
+									required
+									class="w-full p-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all resize-none"
+								></textarea>
+							</div>
+
+							<!-- Submit Button -->
+							<div class="pt-4 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+								<span class="text-xs text-zinc-400">
+									* Enfòmasyon ou yo rete ansekirite.
+								</span>
+
+								<button
+									type="submit"
+									disabled={isSubmitting}
+									class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-2xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 cursor-pointer"
+								>
+									<Send size={15} />
+									{isSubmitting ? 'Voye ap fèt...' : 'Voye mesaj la'}
+								</button>
+							</div>
+
+						</form>
+
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+	</main>
+
+	<PublicFooter />
+</div>

@@ -1,0 +1,323 @@
+{
+  "databaseId": "djrakademi",
+  "tables": [
+	{
+	  "id": "platform_settings",
+	  "permissions": [],
+	  "columns": {
+		"site_name": "varchar(120) required",
+		"tagline": "varchar(240) optional",
+		"contact_email": "email required",
+		"whatsapp_number": "varchar(32) required",
+		"timezone": "varchar(64) required",
+		"currency": "enum[HTG] required",
+		"logo_file_id": "varchar(255) optional",
+		"created_at": "datetime required",
+		"updated_at": "datetime required"
+	  },
+	  "indexes": []
+	},
+    {
+      "id": "coaching_settings",
+      "permissions": [
+        "read(\"team:admins\")",
+        "create(\"team:admins\")",
+        "update(\"team:admins\")"
+      ],
+      "columns": {
+        "user_id": "varchar(36) required",
+        "country": "varchar(2) required",
+        "timezone": "varchar(64) required",
+        "whatsapp": "varchar(16) required",
+        "created_at": "datetime required",
+        "updated_at": "datetime required"
+      },
+      "indexes": [
+        "unique(user_id)"
+      ]
+    },
+    {
+      "id": "coaching_services",
+      "permissions": [
+        "read(\"any\")",
+        "create(\"team:admins\")",
+        "update(\"team:admins\")",
+        "delete(\"team:admins\")"
+      ],
+      "columns": {
+        "owner_id": "varchar(36) required",
+        "title": "varchar(160) required",
+        "slug": "varchar(160) required",
+        "description": "text required",
+        "price": "integer required min:0",
+        "currency": "enum[HTG] required",
+        "is_free": "boolean required",
+        "duration_minutes": "integer required min:1",
+        "active": "boolean required",
+        "created_at": "datetime required",
+        "updated_at": "datetime required"
+      },
+      "indexes": [
+        "unique(slug)",
+        "key(active)",
+        "key(owner_id)"
+      ]
+    },
+    {
+      "id": "coaching_slots",
+      "permissions": [
+        "read(\"any\")"
+      ],
+      "columns": {
+        "service_id": "varchar(36) required",
+        "start_at": "datetime required",
+        "end_at": "datetime required",
+        "coach_timezone": "varchar(64) required",
+        "status": "enum[available,held,booked,cancelled] required",
+        "created_at": "datetime required"
+      },
+      "indexes": [
+        "key(service_id,status,start_at)",
+        "unique(service_id,start_at)",
+        "key(status)"
+      ]
+    },
+    {
+      "id": "bookings",
+      "permissions": [],
+      "columns": {
+        "service_id": "varchar(36) required",
+        "slot_id": "varchar(36) required",
+        "user_id": "varchar(36) optional",
+        "customer_name": "varchar(160) required",
+        "customer_email": "email required",
+        "customer_whatsapp": "varchar(16) required",
+        "customer_timezone": "varchar(64) required",
+        "coach_timezone": "varchar(64) required",
+        "start_at": "datetime required",
+        "end_at": "datetime required",
+        "amount": "integer required min:0",
+        "currency": "enum[HTG] required",
+        "status": "enum[pending_payment,confirmed,completed,cancelled,expired] required",
+        "payment_id": "varchar(36) optional",
+        "hold_expires_at": "datetime optional",
+        "created_at": "datetime required",
+        "updated_at": "datetime required",
+        "payment_status": "enum[pending,paid,failed,expired,not_required] optional"
+      },
+      "indexes": [
+        "key(status,hold_expires_at)",
+        "key(service_id,start_at)",
+        "key(slot_id)",
+        "key(user_id)"
+      ]
+    },
+    {
+      "id": "payments",
+      "permissions": [],
+      "columns": {
+        "booking_id": "varchar(36) required",
+        "provider": "varchar(64) required",
+        "provider_transaction_id": "varchar(160) required",
+        "amount": "integer required min:0",
+        "currency": "enum[HTG] required",
+        "status": "enum[pending,paid,failed,expired] required",
+        "created_at": "datetime required",
+        "updated_at": "datetime required",
+        "paid_at": "datetime optional",
+        "last_checked_at": "datetime optional"
+      },
+      "indexes": [
+        "unique(booking_id)",
+        "key(status,last_checked_at)",
+        "key(provider_transaction_id)"
+      ]
+    },
+    {
+      "id": "courses",
+      "permissions": [
+        "read(\"any\")",
+        "create(\"team:admins\")",
+        "update(\"team:admins\")",
+        "delete(\"team:admins\")"
+      ],
+      "columns": {
+        "title": "varchar(255) required",
+        "description": "text required",
+        "cover": "text optional",
+        "price": "integer required min:0",
+        "is_free": "boolean required",
+        "published": "boolean required",
+        "student_count": "integer required min:0"
+      },
+      "indexes": [
+        "key(published)"
+      ]
+    },
+    {
+      "id": "course_modules",
+      "permissions": [
+        "read(\"team:admins\")",
+        "create(\"team:admins\")",
+        "update(\"team:admins\")",
+        "delete(\"team:admins\")"
+      ],
+      "columns": {
+        "course_id": "varchar(36) required",
+        "title": "varchar(255) required",
+        "order": "integer required min:0"
+      },
+      "indexes": [
+        "key(course_id,order)"
+      ]
+    },
+    {
+      "id": "lessons",
+      "permissions": [
+        "read(\"team:admins\")",
+        "create(\"team:admins\")",
+        "update(\"team:admins\")",
+        "delete(\"team:admins\")"
+      ],
+      "columns": {
+        "course_id": "varchar(36) required",
+        "module_id": "varchar(36) required",
+        "title": "varchar(255) required",
+        "type": "enum[video,text] required",
+        "video_url": "text optional",
+        "content": "text optional",
+        "order": "integer required min:0"
+      },
+      "indexes": [
+        "key(module_id,order)",
+        "key(course_id)"
+      ]
+    },
+    {
+      "id": "ebooks",
+      "permissions": [
+        "read(\"any\")",
+        "create(\"team:admins\")",
+        "update(\"team:admins\")",
+        "delete(\"team:admins\")"
+      ],
+      "columns": {
+        "title": "varchar(255) required",
+        "description": "text optional",
+        "cover_file_id": "varchar(255) optional",
+        "pdf_file_id": "varchar(255) optional",
+        "price": "integer required min:0",
+        "is_free": "boolean required",
+        "published": "boolean required",
+        "created_at": "datetime optional",
+        "updated_at": "datetime optional",
+        "sales_count": "integer required min:0"
+      },
+      "indexes": [
+        "key(published)"
+      ]
+    },
+    {
+      "id": "profiles",
+      "permissions": [],
+      "columns": {
+        "user_id": "varchar(36) required",
+        "name": "varchar(255) required",
+        "email": "email required",
+        "whatsapp": "varchar(16) optional",
+        "status": "enum[active,disabled] required",
+        "created_at": "datetime required",
+        "updated_at": "datetime required"
+      },
+      "indexes": [
+        "unique(user_id)",
+		"key(status)",
+		"key(created_at)",
+		"fulltext(name)",
+		"fulltext(email)"
+      ]
+    },
+    {
+      "id": "orders",
+      "permissions": [],
+      "columns": {
+        "user_id": "varchar(36) optional",
+        "customer_name": "varchar(255) required",
+        "customer_email": "email required",
+        "customer_phone": "varchar(32) optional",
+        "product_type": "enum[course,ebook,coaching] required",
+        "product_id": "varchar(36) required",
+        "product_title": "varchar(255) required",
+        "amount": "integer required min:0",
+        "currency": "enum[HTG] required",
+        "payment_provider": "enum[moncash,natcash,carte,card,free,admin] required",
+        "payment_id": "varchar(160) optional",
+        "status": "enum[pending,paid,failed,expired] required",
+        "created_at": "datetime required",
+        "paid_at": "datetime optional"
+      },
+      "indexes": [
+        "key(user_id)",
+        "key(status,created_at)",
+		"key(product_type,product_id)",
+		"key(product_type,created_at)",
+		"key(status,product_type,created_at)",
+		"key(created_at)",
+		"fulltext(customer_name)",
+		"fulltext(customer_email)",
+		"fulltext(product_title)",
+		"key(user_id,product_type,product_id,status,created_at)"
+      ]
+    },
+    {
+      "id": "access_grants",
+      "permissions": [],
+      "columns": {
+        "user_id": "varchar(36) required",
+        "item_type": "enum[course,ebook] required",
+        "item_id": "varchar(36) required",
+        "granted_by": "enum[purchase,admin,free] required",
+        "created_at": "datetime required"
+      },
+      "indexes": [
+        "unique(user_id,item_type,item_id)",
+        "key(user_id,item_type)"
+      ]
+    },
+    {
+      "id": "course_progress",
+      "permissions": [],
+      "columns": {
+        "user_id": "varchar(36) required",
+        "course_id": "varchar(36) required",
+        "completed_lesson_ids": "text required",
+        "last_lesson_id": "varchar(36) optional",
+        "updated_at": "datetime required"
+      },
+      "indexes": [
+        "unique(user_id,course_id)",
+        "key(user_id)"
+      ]
+    },
+    {
+      "id": "payment_logs",
+      "permissions": [
+        "read(\"team:admins\")"
+      ],
+      "columns": {
+        "order_id": "varchar(36) optional",
+        "payment_id": "varchar(160) optional",
+        "event_type": "enum[initiation,webhook_received,cron_verification,confirmation_success,confirmation_failed] required",
+        "status_code": "integer required min:100",
+        "request_payload": "text optional",
+        "response_payload": "text optional",
+        "error_message": "text optional",
+        "created_at": "datetime required"
+      },
+      "indexes": [
+        "key(order_id)",
+        "key(event_type)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "djrakademi-appwrite-functions",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test shared/*.test.js",
+    "setup:schema": "node setup-schema.js"
+  },
+  "dependencies": {
+    "node-appwrite": "^28.0.0"
+  }
+}

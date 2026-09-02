@@ -1,0 +1,30 @@
+{
+  "projectId": "djrakademi",
+  "projectName": "DJR Akademi",
+  "functions": [
+    {
+      "$id": "booking-maintenance",
+      "name": "booking-maintenance",
+      "runtime": "node-25",
+      "path": "appwrite/functions/booking-maintenance",
+      "entrypoint": "index.js",
+      "schedule": "*/15 * * * *",
+      "timeout": 120,
+      "enabled": true,
+      "logging": true,
+      "scopes": ["rows.read", "rows.write"]
+    },
+    {
+      "$id": "payment-maintenance",
+      "name": "payment-maintenance",
+      "runtime": "node-25",
+      "path": "appwrite/functions/payment-maintenance",
+      "entrypoint": "index.js",
+      "schedule": "*/15 * * * *",
+      "timeout": 120,
+      "enabled": true,
+      "logging": true,
+      "scopes": ["rows.read", "rows.write"]
+    }
+  ]
+}
