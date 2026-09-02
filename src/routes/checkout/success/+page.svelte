@@ -13,7 +13,8 @@
 		Printer,
 		MessageSquare,
 		Sparkles,
-		ShieldCheck
+		ShieldCheck,
+		LayoutDashboard
 	} from 'lucide-svelte';
 	import { confirmPlopplopPayment } from '$lib/services/payments';
 	import type { Order } from '$lib/services/orders';
@@ -94,11 +95,15 @@
 					<h1 class="text-2xl font-bold text-base-content">Nou pa ka verifye kòmand lan</h1>
 					<p class="text-sm text-base-content/60 max-w-md mx-auto">{error}</p>
 				</div>
-				<div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-					<button type="button" class="btn btn-primary btn-sm rounded-xl font-bold px-6" onclick={verifyPayment}>
+				<div class="pt-4 flex flex-wrap items-center justify-center gap-3">
+					<a href="/dashboard" class="btn btn-primary btn-sm rounded-xl font-bold px-6 gap-2">
+						<LayoutDashboard size={16} />
+						Ale nan Espas mwen (Dashboard)
+					</a>
+					<button type="button" class="btn btn-outline btn-sm rounded-xl font-bold px-6" onclick={verifyPayment}>
 						Eseye verifye ankò
 					</button>
-					<a href="/contact" class="btn btn-outline btn-sm rounded-xl font-bold px-6">
+					<a href="/contact" class="btn btn-ghost btn-sm rounded-xl font-bold px-6 border border-base-300">
 						Kontakte sipò a
 					</a>
 				</div>
