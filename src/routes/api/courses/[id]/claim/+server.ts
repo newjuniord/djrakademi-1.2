@@ -1,10 +1,14 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { requirePaymentUser, PaymentServerError } from '$lib/server/payments';
 import { claimFreeCourseServer, CourseServerError } from '$lib/server/courses';
+import { isPurchaseMaintenanceEnabled, MAINTENANCE_MESSAGE } from '$lib/server/maintenance';
 
 export const POST: RequestHandler = async ({ request, params }) => {
 	try {
 		const user = await requirePaymentUser(request);
+		if (await isPurchaseMaintenanceEnabled()) {
+			throw new CourseServerError(MAINTENANCE_MESSAGE, 503);
+		}
 		return json(await claimFreeCourseServer(params.id!, user), { status: 201 });
 	} catch (error) {
 		const status = error instanceof CourseServerError || error instanceof PaymentServerError ? error.status : 500;

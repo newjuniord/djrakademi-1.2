@@ -652,6 +652,7 @@ export const PUT: RequestHandler = async ({ request, params }) => {
 		const contactEmail = String(settings?.contactEmail || '').trim();
 		const whatsappNumber = String(settings?.whatsappNumber || '').trim();
 		const timezone = String(settings?.timezone || '').trim();
+		const maintenanceMode = settings?.maintenanceMode === true;
 		if (!siteName || siteName.length > 120 || tagline.length > 240 || !/^\S+@\S+\.\S+$/.test(contactEmail) || !whatsappNumber || whatsappNumber.length > 32 || !timezone || timezone.length > 64) throw new AdminServerError('Les paramètres de la plateforme sont invalides.', 400);
 		try { new Intl.DateTimeFormat('fr', { timeZone: timezone }).format(); }
 		catch { throw new AdminServerError('Le fuseau horaire est invalide.', 400); }
@@ -664,7 +665,7 @@ export const PUT: RequestHandler = async ({ request, params }) => {
 			uploadedFileId = uploaded.$id;
 		}
 		const now = new Date().toISOString();
-		const data: Record<string, unknown> = { site_name: siteName, tagline, contact_email: contactEmail, whatsapp_number: whatsappNumber, timezone, currency: 'HTG', updated_at: now };
+		const data: Record<string, unknown> = { site_name: siteName, tagline, contact_email: contactEmail, whatsapp_number: whatsappNumber, timezone, currency: 'HTG', maintenance_mode: maintenanceMode, updated_at: now };
 		if (uploadedFileId) data.logo_file_id = uploadedFileId;
 		let saved: any;
 		try {

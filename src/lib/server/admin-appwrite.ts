@@ -127,6 +127,7 @@ export function mapSettings(row?: any) {
 		whatsappNumber: row?.whatsapp_number || '',
 		timezone: row?.timezone || '',
 		currency: 'HTG' as const,
+		maintenanceMode: Boolean(row?.maintenance_mode),
 		logoUrl
 	};
 }

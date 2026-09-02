@@ -39,12 +39,15 @@
 	let coachingItem = $derived(isCoaching ? (item as CoachingService) : null);
 
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
+	import MaintenanceModal from '$lib/components/MaintenanceModal.svelte';
+	import { getMaintenanceStatus } from '$lib/services/maintenance';
 	import { initiatePlopplopPayment } from '$lib/services/payments';
 	import { claimFreeEbook, ownsEbook } from '$lib/services/ebook-access';
 
 	let checkoutSuccess = $state(false);
 	let checkoutLoading = $state(false);
 	let showPaymentModal = $state(false);
+	let showMaintenanceModal = $state(false);
 
 	let currentAmount = $derived.by(() => {
 		if (isCourse && courseItem) return courseItem.price || 0;
@@ -62,8 +65,19 @@
 
 	import { toast } from '$lib/toast.svelte';
 
+	async function showMaintenanceIfEnabled(): Promise<boolean> {
+		try {
+			const status = await getMaintenanceStatus();
+			if (status.enabled) showMaintenanceModal = true;
+			return status.enabled;
+		} catch {
+			return false;
+		}
+	}
+
 	async function handleStartCheckout() {
 		if (!item) return;
+		if (await showMaintenanceIfEnabled()) return;
 
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
@@ -141,6 +155,10 @@
 
 	async function handleSelectPaymentMethod(method: 'moncash' | 'natcash' | 'carte') {
 		if (!item || checkoutLoading) return;
+		if (await showMaintenanceIfEnabled()) {
+			showPaymentModal = false;
+			return;
+		}
 
 		// 1. Connexion requise
 		if (!authState.user || !authState.user.$id) {
@@ -382,3 +400,6 @@
 		onClose={() => (showPaymentModal = false)}
 	/>
 {/if}
+
+
+<MaintenanceModal open={showMaintenanceModal} onClose={() => (showMaintenanceModal = false)} />

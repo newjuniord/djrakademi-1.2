@@ -17,7 +17,8 @@
 		Loader2,
 		AlertCircle,
 		Sparkles,
-		ShieldCheck
+		ShieldCheck,
+		Wrench
 	} from 'lucide-svelte';
 	import { getPlatformSettings, updatePlatformSettings, type PlatformSettings } from '$lib/admin/admin-client';
 	import { TIMEZONE_OPTIONS } from '$lib/coaching/timezone';
@@ -30,7 +31,8 @@
 		contactEmail: '',
 		whatsappNumber: '',
 		timezone: 'America/Port-au-Prince',
-		currency: 'HTG'
+		currency: 'HTG',
+		maintenanceMode: false
 	});
 	let loading = $state(true);
 	let saving = $state(false);
@@ -152,6 +154,32 @@
 		</div>
 	{:else}
 		<form id="settings-form" onsubmit={saveSettings} class="space-y-6">
+			<!-- Mode maintenance des achats -->
+			<section class="card overflow-hidden border shadow-xs {settings.maintenanceMode ? 'border-warning/50 bg-warning/5' : 'border-base-300/70 bg-base-100'}">
+				<div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+					<div class="flex items-start gap-3">
+						<div class="grid size-9 shrink-0 place-items-center rounded-xl {settings.maintenanceMode ? 'bg-warning/20 text-warning-content' : 'bg-base-200 text-base-content/60'}">
+							<Wrench size={18} />
+						</div>
+						<div>
+							<h2 class="font-bold text-sm text-base-content">Maintenance des achats</h2>
+							<p class="mt-1 max-w-2xl text-xs leading-relaxed text-base-content/60">
+								Bloque temporairement les achats, les inscriptions gratuites et les réservations de coaching. Les contenus déjà achetés restent accessibles.
+							</p>
+						</div>
+					</div>
+					<label class="flex cursor-pointer items-center gap-3 rounded-xl border border-base-300 bg-base-100 px-4 py-3">
+						<span class="text-xs font-bold">{settings.maintenanceMode ? 'Activée' : 'Désactivée'}</span>
+						<input class="toggle toggle-warning" type="checkbox" bind:checked={settings.maintenanceMode} />
+					</label>
+				</div>
+				{#if settings.maintenanceMode}
+					<div class="border-t border-warning/30 bg-warning/10 px-5 py-3 text-xs font-semibold text-warning-content">
+						Les clients verront un message leur demandant de réessayer plus tard.
+					</div>
+				{/if}
+			</section>
+
 			<!-- Section 1: Logo de la plateforme -->
 			<section class="card bg-base-100 border border-base-300/70 shadow-xs overflow-hidden">
 				<div class="flex items-center gap-3 border-b border-base-300/70 p-5 bg-base-200/40">

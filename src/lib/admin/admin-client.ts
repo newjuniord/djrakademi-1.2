@@ -51,6 +51,7 @@ export interface PlatformSettings {
 	whatsappNumber: string;
 	timezone: string;
 	currency: 'HTG';
+	maintenanceMode: boolean;
 	logoUrl?: string;
 }
 

@@ -13,6 +13,8 @@
 	import { getCoachingServiceBySlug, getAvailableCoachingSlots } from '$lib/services/coaching';
 	import { authState } from '$lib/auth.svelte';
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
+	import MaintenanceModal from '$lib/components/MaintenanceModal.svelte';
+	import { getMaintenanceStatus } from '$lib/services/maintenance';
 	import { initiatePlopplopPayment } from '$lib/services/payments';
 	import { toast } from '$lib/toast.svelte';
 
@@ -97,9 +99,21 @@
 	});
 
 	let showCoachingPaymentModal = $state(false);
+	let showMaintenanceModal = $state(false);
+
+	async function showMaintenanceIfEnabled(): Promise<boolean> {
+		try {
+			const status = await getMaintenanceStatus();
+			if (status.enabled) showMaintenanceModal = true;
+			return status.enabled;
+		} catch {
+			return false;
+		}
+	}
 
 	async function continueBooking(event: SubmitEvent) {
 		event.preventDefault();
+		if (await showMaintenanceIfEnabled()) return;
 		if (!service || !selected) { error = "Choisissez un créneau disponible."; return; }
 		if (liveBookingId) { showCoachingPaymentModal = true; return; }
 		const customer: BookingCustomerInput = { name, email, whatsapp, timezone };
@@ -128,6 +142,10 @@
 
 	async function handleCoachingSelectPaymentMethod(method: "moncash" | "natcash" | "carte") {
 		if (!service || !liveBookingId) return;
+		if (await showMaintenanceIfEnabled()) {
+			showCoachingPaymentModal = false;
+			return;
+		}
 		loading = true;
 		error = "";
 		try {
@@ -536,3 +554,6 @@
 		onClose={() => (showCoachingPaymentModal = false)}
 	/>
 {/if}
+
+
+<MaintenanceModal open={showMaintenanceModal} onClose={() => (showMaintenanceModal = false)} />

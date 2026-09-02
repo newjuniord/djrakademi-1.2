@@ -7,6 +7,7 @@ import {
 	type PaymentProviderTrace
 } from '$lib/server/payments';
 import { recordPaymentEvent } from '$lib/server/payment-logs';
+import { isPurchaseMaintenanceEnabled, MAINTENANCE_MESSAGE } from '$lib/server/maintenance';
 
 function traceOrderId(trace?: PaymentProviderTrace): string | undefined {
 	const body = trace?.request?.body;
@@ -33,6 +34,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	let providerTrace: PaymentProviderTrace | undefined;
 	try {
 		const user = await requirePaymentUser(request);
+		if (await isPurchaseMaintenanceEnabled()) {
+			throw new PaymentServerError(MAINTENANCE_MESSAGE, 503);
+		}
 		const body = await request.json();
 		const productType = body?.productType;
 		const productId = typeof body?.productId === 'string' ? body.productId.trim() : '';

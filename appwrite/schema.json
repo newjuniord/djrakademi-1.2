@@ -11,6 +11,7 @@
 		"whatsapp_number": "varchar(32) required",
 		"timezone": "varchar(64) required",
 		"currency": "enum[HTG] required",
+		"maintenance_mode": "boolean optional",
 		"logo_file_id": "varchar(255) optional",
 		"created_at": "datetime required",
 		"updated_at": "datetime required"

@@ -90,6 +90,16 @@ async function setupSchema() {
 	await tables.updateTable({ databaseId, tableId: table.id, permissions: table.permissions, rowSecurity: false, enabled: true, purge: true });
 	console.log("Permissions synchronized: " + table.id);
 
+	// Keep additive boolean columns synchronized for already existing tables.
+	const currentColumns = await tables.listColumns({ databaseId, tableId: table.id });
+	const existingColumnKeys = new Set(currentColumns.columns.map((column) => column.key));
+	for (const column of columns) {
+	  if (existingColumnKeys.has(column.key)) continue;
+	  if (column.type !== 'boolean') throw new Error('Automatic migration is not implemented for column type: ' + column.type);
+	  await tables.createBooleanColumn({ databaseId, tableId: table.id, key: column.key, required: column.required, ...(!column.required ? { xdefault: false } : {}) });
+	  console.log('Column created: ' + table.id + '.' + column.key);
+	}
+
 	const current = await tables.listIndexes({ databaseId, tableId: table.id });
 	const existingKeys = new Set(current.indexes.map((index) => index.key));
 	for (const index of indexes) {
