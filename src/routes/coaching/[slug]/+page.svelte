@@ -144,12 +144,12 @@
 			});
 			const redirectTarget = result?.url || result?.redirectUrl;
 			if (!result?.success || !redirectTarget) {
-				throw new Error(result?.message || "Impossible d’initialiser le paiement.");
+				throw new Error(result?.message || "Nou pa ka lanse peman an. Tanpri eseye ankò.");
 			}
 			showCoachingPaymentModal = false;
 			window.location.href = redirectTarget;
 		} catch (caught) {
-			error = caught instanceof Error ? caught.message : "Erreur lors du paiement du coaching.";
+			error = caught instanceof Error ? caught.message : "Yon erè rive pandan n ap trete peman pou sèvis sa a.";
 			toast.error(error);
 			showCoachingPaymentModal = false;
 		} finally {

@@ -47,13 +47,13 @@
 					authState.user.name = updated.name;
 				}
 			}
-			saveSuccessMessage = 'Vos informations de profil ont été mises à jour avec succès !';
+			saveSuccessMessage = 'Enfòmasyon sou kont ou an mete ajou ak siksè !';
 			setTimeout(() => {
 				saveSuccessMessage = null;
 			}, 4000);
 		} catch (e: any) {
 			console.error('Failed to update profile:', e);
-			saveErrorMessage = e.message || 'Impossible de mettre à jour le profil dans Appwrite.';
+			saveErrorMessage = e.message || 'Nou pa ka mete ajou profil la nan kounye a.';
 		} finally {
 			saving = false;
 		}

@@ -67,7 +67,7 @@
 
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
-			toast.error('Veuillez vous connecter à votre compte pour continuer.');
+			toast.error('Tanpri konekte sou kont ou pou w ka kontinye.');
 			goto('/login');
 			return;
 		}
@@ -84,7 +84,7 @@
 			try {
 				const existingAccess = type === 'ebook' ? await ownsEbook(item.id) : await hasCourseAccess(item.id);
 				if (existingAccess) {
-					toast.info('Vous possédez déjà ce programme ! Redirection vers votre espace client.');
+					toast.info('Ou gen pwogram sa a deja! N ap redirije w nan espas ou an.');
 					onClose();
 					goto('/dashboard');
 					return;
@@ -107,7 +107,7 @@
 		if (!item) return;
 
 		if (!authState.user || !authState.user.$id) {
-			toast.error('Veuillez vous connecter pour accéder à ce programme.');
+			toast.error('Tanpri konekte sou kont ou pou w ka jwenn aksè nan pwogram sa a.');
 			goto('/login');
 			return;
 		}
@@ -121,7 +121,7 @@
 			}
 
 			checkoutSuccess = true;
-			toast.success('Accès débloqué avec succès !');
+			toast.success('Aksè debloke ak siksè!');
 			setTimeout(() => {
 				checkoutSuccess = false;
 				onClose();
@@ -129,7 +129,7 @@
 			}, 1500);
 		} catch (e) {
 			console.error('Free enrollment error:', e);
-			toast.error('Erreur lors de l’accès au programme.');
+			toast.error('Yon erè rive pandan n ap ba w aksè nan pwogram nan.');
 		} finally {
 			checkoutLoading = false;
 		}
@@ -141,7 +141,7 @@
 		// 1. Connexion requise
 		if (!authState.user || !authState.user.$id) {
 			showPaymentModal = false;
-			toast.error('Veuillez vous connecter à votre compte pour procéder au paiement.');
+			toast.error('Tanpri konekte sou kont ou pou w ka fè peman an.');
 			goto('/login');
 			return;
 		}
@@ -157,7 +157,7 @@
 				const existingAccess = type === 'ebook' ? await ownsEbook(item.id) : await hasCourseAccess(item.id);
 				if (existingAccess) {
 					showPaymentModal = false;
-					toast.info('Vous possédez déjà ce programme ! Redirection vers votre espace client.');
+					toast.info('Ou gen pwogram sa a deja! N ap redirije w nan espas ou an.');
 					onClose();
 					goto('/dashboard');
 					return;
@@ -180,11 +180,11 @@
 				showPaymentModal = false;
 				window.location.href = redirectTarget;
 			} else {
-				toast.error(res?.message || 'Impossible d’initialiser le paiement. Veuillez réessayer.');
+				toast.error(res?.message || 'Nou pa ka lanse peman an. Tanpri eseye ankò.');
 			}
 		} catch (e: any) {
 			console.error('Plopplop payment initiation error:', e);
-			toast.error(e?.message || 'Erreur lors du traitement du paiement.');
+			toast.error(e?.message || 'Yon erè rive pandan n ap trete peman an.');
 		} finally {
 			checkoutLoading = false;
 		}

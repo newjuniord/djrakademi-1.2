@@ -60,7 +60,7 @@
 					goto('/dashboard');
 				}
 			} catch (error: any) {
-				errorMessage = error.message || 'Une erreur est survenue lors de la connexion.';
+				errorMessage = error.message || 'Yon erè rive pandan w ap konekte a.';
 			} finally {
 				loading = false;
 			}
@@ -86,7 +86,7 @@
 					goto('/dashboard');
 				}
 			} catch (error: any) {
-				errorMessage = error.message || "Une erreur est survenue lors de l'inscription.";
+				errorMessage = error.message || 'Yon erè rive pandan enskripsyon an.';
 			} finally {
 				loading = false;
 			}

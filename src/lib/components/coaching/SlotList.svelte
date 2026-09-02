@@ -203,7 +203,7 @@
 	<div class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 bg-base-200/35 px-5 py-3 sm:px-6">
 		<p class="flex items-center gap-2 text-xs text-base-content/60">
 			<Clock3 size={15} />
-			<span>Fuseau horaire : <strong class="text-base-content font-bold">{getTimezoneLabel(timezone)}</strong></span>
+			<span>Fizo orè : <strong class="text-base-content font-bold">{getTimezoneLabel(timezone)}</strong></span>
 		</p>
 		<p class="text-xs text-base-content/50 font-semibold">{availableCount} disponible{availableCount > 1 ? 's' : ''} sur {slots.length} au total</p>
 	</div>

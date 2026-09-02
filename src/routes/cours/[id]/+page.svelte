@@ -42,7 +42,7 @@
 
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
-			toast.error('Veuillez vous connecter à votre compte pour acheter cette formation.');
+			toast.error('Tanpri konekte sou kont ou pou w ka achte fòmasyon sa a.');
 			goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
 			return;
 		}
@@ -52,7 +52,7 @@
 		try {
 			const existingAccess = await hasCourseAccess(course.id);
 			if (existingAccess) {
-				toast.info('Vous possédez déjà cette formation ! Redirection vers votre espace client.');
+				toast.info('Ou gen fòmasyon sa a deja! N ap redirije w nan espas ou an.');
 				goto('/dashboard');
 				return;
 			}
@@ -75,17 +75,17 @@
 		try {
 			const user = authState.user;
 			if (!user || !user.$id) {
-				toast.error('Veuillez vous connecter pour accéder à ce cours.');
+				toast.error('Tanpri konekte sou kont ou pou w ka jwenn aksè nan fòmasyon sa a.');
 				goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
 				return;
 			}
 
 			await claimFreeCourse(course.id);
-			toast.success('Accès gratuit débloqué ! Redirection vers votre espace client.');
+			toast.success('Aksè gratis debloke! N ap redirije w nan espas ou an.');
 			goto('/dashboard');
 		} catch (e) {
 			console.error('Free enrollment error:', e);
-			toast.error('Erreur lors de l’inscription gratuite.');
+			toast.error('Yon erè rive pandan enskripsyon an.');
 		} finally {
 			checkoutLoading = false;
 		}
@@ -97,7 +97,7 @@
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
 			showPaymentModal = false;
-			toast.error('Veuillez vous connecter à votre compte pour procéder au paiement.');
+			toast.error('Tanpri konekte sou kont ou pou w ka fè peman an.');
 			goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
 			return;
 		}
@@ -112,7 +112,7 @@
 			const existingAccess = await hasCourseAccess(course.id);
 			if (existingAccess) {
 				showPaymentModal = false;
-				toast.info('Vous possédez déjà cette formation ! Redirection vers votre espace client.');
+				toast.info('Ou gen fòmasyon sa a deja! N ap redirije w nan espas ou an.');
 				goto('/dashboard');
 				return;
 			}
@@ -133,11 +133,11 @@
 				showPaymentModal = false;
 				window.location.href = redirectTarget;
 			} else {
-				toast.error(res?.message || 'Impossible d’initialiser le paiement. Veuillez réessayer.');
+				toast.error(res?.message || 'Nou pa ka lanse peman an. Tanpri eseye ankò.');
 			}
 		} catch (e: any) {
 			console.error('Plopplop payment error:', e);
-			toast.error(e?.message || 'Erreur lors du traitement du paiement.');
+			toast.error(e?.message || 'Yon erè rive pandan n ap trete peman an.');
 		} finally {
 			checkoutLoading = false;
 		}

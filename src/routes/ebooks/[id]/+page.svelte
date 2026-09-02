@@ -38,7 +38,7 @@
 
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
-			toast.error('Veuillez vous connecter à votre compte pour acheter cet ebook.');
+			toast.error('Tanpri konekte sou kont ou pou w ka achte ebook sa a.');
 			goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
 			return;
 		}
@@ -48,7 +48,7 @@
 		try {
 			const existingAccess = await ownsEbook(ebook.id);
 			if (existingAccess) {
-				toast.info('Vous possédez déjà cet ebook ! Redirection vers votre espace client.');
+				toast.info('Ou gen ebook sa a deja! N ap redirije w nan espas ou an.');
 				goto('/dashboard');
 				return;
 			}
@@ -70,10 +70,10 @@
 		checkoutLoading = true;
 		try {
 			await claimFreeEbook(ebook.id);
-			toast.success("Ebook débloqué ! Vous pouvez maintenant le télécharger.");
-			await goto("/dashboard#sec-ebooks");
+			toast.success('Ebook debloke! Ou ka telechaje l kounye a.');
+			await goto('/dashboard#sec-ebooks');
 		} catch (caught) {
-			toast.error(caught instanceof Error ? caught.message : "Impossible de débloquer cet ebook.");
+			toast.error(caught instanceof Error ? caught.message : 'Nou pa ka debloke ebook sa a.');
 		} finally {
 			checkoutLoading = false;
 		}
@@ -85,7 +85,7 @@
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
 			showPaymentModal = false;
-			toast.error('Veuillez vous connecter à votre compte pour procéder au paiement.');
+			toast.error('Tanpri konekte sou kont ou pou w ka fè peman an.');
 			goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
 			return;
 		}
@@ -100,7 +100,7 @@
 			const existingAccess = await ownsEbook(ebook.id);
 			if (existingAccess) {
 				showPaymentModal = false;
-				toast.info('Vous possédez déjà cet ebook ! Redirection vers votre espace client.');
+				toast.info('Ou gen ebook sa a deja! N ap redirije w nan espas ou an.');
 				goto('/dashboard');
 				return;
 			}
@@ -121,11 +121,11 @@
 				showPaymentModal = false;
 				window.location.href = redirectTarget;
 			} else {
-				toast.error(res?.message || 'Impossible d’initialiser le paiement. Veuillez réessayer.');
+				toast.error(res?.message || 'Nou pa ka lanse peman an. Tanpri eseye ankò.');
 			}
 		} catch (e: any) {
 			console.error('Plopplop ebook payment error:', e);
-			toast.error(e?.message || 'Erreur lors du traitement du paiement.');
+			toast.error(e?.message || 'Yon erè rive pandan n ap trete peman an.');
 		} finally {
 			checkoutLoading = false;
 		}
