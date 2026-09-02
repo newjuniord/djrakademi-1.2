@@ -8,6 +8,25 @@ class AuthState {
 	profile = $state<UserProfile | null>(null);
 	isAdmin = $state(false);
 	loading = $state(true);
+	showAuthModal = $state(false);
+	onLoginSuccessCallback = $state<(() => void) | null>(null);
+
+	openLogin(callback?: () => void) {
+		if (callback) {
+			this.onLoginSuccessCallback = callback;
+		} else {
+			this.onLoginSuccessCallback = null;
+		}
+		this.showAuthModal = true;
+	}
+
+	triggerLoginSuccess() {
+		if (this.onLoginSuccessCallback) {
+			const cb = this.onLoginSuccessCallback;
+			this.onLoginSuccessCallback = null;
+			cb();
+		}
+	}
 
 	async check() {
 		try {

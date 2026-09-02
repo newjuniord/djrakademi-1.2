@@ -42,8 +42,10 @@
 
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
-			toast.error('Tanpri konekte sou kont ou pou w ka achte fòmasyon sa a.');
-			goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
+			toast.info('Tanpri konekte sou kont ou pou w ka achte fòmasyon sa a.');
+			authState.openLogin(() => {
+				handleBuyClick();
+			});
 			return;
 		}
 
@@ -75,8 +77,10 @@
 		try {
 			const user = authState.user;
 			if (!user || !user.$id) {
-				toast.error('Tanpri konekte sou kont ou pou w ka jwenn aksè nan fòmasyon sa a.');
-				goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
+				toast.info('Tanpri konekte sou kont ou pou w ka jwenn aksè nan fòmasyon sa a.');
+				authState.openLogin(() => {
+					handleFreeEnrollment();
+				});
 				return;
 			}
 
@@ -97,8 +101,10 @@
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
 			showPaymentModal = false;
-			toast.error('Tanpri konekte sou kont ou pou w ka fè peman an.');
-			goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
+			toast.info('Tanpri konekte sou kont ou pou w ka fè peman an.');
+			authState.openLogin(() => {
+				showPaymentModal = true;
+			});
 			return;
 		}
 

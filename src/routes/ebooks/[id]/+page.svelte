@@ -38,8 +38,10 @@
 
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
-			toast.error('Tanpri konekte sou kont ou pou w ka achte ebook sa a.');
-			goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
+			toast.info('Tanpri konekte sou kont ou pou w ka achte ebook sa a.');
+			authState.openLogin(() => {
+				handleBuyClick();
+			});
 			return;
 		}
 
@@ -66,7 +68,14 @@
 	}
 
 	async function handleFreeEnrollment() {
-		if (!ebook || !authState.user) return;
+		if (!ebook) return;
+		if (!authState.user) {
+			toast.info('Tanpri konekte sou kont ou pou w ka telechaje ebook sa a.');
+			authState.openLogin(() => {
+				handleFreeEnrollment();
+			});
+			return;
+		}
 		checkoutLoading = true;
 		try {
 			await claimFreeEbook(ebook.id);
@@ -85,8 +94,10 @@
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
 			showPaymentModal = false;
-			toast.error('Tanpri konekte sou kont ou pou w ka fè peman an.');
-			goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
+			toast.info('Tanpri konekte sou kont ou pou w ka fè peman an.');
+			authState.openLogin(() => {
+				showPaymentModal = true;
+			});
 			return;
 		}
 

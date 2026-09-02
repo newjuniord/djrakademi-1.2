@@ -4,6 +4,7 @@
 	import { authState } from '$lib/auth.svelte';
 	import AdminToast from '$lib/components/admin/AdminToast.svelte';
 	import ImpersonationBanner from '$lib/components/ImpersonationBanner.svelte';
+	import AuthModal from '$lib/components/AuthModal.svelte';
 	import { client } from '$lib/appwrite';
 
 	let { children } = $props();
@@ -16,8 +17,13 @@
 			/* Ping verification. */
 		}
 	});
+
+	function handleLoginSuccess() {
+		authState.triggerLoginSuccess();
+	}
 </script>
 
 <ImpersonationBanner />
 {@render children()}
+<AuthModal bind:isOpen={authState.showAuthModal} onLogin={handleLoginSuccess} />
 <AdminToast />

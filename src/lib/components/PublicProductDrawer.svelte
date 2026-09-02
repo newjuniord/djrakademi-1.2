@@ -67,8 +67,10 @@
 
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
-			toast.error('Tanpri konekte sou kont ou pou w ka kontinye.');
-			goto('/login');
+			toast.info('Tanpri konekte sou kont ou pou w ka kontinye.');
+			authState.openLogin(() => {
+				handleStartCheckout();
+			});
 			return;
 		}
 
@@ -107,8 +109,10 @@
 		if (!item) return;
 
 		if (!authState.user || !authState.user.$id) {
-			toast.error('Tanpri konekte sou kont ou pou w ka jwenn aksè nan pwogram sa a.');
-			goto('/login');
+			toast.info('Tanpri konekte sou kont ou pou w ka jwenn aksè nan pwogram sa a.');
+			authState.openLogin(() => {
+				processFreeEnrollment();
+			});
 			return;
 		}
 
@@ -141,8 +145,10 @@
 		// 1. Connexion requise
 		if (!authState.user || !authState.user.$id) {
 			showPaymentModal = false;
-			toast.error('Tanpri konekte sou kont ou pou w ka fè peman an.');
-			goto('/login');
+			toast.info('Tanpri konekte sou kont ou pou w ka fè peman an.');
+			authState.openLogin(() => {
+				showPaymentModal = true;
+			});
 			return;
 		}
 
