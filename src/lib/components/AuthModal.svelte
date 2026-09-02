@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X, Mail, Lock, User as UserIcon, ArrowRight, Loader2, AlertCircle } from 'lucide-svelte';
+	import { X, Mail, Lock, User as UserIcon, ArrowRight, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-svelte';
 	import { account, ID } from '$lib/appwrite';
 	import { goto } from '$app/navigation';
 	import { authState } from '$lib/auth.svelte';
@@ -16,6 +16,7 @@
 	let name = $state('');
 	let email = $state('');
 	let password = $state('');
+	let showPassword = $state(false);
 	let loading = $state(false);
 	let errorMessage = $state<string | null>(null);
 	let successMessage = $state<string | null>(null);
@@ -29,6 +30,7 @@
 			name = '';
 			email = '';
 			password = '';
+			showPassword = false;
 		}, 300);
 	}
 
@@ -113,6 +115,7 @@
 		view = newView;
 		errorMessage = null;
 		successMessage = null;
+		showPassword = false;
 	}
 </script>
 
@@ -227,13 +230,27 @@
 								</div>
 								<input
 									id="password"
-									type="password"
+									type={showPassword ? 'text' : 'password'}
 									required
 									bind:value={password}
 									disabled={loading}
-									class="w-full bg-zinc-50 border border-zinc-200 hover:border-zinc-300 focus:border-amber-400 focus:bg-white rounded-xl py-3 pl-11 pr-4 text-sm text-zinc-950 placeholder-zinc-400 outline-none transition-all disabled:opacity-60"
+									class="w-full bg-zinc-50 border border-zinc-200 hover:border-zinc-300 focus:border-amber-400 focus:bg-white rounded-xl py-3 pl-11 pr-11 text-sm text-zinc-950 placeholder-zinc-400 outline-none transition-all disabled:opacity-60"
 									placeholder="••••••••"
 								/>
+								<button
+									type="button"
+									onclick={() => (showPassword = !showPassword)}
+									disabled={loading}
+									class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-400 hover:text-zinc-700 focus:outline-none transition-colors disabled:opacity-50"
+									aria-label={showPassword ? 'Kache mo de pas a' : 'Montre mo de pas a'}
+									aria-pressed={showPassword}
+								>
+									{#if showPassword}
+										<EyeOff size={18} />
+									{:else}
+										<Eye size={18} />
+									{/if}
+								</button>
 							</div>
 						</div>
 					{/if}

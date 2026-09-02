@@ -7,7 +7,7 @@
 	import { getOrCreateProfile } from '$lib/services/profiles';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
-	import { Lock, Mail, User as UserIcon, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from 'lucide-svelte';
+	import { Lock, Mail, User as UserIcon, ArrowRight, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-svelte';
 
 	let redirectTarget = $derived(page.url.searchParams.get('redirect') || '/dashboard');
 
@@ -15,6 +15,7 @@
 	let name = $state('');
 	let email = $state('');
 	let password = $state('');
+	let showPassword = $state(false);
 	let loading = $state(false);
 	let errorMessage = $state<string | null>(null);
 
@@ -92,14 +93,14 @@
 			<div class="flex items-center p-1 bg-zinc-100 rounded-xl">
 				<button
 					type="button"
-					onclick={() => { mode = 'login'; errorMessage = null; }}
+					onclick={() => { mode = 'login'; errorMessage = null; showPassword = false; }}
 					class="flex-1 py-2 rounded-lg text-xs font-extrabold transition-all text-center {mode === 'login' ? 'bg-white text-zinc-950 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'}"
 				>
 					Koneksyon
 				</button>
 				<button
 					type="button"
-					onclick={() => { mode = 'signup'; errorMessage = null; }}
+					onclick={() => { mode = 'signup'; errorMessage = null; showPassword = false; }}
 					class="flex-1 py-2 rounded-lg text-xs font-extrabold transition-all text-center {mode === 'signup' ? 'bg-white text-zinc-950 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'}"
 				>
 					Enskripsyon
@@ -151,14 +152,28 @@
 					<div class="relative">
 						<input
 							id="password"
-							type="password"
+							type={showPassword ? 'text' : 'password'}
 							bind:value={password}
 							required
 							minlength={8}
 							placeholder="••••••••"
-							class="w-full h-11 pl-10 pr-4 rounded-xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
+							class="w-full h-11 pl-10 pr-11 rounded-xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
 						/>
 						<Lock size={16} class="absolute left-3.5 top-3 text-zinc-400" />
+						<button
+							type="button"
+							onclick={() => (showPassword = !showPassword)}
+							disabled={loading}
+							class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-400 hover:text-zinc-700 focus:outline-none transition-colors disabled:opacity-50"
+							aria-label={showPassword ? 'Kache modpas la' : 'Montre modpas la'}
+							aria-pressed={showPassword}
+						>
+							{#if showPassword}
+								<EyeOff size={18} />
+							{:else}
+								<Eye size={18} />
+							{/if}
+						</button>
 					</div>
 				</div>
 
