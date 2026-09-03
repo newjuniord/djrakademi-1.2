@@ -128,6 +128,10 @@ export function mapSettings(row?: any) {
 		timezone: row?.timezone || '',
 		currency: 'HTG' as const,
 		maintenanceMode: Boolean(row?.maintenance_mode),
+		announcementEnabled: Boolean(row?.announcement_enabled),
+		announcementText: row?.announcement_text || '',
+		announcementTextColor: (row?.announcement_text_color || 'blanc') as 'noir' | 'blanc' | 'rouge',
+		announcementBgColor: (row?.announcement_bg_color || 'noir') as 'noir' | 'blanc' | 'rouge' | 'jaune' | 'verte',
 		logoUrl
 	};
 }

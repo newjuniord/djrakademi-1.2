@@ -654,9 +654,15 @@ export const PUT: RequestHandler = async ({ request, params }) => {
 		const whatsappNumber = String(settings?.whatsappNumber || '').trim();
 		const timezone = String(settings?.timezone || '').trim();
 		const maintenanceMode = settings?.maintenanceMode === true;
+		const announcementEnabled = settings?.announcementEnabled === true;
+		const announcementText = String(settings?.announcementText || '').trim();
+		const announcementTextColor = ['noir', 'blanc', 'rouge'].includes(settings?.announcementTextColor) ? settings.announcementTextColor : 'blanc';
+		const announcementBgColor = ['noir', 'blanc', 'rouge', 'jaune', 'verte'].includes(settings?.announcementBgColor) ? settings.announcementBgColor : 'noir';
+
 		if (!siteName || siteName.length > 120 || tagline.length > 240 || !/^\S+@\S+\.\S+$/.test(contactEmail) || !whatsappNumber || whatsappNumber.length > 32 || !timezone || timezone.length > 64) throw new AdminServerError('Les paramètres de la plateforme sont invalides.', 400);
 		try { new Intl.DateTimeFormat('fr', { timeZone: timezone }).format(); }
 		catch { throw new AdminServerError('Le fuseau horaire est invalide.', 400); }
+
 		const { tables, storage } = adminServices();
 		const existing = await getSettingsRow(tables);
 		const logo = form.get('logo');
@@ -665,28 +671,54 @@ export const PUT: RequestHandler = async ({ request, params }) => {
 			const uploaded = await storage.createFile({ bucketId: BRANDING_BUCKET_ID, fileId: ID.unique(), file: input, permissions: publicFilePermissions });
 			uploadedFileId = uploaded.$id;
 		}
+
 		const now = new Date().toISOString();
-		const data: Record<string, unknown> = { site_name: siteName, tagline, contact_email: contactEmail, whatsapp_number: whatsappNumber, timezone, currency: 'HTG', maintenance_mode: maintenanceMode, updated_at: now };
+		const data: Record<string, unknown> = {
+			site_name: siteName,
+			tagline,
+			contact_email: contactEmail,
+			whatsapp_number: whatsappNumber,
+			timezone,
+			currency: 'HTG',
+			maintenance_mode: maintenanceMode,
+			announcement_enabled: announcementEnabled,
+			announcement_text: announcementText,
+			announcement_text_color: announcementTextColor,
+			announcement_bg_color: announcementBgColor,
+			updated_at: now
+		};
 		if (uploadedFileId) data.logo_file_id = uploadedFileId;
+
+		const trySave = async (d: Record<string, unknown>) => {
+			return existing
+				? await tables.updateRow({ databaseId: DATABASE_ID, tableId: SETTINGS_TABLE, rowId: SETTINGS_ROW_ID, data: d })
+				: await tables.createRow({ databaseId: DATABASE_ID, tableId: SETTINGS_TABLE, rowId: SETTINGS_ROW_ID, data: { ...d, created_at: now } });
+		};
+
 		let saved: any;
 		try {
-			saved = existing
-				? await tables.updateRow({ databaseId: DATABASE_ID, tableId: SETTINGS_TABLE, rowId: SETTINGS_ROW_ID, data })
-				: await tables.createRow({ databaseId: DATABASE_ID, tableId: SETTINGS_TABLE, rowId: SETTINGS_ROW_ID, data: { ...data, created_at: now } });
+			saved = await trySave(data);
 		} catch (error: any) {
 			const msg = String(error?.message || '');
-			if (msg.includes('Unknown attribute: "maintenance_mode"')) {
+			if (msg.includes('Unknown attribute:')) {
 				const fallbackData = { ...data };
-				delete fallbackData.maintenance_mode;
-				saved = existing
-					? await tables.updateRow({ databaseId: DATABASE_ID, tableId: SETTINGS_TABLE, rowId: SETTINGS_ROW_ID, data: fallbackData })
-					: await tables.createRow({ databaseId: DATABASE_ID, tableId: SETTINGS_TABLE, rowId: SETTINGS_ROW_ID, data: { ...fallbackData, created_at: now } });
+				if (msg.includes('maintenance_mode')) delete fallbackData.maintenance_mode;
+				if (msg.includes('announcement_enabled')) delete fallbackData.announcement_enabled;
+				if (msg.includes('announcement_text')) delete fallbackData.announcement_text;
+				if (msg.includes('announcement_text_color')) delete fallbackData.announcement_text_color;
+				if (msg.includes('announcement_bg_color')) delete fallbackData.announcement_bg_color;
+				try {
+					saved = await trySave(fallbackData);
+				} catch (retryErr) {
+					if (uploadedFileId) await storage.deleteFile({ bucketId: BRANDING_BUCKET_ID, fileId: uploadedFileId }).catch(() => undefined);
+					throw retryErr;
+				}
 			} else {
 				if (uploadedFileId) await storage.deleteFile({ bucketId: BRANDING_BUCKET_ID, fileId: uploadedFileId }).catch(() => undefined);
 				throw error;
 			}
 		}
-		if (uploadedFileId && existing?.logo_file_id) await storage.deleteFile({ bucketId: BRANDING_BUCKET_ID, fileId: existing.logo_file_id }).catch((error) => console.warn('[Admin API] Ancien logo non supprimé:', error));
+		if (uploadedFileId && existing?.logo_file_id) await storage.deleteFile({ bucketId: BRANDING_BUCKET_ID, fileId: existing.logo_file_id }).catch((error: any) => console.warn('[Admin API] Ancien logo non supprimé:', error));
 		return json(mapSettings(saved));
 	} catch (error) { return responseError(error); }
 };

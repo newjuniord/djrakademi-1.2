@@ -44,6 +44,9 @@ export interface AdminSession {
 	email: string;
 }
 
+export type BannerTextColor = 'noir' | 'blanc' | 'rouge';
+export type BannerBgColor = 'noir' | 'blanc' | 'rouge' | 'jaune' | 'verte';
+
 export interface PlatformSettings {
 	siteName: string;
 	tagline: string;
@@ -53,6 +56,10 @@ export interface PlatformSettings {
 	currency: 'HTG';
 	maintenanceMode: boolean;
 	logoUrl?: string;
+	announcementEnabled?: boolean;
+	announcementText?: string;
+	announcementTextColor?: BannerTextColor;
+	announcementBgColor?: BannerBgColor;
 }
 
 export class AdminApiError extends Error {

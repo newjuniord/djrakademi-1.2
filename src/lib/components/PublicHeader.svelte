@@ -9,16 +9,58 @@
 		BookOpen,
 		ExternalLink,
 		LogOut,
-		LogIn
+		LogIn,
+		Megaphone
 	} from 'lucide-svelte';
 	
 	import AuthModal from './AuthModal.svelte';
 	import { account } from '$lib/appwrite';
 	import { goto } from '$app/navigation';
 	import { authState } from '$lib/auth.svelte';
+	import { onMount } from 'svelte';
 
 	let drawerOpen = $state(false);
 	let authModalOpen = $state(false);
+
+	let announcement = $state<{
+		enabled: boolean;
+		text: string;
+		textColor: string;
+		bgColor: string;
+	}>({ enabled: false, text: '', textColor: 'blanc', bgColor: 'noir' });
+	let announcementDismissed = $state(false);
+
+	onMount(async () => {
+		try {
+			const res = await fetch('/api/announcement', { cache: 'no-store' });
+			if (res.ok) {
+				const data = await res.json();
+				if (data.enabled && data.text) {
+					announcement = data;
+				}
+			}
+		} catch (e) {
+			console.error('Failed to load announcement banner:', e);
+		}
+	});
+
+	function getBgHex(color: string) {
+		switch (color) {
+			case 'blanc': return '#ffffff';
+			case 'rouge': return '#dc2626';
+			case 'jaune': return '#f59e0b';
+			case 'verte': return '#16a34a';
+			case 'noir': default: return '#000000';
+		}
+	}
+
+	function getTextHex(color: string) {
+		switch (color) {
+			case 'noir': return '#000000';
+			case 'rouge': return '#ef4444';
+			case 'blanc': default: return '#ffffff';
+		}
+	}
 
 	function closeDrawer() {
 		drawerOpen = false;
@@ -48,6 +90,26 @@
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
+
+{#if announcement.enabled && announcement.text && !announcementDismissed}
+	<aside
+		class="w-full py-2.5 px-4 text-xs font-bold text-center flex items-center justify-between shadow-xs transition-all border-b border-black/10 z-50 relative"
+		style={`background-color: ${getBgHex(announcement.bgColor)}; color: ${getTextHex(announcement.textColor)};`}
+	>
+		<div class="mx-auto flex items-center justify-center gap-2 px-2">
+			<Megaphone size={14} class="shrink-0" />
+			<span>{announcement.text}</span>
+		</div>
+		<button
+			type="button"
+			onclick={() => (announcementDismissed = true)}
+			class="p-1 opacity-70 hover:opacity-100 transition-opacity shrink-0 cursor-pointer"
+			aria-label="Fèmen bannye an"
+		>
+			<X size={14} />
+		</button>
+	</aside>
+{/if}
 
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-zinc-200/80">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6">

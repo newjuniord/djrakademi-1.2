@@ -18,7 +18,8 @@
 		AlertCircle,
 		Sparkles,
 		ShieldCheck,
-		Wrench
+		Wrench,
+		Megaphone
 	} from 'lucide-svelte';
 	import { getPlatformSettings, updatePlatformSettings, type PlatformSettings } from '$lib/admin/admin-client';
 	import { TIMEZONE_OPTIONS } from '$lib/coaching/timezone';
@@ -32,7 +33,11 @@
 		whatsappNumber: '',
 		timezone: 'America/Port-au-Prince',
 		currency: 'HTG',
-		maintenanceMode: false
+		maintenanceMode: false,
+		announcementEnabled: false,
+		announcementText: '',
+		announcementTextColor: 'blanc',
+		announcementBgColor: 'noir'
 	});
 	let loading = $state(true);
 	let saving = $state(false);
@@ -178,6 +183,114 @@
 						Les clients verront un message leur demandant de réessayer plus tard.
 					</div>
 				{/if}
+			</section>
+
+			<!-- Bannière d'annonce (Top Banner) -->
+			<section class="card bg-base-100 border border-base-300/70 shadow-xs overflow-hidden">
+				<div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between border-b border-base-300/70 bg-base-200/40">
+					<div class="flex items-start gap-3">
+						<div class="grid size-9 shrink-0 place-items-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+							<Megaphone size={18} />
+						</div>
+						<div>
+							<h2 class="font-bold text-sm text-base-content">Bannière d'annonce (Top Banner)</h2>
+							<p class="mt-0.5 text-xs text-base-content/60">
+								Affichez un message d'information ou une promotion tout en haut de votre site.
+							</p>
+						</div>
+					</div>
+
+					<label class="flex cursor-pointer items-center gap-3 rounded-xl border border-base-300 bg-base-100 px-4 py-2.5 shrink-0">
+						<span class="text-xs font-bold">{settings.announcementEnabled ? 'Activée' : 'Désactivée'}</span>
+						<input class="toggle toggle-primary toggle-sm" type="checkbox" bind:checked={settings.announcementEnabled} />
+					</label>
+				</div>
+
+				<div class="p-6 space-y-6">
+					<!-- Message Texte de la bannière -->
+					<label class="form-control w-full space-y-1.5">
+						<span class="label-text font-bold text-xs text-base-content/70">Message de la bannière</span>
+						<input
+							type="text"
+							bind:value={settings.announcementText}
+							placeholder="Ex: 🔥 Promotion de lancement : -50% sur tous les cours cette semaine !"
+							class="input input-bordered w-full rounded-xl text-xs font-medium text-base-content bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+						/>
+					</label>
+
+					<div class="grid gap-6 sm:grid-cols-2">
+						<!-- Couleur du Texte -->
+						<div class="space-y-2">
+							<span class="label-text font-bold text-xs text-base-content/70 block">Couleur du texte</span>
+							<div class="flex flex-wrap items-center gap-2">
+								{#each [
+									{ id: 'noir', label: 'Noir', dot: 'bg-black' },
+									{ id: 'blanc', label: 'Blanc', dot: 'bg-white border border-base-300' },
+									{ id: 'rouge', label: 'Rouge', dot: 'bg-red-500' }
+								] as opt}
+									<button
+										type="button"
+										class={`btn btn-sm rounded-xl font-bold text-xs gap-2 transition-all ${settings.announcementTextColor === opt.id ? 'btn-primary shadow-xs ring-2 ring-primary/40' : 'btn-ghost bg-base-200/60 text-base-content/70'}`}
+										onclick={() => (settings.announcementTextColor = opt.id as any)}
+									>
+										<span class={`size-3.5 rounded-full ${opt.dot}`}></span>
+										<span>{opt.label}</span>
+									</button>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Couleur de Fond -->
+						<div class="space-y-2">
+							<span class="label-text font-bold text-xs text-base-content/70 block">Couleur de fond</span>
+							<div class="flex flex-wrap items-center gap-2">
+								{#each [
+									{ id: 'noir', label: 'Noir', dot: 'bg-black' },
+									{ id: 'blanc', label: 'Blanc', dot: 'bg-white border border-base-300' },
+									{ id: 'rouge', label: 'Rouge', dot: 'bg-red-600' },
+									{ id: 'jaune', label: 'Jaune', dot: 'bg-amber-400' },
+									{ id: 'verte', label: 'Vert', dot: 'bg-emerald-600' }
+								] as opt}
+									<button
+										type="button"
+										class={`btn btn-sm rounded-xl font-bold text-xs gap-2 transition-all ${settings.announcementBgColor === opt.id ? 'btn-primary shadow-xs ring-2 ring-primary/40' : 'btn-ghost bg-base-200/60 text-base-content/70'}`}
+										onclick={() => (settings.announcementBgColor = opt.id as any)}
+									>
+										<span class={`size-3.5 rounded-full ${opt.dot}`}></span>
+										<span>{opt.label}</span>
+									</button>
+								{/each}
+							</div>
+						</div>
+					</div>
+
+					<!-- APERÇU EN DIRECT (LIVE PREVIEW) -->
+					<div class="space-y-2 pt-2 border-t border-base-200">
+						<span class="text-[11px] font-bold text-base-content/50 uppercase tracking-wider block">Aperçu en direct (Live Preview)</span>
+						<div
+							class="w-full py-3 px-4 rounded-xl font-semibold text-xs text-center flex items-center justify-between shadow-xs transition-all"
+							style={`
+								background-color: ${
+									settings.announcementBgColor === 'noir' ? '#000000' :
+									settings.announcementBgColor === 'blanc' ? '#ffffff' :
+									settings.announcementBgColor === 'rouge' ? '#dc2626' :
+									settings.announcementBgColor === 'jaune' ? '#f59e0b' : '#16a34a'
+								};
+								color: ${
+									settings.announcementTextColor === 'noir' ? '#000000' :
+									settings.announcementTextColor === 'rouge' ? '#ef4444' : '#ffffff'
+								};
+								border: ${settings.announcementBgColor === 'blanc' ? '1px solid #e5e7eb' : 'none'};
+							`}
+						>
+							<div class="mx-auto flex items-center gap-2">
+								<Megaphone size={14} />
+								<span>{settings.announcementText || 'Votre message d’annonce apparaîtra ici tout en haut du site.'}</span>
+							</div>
+							<span class="text-xs opacity-70">✕</span>
+						</div>
+					</div>
+				</div>
 			</section>
 
 			<!-- Section 1: Logo de la plateforme -->
