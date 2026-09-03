@@ -18,7 +18,9 @@
 				price: value.price,
 				isFree: value.isFree,
 				durationMinutes: value.durationMinutes,
-				active: value.active
+				active: value.active,
+				variantId: value.variantId,
+				lemonsqueezyVariantId: value.lemonsqueezyVariantId
 			});
 			toast.success('Offre de coaching créée avec succès.');
 			await goto('/admin/coaching');

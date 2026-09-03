@@ -187,6 +187,20 @@
 							<p class="text-[11px] text-white/40 font-normal">Istwa ak fakti PDF</p>
 						</div>
 					</a>
+
+					<a
+						href="/verify"
+						onclick={closeDrawer}
+						class="flex items-center gap-3.5 p-3.5 rounded-2xl hover:bg-white/10 transition-colors group"
+					>
+						<div class="size-9 bg-amber-400/20 text-amber-400 rounded-xl grid place-items-center shrink-0 group-hover:scale-105 transition-transform">
+							<Shield size={18} />
+						</div>
+						<div>
+							<p class="font-black text-xs text-white">Verifye yon peman</p>
+							<p class="text-[11px] text-white/40 font-normal">Debloke aksè apre achte</p>
+						</div>
+					</a>
 				</div>
 			</div>
 

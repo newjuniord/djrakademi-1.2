@@ -14,7 +14,7 @@ export interface Order {
 	productTitle: string;
 	amount: number;
 	currency: string;
-	paymentProvider: 'moncash' | 'natcash' | 'carte' | 'card' | 'free' | 'admin';
+	paymentProvider: 'moncash' | 'natcash' | 'carte' | 'card' | 'free' | 'admin' | 'lemonsqueezy';
 	paymentId?: string;
 	status: 'pending' | 'paid' | 'failed' | 'expired';
 	createdAt: string;

@@ -23,6 +23,7 @@
 			<div class="flex flex-wrap items-center gap-6 sm:gap-8 text-xs font-bold text-zinc-300">
 				<a href="/" class="hover:text-amber-400 transition-colors">Akèy</a>
 				<a href="/catalogue" class="hover:text-amber-400 transition-colors">Katalòg</a>
+				<a href="/verify" class="hover:text-amber-400 transition-colors">Verifye Peman</a>
 				<a href="/about" class="hover:text-amber-400 transition-colors">Konsènan nou</a>
 				<a href="/contact" class="flex items-center gap-1.5 hover:text-amber-400 transition-colors">
 					<Mail size={14} class="text-amber-400" />

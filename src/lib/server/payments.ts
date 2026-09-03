@@ -4,6 +4,7 @@ import { Account, Client, ID, Query, type Models } from 'node-appwrite';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
 import type { Order } from '$lib/services/orders';
 import { sendPurchaseConfirmationEmail } from '$lib/server/purchase-email';
+import { lemonSqueezySetup, createCheckout } from '@lemonsqueezy/lemonsqueezy.js';
 
 const ORDERS_TABLE = 'orders';
 const ACCESS_TABLE = 'access_grants';
@@ -172,7 +173,8 @@ async function resolvePurchase(params: InitiatePaymentParams, user: Authenticate
 			queries: [Query.equal('user_id', user.$id), Query.equal('item_type', params.productType), Query.equal('item_id', params.productId), Query.limit(1)]
 		});
 		if (access.rows.length) throw new PaymentServerError('Vous possédez déjà ce produit.', 409);
-		return { productId: params.productId, productTitle: String(product.title || 'Produit'), amount, customerPhone: '' };
+		const variantId = String(product.lemonsqueezy_variant_id || product.variant_id || '').trim();
+		return { productId: params.productId, productTitle: String(product.title || 'Produit'), amount, customerPhone: '', variantId };
 	}
 
 	if (!params.bookingId) throw new PaymentServerError('Réservation de coaching manquante.', 400);
@@ -191,11 +193,13 @@ async function resolvePurchase(params: InitiatePaymentParams, user: Authenticate
 	if (!service.active || service.is_free || !Number.isFinite(amount) || amount <= 0) {
 		throw new PaymentServerError('Ce service ne peut pas être payé actuellement.', 409);
 	}
+	const variantId = String(service.lemonsqueezy_variant_id || service.variant_id || '').trim();
 	return {
 		productId: booking.$id,
 		productTitle: String(service.title || 'Coaching'),
 		amount,
-		customerPhone: String(booking.customer_whatsapp || '')
+		customerPhone: String(booking.customer_whatsapp || ''),
+		variantId
 	};
 }
 
@@ -226,11 +230,128 @@ async function rejectRecentPendingOrder(
 	}
 }
 
+export async function initiateLemonSqueezyPaymentServer(
+	params: InitiatePaymentParams & { variantId?: string; originUrl?: string },
+	user: AuthenticatedUser
+): Promise<PaymentInitiationResult> {
+	const apiKey = env.LEMONSQUEEZY_API_KEY?.trim();
+	const storeId = env.LEMONSQUEEZY_STORE_ID?.trim();
+
+	if (!apiKey || !storeId) {
+		throw new PaymentServerError('Lemon Squeezy n’est pas configuré sur le serveur (LEMONSQUEEZY_API_KEY ou LEMONSQUEEZY_STORE_ID manquant dans .env).', 503);
+	}
+
+	const purchase = await resolvePurchase(params, user);
+	const { tables } = adminServices();
+	await rejectRecentPendingOrder(tables, user.$id, params.productType, purchase.productId);
+
+	const variantId = (
+		params.variantId ||
+		purchase.variantId ||
+		env.LEMONSQUEEZY_VARIANT_ID ||
+		env.LEMONSQUEEZY_DEFAULT_VARIANT_ID ||
+		''
+	).trim();
+
+	if (!variantId) {
+		throw new PaymentServerError('Identifiant de variant Lemon Squeezy manquant (LEMONSQUEEZY_VARIANT_ID dans .env).', 400);
+	}
+
+	lemonSqueezySetup({ apiKey });
+
+	const orderId = ID.unique();
+	const now = new Date().toISOString();
+
+	await tables.createRow({
+		databaseId: DATABASE_ID,
+		tableId: ORDERS_TABLE,
+		rowId: orderId,
+		data: {
+			user_id: user.$id,
+			customer_name: user.name || 'Client',
+			customer_email: user.email,
+			customer_phone: purchase.customerPhone || undefined,
+			product_type: params.productType,
+			product_id: purchase.productId,
+			product_title: purchase.productTitle,
+			amount: purchase.amount,
+			currency: 'USD',
+			payment_provider: 'lemonsqueezy',
+			status: 'pending',
+			created_at: now
+		}
+	});
+
+	try {
+		const redirectUrl = params.originUrl
+			? `${params.originUrl}/checkout/success?order_id=${orderId}`
+			: `https://djrakademi.net/checkout/success?order_id=${orderId}`;
+
+		const checkoutResponse = await createCheckout(storeId, variantId, {
+			checkoutData: {
+				email: user.email,
+				name: user.name || undefined,
+				custom: {
+					user_id: user.$id,
+					order_id: orderId,
+					product_id: purchase.productId,
+					product_type: params.productType
+				}
+			},
+			productOptions: {
+				redirectUrl
+			}
+		});
+
+		if (checkoutResponse.error) {
+			console.error('[Lemon Squeezy Checkout Error]:', checkoutResponse.error);
+			throw new PaymentServerError(
+				checkoutResponse.error.message || 'Erreur lors de la création du checkout Lemon Squeezy.',
+				502
+			);
+		}
+
+		const checkoutUrl = checkoutResponse.data?.data.attributes.url;
+		if (!checkoutUrl) {
+			throw new PaymentServerError('URL de paiement Lemon Squeezy introuvable.', 502);
+		}
+
+		await tables.updateRow({
+			databaseId: DATABASE_ID,
+			tableId: ORDERS_TABLE,
+			rowId: orderId,
+			data: { payment_id: orderId }
+		});
+
+		return {
+			success: true,
+			status: true,
+			orderId,
+			paymentId: orderId,
+			transaction_id: orderId,
+			url: checkoutUrl,
+			redirectUrl: checkoutUrl,
+			message: 'Redirection vers Lemon Squeezy...'
+		};
+	} catch (error) {
+		await tables.updateRow({
+			databaseId: DATABASE_ID,
+			tableId: ORDERS_TABLE,
+			rowId: orderId,
+			data: { status: 'failed' }
+		}).catch(() => undefined);
+		throw error;
+	}
+}
+
 export async function initiatePlopplopPaymentServer(
-	params: InitiatePaymentParams,
+	params: InitiatePaymentParams & { originUrl?: string },
 	user: AuthenticatedUser,
 	onTrace?: PaymentTraceHandler
 ): Promise<PaymentInitiationResult> {
+	if (params.paymentMethod === 'carte') {
+		return initiateLemonSqueezyPaymentServer(params, user);
+	}
 	const purchase = await resolvePurchase(params, user);
 	const { tables } = adminServices();
 	await rejectRecentPendingOrder(tables, user.$id, params.productType, purchase.productId);

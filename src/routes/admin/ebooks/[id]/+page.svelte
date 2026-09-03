@@ -37,7 +37,9 @@
 					description: updated.description || '',
 					price: updated.price ?? 0,
 					isFree: Boolean(updated.isFree),
-					published: Boolean(updated.published)
+					published: Boolean(updated.published),
+					variantId: updated.variantId || updated.lemonsqueezyVariantId || '',
+					lemonsqueezyVariantId: updated.lemonsqueezyVariantId || updated.variantId || ''
 				},
 				coverFile,
 				pdfFile

@@ -59,7 +59,9 @@
 				price: value.price,
 				isFree: value.isFree,
 				durationMinutes: value.durationMinutes,
-				active: value.active
+				active: value.active,
+				variantId: value.variantId,
+				lemonsqueezyVariantId: value.lemonsqueezyVariantId
 			});
 			service = updated;
 			toast.success('Modifications enregistrées avec succès.');

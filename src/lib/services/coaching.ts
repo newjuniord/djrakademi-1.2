@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS: CoachingSettings = {
 
 // Map Appwrite document to CoachingService
 export function mapServiceDoc(doc: any): CoachingService {
+	const vId = doc.lemonsqueezy_variant_id || doc.variant_id || doc.variantId || '';
 	return {
 		id: doc.$id,
 		ownerId: doc.owner_id || 'admin',
@@ -29,6 +30,8 @@ export function mapServiceDoc(doc: any): CoachingService {
 		isFree: Boolean(doc.is_free),
 		durationMinutes: doc.duration_minutes || 60,
 		active: Boolean(doc.active),
+		variantId: vId,
+		lemonsqueezyVariantId: vId,
 		createdAt: doc.created_at || doc.$createdAt || new Date().toISOString(),
 		updatedAt: doc.updated_at || doc.$updatedAt || new Date().toISOString()
 	};
@@ -125,8 +128,11 @@ export async function createCoachingService(data: {
 	isFree: boolean;
 	durationMinutes: number;
 	active: boolean;
+	variantId?: string;
+	lemonsqueezyVariantId?: string;
 }): Promise<CoachingService> {
 	const now = new Date().toISOString();
+	const vId = (data.variantId || data.lemonsqueezyVariantId || '').trim();
 	const payload: Record<string, any> = {
 		owner_id: 'admin',
 		title: data.title,
@@ -137,16 +143,27 @@ export async function createCoachingService(data: {
 		is_free: data.isFree,
 		duration_minutes: data.durationMinutes,
 		active: data.active,
+		lemonsqueezy_variant_id: vId,
+		variant_id: vId,
 		created_at: now,
 		updated_at: now,
 	};
 
-	const doc = await tables.createRow(
-		DATABASE_ID,
-		SERVICES_COLLECTION,
-		ID.unique(),
-		payload
-	);
+	let doc: any;
+	try {
+		doc = await tables.createRow(DATABASE_ID, SERVICES_COLLECTION, ID.unique(), payload);
+	} catch (e: any) {
+		const msg = String(e?.message || '');
+		if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
+			delete payload.lemonsqueezy_variant_id;
+			doc = await tables.createRow(DATABASE_ID, SERVICES_COLLECTION, ID.unique(), payload);
+		} else if (msg.includes('Unknown attribute: "variant_id"')) {
+			delete payload.variant_id;
+			doc = await tables.createRow(DATABASE_ID, SERVICES_COLLECTION, ID.unique(), payload);
+		} else {
+			throw e;
+		}
+	}
 
 	return mapServiceDoc(doc);
 }
@@ -161,8 +178,11 @@ export async function updateCoachingService(
 		isFree: boolean;
 		durationMinutes: number;
 		active: boolean;
+		variantId?: string;
+		lemonsqueezyVariantId?: string;
 	}
 ): Promise<CoachingService> {
+	const vId = (data.variantId || data.lemonsqueezyVariantId || '').trim();
 	const payload: Record<string, any> = {
 		title: data.title,
 		slug: data.slug,
@@ -171,15 +191,26 @@ export async function updateCoachingService(
 		is_free: data.isFree,
 		duration_minutes: data.durationMinutes,
 		active: data.active,
+		lemonsqueezy_variant_id: vId,
+		variant_id: vId,
 		updated_at: new Date().toISOString(),
 	};
 
-	const updatedDoc = await tables.updateRow(
-		DATABASE_ID,
-		SERVICES_COLLECTION,
-		id,
-		payload
-	);
+	let updatedDoc: any;
+	try {
+		updatedDoc = await tables.updateRow(DATABASE_ID, SERVICES_COLLECTION, id, payload);
+	} catch (e: any) {
+		const msg = String(e?.message || '');
+		if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
+			delete payload.lemonsqueezy_variant_id;
+			updatedDoc = await tables.updateRow(DATABASE_ID, SERVICES_COLLECTION, id, payload);
+		} else if (msg.includes('Unknown attribute: "variant_id"')) {
+			delete payload.variant_id;
+			updatedDoc = await tables.updateRow(DATABASE_ID, SERVICES_COLLECTION, id, payload);
+		} else {
+			throw e;
+		}
+	}
 
 	return mapServiceDoc(updatedDoc);
 }

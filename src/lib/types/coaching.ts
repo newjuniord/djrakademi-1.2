@@ -24,6 +24,8 @@ export interface CoachingService {
 	isFree: boolean;
 	durationMinutes: CoachingDuration;
 	active: boolean;
+	variantId?: string;
+	lemonsqueezyVariantId?: string;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -88,6 +90,8 @@ export interface CoachingFormValue {
 	isFree: boolean;
 	durationMinutes: CoachingDuration;
 	active: boolean;
+	variantId?: string;
+	lemonsqueezyVariantId?: string;
 }
 
 export interface BookingCustomerInput {

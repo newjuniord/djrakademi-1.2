@@ -84,6 +84,8 @@ export type Course = {
 	isFree: boolean;
 	published: boolean;
 	studentCount: number;
+	variantId?: string;
+	lemonsqueezyVariantId?: string;
 	modules: CourseModule[];
 	progress?: { completedLessonIds: string[]; lastLessonId?: string };
 };
@@ -101,6 +103,8 @@ export type Ebook = {
 	isFree: boolean;
 	published: boolean;
 	salesCount: number;
+	variantId?: string;
+	lemonsqueezyVariantId?: string;
 	createdAt?: string;
 	updatedAt?: string;
 };

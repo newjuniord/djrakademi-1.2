@@ -16,6 +16,7 @@
 	let isFree = $state(defaults?.isFree ?? false);
 	let durationMinutes = $state<CoachingDuration>(defaults?.durationMinutes ?? 60);
 	let active = $state(defaults?.active ?? true);
+	let variantId = $state(defaults?.variantId ?? defaults?.lemonsqueezyVariantId ?? '');
 	let error = $state('');
 	let slugEdited = $state(Boolean(defaults?.slug));
 	let submitting = $state(false);
@@ -28,7 +29,17 @@
 	async function submit(event: SubmitEvent) {
 		event.preventDefault();
 		if (submitting || saving) return;
-		const value: CoachingFormValue = { title: title.trim(), slug: slugify(slug), description: description.trim(), price: isFree ? 0 : Number(price), isFree, durationMinutes, active };
+		const value: CoachingFormValue = {
+			title: title.trim(),
+			slug: slugify(slug),
+			description: description.trim(),
+			price: isFree ? 0 : Number(price),
+			isFree,
+			durationMinutes,
+			active,
+			variantId: variantId.trim(),
+			lemonsqueezyVariantId: variantId.trim()
+		};
 		error = validateCoaching(value) ?? '';
 		if (!error) {
 			submitting = true;
@@ -171,6 +182,20 @@
 									HTG
 								</span>
 							</div>
+						</div>
+
+						<div class="form-control gap-1 pt-2 border-t border-base-200/60">
+							<label for="lemonsqueezy-variant-id" class="label-text font-bold text-[10px] uppercase tracking-wider text-base-content/60 flex items-center justify-between">
+								<span>Lemon Squeezy Variant ID</span>
+								<span class="text-[9px] font-normal text-base-content/40 font-mono">Paiement par Kat</span>
+							</label>
+							<input
+								id="lemonsqueezy-variant-id"
+								type="text"
+								placeholder="ex: 482049"
+								bind:value={variantId}
+								class="input input-sm input-bordered w-full rounded-xl text-xs font-mono font-bold text-base-content bg-base-100 border-base-300 shadow-2xs focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:font-normal placeholder:text-base-content/30"
+							/>
 						</div>
 					{:else}
 						<p class="text-[11px] text-emerald-600 font-bold flex items-center gap-1">

@@ -23,8 +23,9 @@ import { mapBooking } from '$lib/server/bookings';
 function responseError(error: unknown) {
 	if (error instanceof AdminServerError) return json({ message: error.message }, { status: error.status });
 	const code = typeof (error as any)?.code === 'number' ? (error as any).code : 500;
-	console.error('[Admin API]', code, (error as any)?.message || error);
-	return json({ message: code === 404 ? 'Ressource Appwrite introuvable.' : 'Erreur interne de l’API admin.' }, { status: code >= 400 && code < 600 ? code : 500 });
+	const message = (error as any)?.message || 'Erreur interne de l’API admin.';
+	console.error('[Admin API Error]:', code, message, error);
+	return json({ message: code === 404 ? 'Ressource Appwrite introuvable.' : message }, { status: code >= 400 && code < 600 ? code : 500 });
 }
 
 function pathParts(path?: string) {
@@ -672,9 +673,18 @@ export const PUT: RequestHandler = async ({ request, params }) => {
 			saved = existing
 				? await tables.updateRow({ databaseId: DATABASE_ID, tableId: SETTINGS_TABLE, rowId: SETTINGS_ROW_ID, data })
 				: await tables.createRow({ databaseId: DATABASE_ID, tableId: SETTINGS_TABLE, rowId: SETTINGS_ROW_ID, data: { ...data, created_at: now } });
-		} catch (error) {
-			if (uploadedFileId) await storage.deleteFile({ bucketId: BRANDING_BUCKET_ID, fileId: uploadedFileId }).catch(() => undefined);
-			throw error;
+		} catch (error: any) {
+			const msg = String(error?.message || '');
+			if (msg.includes('Unknown attribute: "maintenance_mode"')) {
+				const fallbackData = { ...data };
+				delete fallbackData.maintenance_mode;
+				saved = existing
+					? await tables.updateRow({ databaseId: DATABASE_ID, tableId: SETTINGS_TABLE, rowId: SETTINGS_ROW_ID, data: fallbackData })
+					: await tables.createRow({ databaseId: DATABASE_ID, tableId: SETTINGS_TABLE, rowId: SETTINGS_ROW_ID, data: { ...fallbackData, created_at: now } });
+			} else {
+				if (uploadedFileId) await storage.deleteFile({ bucketId: BRANDING_BUCKET_ID, fileId: uploadedFileId }).catch(() => undefined);
+				throw error;
+			}
 		}
 		if (uploadedFileId && existing?.logo_file_id) await storage.deleteFile({ bucketId: BRANDING_BUCKET_ID, fileId: existing.logo_file_id }).catch((error) => console.warn('[Admin API] Ancien logo non supprimé:', error));
 		return json(mapSettings(saved));

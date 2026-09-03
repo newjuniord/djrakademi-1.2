@@ -25,6 +25,7 @@
 	let isFree = $state(false);
 	let price = $state(2500);
 	let published = $state(false);
+	let variantId = $state('');
 
 	let coverFile = $state<File | null>(null);
 	let coverInputRef = $state<HTMLInputElement | null>(null);
@@ -38,6 +39,7 @@
 			isFree = course.isFree;
 			price = course.price;
 			published = course.published;
+			variantId = course.variantId ?? course.lemonsqueezyVariantId ?? '';
 		} else {
 			title = '';
 			description = '';
@@ -45,6 +47,7 @@
 			isFree = false;
 			price = 2500;
 			published = false;
+			variantId = '';
 		}
 		coverFile = null;
 	});
@@ -106,7 +109,9 @@
 				cover: cover.trim() || undefined,
 				isFree,
 				price: isFree ? 0 : price,
-				published
+				published,
+				variantId: variantId.trim() || undefined,
+				lemonsqueezyVariantId: variantId.trim() || undefined
 			},
 			coverFile
 		);
@@ -272,6 +277,21 @@
 						class="input input-sm bg-base-100 w-full rounded-none text-xs border border-base-300 font-bold text-base-content shadow-2xs focus:bg-base-100 disabled:bg-base-200/40 disabled:text-base-content/40"
 					/>
 					<p class="mt-1 text-[10px] text-base-content/50">Entre 100 et 100 000 HTG.</p>
+				</div>
+
+				<!-- Lemon Squeezy Variant ID -->
+				<div class="form-control w-full">
+					<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="drawer-variant-input">
+						Lemon Squeezy Variant ID (Paiement par Carte)
+					</label>
+					<input
+						id="drawer-variant-input"
+						type="text"
+						placeholder="Ex: 582910"
+						bind:value={variantId}
+						class="input input-sm bg-base-100 w-full rounded-none text-xs border border-base-300 font-bold text-base-content shadow-2xs focus:bg-base-100"
+					/>
+					<p class="mt-1 text-[10px] text-base-content/50">Identifiant du variant de ce cours sur Lemon Squeezy.</p>
 				</div>
 
 				<div class="flex items-center justify-between p-4 bg-base-200/40 rounded-none border border-base-200">

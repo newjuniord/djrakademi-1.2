@@ -32,7 +32,7 @@ export interface PaymentConfirmationResult {
 	emailSent?: boolean;
 }
 
-async function paymentJwt(): Promise<string> {
+export async function paymentJwt(): Promise<string> {
 	return (await account.createJWT()).jwt;
 }
 
@@ -78,6 +78,42 @@ export async function confirmPlopplopPayment(orderId: string): Promise<PaymentCo
 			success: false,
 			order: null,
 			message: error instanceof Error ? error.message : 'Erreur de connexion au serveur de vérification.'
+		};
+	}
+}
+
+export async function verifyPlopplopReference(reference: string) {
+	try {
+		const jwt = await paymentJwt();
+		const response = await fetch('/api/plopplop/verify', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+			body: JSON.stringify({ reference })
+		});
+		const data = await response.json();
+		return { status: response.status, ok: response.ok, ...data };
+	} catch (error) {
+		return {
+			success: false,
+			message: error instanceof Error ? error.message : 'Erreur de connexion lors de la vérification.'
+		};
+	}
+}
+
+export async function verifyLemonSqueezyEmail(email: string) {
+	try {
+		const jwt = await paymentJwt();
+		const response = await fetch('/api/lemonsqueezy/verify', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+			body: JSON.stringify({ email })
+		});
+		const data = await response.json();
+		return { status: response.status, ok: response.ok, ...data };
+	} catch (error) {
+		return {
+			success: false,
+			message: error instanceof Error ? error.message : 'Erreur de connexion lors de la vérification.'
 		};
 	}
 }

@@ -26,6 +26,7 @@ export function mapEbookDoc(doc: any): Ebook {
 	const pdfFileId = doc.pdf_file_id;
 	const coverUrl = coverFileId ? `/api/ebooks/${encodeURIComponent(doc.$id)}/cover` : doc.cover || '';
 	const pdfUrl: undefined = undefined;
+	const vId = doc.lemonsqueezy_variant_id || doc.variant_id || doc.variantId || '';
 
 	return {
 		id: doc.$id,
@@ -40,6 +41,8 @@ export function mapEbookDoc(doc: any): Ebook {
 		isFree: Boolean(doc.is_free),
 		published: Boolean(doc.published),
 		salesCount: typeof doc.sales_count === 'number' ? doc.sales_count : 0,
+		variantId: vId,
+		lemonsqueezyVariantId: vId,
 		createdAt: doc.created_at || doc.$createdAt || new Date().toISOString(),
 		updatedAt: doc.updated_at || doc.$updatedAt || new Date().toISOString()
 	};
@@ -118,6 +121,8 @@ export async function createEbook(
 		price: number;
 		isFree: boolean;
 		published: boolean;
+		variantId?: string;
+		lemonsqueezyVariantId?: string;
 	},
 	coverFile?: File | null,
 	pdfFile?: File | null
@@ -142,6 +147,7 @@ export async function createEbook(
 	}
 
 	const now = new Date().toISOString();
+	const vId = (data.variantId || data.lemonsqueezyVariantId || '').trim();
 	const payload: Record<string, any> = {
 		title: data.title || 'Nouvel Ebook',
 		description: data.description || '',
@@ -149,6 +155,8 @@ export async function createEbook(
 		is_free: Boolean(data.isFree),
 		published: Boolean(data.published),
 		sales_count: 0,
+		lemonsqueezy_variant_id: vId,
+		variant_id: vId,
 		created_at: now,
 		updated_at: now
 	};
@@ -157,15 +165,27 @@ export async function createEbook(
 	if (pdfFileId) payload.pdf_file_id = pdfFileId;
 
 	let doc: any;
-	try {
-		doc = await tables.createRow(DATABASE_ID, EBOOKS_COLLECTION, ID.unique(), payload);
-	} catch (e: any) {
-		console.warn('[Appwrite Ebooks Service] tables.createRow failed, trying databases.createDocument:', e?.message || e);
+	const tryCreate = async (p: Record<string, any>) => {
 		try {
-			doc = await databases.createDocument(DATABASE_ID, EBOOKS_COLLECTION, ID.unique(), payload);
-		} catch (dbErr: any) {
-			console.error('[Appwrite Ebooks Service] Failed to create ebook document in Appwrite:', dbErr);
-			throw new Error(dbErr?.message || e?.message || "Erreur lors de la création de l'ebook dans Appwrite.");
+			return await tables.createRow(DATABASE_ID, EBOOKS_COLLECTION, ID.unique(), p);
+		} catch (e) {
+			return await databases.createDocument(DATABASE_ID, EBOOKS_COLLECTION, ID.unique(), p);
+		}
+	};
+
+	try {
+		doc = await tryCreate(payload);
+	} catch (e: any) {
+		const msg = String(e?.message || '');
+		if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
+			delete payload.lemonsqueezy_variant_id;
+			doc = await tryCreate(payload);
+		} else if (msg.includes('Unknown attribute: "variant_id"')) {
+			delete payload.variant_id;
+			doc = await tryCreate(payload);
+		} else {
+			console.error('[Appwrite Ebooks Service] Failed to create ebook document in Appwrite:', e);
+			throw new Error(e?.message || "Erreur lors de la création de l'ebook dans Appwrite.");
 		}
 	}
 
@@ -183,6 +203,8 @@ export async function updateEbook(
 		price: number;
 		isFree: boolean;
 		published: boolean;
+		variantId?: string;
+		lemonsqueezyVariantId?: string;
 	},
 	coverFile?: File | null,
 	pdfFile?: File | null
@@ -223,28 +245,43 @@ export async function updateEbook(
 		}
 	}
 
+	const vId = (data.variantId || data.lemonsqueezyVariantId || '').trim();
 	const payload: Record<string, any> = {
 		title: data.title || 'Ebook',
 		description: data.description || '',
 		price: typeof data.price === 'number' ? Math.max(0, data.price) : 0,
 		is_free: Boolean(data.isFree),
 		published: Boolean(data.published),
+		lemonsqueezy_variant_id: vId,
+		variant_id: vId,
 		updated_at: new Date().toISOString()
 	};
 
 	if (coverFileId) payload.cover_file_id = coverFileId;
 	if (pdfFileId) payload.pdf_file_id = pdfFileId;
 
+	const tryUpdate = async (p: Record<string, any>) => {
+		try {
+			return await tables.updateRow(DATABASE_ID, EBOOKS_COLLECTION, ebookId, p);
+		} catch (e) {
+			return await databases.updateDocument(DATABASE_ID, EBOOKS_COLLECTION, ebookId, p);
+		}
+	};
+
 	let updatedDoc: any;
 	try {
-		updatedDoc = await tables.updateRow(DATABASE_ID, EBOOKS_COLLECTION, ebookId, payload);
+		updatedDoc = await tryUpdate(payload);
 	} catch (e: any) {
-		console.warn('[Appwrite Ebooks Service] tables.updateRow failed, trying databases.updateDocument:', e?.message || e);
-		try {
-			updatedDoc = await databases.updateDocument(DATABASE_ID, EBOOKS_COLLECTION, ebookId, payload);
-		} catch (dbErr: any) {
-			console.error('[Appwrite Ebooks Service] Failed to update ebook document in Appwrite:', dbErr);
-			throw new Error(dbErr?.message || e?.message || "Erreur lors de la mise à jour de l'ebook.");
+		const msg = String(e?.message || '');
+		if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
+			delete payload.lemonsqueezy_variant_id;
+			updatedDoc = await tryUpdate(payload);
+		} else if (msg.includes('Unknown attribute: "variant_id"')) {
+			delete payload.variant_id;
+			updatedDoc = await tryUpdate(payload);
+		} else {
+			console.error('[Appwrite Ebooks Service] Failed to update ebook document in Appwrite:', e);
+			throw new Error(e?.message || "Erreur lors de la mise à jour de l'ebook.");
 		}
 	}
 

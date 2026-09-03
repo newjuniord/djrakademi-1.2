@@ -21,6 +21,7 @@
 	let isFree = $state(false);
 	let price = $state(750);
 	let published = $state(false);
+	let variantId = $state('');
 
 	let coverFile = $state<File | null>(null);
 	let pdfFile = $state<File | null>(null);
@@ -34,6 +35,7 @@
 			isFree = ebook.isFree;
 			price = ebook.price;
 			published = ebook.published;
+			variantId = ebook.variantId ?? ebook.lemonsqueezyVariantId ?? '';
 		}
 	});
 
@@ -95,6 +97,8 @@
 				isFree,
 				price: isFree ? 0 : Number(price),
 				published,
+				variantId: variantId.trim() || undefined,
+				lemonsqueezyVariantId: variantId.trim() || undefined,
 				salesCount: ebook?.salesCount ?? 0,
 				createdAt: ebook?.createdAt ?? new Date().toISOString()
 			},
@@ -282,6 +286,21 @@
 				</div>
 			</div>
 		{/if}
+
+		<!-- Variant ID Lemon Squeezy -->
+		<div class="form-control w-full sm:w-1/2">
+			<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="ebook-variantId">
+				Lemon Squeezy Variant ID (Paiement par Carte)
+			</label>
+			<input
+				id="ebook-variantId"
+				type="text"
+				placeholder="Ex: 582910"
+				bind:value={variantId}
+				class="input input-sm bg-base-100 w-full rounded-none font-bold text-xs border border-base-300 text-base-content shadow-2xs focus:bg-base-100"
+			/>
+			<p class="mt-1 text-[10px] text-base-content/50">Identifiant du variant de votre produit sur Lemon Squeezy.</p>
+		</div>
 	</div>
 
 	<!-- Bottom Action Buttons -->

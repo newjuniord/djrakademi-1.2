@@ -17,7 +17,9 @@
 					description: newEbook.description || '',
 					price: newEbook.price ?? 0,
 					isFree: Boolean(newEbook.isFree),
-					published: Boolean(newEbook.published)
+					published: Boolean(newEbook.published),
+					variantId: newEbook.variantId || newEbook.lemonsqueezyVariantId || '',
+					lemonsqueezyVariantId: newEbook.lemonsqueezyVariantId || newEbook.variantId || ''
 				},
 				coverFile,
 				pdfFile

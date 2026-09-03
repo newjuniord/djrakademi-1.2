@@ -36,6 +36,7 @@
 	let isFree = $state(initialCourse?.isFree ?? false);
 	let price = $state(initialCourse?.price ?? 2500);
 	let published = $state(initialCourse?.published ?? false);
+	let variantId = $state(initialCourse?.variantId ?? initialCourse?.lemonsqueezyVariantId ?? '');
 
 	let coverFile = $state<File | null>(null);
 	let coverInputRef = $state<HTMLInputElement | null>(null);
@@ -197,6 +198,8 @@
 			price: isFree ? 0 : price,
 			published,
 			studentCount: initialCourse?.studentCount ?? 0,
+			variantId: variantId.trim() || undefined,
+			lemonsqueezyVariantId: variantId.trim() || undefined,
 			modules
 		};
 		try {
@@ -340,6 +343,21 @@
 				/>
 				<p class="mt-1 text-[10px] text-base-content/50">Entre 100 et 100 000 HTG.</p>
 			</div>
+		</div>
+
+		<!-- Variant ID Lemon Squeezy -->
+		<div class="form-control w-full">
+			<label class="label font-semibold text-xs text-base-content/70" for="variantId">
+				Lemon Squeezy Variant ID (Paiement par Carte)
+			</label>
+			<input
+				id="variantId"
+				type="text"
+				placeholder="Ex: 582910"
+				bind:value={variantId}
+				class="input input-bordered bg-base-200/40 w-full rounded-none focus:bg-base-100 text-sm border-base-300"
+			/>
+			<p class="mt-1 text-[10px] text-base-content/50">Identifiant du variant produit sur votre compte Lemon Squeezy.</p>
 		</div>
 
 		<!-- Publication Switch -->

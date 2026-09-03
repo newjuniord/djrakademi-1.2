@@ -28,7 +28,7 @@ function traceStatus(trace: PaymentProviderTrace | undefined, fallback: number):
 	return Number.isFinite(value) ? value : fallback;
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, url }) => {
 	const startedAt = Date.now();
 	let safeRequest: Record<string, unknown> = {};
 	let providerTrace: PaymentProviderTrace | undefined;
@@ -51,7 +51,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ success: false, message: 'Produit invalide.' }, { status: 400 });
 		}
 		const result = await initiatePlopplopPaymentServer(
-			{ productType, productId, bookingId, paymentMethod },
+			{ productType, productId, bookingId, paymentMethod, originUrl: url.origin },
 			user,
 			(trace) => { providerTrace = trace; }
 		);

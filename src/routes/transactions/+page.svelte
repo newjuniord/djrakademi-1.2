@@ -18,8 +18,12 @@
 		AlertCircle,
 		Sparkles,
 		ShoppingBag,
-		ExternalLink
+		ExternalLink,
+		Copy,
+		Check,
+		ShieldCheck
 	} from 'lucide-svelte';
+	import { toast } from '$lib/toast.svelte';
 	import { authState } from '$lib/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { getUserOrders, type Order } from '$lib/services/orders';
@@ -31,6 +35,20 @@
 
 	// Receipt Modal state
 	let selectedOrderForInvoice = $state<Order | null>(null);
+	let copiedOrderId = $state<string | null>(null);
+
+	async function copyOrderId(orderId: string) {
+		try {
+			await navigator.clipboard.writeText(orderId);
+			copiedOrderId = orderId;
+			toast.success('Réf ID kopye nan presse-papier !');
+			setTimeout(() => {
+				if (copiedOrderId === orderId) copiedOrderId = null;
+			}, 2000);
+		} catch (e) {
+			console.error('Copy error:', e);
+		}
+	}
 
 	$effect(() => {
 		if (!authState.loading && !authState.user) {
@@ -177,7 +195,7 @@
 				</a>
 
 				<!-- Page Header Banner -->
-				<div class="bg-zinc-950 text-white rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-xl border border-zinc-800">
+				<div class="bg-zinc-950 text-white rounded-3xl p-6 sm:p-8 flex items-center justify-between gap-6 shadow-xl border border-zinc-800">
 					<div class="flex items-center gap-4">
 						<div class="size-14 bg-gradient-to-br from-amber-400 to-orange-500 text-black text-xl font-black rounded-2xl grid place-items-center shadow-lg shrink-0">
 							<Receipt size={26} />
@@ -189,21 +207,26 @@
 							</p>
 						</div>
 					</div>
+				</div>
 
-					<div class="flex items-center gap-3 self-stretch sm:self-auto">
-						<div class="flex-1 sm:flex-initial px-4 py-2.5 bg-white/10 rounded-2xl text-center sm:text-right border border-white/10 shrink-0">
-							<span class="text-[10px] font-bold text-white/50 uppercase tracking-wider block">Total depanse</span>
-							<span class="text-sm font-black text-amber-400 font-mono">
-								{totalSpent.toLocaleString('fr-FR')} HTG
-							</span>
+				<!-- Verification Callout Banner -->
+				<div class="bg-amber-500/10 border border-amber-500/20 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
+					<div class="flex items-center gap-3">
+						<div class="size-9 bg-amber-400 text-black rounded-xl grid place-items-center font-bold shrink-0">
+							<ShieldCheck size={18} />
 						</div>
-						<div class="flex-1 sm:flex-initial px-4 py-2.5 bg-white/10 rounded-2xl text-center sm:text-right border border-white/10 shrink-0">
-							<span class="text-[10px] font-bold text-white/50 uppercase tracking-wider block">Achte ki konfime</span>
-							<span class="text-sm font-black text-white">
-								{paidCount} kòmand
-							</span>
+						<div>
+							<p class="font-bold text-zinc-900 text-sm">Ou gen yon peman ki pa parèt oswa aksè ki pa debloke ?</p>
+							<p class="text-zinc-500 text-xs">Sèvi ak paj verifikasyon an pou chèche epi debloke kòmand ou a imedyatman.</p>
 						</div>
 					</div>
+					<a
+						href="/verify"
+						class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shrink-0 shadow-sm"
+					>
+						<span>Verifye peman m lan</span>
+						<ArrowRight size={14} class="text-amber-400" />
+					</a>
 				</div>
 
 				<!-- Search & Filter Controls -->
@@ -315,8 +338,21 @@
 												<span>Fason : <strong class="text-zinc-700">{getProviderLabel(order.paymentProvider)}</strong></span>
 											</p>
 
-											<p class="text-[11px] text-zinc-400 font-mono">
-												Réf : {order.id.slice(0, 16)} · {formatDate(order.createdAt)}
+											<p class="text-[11px] text-zinc-400 font-mono flex items-center gap-1.5">
+												<span>Réf : {order.id.slice(0, 16)}</span>
+												<button
+													type="button"
+													onclick={() => copyOrderId(order.id)}
+													class="p-1 hover:bg-zinc-200/60 hover:text-zinc-950 rounded transition-colors text-zinc-400 cursor-pointer inline-flex items-center"
+													title="Kopye ID kòmand lan"
+												>
+													{#if copiedOrderId === order.id}
+														<Check size={13} class="text-emerald-500" />
+													{:else}
+														<Copy size={13} />
+													{/if}
+												</button>
+												<span>· {formatDate(order.createdAt)}</span>
 											</p>
 										</div>
 									</div>

@@ -34,6 +34,7 @@ async function courseRows(courseId: string) {
 }
 
 function mapCourse(course: any, modules: any[], lessons: any[], includeContent: boolean) {
+	const vId = course.lemonsqueezy_variant_id || course.variant_id || course.variantId || '';
 	return {
 		id: course.$id,
 		title: course.title || '',
@@ -43,6 +44,8 @@ function mapCourse(course: any, modules: any[], lessons: any[], includeContent: 
 		isFree: Boolean(course.is_free),
 		published: Boolean(course.published),
 		studentCount: Number(course.student_count) || 0,
+		variantId: vId,
+		lemonsqueezyVariantId: vId,
 		modules: modules.map((module) => ({
 			id: module.$id,
 			title: module.title || '',

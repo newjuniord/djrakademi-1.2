@@ -69,6 +69,7 @@ export async function uploadCourseCover(file: File): Promise<string> {
 
 // Map Appwrite document to Course object
 function mapCourseDoc(doc: any, modules: CourseModule[] = []): Course {
+	const vId = doc.lemonsqueezy_variant_id || doc.variant_id || doc.variantId || '';
 	return {
 		id: doc.$id,
 		title: doc.title || '',
@@ -82,6 +83,8 @@ function mapCourseDoc(doc: any, modules: CourseModule[] = []): Course {
 			: typeof doc.studentCount === 'number'
 				? doc.studentCount
 				: 0,
+		variantId: vId,
+		lemonsqueezyVariantId: vId,
 		modules
 	};
 }
@@ -254,17 +257,33 @@ export async function createCourse(data: Partial<Course>, coverFile?: File | nul
 			}
 		}
 
-		const payload = {
+		const payload: Record<string, any> = {
 			title: data.title || 'Nouveau cours',
 			description: data.description || '',
 			cover: (coverUrl || '').slice(0, 64000),
 			price: coursePrice,
 			is_free: Boolean(data.isFree),
 			published: Boolean(data.published),
-			student_count: data.studentCount ?? 0
+			student_count: data.studentCount ?? 0,
+			lemonsqueezy_variant_id: (data.variantId || data.lemonsqueezyVariantId || '').trim(),
+			variant_id: (data.variantId || data.lemonsqueezyVariantId || '').trim()
 		};
 
-		const doc: any = await tables.createRow(DATABASE_ID, COURSES_COLLECTION, ID.unique(), payload);
+		let doc: any;
+		try {
+			doc = await tables.createRow(DATABASE_ID, COURSES_COLLECTION, ID.unique(), payload);
+		} catch (e: any) {
+			const msg = String(e?.message || '');
+			if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
+				delete payload.lemonsqueezy_variant_id;
+				doc = await tables.createRow(DATABASE_ID, COURSES_COLLECTION, ID.unique(), payload);
+			} else if (msg.includes('Unknown attribute: "variant_id"')) {
+				delete payload.variant_id;
+				doc = await tables.createRow(DATABASE_ID, COURSES_COLLECTION, ID.unique(), payload);
+			} else {
+				throw e;
+			}
+		}
 
 		const createdCourse = mapCourseDoc(doc, []);
 
@@ -301,6 +320,11 @@ export async function updateCourse(courseId: string, data: Partial<Course>, cove
 			payload.is_free = Boolean(data.isFree);
 		}
 		if (data.published !== undefined) payload.published = Boolean(data.published);
+		if (data.variantId !== undefined || data.lemonsqueezyVariantId !== undefined) {
+			const vId = (data.variantId || data.lemonsqueezyVariantId || '').trim();
+			payload.lemonsqueezy_variant_id = vId;
+			payload.variant_id = vId;
+		}
 
 		if (coverFile) {
 			try {
@@ -313,7 +337,20 @@ export async function updateCourse(courseId: string, data: Partial<Course>, cove
 			payload.cover = (data.cover || '').slice(0, 64000);
 		}
 
-		await tables.updateRow(DATABASE_ID, COURSES_COLLECTION, courseId, payload);
+		try {
+			await tables.updateRow(DATABASE_ID, COURSES_COLLECTION, courseId, payload);
+		} catch (e: any) {
+			const msg = String(e?.message || '');
+			if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
+				delete payload.lemonsqueezy_variant_id;
+				await tables.updateRow(DATABASE_ID, COURSES_COLLECTION, courseId, payload);
+			} else if (msg.includes('Unknown attribute: "variant_id"')) {
+				delete payload.variant_id;
+				await tables.updateRow(DATABASE_ID, COURSES_COLLECTION, courseId, payload);
+			} else {
+				throw e;
+			}
+		}
 	} catch (error) {
 		console.error(`[Appwrite Courses Service] Error updating course :`, error);
 		throw error;

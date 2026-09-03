@@ -14,6 +14,7 @@
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tailwindcss/vite": "^4.0.0",
+    "@types/node": "^26.4.1",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "tailwindcss": "^4.0.0",
@@ -21,6 +22,7 @@
     "vite": "^6.0.0"
   },
   "dependencies": {
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "appwrite": "^26.2.0",
     "daisyui": "^5.0.0",
     "lucide-svelte": "^1.0.1",
