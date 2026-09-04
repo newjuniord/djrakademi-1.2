@@ -17,8 +17,10 @@ function verifySignature(rawBody: string, signatureHeader: string | null, secret
 	if (!signatureHeader || !secret) return false;
 	try {
 		const hmac = crypto.createHmac('sha256', secret);
-		const digest = Buffer.from(hmac.update(rawBody).digest('hex'), 'utf8');
+		const digestHex = hmac.update(rawBody).digest('hex');
+		const digest = Buffer.from(digestHex, 'utf8');
 		const signature = Buffer.from(signatureHeader, 'utf8');
+		if (digest.length !== signature.length) return false;
 		return crypto.timingSafeEqual(digest, signature);
 	} catch {
 		return false;
@@ -28,17 +30,70 @@ function verifySignature(rawBody: string, signatureHeader: string | null, secret
 /**
  * Traite et valide une commande payée depuis Lemon Squeezy.
  */
-async function fulfillOrder(orderId: string, customData?: Record<string, any>, lqOrderId?: string) {
+async function fulfillOrder(orderId?: string, customData?: Record<string, any>, lqOrderId?: string) {
 	const { tables } = adminServices();
 	const paidAt = new Date().toISOString();
 
-	let orderRow: any;
-	try {
-		orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId });
-	} catch {
-		console.warn('[Lemon Squeezy Verify]: Order introuvable par rowId:', orderId);
+	let orderRow: any = null;
+
+	// 1. Recherche par rowId (Appwrite order_id)
+	if (orderId) {
+		try {
+			orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId });
+		} catch {
+			// handled in fallbacks below
+		}
+	}
+
+	// 2. Fallback: Recherche par payment_id
+	if (!orderRow) {
+		try {
+			const queries = [];
+			if (orderId) queries.push(Query.equal('payment_id', orderId));
+			if (lqOrderId) queries.push(Query.equal('payment_id', lqOrderId));
+			if (queries.length) {
+				const listByPayment = await tables.listRows({
+					databaseId: DATABASE_ID,
+					tableId: ORDERS_TABLE,
+					queries: [Query.or(queries), Query.limit(1)]
+				});
+				if (listByPayment.rows.length) {
+					orderRow = listByPayment.rows[0];
+				}
+			}
+		} catch (e) {
+			console.warn('[Lemon Squeezy Verify]: Recherche par payment_id echouee:', e);
+		}
+	}
+
+	// 3. Fallback: Recherche par user_id + product_id + status pending
+	if (!orderRow && customData?.user_id && customData?.product_id) {
+		try {
+			const listByUserProduct = await tables.listRows({
+				databaseId: DATABASE_ID,
+				tableId: ORDERS_TABLE,
+				queries: [
+					Query.equal('user_id', customData.user_id),
+					Query.equal('product_id', customData.product_id),
+					Query.equal('status', 'pending'),
+					Query.orderDesc('created_at'),
+					Query.limit(1)
+				]
+			});
+			if (listByUserProduct.rows.length) {
+				orderRow = listByUserProduct.rows[0];
+			}
+		} catch (e) {
+			console.warn('[Lemon Squeezy Verify]: Recherche par user/product echouee:', e);
+		}
+	}
+
+	if (!orderRow) {
+		console.warn('[Lemon Squeezy Verify]: Order introuvable dans Appwrite:', { orderId, lqOrderId });
 		return false;
 	}
+
+	const targetOrderId = orderRow.$id;
 
 	if (orderRow.status === 'paid') {
 		return true; // Déjà confirmé
@@ -108,7 +163,7 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, l
 		orderRow = await tables.updateRow({
 			databaseId: DATABASE_ID,
 			tableId: ORDERS_TABLE,
-			rowId: orderId,
+			rowId: targetOrderId,
 			transactionId: transaction.$id,
 			data: {
 				status: 'paid',
@@ -151,7 +206,7 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, l
 /**
  * Interroge l'API Lemon Squeezy par email, extrait le variant_id et débloque le produit Appwrite correspondant.
  */
-async function verifyAndFulfillByEmail(userEmail: string) {
+async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string) {
 	const apiKey = env.LEMONSQUEEZY_API_KEY?.trim();
 	const storeId = env.LEMONSQUEEZY_STORE_ID?.trim();
 
@@ -247,6 +302,7 @@ async function verifyAndFulfillByEmail(userEmail: string) {
 		const metaProductId = customData.product_id;
 		const metaProductType = customData.product_type;
 		const metaUserId = customData.user_id || userId;
+		const metaOrderId = customData.order_id || targetOrderId;
 
 		// Matcher avec un produit Appwrite ayant le même Lemon Squeezy Variant ID
 		let matchedProduct = allProducts.find(
@@ -295,6 +351,46 @@ async function verifyAndFulfillByEmail(userEmail: string) {
 						created_at: paidAt
 					}
 				}).catch((e) => console.error('[Access grant error]:', e));
+			}
+
+			// Mettre à jour la commande dans ORDERS_TABLE vers status: "paid"
+			const rowToUpdate = metaOrderId || targetOrderId;
+			if (rowToUpdate) {
+				await tables.updateRow({
+					databaseId: DATABASE_ID,
+					tableId: ORDERS_TABLE,
+					rowId: rowToUpdate,
+					data: {
+						status: 'paid',
+						payment_id: String(order.id || ''),
+						paid_at: paidAt
+					}
+				}).catch((e) => console.warn('[Order update to paid failed]:', e));
+			} else {
+				try {
+					const pendingOrders = await tables.listRows({
+						databaseId: DATABASE_ID,
+						tableId: ORDERS_TABLE,
+						queries: [
+							Query.equal('user_id', targetUserId),
+							Query.equal('product_id', matchedProduct.id),
+							Query.equal('status', 'pending'),
+							Query.limit(1)
+						]
+					});
+					if (pendingOrders.rows.length) {
+						await tables.updateRow({
+							databaseId: DATABASE_ID,
+							tableId: ORDERS_TABLE,
+							rowId: pendingOrders.rows[0].$id,
+							data: {
+								status: 'paid',
+								payment_id: String(order.id || ''),
+								paid_at: paidAt
+							}
+						}).catch(() => undefined);
+					}
+				} catch { /* ignore */ }
 			}
 
 			if (!grantedProducts.includes(matchedProduct.title)) {
@@ -388,35 +484,57 @@ export const GET: RequestHandler = async ({ url }) => {
 
 	try {
 		const { tables } = adminServices();
-		let orderRow: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId });
+		let orderRow: any = null;
 
-		// Si la commande n'est pas encore marquée paid, vérifier si l'accès existe déjà
-		if (orderRow.status !== 'paid' && orderRow.user_id && orderRow.product_id) {
-			const existingAccess = await tables.listRows({
+		// 1. Chercher par rowId (orderId)
+		try {
+			orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId });
+		} catch {
+			// Fallback: Chercher par payment_id
+			const listByPayment = await tables.listRows({
 				databaseId: DATABASE_ID,
-				tableId: ACCESS_TABLE,
-				queries: [
-					Query.equal('user_id', orderRow.user_id),
-					Query.equal('item_type', orderRow.product_type),
-					Query.equal('item_id', orderRow.product_id),
-					Query.limit(1)
-				]
+				tableId: ORDERS_TABLE,
+				queries: [Query.equal('payment_id', orderId), Query.limit(1)]
 			}).catch(() => ({ rows: [] }));
+			if (listByPayment.rows.length) {
+				orderRow = listByPayment.rows[0];
+			}
+		}
 
-			if (existingAccess.rows.length > 0) {
-				orderRow = await tables.updateRow({
+		if (!orderRow) {
+			return json({ success: false, message: 'Commande introuvable.' }, { status: 404 });
+		}
+
+		// 2. Si la commande n'est pas encore marquée 'paid' dans Appwrite
+		if (orderRow.status !== 'paid') {
+			// Check A: Est-ce que l'accès existe déjà dans access_grants ?
+			if (orderRow.user_id && orderRow.product_id) {
+				const existingAccess = await tables.listRows({
 					databaseId: DATABASE_ID,
-					tableId: ORDERS_TABLE,
-					rowId: orderId,
-					data: { status: 'paid', paid_at: new Date().toISOString() }
-				}).catch(() => orderRow);
-			} else if (orderRow.customer_email) {
-				// Fallback si le webhook était retardé : vérifier auprès de l'API Lemon Squeezy
+					tableId: ACCESS_TABLE,
+					queries: [
+						Query.equal('user_id', orderRow.user_id),
+						Query.equal('item_type', orderRow.product_type),
+						Query.equal('item_id', orderRow.product_id),
+						Query.limit(1)
+					]
+				}).catch(() => ({ rows: [] }));
+
+				if (existingAccess.rows.length > 0) {
+					orderRow = await tables.updateRow({
+						databaseId: DATABASE_ID,
+						tableId: ORDERS_TABLE,
+						rowId: orderRow.$id,
+						data: { status: 'paid', paid_at: new Date().toISOString() }
+					}).catch(() => orderRow);
+				}
+			}
+
+			// Check B: Interroger Lemon Squeezy API par email du client
+			if (orderRow.status !== 'paid' && orderRow.customer_email) {
 				try {
-					const verifyRes = await verifyAndFulfillByEmail(orderRow.customer_email);
-					if (verifyRes.success) {
-						orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId }).catch(() => orderRow);
-					}
+					await verifyAndFulfillByEmail(orderRow.customer_email, orderRow.$id);
+					orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderRow.$id }).catch(() => orderRow);
 				} catch (e) {
 					console.warn('[Lemon Squeezy GET Verify Fallback Error]:', e);
 				}
@@ -440,7 +558,8 @@ export const GET: RequestHandler = async ({ url }) => {
 				paidAt: orderRow.paid_at
 			}
 		});
-	} catch {
+	} catch (e) {
+		console.error('[API Lemon Squeezy GET Verify Error]:', e);
 		return json({ success: false, message: 'Commande introuvable.' }, { status: 404 });
 	}
 };
