@@ -350,9 +350,6 @@
 					</div>
 				</div>
 			</section>
-					</div>
-				</div>
-			</section>
 
 			<!-- What you'll learn -->
 			<section class="py-14 bg-white border-b border-zinc-100">
