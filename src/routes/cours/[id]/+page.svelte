@@ -304,7 +304,7 @@
 										<span class="text-4xl font-black text-white">{course.price.toLocaleString('fr-FR')}</span>
 										<span class="text-white/40 text-sm font-medium ml-1">HTG</span>
 										{#if course.priceUsd && course.priceUsd > 0}
-											<span class="text-amber-400 text-sm font-bold ml-2">(${course.priceUsd} USD)</span>
+											<span class="text-4xl font-black text-amber-400 ml-2">(${course.priceUsd} USD)</span>
 										{/if}
 									{/if}
 								</div>

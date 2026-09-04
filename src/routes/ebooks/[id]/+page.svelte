@@ -237,7 +237,7 @@
 										<span class="text-4xl font-black text-white">{ebook.price.toLocaleString('fr-FR')}</span>
 										<span class="text-white/40 text-sm font-medium ml-1">HTG</span>
 										{#if ebook.priceUsd && ebook.priceUsd > 0}
-											<span class="text-amber-400 text-sm font-bold ml-2">(${ebook.priceUsd} USD)</span>
+											<span class="text-4xl font-black text-amber-400 ml-2">(${ebook.priceUsd} USD)</span>
 										{/if}
 									{/if}
 								</div>
@@ -357,6 +357,7 @@
 		open={showPaymentModal}
 		productTitle={ebook.title}
 		amount={ebook.price}
+		amountUsd={ebook.priceUsd}
 		isFree={ebook.isFree || ebook.price === 0}
 		loading={checkoutLoading}
 		onSelectMethod={handleSelectPaymentMethod}

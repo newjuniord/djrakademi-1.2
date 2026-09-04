@@ -5,6 +5,7 @@
 		open = false,
 		productTitle = '',
 		amount = 0,
+		amountUsd,
 		isFree = false,
 		loading = false,
 		onSelectMethod,
@@ -13,6 +14,7 @@
 		open: boolean;
 		productTitle: string;
 		amount: number;
+		amountUsd?: number;
 		isFree?: boolean;
 		loading?: boolean;
 		onSelectMethod: (method: 'moncash' | 'natcash' | 'carte') => void;
@@ -46,7 +48,7 @@
 						Chwazi fason pou w peye
 					</h3>
 					<p class="text-xs text-zinc-500 mt-0.5 truncate max-w-xs font-medium">
-						{productTitle} · <span class="font-bold text-zinc-900">{isFree ? 'Gratis' : `${amount.toLocaleString('fr-FR')} HTG`}</span>
+						{productTitle} · <span class="font-bold text-zinc-900">{isFree ? 'Gratis' : `${amount.toLocaleString('fr-FR')} HTG${amountUsd && amountUsd > 0 ? ` ($${amountUsd} USD)` : ''}`}</span>
 					</p>
 				</div>
 

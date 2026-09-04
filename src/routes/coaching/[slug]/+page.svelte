@@ -548,6 +548,7 @@
 		open={showCoachingPaymentModal}
 		productTitle={service.title}
 		amount={service.price}
+		amountUsd={service.priceUsd}
 		isFree={service.isFree}
 		loading={loading}
 		onSelectMethod={handleCoachingSelectPaymentMethod}
