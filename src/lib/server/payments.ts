@@ -174,7 +174,9 @@ async function resolvePurchase(params: InitiatePaymentParams, user: Authenticate
 		});
 		if (access.rows.length) throw new PaymentServerError('Vous possédez déjà ce produit.', 409);
 		const variantId = String(product.lemonsqueezy_variant_id || product.variant_id || '').trim();
-		return { productId: params.productId, productTitle: String(product.title || 'Produit'), amount, customerPhone: '', variantId };
+		const pUsd = Number(product.price_usd || product.priceUsd || 0);
+		const amountUsd = pUsd && pUsd > 0 ? pUsd : Math.max(1, Math.round(amount / 130));
+		return { productId: params.productId, productTitle: String(product.title || 'Produit'), amount, amountUsd, customerPhone: '', variantId };
 	}
 
 	if (!params.bookingId) throw new PaymentServerError('Réservation de coaching manquante.', 400);
@@ -194,10 +196,13 @@ async function resolvePurchase(params: InitiatePaymentParams, user: Authenticate
 		throw new PaymentServerError('Ce service ne peut pas être payé actuellement.', 409);
 	}
 	const variantId = String(service.lemonsqueezy_variant_id || service.variant_id || '').trim();
+	const pUsd = Number(service.price_usd || service.priceUsd || 0);
+	const amountUsd = pUsd && pUsd > 0 ? pUsd : Math.max(1, Math.round(amount / 130));
 	return {
 		productId: booking.$id,
 		productTitle: String(service.title || 'Coaching'),
 		amount,
+		amountUsd,
 		customerPhone: String(booking.customer_whatsapp || ''),
 		variantId
 	};
@@ -270,7 +275,7 @@ export async function initiateLemonSqueezyPaymentServer(
 		product_type: params.productType,
 		product_id: purchase.productId,
 		product_title: purchase.productTitle,
-		amount: purchase.amount,
+		amount: purchase.amountUsd,
 		currency: 'USD',
 		payment_provider: 'lemonsqueezy',
 		status: 'pending',
@@ -287,6 +292,7 @@ export async function initiateLemonSqueezyPaymentServer(
 	} catch (err: any) {
 		if (String(err?.message || '').includes('currency')) {
 			orderPayload.currency = 'HTG';
+			orderPayload.amount = purchase.amount;
 			await tables.createRow({
 				databaseId: DATABASE_ID,
 				tableId: ORDERS_TABLE,
