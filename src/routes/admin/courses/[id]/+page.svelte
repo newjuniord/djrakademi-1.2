@@ -4,6 +4,7 @@
 	import { getAdminCourseById, saveCourseCurriculum, updateCourse } from '$lib/services/courses';
 	import type { Course, CourseModule, Lesson } from '$lib/types/admin';
 	import CourseDrawer from '$lib/components/admin/CourseDrawer.svelte';
+	import { parseVideoUrl } from '$lib/utils/video';
 	import {
 		ArrowLeft,
 		Plus,
@@ -349,7 +350,7 @@
 		<!-- Left Main Workspace (Active Lesson Studio / Video Theater) -->
 		<main class="lg:col-span-8 lg:order-1 bg-base-100 shadow-sm rounded-none border-none p-6 space-y-6">
 			{#if activeLesson}
-				{@const vimeoId = extractVimeoId(activeLesson.videoUrl)}
+				{@const videoSource = parseVideoUrl(activeLesson.videoUrl)}
 
 				<!-- Active Lesson Top Header -->
 				<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-base-200/70 pb-4">
@@ -412,7 +413,7 @@
 								bind:value={activeLesson.type}
 								class="select select-sm bg-base-100 rounded-none text-xs border border-base-300 font-bold text-base-content shadow-2xs focus:bg-base-100"
 							>
-								<option value="video">🎥 Vidéo Vimeo</option>
+								<option value="video">🎥 Vidéo (YouTube, Vimeo, MP4)</option>
 								<option value="text">📄 Contenu Texte</option>
 							</select>
 						</div>
@@ -422,13 +423,13 @@
 						<!-- Video Link Input -->
 						<div class="form-control">
 							<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="active-video-url">
-								URL de la vidéo Vimeo
+								URL de la vidéo (YouTube, Vimeo, Loom, MP4...)
 							</label>
 							<input
 								id="active-video-url"
 								type="text"
 								bind:value={activeLesson.videoUrl}
-								placeholder="Ex: https://vimeo.com/76979871"
+								placeholder="Ex: https://www.youtube.com/watch?v=... ou https://vimeo.com/76979871"
 								class="input input-sm bg-base-100 w-full rounded-none text-xs border border-base-300 font-mono text-base-content shadow-2xs focus:bg-base-100"
 							/>
 						</div>
@@ -473,30 +474,40 @@
 						<div class="flex items-center justify-between">
 							<span class="text-xs font-bold text-base-content flex items-center gap-1.5">
 								<Play size={14} class="text-primary" />
-								Visualisation de la vidéo (Vimeo Player)
+								Visualisation de la vidéo (YouTube / Vimeo Player)
 							</span>
-							{#if vimeoId}
+							{#if videoSource}
 								<span class="badge badge-success badge-sm text-[10px] font-semibold bg-success/15 text-success border-none">
-									Synchronisé
+									{videoSource.type === 'iframe' ? 'Lecteur Embed' : 'Vidéo Directe'}
 								</span>
 							{/if}
 						</div>
 
-						{#if vimeoId}
+						{#if videoSource}
 							<div class="aspect-video w-full bg-black rounded-none overflow-hidden shadow-xl border border-base-200">
-								<iframe
-									src="https://player.vimeo.com/video/{vimeoId}"
-									title={activeLesson.title}
-									class="w-full h-full"
-									allow="autoplay; fullscreen; picture-in-picture"
-									allowfullscreen
-								></iframe>
+								{#if videoSource.type === 'iframe'}
+									<iframe
+										src={videoSource.embedUrl}
+										title={activeLesson.title}
+										class="w-full h-full border-0"
+										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+										allowfullscreen
+									></iframe>
+								{:else}
+									<video
+										src={videoSource.src}
+										controls
+										class="w-full h-full object-contain"
+									>
+										<track kind="captions" />
+									</video>
+								{/if}
 							</div>
 						{:else}
 							<div class="py-16 text-center text-base-content/50 border border-dashed border-base-200 bg-base-200/20 p-6 space-y-2">
 								<Video size={36} class="mx-auto opacity-30" />
 								<p class="text-xs font-semibold">Aucune vidéo valide configurée</p>
-								<p class="text-[11px]">Saisissez un lien Vimeo ci-dessus pour activer la visualisation.</p>
+								<p class="text-[11px]">Saisissez un lien YouTube, Vimeo ou MP4 ci-dessus pour activer la visualisation.</p>
 							</div>
 						{/if}
 					</div>

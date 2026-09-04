@@ -550,7 +550,7 @@
 										<div class="pt-1">
 											<input
 												type="text"
-												placeholder="URL Vimeo ou ID de la vidéo (ex: https://vimeo.com/76979871)"
+												placeholder="URL YouTube, Vimeo ou MP4 (ex: https://www.youtube.com/watch?v=... ou https://vimeo.com/...)"
 												bind:value={lesson.videoUrl}
 												class="input input-xs bg-base-200/30 w-full rounded-none text-xs border-base-200"
 											/>

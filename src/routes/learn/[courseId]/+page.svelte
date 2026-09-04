@@ -19,6 +19,7 @@
 		Sparkles
 	} from 'lucide-svelte';
 	import { authState } from '$lib/auth.svelte';
+	import { parseVideoUrl } from '$lib/utils/video';
 
 	$effect(() => {
 		if (!authState.loading && !authState.user) {
@@ -88,13 +89,6 @@
 	const progressPercent = $derived(
 		totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 	);
-
-	function getVimeoEmbedUrl(url?: string): string {
-		if (!url) return 'https://player.vimeo.com/video/76979871?title=0&byline=0&portrait=0';
-		const match = url.match(/(\d+)/);
-		const vimeoId = match ? match[1] : '76979871';
-		return `https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0`;
-	}
 
 	async function persistProgress(completed = completedLessonIds, lastLessonId = activeLessonId) {
 		if (!courseId) return;
@@ -210,18 +204,40 @@
 			<main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 flex flex-col gap-5 sm:gap-6">
 
 			{#if activeLesson}
-				<!-- Video Container (Real Vimeo Embed) -->
+				<!-- Video Container (Universal YouTube / Vimeo / Direct Video Embed) -->
 				<div class="relative w-full aspect-video bg-black rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
 					{#if activeLesson.type === 'video'}
-						<div class="absolute inset-0 bg-black">
-							<iframe
-								src={getVimeoEmbedUrl(activeLesson.videoUrl)}
-								title={activeLesson.title}
-								class="w-full h-full border-0"
-								allow="autoplay; fullscreen; picture-in-picture"
-								allowfullscreen
-							></iframe>
-						</div>
+						{@const videoSource = parseVideoUrl(activeLesson.videoUrl)}
+						{#if videoSource}
+							<div class="absolute inset-0 bg-black">
+								{#if videoSource.type === 'iframe'}
+									<iframe
+										src={videoSource.embedUrl}
+										title={activeLesson.title}
+										class="w-full h-full border-0"
+										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+										allowfullscreen
+									></iframe>
+								{:else}
+									<video
+										src={videoSource.src}
+										controls
+										autoplay
+										class="w-full h-full object-contain"
+									>
+										<track kind="captions" />
+									</video>
+								{/if}
+							</div>
+						{:else}
+							<div class="w-full h-full bg-zinc-900 p-6 sm:p-8 flex flex-col justify-center items-center text-center space-y-3 sm:space-y-4">
+								<div class="size-12 sm:size-16 bg-amber-400/20 text-amber-400 rounded-2xl grid place-items-center">
+									<BookOpen size={24} class="sm:w-8 sm:h-8" />
+								</div>
+								<h3 class="text-base sm:text-xl font-black text-white">{activeLesson.title}</h3>
+								<p class="text-white/60 text-xs sm:text-sm max-w-md">Okenn lyen vidyo ki valab pa configuré pou leson sa a.</p>
+							</div>
+						{/if}
 					{:else}
 						<!-- Text / Article Lesson View -->
 						<div class="w-full h-full bg-zinc-900 p-6 sm:p-8 flex flex-col justify-center items-center text-center space-y-3 sm:space-y-4">
