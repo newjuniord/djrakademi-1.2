@@ -235,15 +235,20 @@
 						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 							{#each myCourses as item (item.course.id)}
 								<div class="bg-white rounded-2xl border border-zinc-200/80 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
-									<div class="relative aspect-video bg-zinc-100 overflow-hidden">
+									<a href="/learn/{item.course.id}" class="relative aspect-video bg-zinc-100 overflow-hidden group block">
 										{#if item.course.cover}
-											<img src={item.course.cover} alt={item.course.title} class="w-full h-full object-cover" />
+											<img src={item.course.cover} alt={item.course.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
 										{:else}
 											<div class="w-full h-full flex items-center justify-center bg-zinc-200">
 												<BookOpen size={32} class="text-zinc-400" />
 											</div>
 										{/if}
-										<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+										<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+										<div class="absolute inset-0 flex items-center justify-center">
+											<div class="size-12 bg-amber-400 text-black rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+												<Play size={20} class="fill-black ml-0.5" />
+											</div>
+										</div>
 										<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between">
 											<span class="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-zinc-950 text-[11px] font-black rounded-full shadow">
 												{item.progressPercent}% fini
@@ -254,11 +259,13 @@
 												</span>
 											{/if}
 										</div>
-									</div>
+									</a>
 
 									<div class="p-5 flex flex-col flex-1 gap-4">
 										<div>
-											<h3 class="font-black text-base text-zinc-950 leading-snug line-clamp-1">{item.course.title}</h3>
+											<a href="/learn/{item.course.id}" class="hover:text-amber-600 transition-colors">
+												<h3 class="font-black text-base text-zinc-950 leading-snug line-clamp-1">{item.course.title}</h3>
+											</a>
 											<p class="text-xs text-zinc-400 mt-1 line-clamp-2">{item.course.description}</p>
 										</div>
 

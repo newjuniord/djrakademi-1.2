@@ -29,6 +29,18 @@
 		}
 	});
 
+	$effect(() => {
+		const id = courseId;
+		const user = authState.user;
+		if (id && user && user.$id) {
+			hasCourseAccess(id).then((owned) => {
+				if (owned) {
+					goto(`/learn/${id}`, { replaceState: true });
+				}
+			}).catch(() => undefined);
+		}
+	});
+
 	async function loadCourse(id: string) {
 		loading = true;
 		course = await getCourseById(id);
