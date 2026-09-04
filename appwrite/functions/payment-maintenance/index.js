@@ -2,7 +2,7 @@ import { Client, ID, Query, TablesDB } from 'node-appwrite';
 
 const DATABASE_ID = process.env.PAYMENTS_DATABASE_ID || 'djrakademi';
 const VERIFY_URL = process.env.PLOPPLOP_VERIFY_URL || 'https://plopplop.solutionip.app/api/paiement-verify';
-const ORDER_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
+const ORDER_EXPIRATION_MS = 60 * 60 * 1000;
 const MAX_EXPIRED_PER_RUN = 200;
 const TABLES = {
   orders: 'orders',
@@ -22,13 +22,14 @@ function tablesClient(req) {
 
 function providerConfig() {
   const clientId = String(process.env.PLOPPLOP_CLIENT_ID || '').trim();
+  if (!clientId) throw new Error('PLOPPLOP_CLIENT_ID manquant.');
   const apiKey = String(process.env.PLOPPLOP_API_KEY || process.env.PLOPPLOP_SECRET_KEY || '').trim();
   const headers = { 'Content-Type': 'application/json' };
   if (apiKey) {
     headers.Authorization = `Bearer ${apiKey}`;
     headers['x-api-key'] = apiKey;
   }
-  return { clientId, headers, hasClient: Boolean(clientId) };
+  return { clientId, headers };
 }
 
 async function verifyOrder(order, config) {
@@ -270,13 +271,6 @@ async function writeExpirationLog(tables, order) {
 }
 
 async function processOrder(tables, order, config) {
-  if (order.payment_provider === 'lemonsqueezy') {
-    return { state: 'pending' };
-  }
-  if (!config.hasClient) {
-    await writeLog(tables, order, undefined, 'PLOPPLOP_CLIENT_ID manquant.');
-    return { state: 'error', message: 'PLOPPLOP_CLIENT_ID manquant dans l’environnement Appwrite.' };
-  }
   let verification;
   try {
     verification = await verifyOrder(order, config);
@@ -311,7 +305,7 @@ async function expireOldOrder(tables, order) {
       tableId: TABLES.orders,
       rowId: current.$id,
       transactionId: tx.$id,
-      data: { status: 'expired' }
+      data: { status: 'failed' }
     });
     await tables.updateTransaction({ transactionId: tx.$id, commit: true });
     await writeExpirationLog(tables, order);
@@ -381,7 +375,7 @@ export default async ({ req, res, log, error }) => {
     return res.json(summary);
   } catch (caught) {
     const message = caught instanceof Error ? caught.message : String(caught);
-    error(`[payment-maintenance error]: ${message}`);
-    return res.json({ success: false, message: 'Vérification automatique impossible.', error: message }, 500);
+    error(message);
+    return res.json({ message: 'Vérification automatique impossible.' }, 500);
   }
 };
