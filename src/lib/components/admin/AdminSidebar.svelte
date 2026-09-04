@@ -54,6 +54,7 @@
 		{
 			title: 'Système & Monitoring',
 			items: [
+				{ label: 'Logs Verifikasyon', href: '/admin/verifications', icon: ShieldCheck },
 				{ label: 'Santé & Logs API', href: '/admin/health', icon: Activity }
 			]
 		}

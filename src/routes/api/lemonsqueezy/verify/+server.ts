@@ -535,6 +535,31 @@ export const POST: RequestHandler = async ({ request }) => {
 				);
 			}
 			const inputEmail = payload.email.trim().toLowerCase();
+
+			// 1. Pre-check dans verification_logs avant d'appeler l'API Lemon Squeezy
+			const { tables } = adminServices();
+			const existingSuccessLog = await tables.listRows({
+				databaseId: DATABASE_ID,
+				tableId: 'verification_logs',
+				queries: [
+					Query.equal('input_value', inputEmail),
+					Query.equal('status', 'success'),
+					Query.limit(1)
+				]
+			}).catch(() => ({ rows: [] }));
+
+			if (existingSuccessLog.rows.length > 0) {
+				const message = `Imel sa a ("${inputEmail}") te deja itilize ak siksè pou debloke yon fòmasyon sou yon kont. Peman sa a pa ka re-itilize.`;
+				await logVerification(
+					user.$id,
+					inputEmail,
+					'carte',
+					'failed',
+					message
+				);
+				return json({ success: false, message }, { status: 400 });
+			}
+
 			const result = await verifyAndFulfillByEmail(inputEmail, undefined, user.$id);
 
 			await logVerification(

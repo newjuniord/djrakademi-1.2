@@ -180,6 +180,34 @@ export function getAdminOrders(params: {
 	return adminRequest(`/orders${queryString(params)}`);
 }
 
+export interface VerificationLog {
+	id: string;
+	userId: string;
+	inputValue: string;
+	method: 'carte' | 'mobile';
+	status: 'success' | 'failed';
+	message: string;
+	grantedItems?: string;
+	createdAt: string;
+}
+
+export interface AdminVerificationsResult {
+	items: VerificationLog[];
+	total: number;
+	page: number;
+	limit: number;
+}
+
+export function getAdminVerificationLogs(params: {
+	page: number;
+	limit: number;
+	search?: string;
+	status?: 'success' | 'failed';
+	method?: 'carte' | 'mobile';
+}): Promise<AdminVerificationsResult> {
+	return adminRequest(`/verifications${queryString(params)}`);
+}
+
 export function getAdminBookings(): Promise<Booking[]> {
 	return adminRequest('/bookings');
 }

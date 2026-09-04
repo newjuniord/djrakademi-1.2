@@ -312,16 +312,41 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ success: false, message: 'Payload JSON invalide.' }, { status: 400 });
 		}
 
-		const reference = payload?.reference || payload?.reference_id || payload?.refference_id || payload?.ref;
-		if (!reference || typeof reference !== 'string' || !reference.trim()) {
+		const rawRef = payload?.reference || payload?.reference_id || payload?.refference_id || payload?.ref;
+		if (!rawRef || typeof rawRef !== 'string' || !rawRef.trim()) {
 			return json({ success: false, message: 'Tanpri antre yon nimewo referans ki valab.' }, { status: 400 });
 		}
+		const ref = rawRef.trim();
 
-		const result = await verifyAndFulfillByPlopplopReference(reference, user.$id);
+		// 1. Pre-check dans verification_logs avant d'appeler l'API de passerelle
+		const { tables } = adminServices();
+		const existingSuccessLog = await tables.listRows({
+			databaseId: DATABASE_ID,
+			tableId: 'verification_logs',
+			queries: [
+				Query.equal('input_value', ref),
+				Query.equal('status', 'success'),
+				Query.limit(1)
+			]
+		}).catch(() => ({ rows: [] }));
+
+		if (existingSuccessLog.rows.length > 0) {
+			const message = `Nimewo referans sa a ("${ref}") te deja itilize ak siksè pou debloke yon fòmasyon sou yon kont. Peman sa a pa ka re-itilize.`;
+			await logVerification(
+				user.$id,
+				ref,
+				'mobile',
+				'failed',
+				message
+			);
+			return json({ success: false, message }, { status: 400 });
+		}
+
+		const result = await verifyAndFulfillByPlopplopReference(ref, user.$id);
 
 		await logVerification(
 			user.$id,
-			reference,
+			ref,
 			'mobile',
 			result.success ? 'success' : 'failed',
 			result.message || '',

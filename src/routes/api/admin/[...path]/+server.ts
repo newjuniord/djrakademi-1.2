@@ -415,6 +415,39 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 			return json((await listAllRows(tables, "bookings")).map(mapBooking));
 		}
 
+		if (parts[0] === 'verifications' && parts.length === 1) {
+			const { page, limit, offset } = normalizePage(url);
+			const search = (url.searchParams.get('search') || '').trim();
+			const status = url.searchParams.get('status');
+			const method = url.searchParams.get('method');
+			const queries = [Query.orderDesc('created_at'), Query.limit(limit), Query.offset(offset)];
+			if (status) queries.push(Query.equal('status', status));
+			if (method) queries.push(Query.equal('method', method));
+			if (search) {
+				queries.push(Query.or([
+					Query.search('input_value', search),
+					Query.search('user_id', search),
+					Query.search('message', search)
+				]));
+			}
+			const logsPage = await tables.listRows({ databaseId: DATABASE_ID, tableId: 'verification_logs', queries }).catch(() => ({ rows: [], total: 0 }));
+			return json({
+				items: logsPage.rows.map((row: any) => ({
+					id: row.$id,
+					userId: row.user_id,
+					inputValue: row.input_value,
+					method: row.method,
+					status: row.status,
+					message: row.message || '',
+					grantedItems: row.granted_items || '',
+					createdAt: row.created_at || row.$createdAt
+				})),
+				total: logsPage.total,
+				page,
+				limit
+			});
+		}
+
 		if (parts[0] === 'settings' && parts.length === 1) return json(mapSettings(await getSettingsRow(tables)));
 		throw new AdminServerError('Route admin introuvable.', 404);
 	} catch (error) { return responseError(error); }
