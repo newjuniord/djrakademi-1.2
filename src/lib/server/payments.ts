@@ -303,17 +303,20 @@ export async function initiateLemonSqueezyPaymentServer(
 			? `${params.originUrl}/checkout/success?order_id=${orderId}`
 			: `https://djrakademi.net/checkout/success?order_id=${orderId}`;
 
+		const expiresAt = new Date(Date.now() + 12 * 60 * 1000).toISOString();
+
 		const checkoutResponse = await createCheckout(storeId, variantId, {
 			checkoutData: {
 				email: user.email,
 				name: user.name || undefined,
+				expiresAt,
 				custom: {
 					user_id: user.$id,
 					order_id: orderId,
 					product_id: purchase.productId,
 					product_type: params.productType
 				}
-			},
+			} as any,
 			productOptions: {
 				redirectUrl
 			}
