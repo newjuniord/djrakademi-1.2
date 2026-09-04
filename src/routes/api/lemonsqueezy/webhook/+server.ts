@@ -97,48 +97,64 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 	}
 
 	const targetOrderId = orderRow.$id;
-
-	if (orderRow.status === 'paid') {
-		console.log('[Lemon Squeezy Webhook]: Commande déjà marquée payée:', targetOrderId);
-		return true;
+	let userId = (orderRow.user_id && orderRow.user_id !== 'admin') ? orderRow.user_id : (customData?.user_id && customData.user_id !== 'admin' ? customData.user_id : undefined);
+	if (!userId && orderRow.customer_email) {
+		const { users } = adminServices();
+		try {
+			const uList = await users.list([Query.equal('email', orderRow.customer_email.trim().toLowerCase()), Query.limit(1)]);
+			if (uList.users.length > 0) userId = uList.users[0].$id;
+		} catch {}
 	}
+	if (!userId) userId = orderRow.user_id || customData?.user_id;
 
-	const userId = orderRow.user_id || customData?.user_id;
 	const productType = orderRow.product_type || customData?.product_type;
 	const productId = orderRow.product_id || customData?.product_id;
 
-	const transaction = await tables.createTransaction({ ttl: 60 });
-	try {
-		// Accès Cours / Ebook
-		if ((productType === 'course' || productType === 'ebook') && userId && productId) {
-			const existing = await tables.listRows({
+	// TOUJOURS créer l'accès dans access_grants
+	if ((productType === 'course' || productType === 'ebook') && userId && productId) {
+		const existing = await tables.listRows({
+			databaseId: DATABASE_ID,
+			tableId: ACCESS_TABLE,
+			queries: [
+				Query.equal('user_id', userId),
+				Query.equal('item_type', productType),
+				Query.equal('item_id', productId),
+				Query.limit(1)
+			]
+		}).catch(() => ({ rows: [] }));
+
+		if (!existing.rows.length) {
+			await tables.createRow({
 				databaseId: DATABASE_ID,
 				tableId: ACCESS_TABLE,
-				transactionId: transaction.$id,
-				queries: [
-					Query.equal('user_id', userId),
-					Query.equal('item_type', productType),
-					Query.equal('item_id', productId),
-					Query.limit(1)
-				]
-			});
+				rowId: ID.unique(),
+				data: {
+					user_id: userId,
+					item_type: productType,
+					item_id: productId,
+					granted_by: 'lemonsqueezy_webhook',
+					created_at: paidAt
+				}
+			}).catch((e) => console.error('[Access grant error in webhook fulfillOrder]:', e));
+		}
+	}
 
-			if (!existing.rows.length) {
-				await tables.createRow({
-					databaseId: DATABASE_ID,
-					tableId: ACCESS_TABLE,
-					rowId: ID.unique(),
-					transactionId: transaction.$id,
-					data: {
-						user_id: userId,
-						item_type: productType,
-						item_id: productId,
-						granted_by: 'lemonsqueezy_webhook',
-						created_at: paidAt
-					}
-				});
-			}
-		} else if (productType === 'coaching' && productId) {
+	if (orderRow.status === 'paid') {
+		if (userId && (!orderRow.user_id || orderRow.user_id === 'admin')) {
+			await tables.updateRow({
+				databaseId: DATABASE_ID,
+				tableId: ORDERS_TABLE,
+				rowId: targetOrderId,
+				data: { user_id: userId }
+			}).catch(() => undefined);
+		}
+		console.log('[Lemon Squeezy Webhook]: Commande déjà marquée payée et accès garanti:', targetOrderId);
+		return true;
+	}
+
+	const transaction = await tables.createTransaction({ ttl: 60 });
+	try {
+		if (productType === 'coaching' && productId) {
 			// Confirmation Coaching
 			const booking: any = await tables.getRow({
 				databaseId: DATABASE_ID,
@@ -171,6 +187,7 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 			transactionId: transaction.$id,
 			data: {
 				status: 'paid',
+				user_id: userId || orderRow.user_id,
 				payment_id: lqOrderId || undefined,
 				paid_at: paidAt
 			}

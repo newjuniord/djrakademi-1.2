@@ -58,8 +58,8 @@
 		try {
 			const existingAccess = await hasCourseAccess(course.id);
 			if (existingAccess) {
-				toast.info('Ou gen fòmasyon sa a deja! N ap redirije w nan espas ou an.');
-				goto('/dashboard');
+				toast.info('Ou gen fòmasyon sa a deja! N ap redirije w pou w gade l.');
+				goto(`/learn/${course.id}`);
 				return;
 			}
 
@@ -89,8 +89,8 @@
 			}
 
 			await claimFreeCourse(course.id);
-			toast.success('Aksè gratis debloke! N ap redirije w nan espas ou an.');
-			goto('/dashboard');
+			toast.success('Aksè gratis debloke! N ap redirije w pou w gade l.');
+			goto(`/learn/${course.id}`);
 		} catch (e) {
 			console.error('Free enrollment error:', e);
 			toast.error('Yon erè rive pandan enskripsyon an.');

@@ -1,5 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { Query } from 'node-appwrite';
+import { ID, Query } from 'node-appwrite';
 import { requirePaymentUser, PaymentServerError } from '$lib/server/payments';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
 import { mapBooking } from '$lib/server/bookings';
@@ -8,7 +8,7 @@ export const GET: RequestHandler = async ({ request }) => {
 	try {
 		const user = await requirePaymentUser(request);
 		const { tables } = adminServices();
-		const [grants, bookings, progressRows] = await Promise.all([
+		const [grantsRes, bookings, progressRows, userPaidOrders, emailPaidOrders] = await Promise.all([
 			tables.listRows({
 				databaseId: DATABASE_ID, tableId: 'access_grants',
 				queries: [Query.equal('user_id', user.$id), Query.limit(100)]
@@ -20,10 +20,67 @@ export const GET: RequestHandler = async ({ request }) => {
 			tables.listRows({
 				databaseId: DATABASE_ID, tableId: 'course_progress',
 				queries: [Query.equal('user_id', user.$id), Query.limit(100)]
-			})
+			}),
+			tables.listRows({
+				databaseId: DATABASE_ID, tableId: 'orders',
+				queries: [Query.equal('user_id', user.$id), Query.equal('status', 'paid'), Query.limit(100)]
+			}).catch(() => ({ rows: [] })),
+			user.email ? tables.listRows({
+				databaseId: DATABASE_ID, tableId: 'orders',
+				queries: [Query.equal('customer_email', user.email.trim().toLowerCase()), Query.equal('status', 'paid'), Query.limit(100)]
+			}).catch(() => ({ rows: [] })) : Promise.resolve({ rows: [] })
 		]);
-		const courseIds = grants.rows.filter((row: any) => row.item_type === 'course').map((row: any) => row.item_id);
-		const ebookIds = grants.rows.filter((row: any) => row.item_type === 'ebook').map((row: any) => row.item_id);
+
+		const grants: any[] = [...grantsRes.rows];
+		const allPaidOrdersMap = new Map<string, any>();
+		for (const o of [...userPaidOrders.rows, ...emailPaidOrders.rows]) {
+			allPaidOrdersMap.set(o.$id, o);
+		}
+
+		for (const orderRow of allPaidOrdersMap.values()) {
+			if (orderRow.product_id && (orderRow.product_type === 'course' || orderRow.product_type === 'ebook')) {
+				const hasGrant = grants.some(
+					(g: any) => g.item_type === orderRow.product_type && g.item_id === orderRow.product_id
+				);
+				if (!hasGrant) {
+					const newGrant = await tables.createRow({
+						databaseId: DATABASE_ID,
+						tableId: 'access_grants',
+						rowId: ID.unique(),
+						data: {
+							user_id: user.$id,
+							item_type: orderRow.product_type,
+							item_id: orderRow.product_id,
+							granted_by: 'library_auto_heal',
+							created_at: new Date().toISOString()
+						}
+					}).catch(() => null);
+
+					if (newGrant) {
+						grants.push(newGrant);
+					} else {
+						grants.push({
+							$id: ID.unique(),
+							user_id: user.$id,
+							item_type: orderRow.product_type,
+							item_id: orderRow.product_id
+						});
+					}
+
+					if (!orderRow.user_id || orderRow.user_id === 'admin') {
+						await tables.updateRow({
+							databaseId: DATABASE_ID,
+							tableId: 'orders',
+							rowId: orderRow.$id,
+							data: { user_id: user.$id }
+						}).catch(() => undefined);
+					}
+				}
+			}
+		}
+
+		const courseIds = grants.filter((row: any) => row.item_type === 'course').map((row: any) => row.item_id);
+		const ebookIds = grants.filter((row: any) => row.item_type === 'ebook').map((row: any) => row.item_id);
 		const ebookRows = await Promise.all(ebookIds.map((id: string) =>
 			tables.getRow({ databaseId: DATABASE_ID, tableId: 'ebooks', rowId: id }).catch(() => null)
 		));
@@ -69,3 +126,4 @@ export const GET: RequestHandler = async ({ request }) => {
 		return json({ message: error instanceof Error ? error.message : 'Impossible de charger votre espace.' }, { status });
 	}
 };
+

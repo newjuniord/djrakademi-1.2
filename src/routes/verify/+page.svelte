@@ -2,6 +2,7 @@
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import { toast } from '$lib/toast.svelte';
+	import { goto } from '$app/navigation';
 
 	import {
 		CreditCard,
@@ -51,8 +52,12 @@
 				const resData = await verifyLemonSqueezyEmail(email);
 
 				if (resData.ok && resData.success) {
-					supportSuccessMessage = resData.message || 'Peman pa kat ou a verifye avèk siksè! Aksè a debloke sou kont ou.';
-					toast.success('Peman pa kat verifye ak siksè !');
+					const targetUrl = resData.courseId ? `/learn/${resData.courseId}` : '/dashboard';
+					supportSuccessMessage = 'Peman pa kat ou a verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...';
+					toast.success('Aksè debloke ak siksè ! Redirèksyon en kous...');
+					setTimeout(() => {
+						goto(targetUrl);
+					}, 1000);
 				} else {
 					supportErrorMessage = resData.message || `Nou pa jwenn okenn peman konfime sou Lemon Squeezy pou imel "${email}".`;
 					toast.error('Erè nan verifikasyon an.');
@@ -68,8 +73,12 @@
 				const resData = await verifyPlopplopReference(ref);
 
 				if (resData.ok && resData.success) {
-					supportSuccessMessage = resData.message || `Peman MonCash / Natcash (${ref}) verifye ak siksè !`;
-					toast.success('Peman MonCash / Natcash verifye ak siksè !');
+					const targetUrl = resData.courseId ? `/learn/${resData.courseId}` : '/dashboard';
+					supportSuccessMessage = 'Peman verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...';
+					toast.success('Aksè debloke ak siksè ! Redirèksyon en kous...');
+					setTimeout(() => {
+						goto(targetUrl);
+					}, 1000);
 				} else {
 					supportErrorMessage = resData.message || `Nou pa jwenn okenn peman valide pou referans "${ref}".`;
 					toast.error('Erè nan verifikasyon an.');

@@ -94,47 +94,63 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 	}
 
 	const targetOrderId = orderRow.$id;
-
-	if (orderRow.status === 'paid') {
-		return true; // Déjà confirmé
+	let userId = (orderRow.user_id && orderRow.user_id !== 'admin') ? orderRow.user_id : (customData?.user_id && customData.user_id !== 'admin' ? customData.user_id : undefined);
+	if (!userId && orderRow.customer_email) {
+		const { users } = adminServices();
+		try {
+			const uList = await users.list([Query.equal('email', orderRow.customer_email.trim().toLowerCase()), Query.limit(1)]);
+			if (uList.users.length > 0) userId = uList.users[0].$id;
+		} catch {}
 	}
+	if (!userId) userId = orderRow.user_id || customData?.user_id;
 
-	const userId = orderRow.user_id || customData?.user_id;
 	const productType = orderRow.product_type || customData?.product_type;
 	const productId = orderRow.product_id || customData?.product_id;
 
-	const transaction = await tables.createTransaction({ ttl: 60 });
-	try {
-		// Accès Cours / Ebook
-		if ((productType === 'course' || productType === 'ebook') && userId && productId) {
-			const existing = await tables.listRows({
+	// TOUJOURS vérifier et créer l'accès dans access_grants
+	if ((productType === 'course' || productType === 'ebook') && userId && productId) {
+		const existing = await tables.listRows({
+			databaseId: DATABASE_ID,
+			tableId: ACCESS_TABLE,
+			queries: [
+				Query.equal('user_id', userId),
+				Query.equal('item_type', productType),
+				Query.equal('item_id', productId),
+				Query.limit(1)
+			]
+		}).catch(() => ({ rows: [] }));
+
+		if (!existing.rows.length) {
+			await tables.createRow({
 				databaseId: DATABASE_ID,
 				tableId: ACCESS_TABLE,
-				transactionId: transaction.$id,
-				queries: [
-					Query.equal('user_id', userId),
-					Query.equal('item_type', productType),
-					Query.equal('item_id', productId),
-					Query.limit(1)
-				]
-			});
+				rowId: ID.unique(),
+				data: {
+					user_id: userId,
+					item_type: productType,
+					item_id: productId,
+					granted_by: 'lemonsqueezy',
+					created_at: paidAt
+				}
+			}).catch((e) => console.error('[Access grant create error in fulfillOrder]:', e));
+		}
+	}
 
-			if (!existing.rows.length) {
-				await tables.createRow({
-					databaseId: DATABASE_ID,
-					tableId: ACCESS_TABLE,
-					rowId: ID.unique(),
-					transactionId: transaction.$id,
-					data: {
-						user_id: userId,
-						item_type: productType,
-						item_id: productId,
-						granted_by: 'lemonsqueezy',
-						created_at: paidAt
-					}
-				});
-			}
-		} else if (productType === 'coaching' && productId) {
+	if (orderRow.status === 'paid') {
+		if (userId && (!orderRow.user_id || orderRow.user_id === 'admin')) {
+			await tables.updateRow({
+				databaseId: DATABASE_ID,
+				tableId: ORDERS_TABLE,
+				rowId: targetOrderId,
+				data: { user_id: userId }
+			}).catch(() => undefined);
+		}
+		return true;
+	}
+
+	const transaction = await tables.createTransaction({ ttl: 60 });
+	try {
+		if (productType === 'coaching' && productId) {
 			// Accès Coaching
 			const booking: any = await tables.getRow({
 				databaseId: DATABASE_ID,
@@ -167,6 +183,7 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 			transactionId: transaction.$id,
 			data: {
 				status: 'paid',
+				user_id: userId || orderRow.user_id,
 				payment_id: lqOrderId || undefined,
 				paid_at: paidAt
 			}
@@ -206,7 +223,7 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 /**
  * Interroge l'API Lemon Squeezy par email, extrait le variant_id et débloque le produit Appwrite correspondant.
  */
-async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string) {
+async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string, loggedInUserId?: string) {
 	const apiKey = env.LEMONSQUEEZY_API_KEY?.trim();
 	const storeId = env.LEMONSQUEEZY_STORE_ID?.trim();
 
@@ -245,14 +262,16 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 
 	// 2. Retrouver l'utilisateur Appwrite par son email
 	const { tables, users } = adminServices();
-	let userId: string | null = null;
-	try {
-		const userList = await users.list([Query.equal('email', normalizedEmail), Query.limit(1)]);
-		if (userList.users.length > 0) {
-			userId = userList.users[0].$id;
+	let userId: string | null = loggedInUserId || null;
+	if (!userId) {
+		try {
+			const userList = await users.list([Query.equal('email', normalizedEmail), Query.limit(1)]);
+			if (userList.users.length > 0) {
+				userId = userList.users[0].$id;
+			}
+		} catch (e) {
+			console.warn('[Lemon Squeezy Verify]: Utilisateur introuvable dans Appwrite Users par email:', e);
 		}
-	} catch (e) {
-		console.warn('[Lemon Squeezy Verify]: Utilisateur introuvable dans Appwrite Users par email:', e);
 	}
 
 	// 3. Charger tous les cours, ebooks et services de coaching avec leur variant_id
@@ -284,6 +303,7 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 	];
 
 	const grantedProducts: string[] = [];
+	let alreadyClaimedByOtherCount = 0;
 	const paidAt = new Date().toISOString();
 
 	for (const order of orders) {
@@ -292,6 +312,7 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 
 		if (status !== 'paid') continue; // Seules les commandes confirmées
 
+		const lqOrderId = String(order.id || attributes.identifier || '').trim();
 		const lqVariantId = String(
 			attributes.first_order_item?.variant_id ||
 			attributes.variant_id ||
@@ -301,7 +322,7 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 		const customData = attributes.custom_data || {};
 		const metaProductId = customData.product_id;
 		const metaProductType = customData.product_type;
-		const metaUserId = customData.user_id || userId;
+		const metaUserId = customData.user_id;
 		const metaOrderId = customData.order_id || targetOrderId;
 
 		// Matcher avec un produit Appwrite ayant le même Lemon Squeezy Variant ID
@@ -323,10 +344,43 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 			continue;
 		}
 
-		const targetUserId = metaUserId || userId;
+		let targetUserId = loggedInUserId || userId;
+		if (!targetUserId || targetUserId === 'admin') {
+			targetUserId = (metaUserId && metaUserId !== 'admin') ? metaUserId : (userId || undefined);
+		}
 
 		if (targetUserId) {
-			// Créer l'accès dans access_grants
+			// Vérifier si cette commande Lemon Squeezy a déjà été réclamée par UN AUTRE compte utilisateur
+			let existingClaimedOrder: any = null;
+			if (lqOrderId) {
+				try {
+					const claimedCheck = await tables.listRows({
+						databaseId: DATABASE_ID,
+						tableId: ORDERS_TABLE,
+						queries: [
+							Query.equal('payment_id', lqOrderId),
+							Query.equal('status', 'paid'),
+							Query.limit(1)
+						]
+					});
+					if (claimedCheck.rows.length) {
+						existingClaimedOrder = claimedCheck.rows[0];
+					}
+				} catch {}
+			}
+
+			if (
+				existingClaimedOrder &&
+				existingClaimedOrder.user_id &&
+				existingClaimedOrder.user_id !== 'admin' &&
+				existingClaimedOrder.user_id !== targetUserId
+			) {
+				console.warn(`[Lemon Squeezy Verify]: Commande ${lqOrderId} déjà réclamée par l'utilisateur ${existingClaimedOrder.user_id}`);
+				alreadyClaimedByOtherCount++;
+				continue; // Déjà attribuée à un autre compte (premier arrivé, premier servi !)
+			}
+
+			// Créer l'accès dans access_grants pour targetUserId
 			const existingAccess = await tables.listRows({
 				databaseId: DATABASE_ID,
 				tableId: ACCESS_TABLE,
@@ -353,7 +407,7 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 				}).catch((e) => console.error('[Access grant error]:', e));
 			}
 
-			// Mettre à jour la commande dans ORDERS_TABLE vers status: "paid"
+			// Mettre à jour la commande dans ORDERS_TABLE vers status: "paid" et user_id: targetUserId
 			const rowToUpdate = metaOrderId || targetOrderId;
 			if (rowToUpdate) {
 				await tables.updateRow({
@@ -362,7 +416,8 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 					rowId: rowToUpdate,
 					data: {
 						status: 'paid',
-						payment_id: String(order.id || ''),
+						user_id: targetUserId,
+						payment_id: lqOrderId,
 						paid_at: paidAt
 					}
 				}).catch((e) => console.warn('[Order update to paid failed]:', e));
@@ -372,7 +427,6 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 						databaseId: DATABASE_ID,
 						tableId: ORDERS_TABLE,
 						queries: [
-							Query.equal('user_id', targetUserId),
 							Query.equal('product_id', matchedProduct.id),
 							Query.equal('status', 'pending'),
 							Query.limit(1)
@@ -385,7 +439,8 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 							rowId: pendingOrders.rows[0].$id,
 							data: {
 								status: 'paid',
-								payment_id: String(order.id || ''),
+								user_id: targetUserId,
+								payment_id: lqOrderId,
 								paid_at: paidAt
 							}
 						}).catch(() => undefined);
@@ -399,17 +454,25 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 		}
 	}
 
+	if (grantedProducts.length === 0 && alreadyClaimedByOtherCount > 0) {
+		return {
+			success: false,
+			grantedProducts: [],
+			message: `Peman ki lye ak imel "${normalizedEmail}" la te deja debloke sou yon lòt kont.`
+		};
+	}
+
 	return {
 		success: grantedProducts.length > 0,
 		grantedProducts,
 		message: grantedProducts.length > 0
-			? `Aksè dousman epi avèk siksè debloke pou : ${grantedProducts.join(', ')}.`
+			? `Aksè debloke ak siksè !`
 			: `Peman pa kat la jwenn men okenn Variant ID pa matche ak yon pwodui Appwrite.`
 	};
 }
 
 /**
- * Endpoint POST : Webhook Lemon Squeezy OU Vérification par email
+ * Endpoint POST : Vérification par Email depuis le formulaire du site OU Webhook
  */
 export const POST: RequestHandler = async ({ request }) => {
 	try {
@@ -442,7 +505,8 @@ export const POST: RequestHandler = async ({ request }) => {
 					{ status: 401 }
 				);
 			}
-			const result = await verifyAndFulfillByEmail(payload.email);
+			const inputEmail = payload.email.trim().toLowerCase();
+			const result = await verifyAndFulfillByEmail(inputEmail, undefined, user.$id);
 			return json(result, { status: result.success ? 200 : 404 });
 		}
 
@@ -476,7 +540,7 @@ export const POST: RequestHandler = async ({ request }) => {
 /**
  * Endpoint GET : Vérification du statut d'une commande par Order ID
  */
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async ({ request, url }) => {
 	const orderId = url.searchParams.get('order_id') || url.searchParams.get('orderId');
 	if (!orderId) {
 		return json({ success: false, message: 'order_id est requis.' }, { status: 400 });
@@ -484,6 +548,8 @@ export const GET: RequestHandler = async ({ url }) => {
 
 	try {
 		const { tables } = adminServices();
+		const user = await requirePaymentUser(request).catch(() => null);
+
 		let orderRow: any = null;
 
 		// 1. Chercher par rowId (orderId)
@@ -505,39 +571,53 @@ export const GET: RequestHandler = async ({ url }) => {
 			return json({ success: false, message: 'Commande introuvable.' }, { status: 404 });
 		}
 
-		// 2. Si la commande n'est pas encore marquée 'paid' dans Appwrite
-		if (orderRow.status !== 'paid') {
-			// Check A: Est-ce que l'accès existe déjà dans access_grants ?
-			if (orderRow.user_id && orderRow.product_id) {
-				const existingAccess = await tables.listRows({
+		const targetUserId = user?.$id || (orderRow.user_id && orderRow.user_id !== 'admin' ? orderRow.user_id : null);
+
+		// 2. Toujours s'assurer atomiquement que l'accès existe dans access_grants pour cet utilisateur
+		if (targetUserId && orderRow.product_id && (orderRow.product_type === 'course' || orderRow.product_type === 'ebook')) {
+			const existingAccess = await tables.listRows({
+				databaseId: DATABASE_ID,
+				tableId: ACCESS_TABLE,
+				queries: [
+					Query.equal('user_id', targetUserId),
+					Query.equal('item_type', orderRow.product_type),
+					Query.equal('item_id', orderRow.product_id),
+					Query.limit(1)
+				]
+			}).catch(() => ({ rows: [] }));
+
+			if (existingAccess.rows.length === 0) {
+				await tables.createRow({
 					databaseId: DATABASE_ID,
 					tableId: ACCESS_TABLE,
-					queries: [
-						Query.equal('user_id', orderRow.user_id),
-						Query.equal('item_type', orderRow.product_type),
-						Query.equal('item_id', orderRow.product_id),
-						Query.limit(1)
-					]
-				}).catch(() => ({ rows: [] }));
-
-				if (existingAccess.rows.length > 0) {
-					orderRow = await tables.updateRow({
-						databaseId: DATABASE_ID,
-						tableId: ORDERS_TABLE,
-						rowId: orderRow.$id,
-						data: { status: 'paid', paid_at: new Date().toISOString() }
-					}).catch(() => orderRow);
-				}
+					rowId: ID.unique(),
+					data: {
+						user_id: targetUserId,
+						item_type: orderRow.product_type,
+						item_id: orderRow.product_id,
+						granted_by: 'lemonsqueezy_get_verify',
+						created_at: new Date().toISOString()
+					}
+				}).catch((e) => console.error('[Access grant create error]:', e));
 			}
 
-			// Check B: Interroger Lemon Squeezy API par email du client
-			if (orderRow.status !== 'paid' && orderRow.customer_email) {
-				try {
-					await verifyAndFulfillByEmail(orderRow.customer_email, orderRow.$id);
-					orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderRow.$id }).catch(() => orderRow);
-				} catch (e) {
-					console.warn('[Lemon Squeezy GET Verify Fallback Error]:', e);
-				}
+			if (orderRow.status !== 'paid' || !orderRow.user_id || orderRow.user_id === 'admin') {
+				orderRow = await tables.updateRow({
+					databaseId: DATABASE_ID,
+					tableId: ORDERS_TABLE,
+					rowId: orderRow.$id,
+					data: { status: 'paid', user_id: targetUserId, paid_at: new Date().toISOString() }
+				}).catch(() => orderRow);
+			}
+		}
+
+		// 3. Fallback: Interroger Lemon Squeezy API par email si toujours pas marked paid
+		if (orderRow.status !== 'paid' && orderRow.customer_email) {
+			try {
+				await verifyAndFulfillByEmail(orderRow.customer_email, orderRow.$id, targetUserId || undefined);
+				orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderRow.$id }).catch(() => orderRow);
+			} catch (e) {
+				console.warn('[Lemon Squeezy GET Verify Fallback Error]:', e);
 			}
 		}
 
