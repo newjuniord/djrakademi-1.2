@@ -19,7 +19,6 @@
 	let checkoutLoading = $state(false);
 	let showPaymentModal = $state(false);
 	let showVideoModal = $state(false);
-	let playInlineVideo = $state(false);
 
 	const videoSource = $derived(parseVideoUrl(course?.videoUrl || course?.previewVideoUrl));
 
@@ -186,44 +185,15 @@
 		<main class="flex-1">
 
 			{#snippet mediaCard()}
-				{#if videoSource && playInlineVideo}
-					<div class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video bg-black border border-white/20">
-						{#if videoSource.type === 'iframe'}
-							<iframe
-								src={videoSource.embedUrl}
-								title={course?.title ?? 'Vidéo'}
-								class="w-full h-full border-0"
-								allow="autoplay; fullscreen; picture-in-picture"
-								allowfullscreen
-							></iframe>
-						{:else}
-							<video
-								src={videoSource.src}
-								controls
-								autoplay
-								class="w-full h-full object-contain bg-black"
-							>
-								<track kind="captions" />
-							</video>
-						{/if}
-						<button
-							type="button"
-							onclick={() => (playInlineVideo = false)}
-							class="absolute top-3 right-3 size-8 bg-black/70 hover:bg-black text-white rounded-full grid place-items-center transition-colors border border-white/20"
-							title="Fèmen videyo"
-						>
-							<X size={16} />
-						</button>
-					</div>
-				{:else if course?.cover || videoSource}
+				{#if course?.cover || videoSource}
 					<div
 						role="button"
 						tabindex="0"
 						onclick={() => {
-							if (videoSource) playInlineVideo = true;
+							if (videoSource) showVideoModal = true;
 						}}
 						onkeydown={(e) => {
-							if (videoSource && (e.key === 'Enter' || e.key === ' ')) playInlineVideo = true;
+							if (videoSource && (e.key === 'Enter' || e.key === ' ')) showVideoModal = true;
 						}}
 						class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video group {videoSource ? 'cursor-pointer' : ''}"
 					>
