@@ -87,9 +87,18 @@ export const GET: RequestHandler = async ({ request }) => {
 							data: {
 								status: 'confirmed',
 								payment_status: 'paid',
+								hold_expires_at: null,
 								updated_at: new Date().toISOString()
 							}
 						}).catch(() => undefined);
+						if (bookingRow.slot_id) {
+							await tables.updateRow({
+								databaseId: DATABASE_ID,
+								tableId: 'coaching_slots',
+								rowId: bookingRow.slot_id,
+								data: { status: 'booked' }
+							}).catch(() => undefined);
+						}
 						bookingRow.status = 'confirmed';
 						bookingRow.payment_status = 'paid';
 					}

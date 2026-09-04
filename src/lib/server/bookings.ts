@@ -98,6 +98,41 @@ export async function getOwnedBookingServer(bookingId: string, userId: string) {
 	try { booking = await tables.getRow({ databaseId: DATABASE_ID, tableId: TABLES.bookings, rowId: bookingId }); }
 	catch { throw new BookingServerError('Réservation introuvable.', 404); }
 	if (booking.user_id !== userId) throw new BookingServerError('Accès refusé à cette réservation.', 403);
+
+	if (booking.status === 'pending_payment' || booking.payment_status === 'pending') {
+		const paidOrders = await tables.listRows({
+			databaseId: DATABASE_ID,
+			tableId: TABLES.orders,
+			queries: [
+				Query.equal('product_type', 'coaching'),
+				Query.equal('product_id', booking.$id),
+				Query.equal('status', 'paid'),
+				Query.limit(1)
+			]
+		}).catch(() => ({ rows: [] }));
+
+		if (paidOrders.rows.length > 0) {
+			const paidAt = new Date().toISOString();
+			await tables.updateRow({
+				databaseId: DATABASE_ID,
+				tableId: TABLES.bookings,
+				rowId: booking.$id,
+				data: { status: 'confirmed', payment_status: 'paid', hold_expires_at: null, updated_at: paidAt }
+			}).catch(() => undefined);
+			booking.status = 'confirmed';
+			booking.payment_status = 'paid';
+
+			if (booking.slot_id) {
+				await tables.updateRow({
+					databaseId: DATABASE_ID,
+					tableId: TABLES.slots,
+					rowId: booking.slot_id,
+					data: { status: 'booked' }
+				}).catch(() => undefined);
+			}
+		}
+	}
+
 	const [service, settings] = await Promise.all([
 		tables.getRow({ databaseId: DATABASE_ID, tableId: TABLES.services, rowId: booking.service_id }).catch(() => null),
 		tables.listRows({ databaseId: DATABASE_ID, tableId: TABLES.settings, queries: [Query.limit(1)] }).catch(() => ({ rows: [] }))

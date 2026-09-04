@@ -504,17 +504,17 @@ export async function confirmPlopplopPaymentServer(
 				});
 			}
 		} else if (current.product_type === "coaching") {
-			const booking: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: BOOKINGS_TABLE, rowId: current.product_id, transactionId: transaction.$id });
-			if (booking.user_id !== current.user_id) throw new PaymentServerError("La réservation appartient à un autre utilisateur.", 409);
-			const slot: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: "coaching_slots", rowId: booking.slot_id, transactionId: transaction.$id });
-			if (booking.status !== "pending_payment" || booking.payment_status !== "pending" || slot.status !== "held") {
-				throw new PaymentServerError("Ce créneau ne peut plus être confirmé automatiquement.", 409);
+			const booking: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: BOOKINGS_TABLE, rowId: current.product_id, transactionId: transaction.$id }).catch(() => null);
+			if (booking) {
+				if (booking.user_id !== current.user_id) throw new PaymentServerError("La réservation appartient à un autre utilisateur.", 409);
+				if (booking.slot_id) {
+					await tables.updateRow({ databaseId: DATABASE_ID, tableId: "coaching_slots", rowId: booking.slot_id, transactionId: transaction.$id, data: { status: "booked" } }).catch(() => undefined);
+				}
+				await tables.updateRow({
+					databaseId: DATABASE_ID, tableId: BOOKINGS_TABLE, rowId: booking.$id, transactionId: transaction.$id,
+					data: { status: "confirmed", payment_status: "paid", payment_id: transactionId || undefined, hold_expires_at: null, updated_at: paidAt }
+				});
 			}
-			await tables.updateRow({ databaseId: DATABASE_ID, tableId: "coaching_slots", rowId: slot.$id, transactionId: transaction.$id, data: { status: "booked" } });
-			await tables.updateRow({
-				databaseId: DATABASE_ID, tableId: BOOKINGS_TABLE, rowId: booking.$id, transactionId: transaction.$id,
-				data: { status: "confirmed", payment_status: "paid", payment_id: transactionId || undefined, hold_expires_at: null, updated_at: paidAt }
-			});
 		}
 
 		row = await tables.updateRow({
