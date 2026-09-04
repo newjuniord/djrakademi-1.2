@@ -1,6 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import {
 	initiatePlopplopPaymentServer,
+	initiateLemonSqueezyPaymentServer,
 	requirePaymentUser,
 	PaymentServerError,
 	type PaymentMethod,
@@ -50,6 +51,14 @@ export const POST: RequestHandler = async ({ request, url }) => {
 			});
 			return json({ success: false, message: 'Produit invalide.' }, { status: 400 });
 		}
+		if (paymentMethod === 'carte') {
+			const result = await initiateLemonSqueezyPaymentServer(
+				{ productType, productId, bookingId, paymentMethod: 'carte', originUrl: url.origin },
+				user
+			);
+			return json(result);
+		}
+
 		const result = await initiatePlopplopPaymentServer(
 			{ productType, productId, bookingId, paymentMethod, originUrl: url.origin },
 			user,
