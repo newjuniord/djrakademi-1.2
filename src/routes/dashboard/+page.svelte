@@ -79,7 +79,10 @@
 			});
 			myCourses = (await Promise.all(coursePromises)).filter(Boolean);
 			myEbooks = library.ebooks;
-			myBookings = library.bookings;
+			myBookings = (library.bookings || []).filter(
+				(b) => (b.status === 'confirmed' || b.status === 'completed' || b.paymentStatus === 'paid' || b.paymentStatus === 'not_required') &&
+				       b.status !== 'pending_payment' && b.paymentStatus !== 'pending'
+			);
 		} catch (caught) {
 			console.warn("[Dashboard] Failed to load library:", caught);
 		} finally {

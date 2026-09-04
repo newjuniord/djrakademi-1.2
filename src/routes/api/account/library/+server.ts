@@ -38,42 +38,60 @@ export const GET: RequestHandler = async ({ request }) => {
 		}
 
 		for (const orderRow of allPaidOrdersMap.values()) {
-			if (orderRow.product_id && (orderRow.product_type === 'course' || orderRow.product_type === 'ebook')) {
-				const hasGrant = grants.some(
-					(g: any) => g.item_type === orderRow.product_type && g.item_id === orderRow.product_id
-				);
-				if (!hasGrant) {
-					const newGrant = await tables.createRow({
-						databaseId: DATABASE_ID,
-						tableId: 'access_grants',
-						rowId: ID.unique(),
-						data: {
-							user_id: user.$id,
-							item_type: orderRow.product_type,
-							item_id: orderRow.product_id,
-							granted_by: 'library_auto_heal',
-							created_at: new Date().toISOString()
+			if (orderRow.product_id) {
+				if (orderRow.product_type === 'course' || orderRow.product_type === 'ebook') {
+					const hasGrant = grants.some(
+						(g: any) => g.item_type === orderRow.product_type && g.item_id === orderRow.product_id
+					);
+					if (!hasGrant) {
+						const newGrant = await tables.createRow({
+							databaseId: DATABASE_ID,
+							tableId: 'access_grants',
+							rowId: ID.unique(),
+							data: {
+								user_id: user.$id,
+								item_type: orderRow.product_type,
+								item_id: orderRow.product_id,
+								granted_by: 'library_auto_heal',
+								created_at: new Date().toISOString()
+							}
+						}).catch(() => null);
+
+						if (newGrant) {
+							grants.push(newGrant);
+						} else {
+							grants.push({
+								$id: ID.unique(),
+								user_id: user.$id,
+								item_type: orderRow.product_type,
+								item_id: orderRow.product_id
+							});
 						}
-					}).catch(() => null);
 
-					if (newGrant) {
-						grants.push(newGrant);
-					} else {
-						grants.push({
-							$id: ID.unique(),
-							user_id: user.$id,
-							item_type: orderRow.product_type,
-							item_id: orderRow.product_id
-						});
+						if (!orderRow.user_id || orderRow.user_id === 'admin') {
+							await tables.updateRow({
+								databaseId: DATABASE_ID,
+								tableId: 'orders',
+								rowId: orderRow.$id,
+								data: { user_id: user.$id }
+							}).catch(() => undefined);
+						}
 					}
-
-					if (!orderRow.user_id || orderRow.user_id === 'admin') {
+				} else if (orderRow.product_type === 'coaching') {
+					const bookingRow = bookings.rows.find((b: any) => b.$id === orderRow.product_id);
+					if (bookingRow && (bookingRow.status === 'pending_payment' || bookingRow.payment_status === 'pending')) {
 						await tables.updateRow({
 							databaseId: DATABASE_ID,
-							tableId: 'orders',
-							rowId: orderRow.$id,
-							data: { user_id: user.$id }
+							tableId: 'bookings',
+							rowId: bookingRow.$id,
+							data: {
+								status: 'confirmed',
+								payment_status: 'paid',
+								updated_at: new Date().toISOString()
+							}
 						}).catch(() => undefined);
+						bookingRow.status = 'confirmed';
+						bookingRow.payment_status = 'paid';
 					}
 				}
 			}
@@ -84,7 +102,14 @@ export const GET: RequestHandler = async ({ request }) => {
 		const ebookRows = await Promise.all(ebookIds.map((id: string) =>
 			tables.getRow({ databaseId: DATABASE_ID, tableId: 'ebooks', rowId: id }).catch(() => null)
 		));
-		const serviceIds = [...new Set(bookings.rows.map((row: any) => row.service_id).filter(Boolean))] as string[];
+
+		const paidBookings = bookings.rows.filter((row: any) => {
+			const isConfirmed = row.status === 'confirmed' || row.status === 'completed' || row.payment_status === 'paid' || row.payment_status === 'not_required';
+			const isPending = row.status === 'pending_payment' || row.payment_status === 'pending' || row.status === 'cancelled' || row.payment_status === 'failed';
+			return isConfirmed && !isPending;
+		});
+
+		const serviceIds = [...new Set(paidBookings.map((row: any) => row.service_id).filter(Boolean))] as string[];
 		const [serviceRows, settingsResult] = await Promise.all([
 			Promise.all(serviceIds.map((id) =>
 				tables.getRow({ databaseId: DATABASE_ID, tableId: 'coaching_services', rowId: id }).catch(() => null)
@@ -115,7 +140,7 @@ export const GET: RequestHandler = async ({ request }) => {
 				published: Boolean(row.published),
 				salesCount: Number(row.sales_count) || 0
 			})),
-			bookings: bookings.rows.map((row: any) => ({
+			bookings: paidBookings.map((row: any) => ({
 				...mapBooking(row),
 				serviceTitle: serviceTitles.get(row.service_id) || 'Coaching individuel',
 				coachWhatsapp
