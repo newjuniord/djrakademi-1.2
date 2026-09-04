@@ -87,7 +87,7 @@
 							<dt class="text-base-content/55">Fizo orè</dt>
 							<dd class="font-medium">Lè lokal · {getTimezoneCity(booking.customerTimezone)}</dd>
 						</div>
-						{#if whatsappNumber}
+						{#if whatsappNumber && (booking.status === 'confirmed' || booking.status === 'completed')}
 							<div class="flex justify-between gap-4">
 								<dt class="text-base-content/55">WhatsApp Coach</dt>
 								<dd class="font-bold text-success">{whatsappNumber}</dd>
