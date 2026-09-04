@@ -69,7 +69,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
 	} catch (error) {
 		console.error('[API Payments Create]:', error instanceof Error ? error.message : error);
 		const status = error instanceof PaymentServerError ? error.status : 500;
-		const message = error instanceof PaymentServerError ? error.message : 'Erreur serveur lors de la création du paiement.';
+		const message = error instanceof Error ? error.message : 'Erreur serveur lors de la création du paiement.';
 		await recordPaymentEvent({
 			orderId: traceOrderId(providerTrace),
 			paymentId: tracePaymentId(providerTrace),
