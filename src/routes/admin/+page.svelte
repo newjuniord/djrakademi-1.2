@@ -27,13 +27,21 @@
 		loadError = null;
 		try {
 			const overview = await getAdminOverview();
-			totalRevenue = overview.revenue;
+			totalRevenue = overview.revenue || 0;
+			const totalRevenueUsd = overview.revenueUsd || 0;
+
+			let revenueDisplay = `${totalRevenue.toLocaleString('fr-FR')} HTG`;
+			if (totalRevenueUsd > 0 && totalRevenue > 0) {
+				revenueDisplay = `${totalRevenue.toLocaleString('fr-FR')} HTG / $${totalRevenueUsd.toLocaleString('fr-FR')} USD`;
+			} else if (totalRevenueUsd > 0) {
+				revenueDisplay = `$${totalRevenueUsd.toLocaleString('fr-FR')} USD`;
+			}
 
 			stats = [
 				{
 					label: "Chiffre d'affaires",
-					value: `${totalRevenue.toLocaleString('fr-FR')} HTG`,
-					detail: `${overview.paidOrders} ventes validées`,
+					value: revenueDisplay,
+					detail: `${overview.paidOrders} vente${overview.paidOrders > 1 ? 's' : ''} validée${overview.paidOrders > 1 ? 's' : ''}`,
 					icon: 'revenue'
 				},
 				{
@@ -63,7 +71,9 @@
 				client: o.customerName,
 				product: o.productTitle,
 				type: (o.type === 'course' ? 'Cours' : o.type === 'ebook' ? 'Ebook' : 'Coaching') as 'Cours' | 'Ebook' | 'Coaching',
-				amount: `${o.amount.toLocaleString('fr-FR')} HTG`,
+				amount: (o.currency as string)?.toUpperCase() === 'USD'
+					? `$${o.amount.toLocaleString('fr-FR')} USD`
+					: `${o.amount.toLocaleString('fr-FR')} HTG`,
 				status: o.status === 'paid' ? 'Payé' : o.status === 'pending' ? 'En attente' : o.status === 'failed' ? 'Échoué' : 'Expiré',
 				date: new Date(o.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 			}));

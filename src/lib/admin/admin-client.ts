@@ -14,6 +14,7 @@ export interface AdminOrdersResult extends PaginatedResult<Order> {
 
 export interface AdminOverview {
 	revenue: number;
+	revenueUsd?: number;
 	paidOrders: number;
 	totalUsers: number;
 	disabledUsers: number;

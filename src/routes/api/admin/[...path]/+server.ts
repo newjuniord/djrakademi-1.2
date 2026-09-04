@@ -255,6 +255,13 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 			allCombinedUsers.sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0));
 
 			const paid = orders.filter((order) => order.status === 'paid');
+			const revenueHtg = paid
+				.filter((o) => (o.currency || 'HTG').toUpperCase() === 'HTG')
+				.reduce((sum, order) => sum + (Number(order.amount) || 0), 0);
+			const revenueUsd = paid
+				.filter((o) => (o.currency || '').toUpperCase() === 'USD')
+				.reduce((sum, order) => sum + (Number(order.amount) || 0), 0);
+
 			const grantSet = accessKeys(grants);
 			const serviceTitles = new Map(services.map((service) => [service.$id, service.title || service.$id]));
 			const recentOrders = [...orders].sort((a, b) => Date.parse(b.created_at || b.$createdAt) - Date.parse(a.created_at || a.$createdAt)).slice(0, 5)
@@ -267,7 +274,8 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 				.map((booking) => ({ id: booking.$id, customerName: booking.customer_name || '', serviceTitle: serviceTitles.get(booking.service_id) || booking.service_id, startAt: booking.start_at }));
 
 			return json({
-				revenue: paid.reduce((sum, order) => sum + (Number(order.amount) || 0), 0),
+				revenue: revenueHtg,
+				revenueUsd,
 				paidOrders: paid.length,
 				totalUsers: allCombinedUsers.length,
 				disabledUsers,

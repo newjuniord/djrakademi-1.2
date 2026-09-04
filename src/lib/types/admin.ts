@@ -128,7 +128,7 @@ export type Order = {
 	productTitle: string;
 	type: OrderType;
 	amount: number;
-	currency: 'HTG';
+	currency: 'HTG' | 'USD' | string;
 	status: OrderStatus;
 	paymentId?: string;
 	paymentProvider?: string;
