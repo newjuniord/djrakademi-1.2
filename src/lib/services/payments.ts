@@ -36,12 +36,43 @@ export async function paymentJwt(): Promise<string> {
 	return (await account.createJWT()).jwt;
 }
 
-export async function initiatePlopplopPayment(
-	params: InitiatePaymentParams
+export async function initiateLemonSqueezyPayment(
+	params: InitiatePaymentParams & { variantId?: string }
 ): Promise<PaymentInitiationResult> {
 	try {
 		const jwt = await paymentJwt();
-		const response = await fetch('/api/payments/create', {
+		const response = await fetch('/api/lemonsqueezy/checkout', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+			body: JSON.stringify({
+				productType: params.productType,
+				productId: params.productId,
+				bookingId: params.bookingId,
+				variantId: params.variantId
+			})
+		});
+		const data = await response.json();
+		return response.ok ? data : { ...data, success: false };
+	} catch (error) {
+		return {
+			success: false,
+			orderId: '',
+			paymentId: '',
+			redirectUrl: '',
+			message: error instanceof Error ? error.message : 'Erreur de connexion au serveur Lemon Squeezy.'
+		};
+	}
+}
+
+export async function initiatePlopplopPayment(
+	params: InitiatePaymentParams
+): Promise<PaymentInitiationResult> {
+	if (params.paymentMethod === 'carte') {
+		return initiateLemonSqueezyPayment(params);
+	}
+	try {
+		const jwt = await paymentJwt();
+		const response = await fetch('/api/plopplop/create', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
 			body: JSON.stringify({

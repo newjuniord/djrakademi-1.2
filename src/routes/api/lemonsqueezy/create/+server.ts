@@ -26,9 +26,9 @@ export const POST: RequestHandler = async ({ request, url }) => {
 
 		return json(result);
 	} catch (error) {
-		console.error('[API Lemon Squeezy Checkout Error]:', error instanceof Error ? error.message : error);
+		console.error('[API Lemon Squeezy Create Error]:', error instanceof Error ? error.message : error);
 		const status = error instanceof PaymentServerError ? error.status : 500;
-		const message = error instanceof Error ? error.message : 'Erreur serveur lors du checkout Lemon Squeezy.';
+		const message = error instanceof Error ? error.message : 'Erreur serveur lors de la création du paiement Lemon Squeezy.';
 		return json({ success: false, message }, { status });
 	}
 };
