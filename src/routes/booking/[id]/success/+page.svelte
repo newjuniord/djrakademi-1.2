@@ -7,18 +7,24 @@
 	import type { Booking } from '$lib/types/coaching';
 	import { getOwnedBooking } from '$lib/coaching/booking-client';
 
-	let booking = $state<Booking | null>(null);
-	let whatsappNumber = $state('');
-	let serviceTitle = $state('Coaching individuel');
 	let loading = $state(true);
+	let booking = $state<Booking | null>(null);
+	let serviceTitle = $state('');
+	let whatsappNumber = $state<string | null>(null);
+	let servicePrice = $state(0);
+	let servicePriceUsd = $state(0);
+	let serviceIsFree = $state(false);
 
 	onMount(async () => {
 		const bookingId = page.params.id;
 		if (!bookingId) { loading = false; return; }
 		try {
-			const result = await getOwnedBooking(bookingId);
+			const result = await getOwnedBooking(bookingId) as any;
 			booking = result.booking;
 			serviceTitle = result.serviceTitle;
+			servicePrice = result.servicePrice || 0;
+			servicePriceUsd = result.servicePriceUsd || 0;
+			serviceIsFree = Boolean(result.serviceIsFree);
 			whatsappNumber = result.supportWhatsapp;
 		} catch (caught) {
 			console.warn("Failed to fetch owned booking:", caught);
@@ -81,7 +87,18 @@
 						</div>
 						<div class="flex justify-between gap-4">
 							<dt class="text-base-content/55">Montan</dt>
-							<dd class="font-medium">{booking.amount ? `${booking.amount.toLocaleString('fr-FR')} HTG` : 'Gratis'}</dd>
+							<dd class="font-medium">
+								{#if (booking.amount || servicePrice) > 0}
+									{(booking.amount || servicePrice).toLocaleString('fr-FR')} HTG
+									{#if servicePriceUsd > 0}
+										<span class="text-amber-600 font-semibold ml-1">(${servicePriceUsd} USD)</span>
+									{/if}
+								{:else if serviceIsFree}
+									Gratis
+								{:else}
+									Gratis
+								{/if}
+							</dd>
 						</div>
 						<div class="flex justify-between gap-4">
 							<dt class="text-base-content/55">Fizo orè</dt>

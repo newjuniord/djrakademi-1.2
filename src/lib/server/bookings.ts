@@ -102,5 +102,12 @@ export async function getOwnedBookingServer(bookingId: string, userId: string) {
 		tables.getRow({ databaseId: DATABASE_ID, tableId: TABLES.services, rowId: booking.service_id }).catch(() => null),
 		tables.listRows({ databaseId: DATABASE_ID, tableId: TABLES.settings, queries: [Query.limit(1)] }).catch(() => ({ rows: [] }))
 	]);
-	return { booking: mapBooking(booking), serviceTitle: service?.title || 'Coaching individuel', supportWhatsapp: settings.rows[0]?.whatsapp || '' };
+	return {
+		booking: mapBooking(booking),
+		serviceTitle: service?.title || 'Coaching individuel',
+		servicePrice: Number(service?.price) || 0,
+		servicePriceUsd: Number(service?.price_usd || service?.priceUsd) || 0,
+		serviceIsFree: Boolean(service?.is_free),
+		supportWhatsapp: settings.rows[0]?.whatsapp || ''
+	};
 }
