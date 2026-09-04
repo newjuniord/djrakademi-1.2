@@ -401,6 +401,7 @@
 		open={showPaymentModal}
 		productTitle={item.title}
 		amount={currentAmount}
+		amountUsd={item.priceUsd}
 		isFree={currentIsFree}
 		loading={checkoutLoading}
 		onSelectMethod={handleSelectPaymentMethod}

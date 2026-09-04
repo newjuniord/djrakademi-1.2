@@ -422,6 +422,7 @@
 		open={showPaymentModal}
 		productTitle={course.title}
 		amount={course.price}
+		amountUsd={course.priceUsd}
 		isFree={course.isFree || course.price === 0}
 		loading={checkoutLoading}
 		onSelectMethod={handleSelectPaymentMethod}
