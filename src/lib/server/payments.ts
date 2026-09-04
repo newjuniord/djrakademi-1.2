@@ -262,25 +262,41 @@ export async function initiateLemonSqueezyPaymentServer(
 	const orderId = ID.unique();
 	const now = new Date().toISOString();
 
-	await tables.createRow({
-		databaseId: DATABASE_ID,
-		tableId: ORDERS_TABLE,
-		rowId: orderId,
-		data: {
-			user_id: user.$id,
-			customer_name: user.name || 'Client',
-			customer_email: user.email,
-			customer_phone: purchase.customerPhone || undefined,
-			product_type: params.productType,
-			product_id: purchase.productId,
-			product_title: purchase.productTitle,
-			amount: purchase.amount,
-			currency: 'HTG',
-			payment_provider: 'lemonsqueezy',
-			status: 'pending',
-			created_at: now
+	const orderPayload: Record<string, any> = {
+		user_id: user.$id,
+		customer_name: user.name || 'Client',
+		customer_email: user.email,
+		customer_phone: purchase.customerPhone || undefined,
+		product_type: params.productType,
+		product_id: purchase.productId,
+		product_title: purchase.productTitle,
+		amount: purchase.amount,
+		currency: 'USD',
+		payment_provider: 'lemonsqueezy',
+		status: 'pending',
+		created_at: now
+	};
+
+	try {
+		await tables.createRow({
+			databaseId: DATABASE_ID,
+			tableId: ORDERS_TABLE,
+			rowId: orderId,
+			data: orderPayload
+		});
+	} catch (err: any) {
+		if (String(err?.message || '').includes('currency')) {
+			orderPayload.currency = 'HTG';
+			await tables.createRow({
+				databaseId: DATABASE_ID,
+				tableId: ORDERS_TABLE,
+				rowId: orderId,
+				data: orderPayload
+			});
+		} else {
+			throw err;
 		}
-	});
+	}
 
 	try {
 		const redirectUrl = params.originUrl
