@@ -29,8 +29,8 @@
 	let filterStatus = $state<OrderStatus | 'all'>('all');
 	let filterType = $state<OrderType | 'all'>('all');
 
-	// Pagination State (20 orders per page)
-	let pageSize = $state(20);
+	// Pagination State (10 orders per page default to prevent heavy queries)
+	let pageSize = $state(10);
 	let currentPage = $state(1);
 
 	// Drawer Detail State
@@ -201,6 +201,18 @@
 					<option value="course">Cours</option>
 					<option value="ebook">Ebook</option>
 					<option value="coaching">Coaching</option>
+				</select>
+
+				<!-- Page Size Selector -->
+				<select
+					bind:value={pageSize}
+					onchange={() => (currentPage = 1)}
+					aria-label="Affichage par page"
+					class="select select-sm bg-base-200/60 rounded-none text-xs border-none font-semibold text-base-content"
+				>
+					<option value={10}>10 par page</option>
+					<option value={20}>20 par page</option>
+					<option value={50}>50 par page</option>
 				</select>
 			</div>
 		</div>

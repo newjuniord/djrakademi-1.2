@@ -71,3 +71,22 @@ export async function fetchAdminHealth(signal?: AbortSignal): Promise<AdminHealt
 			: []
 	};
 }
+
+export async function purgeAdminHealthLogs(days: number): Promise<{ success: boolean; deletedCount: number }> {
+	let jwt: string;
+	try { jwt = (await account.createJWT()).jwt; }
+	catch { throw new Error('Votre session admin a expiré. Reconnectez-vous.'); }
+
+	const response = await fetch(`/api/admin/health?days=${days}`, {
+		method: 'DELETE',
+		headers: { Accept: 'application/json', Authorization: `Bearer ${jwt}` },
+		credentials: 'same-origin',
+		cache: 'no-store'
+	});
+	const payload = await response.json().catch(() => null);
+	if (!response.ok) throw new Error(payload?.message || 'Impossible de nettoyer les logs.');
+	return {
+		success: payload?.success === true,
+		deletedCount: typeof payload?.deletedCount === 'number' ? payload.deletedCount : 0
+	};
+}

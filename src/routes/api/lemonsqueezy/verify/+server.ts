@@ -381,23 +381,62 @@ export const POST: RequestHandler = async ({ request }) => {
  * Endpoint GET : Vérification du statut d'une commande par Order ID
  */
 export const GET: RequestHandler = async ({ url }) => {
-	const orderId = url.searchParams.get('order_id');
+	const orderId = url.searchParams.get('order_id') || url.searchParams.get('orderId');
 	if (!orderId) {
 		return json({ success: false, message: 'order_id est requis.' }, { status: 400 });
 	}
 
 	try {
 		const { tables } = adminServices();
-		const orderRow: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId });
+		let orderRow: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId });
+
+		// Si la commande n'est pas encore marquée paid, vérifier si l'accès existe déjà
+		if (orderRow.status !== 'paid' && orderRow.user_id && orderRow.product_id) {
+			const existingAccess = await tables.listRows({
+				databaseId: DATABASE_ID,
+				tableId: ACCESS_TABLE,
+				queries: [
+					Query.equal('user_id', orderRow.user_id),
+					Query.equal('item_type', orderRow.product_type),
+					Query.equal('item_id', orderRow.product_id),
+					Query.limit(1)
+				]
+			}).catch(() => ({ rows: [] }));
+
+			if (existingAccess.rows.length > 0) {
+				orderRow = await tables.updateRow({
+					databaseId: DATABASE_ID,
+					tableId: ORDERS_TABLE,
+					rowId: orderId,
+					data: { status: 'paid', paid_at: new Date().toISOString() }
+				}).catch(() => orderRow);
+			} else if (orderRow.customer_email) {
+				// Fallback si le webhook était retardé : vérifier auprès de l'API Lemon Squeezy
+				try {
+					const verifyRes = await verifyAndFulfillByEmail(orderRow.customer_email);
+					if (verifyRes.success) {
+						orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId }).catch(() => orderRow);
+					}
+				} catch (e) {
+					console.warn('[Lemon Squeezy GET Verify Fallback Error]:', e);
+				}
+			}
+		}
 
 		return json({
 			success: true,
 			order: {
 				id: orderRow.$id,
-				status: orderRow.status,
+				customerName: orderRow.customer_name || '',
+				customerEmail: orderRow.customer_email || '',
 				productType: orderRow.product_type,
 				productId: orderRow.product_id,
-				amount: orderRow.amount,
+				productTitle: orderRow.product_title || '',
+				amount: orderRow.amount || 0,
+				currency: 'USD',
+				paymentProvider: 'lemonsqueezy',
+				status: orderRow.status,
+				createdAt: orderRow.created_at || orderRow.$createdAt,
 				paidAt: orderRow.paid_at
 			}
 		});

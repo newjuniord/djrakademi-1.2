@@ -732,3 +732,63 @@ export const PUT: RequestHandler = async ({ request, params }) => {
 		return json(mapSettings(saved));
 	} catch (error) { return responseError(error); }
 };
+
+export const DELETE: RequestHandler = async ({ request, params, url }) => {
+	try {
+		await requireAdmin(request);
+		const parts = pathParts(params.path);
+
+		if (parts[0] === 'health' || parts[0] === 'logs') {
+			const daysParam = url.searchParams.get('days');
+			const days = daysParam ? parseInt(daysParam, 10) : 7;
+			const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+			const cutoffISO = cutoffDate.toISOString();
+
+			const { tables } = adminServices();
+			let logsToDelete: any[] = [];
+
+			try {
+				const result = await tables.listRows({
+					databaseId: DATABASE_ID,
+					tableId: 'payment_logs',
+					queries: [Query.lessThan('created_at', cutoffISO), Query.limit(100)]
+				});
+				logsToDelete = result.rows;
+			} catch {
+				try {
+					const result = await tables.listRows({
+						databaseId: DATABASE_ID,
+						tableId: 'payment_logs',
+						queries: [Query.limit(100)]
+					});
+					logsToDelete = result.rows.filter((r: any) => {
+						const date = r.created_at || r.$createdAt;
+						return date && new Date(date).getTime() < cutoffDate.getTime();
+					});
+				} catch (e) {
+					console.error('[Purge payment_logs error]:', e);
+				}
+			}
+
+			let deletedCount = 0;
+			for (const logRow of logsToDelete) {
+				try {
+					await tables.deleteRow({
+						databaseId: DATABASE_ID,
+						tableId: 'payment_logs',
+						rowId: logRow.$id
+					});
+					deletedCount++;
+				} catch (err) {
+					console.warn('[Delete log row failed]:', logRow.$id, err);
+				}
+			}
+
+			return json({ success: true, deletedCount, days });
+		}
+
+		throw new AdminServerError('Route admin introuvable.', 404);
+	} catch (error) {
+		return responseError(error);
+	}
+};

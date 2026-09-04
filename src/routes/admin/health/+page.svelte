@@ -3,6 +3,7 @@
 	import type { ApiLogEntry, ApiMethod } from '$lib/types/admin';
 	import {
 		fetchAdminHealth,
+		purgeAdminHealthLogs,
 		isAdminHealthBackendConfigured,
 		type AdminHealthSnapshot,
 		type AdminHealthStatus
@@ -17,7 +18,9 @@
 		Clock,
 		ChevronLeft,
 		ChevronRight,
-		RefreshCw
+		RefreshCw,
+		Trash2,
+		AlertTriangle
 	} from 'lucide-svelte';
 
 	let snapshot = $state<AdminHealthSnapshot | null>(null);
@@ -31,6 +34,33 @@
 	let currentPage = $state(1);
 	let selectedLog = $state<ApiLogEntry | null>(null);
 	let drawerOpen = $state(false);
+	let purgingDays = $state<number | null>(null);
+	let purgeMessage = $state('');
+	let confirmModalOpen = $state(false);
+	let pendingPurgeDays = $state<number | null>(null);
+
+	function promptPurgeLogs(days: number) {
+		pendingPurgeDays = days;
+		confirmModalOpen = true;
+	}
+
+	async function confirmPurgeLogs() {
+		if (!pendingPurgeDays) return;
+		const days = pendingPurgeDays;
+		confirmModalOpen = false;
+		purgingDays = days;
+		purgeMessage = '';
+		try {
+			const res = await purgeAdminHealthLogs(days);
+			purgeMessage = `${res.deletedCount} log(s) datant de plus de ${days} jours ont été supprimés avec succès.`;
+			await loadHealth();
+		} catch (err) {
+			purgeMessage = err instanceof Error ? err.message : 'Erreur lors de la suppression des logs.';
+		} finally {
+			purgingDays = null;
+			pendingPurgeDays = null;
+		}
+	}
 
 	$effect(() => {
 		searchQuery;
@@ -144,15 +174,42 @@
 			</div>
 			<p class="text-xs text-base-content/60 mt-1">Créations et vérifications de paiement enregistrées par le backend sécurisé.</p>
 		</div>
-		<button
-			type="button"
-			disabled={loading || !isAdminHealthBackendConfigured()}
-			class="btn bg-black text-white hover:bg-black/90 border-none rounded-none btn-sm font-semibold text-xs gap-2 px-5"
-			onclick={loadHealth}
-		>
-			<RefreshCw size={14} class={loading ? "animate-spin" : ""} /> Actualiser
-		</button>
+		<div class="flex flex-wrap items-center gap-2">
+			<button
+				type="button"
+				disabled={purgingDays !== null || loading}
+				class="btn btn-outline border-error/40 text-error hover:bg-error hover:text-white rounded-none btn-sm font-semibold text-xs gap-1.5 px-3"
+				onclick={() => promptPurgeLogs(3)}
+			>
+				<Trash2 size={13} class={purgingDays === 3 ? "animate-spin" : ""} />
+				Effacer (> 3 jours)
+			</button>
+			<button
+				type="button"
+				disabled={purgingDays !== null || loading}
+				class="btn btn-outline border-error/40 text-error hover:bg-error hover:text-white rounded-none btn-sm font-semibold text-xs gap-1.5 px-3"
+				onclick={() => promptPurgeLogs(7)}
+			>
+				<Trash2 size={13} class={purgingDays === 7 ? "animate-spin" : ""} />
+				Effacer (> 7 jours)
+			</button>
+			<button
+				type="button"
+				disabled={loading || !isAdminHealthBackendConfigured()}
+				class="btn bg-black text-white hover:bg-black/90 border-none rounded-none btn-sm font-semibold text-xs gap-2 px-4"
+				onclick={loadHealth}
+			>
+				<RefreshCw size={14} class={loading ? "animate-spin" : ""} /> Actualiser
+			</button>
+		</div>
 	</div>
+
+	{#if purgeMessage}
+		<div class="bg-info/10 text-info border border-info/20 p-4 text-xs font-semibold flex items-center justify-between">
+			<span>{purgeMessage}</span>
+			<button type="button" class="underline text-[11px]" onclick={() => (purgeMessage = '')}>Fermer</button>
+		</div>
+	{/if}
 
 	{#if loadError}
 		<div class="bg-error/10 text-error border border-error/20 p-4 text-xs font-semibold">{loadError}</div>
@@ -389,3 +446,44 @@
 	log={selectedLog}
 	onClose={() => (drawerOpen = false)}
 />
+
+<!-- Confirmation Purge UX Modal Popup -->
+{#if confirmModalOpen}
+	<div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+		<div class="bg-base-100 max-w-md w-full p-6 sm:p-8 shadow-2xl rounded-2xl border border-base-200/80 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+			<div class="flex items-start gap-4">
+				<div class="size-12 bg-error/15 text-error rounded-2xl grid place-items-center shrink-0">
+					<AlertTriangle size={24} />
+				</div>
+				<div class="space-y-1">
+					<h3 class="text-lg font-bold text-base-content tracking-tight">Suppression de logs</h3>
+					<p class="text-xs text-base-content/70 leading-relaxed">
+						Voulez-vous vraiment supprimer les logs datant de plus de <strong class="text-base-content font-mono">{pendingPurgeDays} jours</strong> ?
+					</p>
+				</div>
+			</div>
+
+			<p class="text-[11px] text-base-content/50 bg-base-200/60 p-3 rounded-xl">
+				Cette opération retirera définitivement les enregistrements de l'historique Plopplop pour alléger la base de données.
+			</p>
+
+			<div class="flex items-center justify-end gap-3 pt-2">
+				<button
+					type="button"
+					class="btn btn-ghost btn-sm rounded-xl text-xs font-bold px-4"
+					onclick={() => (confirmModalOpen = false)}
+				>
+					Annuler
+				</button>
+				<button
+					type="button"
+					class="btn bg-error hover:bg-error/90 text-white rounded-xl border-none btn-sm text-xs font-bold gap-2 px-5"
+					onclick={confirmPurgeLogs}
+				>
+					<Trash2 size={14} />
+					Oui, supprimer les logs
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}

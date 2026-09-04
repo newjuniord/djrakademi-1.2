@@ -129,6 +129,14 @@ async function postJson(
 }
 
 function mapOrder(row: any): Order {
+	const provider = row.payment_provider || 'moncash';
+	const isLemonSqueezy = provider === 'lemonsqueezy';
+	let currency = isLemonSqueezy ? 'USD' : row.currency || 'HTG';
+	let amount = typeof row.amount === 'number' ? row.amount : 0;
+	if (isLemonSqueezy && amount > 500) {
+		amount = Math.max(1, Math.round(amount / 130));
+	}
+
 	return {
 		id: row.$id,
 		userId: row.user_id || undefined,
@@ -138,9 +146,9 @@ function mapOrder(row: any): Order {
 		productType: row.product_type,
 		productId: row.product_id,
 		productTitle: row.product_title || '',
-		amount: typeof row.amount === 'number' ? row.amount : 0,
-		currency: row.currency || 'HTG',
-		paymentProvider: row.payment_provider || 'moncash',
+		amount,
+		currency,
+		paymentProvider: provider,
 		paymentId: row.payment_id || undefined,
 		status: row.status || 'pending',
 		createdAt: row.created_at || row.$createdAt,
@@ -292,7 +300,7 @@ export async function initiateLemonSqueezyPaymentServer(
 	} catch (err: any) {
 		if (String(err?.message || '').includes('currency')) {
 			orderPayload.currency = 'HTG';
-			orderPayload.amount = purchase.amount;
+			orderPayload.amount = purchase.amountUsd;
 			await tables.createRow({
 				databaseId: DATABASE_ID,
 				tableId: ORDERS_TABLE,
@@ -306,23 +314,23 @@ export async function initiateLemonSqueezyPaymentServer(
 
 	try {
 		const redirectUrl = params.originUrl
-			? `${params.originUrl}/checkout/success?order_id=${orderId}`
-			: `https://djrakademi.net/checkout/success?order_id=${orderId}`;
+			? `${params.originUrl}/checkout/lemonsqueezy/success?order_id=${orderId}`
+			: `https://djrakademi.net/checkout/lemonsqueezy/success?order_id=${orderId}`;
 
 		const expiresAt = new Date(Date.now() + 12 * 60 * 1000).toISOString();
 
 		const checkoutResponse = await createCheckout(storeId, variantId, {
+			expiresAt,
 			checkoutData: {
 				email: user.email,
 				name: user.name || undefined,
-				expiresAt,
 				custom: {
 					user_id: user.$id,
 					order_id: orderId,
 					product_id: purchase.productId,
 					product_type: params.productType
 				}
-			} as any,
+			},
 			productOptions: {
 				redirectUrl
 			}

@@ -22,6 +22,14 @@ export interface Order {
 }
 
 export function mapOrderDoc(doc: any): Order {
+	const provider = doc.payment_provider || 'free';
+	const isLemonSqueezy = provider === 'lemonsqueezy';
+	let currency = isLemonSqueezy ? 'USD' : doc.currency || 'HTG';
+	let amount = typeof doc.amount === 'number' ? doc.amount : 0;
+	if (isLemonSqueezy && amount > 500) {
+		amount = Math.max(1, Math.round(amount / 130));
+	}
+
 	return {
 		id: doc.$id,
 		userId: doc.user_id,
@@ -31,9 +39,9 @@ export function mapOrderDoc(doc: any): Order {
 		productType: doc.product_type,
 		productId: doc.product_id,
 		productTitle: doc.product_title || '',
-		amount: typeof doc.amount === 'number' ? doc.amount : 0,
-		currency: doc.currency || 'HTG',
-		paymentProvider: doc.payment_provider || 'free',
+		amount,
+		currency,
+		paymentProvider: provider,
 		paymentId: doc.payment_id,
 		status: doc.status || 'pending',
 		createdAt: doc.created_at || doc.$createdAt || new Date().toISOString(),

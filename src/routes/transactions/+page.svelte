@@ -275,7 +275,7 @@
 							<CreditCard size={18} class="text-amber-500" />
 							Istwa detaye peman yo
 						</h2>
-						<span class="text-xs text-zinc-400 font-mono">Lajan ofisyèl : HTG</span>
+						<span class="text-xs text-zinc-400 font-mono">Lajan ofisyèl : HTG / USD</span>
 					</div>
 
 					{#if filteredOrders.length === 0}
@@ -365,16 +365,16 @@
 										</div>
 
 										<div class="flex items-center gap-2">
-											<button
-												type="button"
-												onclick={() => openInvoiceModal(order)}
-												class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] rounded-xl transition-colors"
-											>
-												<FileText size={12} />
-												<span>Resi PDF</span>
-											</button>
-
 											{#if order.status === 'paid'}
+												<button
+													type="button"
+													onclick={() => openInvoiceModal(order)}
+													class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] rounded-xl transition-colors"
+												>
+													<FileText size={12} />
+													<span>Resi PDF</span>
+												</button>
+
 												{#if order.productType === 'course'}
 													<a
 														href="/learn/{order.productId}"
@@ -503,7 +503,7 @@
 						</div>
 						<div class="flex justify-between text-xs text-zinc-500">
 							<span>Frais tretman :</span>
-							<span class="font-mono font-bold text-emerald-600">0 HTG</span>
+							<span class="font-mono font-bold text-emerald-600">0 {selectedOrderForInvoice.currency}</span>
 						</div>
 						<div class="flex justify-between text-base font-black text-zinc-950 pt-2 border-t border-zinc-200">
 							<span>Montan Total :</span>

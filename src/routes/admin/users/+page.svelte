@@ -31,8 +31,8 @@
 	let searchQuery = $state('');
 	let statusFilter = $state<'all' | 'active' | 'disabled'>('all');
 
-	// Pagination state (50 users per page)
-	let pageSize = $state(50);
+	// Pagination state (10 users per page default to prevent heavy requests)
+	let pageSize = $state(10);
 	let currentPage = $state(1);
 
 	// Modal states
@@ -245,6 +245,18 @@
 						Désactivés
 					</button>
 				</div>
+
+				<!-- Page Size Selector -->
+				<select
+					bind:value={pageSize}
+					onchange={() => (currentPage = 1)}
+					aria-label="Affichage par page"
+					class="select select-sm bg-base-200/60 rounded-none text-xs border-none font-semibold text-base-content"
+				>
+					<option value={10}>10 par page</option>
+					<option value={20}>20 par page</option>
+					<option value={50}>50 par page</option>
+				</select>
 			</div>
 		</div>
 

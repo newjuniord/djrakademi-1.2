@@ -2,7 +2,7 @@ import { Client, ID, Query, TablesDB } from 'node-appwrite';
 
 const DATABASE_ID = process.env.PAYMENTS_DATABASE_ID || 'djrakademi';
 const VERIFY_URL = process.env.PLOPPLOP_VERIFY_URL || 'https://plopplop.solutionip.app/api/paiement-verify';
-const ORDER_EXPIRATION_MS = 60 * 60 * 1000;
+const ORDER_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
 const MAX_EXPIRED_PER_RUN = 200;
 const TABLES = {
   orders: 'orders',
@@ -271,6 +271,9 @@ async function writeExpirationLog(tables, order) {
 }
 
 async function processOrder(tables, order, config) {
+  if (order.payment_provider === 'lemonsqueezy') {
+    return { state: 'pending' };
+  }
   let verification;
   try {
     verification = await verifyOrder(order, config);
@@ -305,7 +308,7 @@ async function expireOldOrder(tables, order) {
       tableId: TABLES.orders,
       rowId: current.$id,
       transactionId: tx.$id,
-      data: { status: 'failed' }
+      data: { status: 'expired' }
     });
     await tables.updateTransaction({ transactionId: tx.$id, commit: true });
     await writeExpirationLog(tables, order);
