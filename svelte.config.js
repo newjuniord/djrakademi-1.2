@@ -2,7 +2,10 @@ import adapter from '@sveltejs/adapter-auto';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	kit: { adapter: adapter() }
+	kit: {
+		adapter: adapter(),
+		inlineStyleThreshold: 1024
+	}
 };
 
 export default config;
