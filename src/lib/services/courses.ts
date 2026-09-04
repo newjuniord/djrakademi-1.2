@@ -273,7 +273,7 @@ export async function createCourse(data: Partial<Course>, coverFile?: File | nul
 			published: Boolean(data.published),
 			student_count: data.studentCount ?? 0,
 			lemonsqueezy_variant_id: (data.variantId || data.lemonsqueezyVariantId || '').trim() || undefined,
-			video_url: videoUrl || undefined
+			preview_video_url: videoUrl || undefined
 		};
 
 		const tryCreate = async (p: Record<string, any>) => {
@@ -290,11 +290,11 @@ export async function createCourse(data: Partial<Course>, coverFile?: File | nul
 				if (msg.includes('price_usd')) delete fallback.price_usd;
 				if (msg.includes('lemonsqueezy_variant_id')) delete fallback.lemonsqueezy_variant_id;
 				if (msg.includes('variant_id')) delete fallback.variant_id;
-				if (msg.includes('video_url')) {
-					delete fallback.video_url;
-					if (videoUrl) fallback.preview_video_url = videoUrl;
+				if (msg.includes('preview_video_url')) {
+					delete fallback.preview_video_url;
+					if (videoUrl) fallback.video_url = videoUrl;
 				}
-				if (msg.includes('preview_video_url')) delete fallback.preview_video_url;
+				if (msg.includes('video_url')) delete fallback.video_url;
 				doc = await tryCreate(fallback);
 			} else {
 				throw e;
@@ -343,7 +343,7 @@ export async function updateCourse(courseId: string, data: Partial<Course>, cove
 		}
 		if (data.videoUrl !== undefined || data.previewVideoUrl !== undefined) {
 			const vUrl = (data.videoUrl || data.previewVideoUrl || '').trim();
-			payload.video_url = vUrl;
+			payload.preview_video_url = vUrl;
 		}
 
 		if (coverFile) {
@@ -370,12 +370,12 @@ export async function updateCourse(courseId: string, data: Partial<Course>, cove
 				if (msg.includes('price_usd')) delete fallback.price_usd;
 				if (msg.includes('lemonsqueezy_variant_id')) delete fallback.lemonsqueezy_variant_id;
 				if (msg.includes('variant_id')) delete fallback.variant_id;
-				if (msg.includes('video_url')) {
-					delete fallback.video_url;
+				if (msg.includes('preview_video_url')) {
+					delete fallback.preview_video_url;
 					const vUrl = (data.videoUrl || data.previewVideoUrl || '').trim();
-					if (vUrl) fallback.preview_video_url = vUrl;
+					if (vUrl) fallback.video_url = vUrl;
 				}
-				if (msg.includes('preview_video_url')) delete fallback.preview_video_url;
+				if (msg.includes('video_url')) delete fallback.video_url;
 				await tryUpdate(fallback);
 			} else {
 				throw e;
