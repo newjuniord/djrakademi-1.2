@@ -10,7 +10,17 @@
 		onStatusChange: (id: string, status: BookingStatus) => void;
 	} = $props();
 	let selected = $state<Booking | null>(null);
-	const serviceTitle = (id: string) => services.find((service) => service.id === id)?.title ?? 'Coaching';
+	const getService = (id: string) => services.find((service) => service.id === id);
+	const serviceTitle = (id: string) => getService(id)?.title ?? 'Coaching';
+	const formatAmount = (b: Booking) => {
+		const s = getService(b.serviceId);
+		const amt = b.amount || s?.price || 0;
+		if (amt > 0) {
+			const sUsd = Number(s?.priceUsd || 0);
+			return sUsd > 0 ? `${amt.toLocaleString('fr-FR')} HTG ($${sUsd} USD)` : `${amt.toLocaleString('fr-FR')} HTG`;
+		}
+		return s?.isFree ? 'Gratuit' : 'Paiement en attente';
+	};
 </script>
 
 <div class="overflow-x-auto">
@@ -21,7 +31,7 @@
 			<tr>
 				<td><button class="font-medium hover:text-primary" type="button" onclick={() => (selected = booking)}>{booking.customerName}</button><span class="block text-xs text-base-content/50">{booking.customerEmail}</span></td>
 				<td><a class="link link-primary" href={whatsappLink(booking.customerWhatsapp, `Bonjour ${booking.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer">{booking.customerWhatsapp}</a></td>
-				<td>{serviceTitle(booking.serviceId)}</td><td class="capitalize">{local.date}</td><td>{local.time}</td><td>{booking.amount ? `${booking.amount.toLocaleString('fr-FR')} HTG` : 'Gratuit'}</td><td><BookingStatusBadge status={booking.status} /></td>
+				<td>{serviceTitle(booking.serviceId)}</td><td class="capitalize">{local.date}</td><td>{local.time}</td><td>{formatAmount(booking)}</td><td><BookingStatusBadge status={booking.status} /></td>
 				<td><div class="flex justify-end gap-1"><button class="btn btn-ghost btn-square btn-sm" type="button" aria-label="Voir la réservation" onclick={() => (selected = booking)}><Eye size={17} /></button><a class="btn btn-ghost btn-square btn-sm text-success" aria-label="Ouvrir WhatsApp" href={whatsappLink(booking.customerWhatsapp, `Bonjour ${booking.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer"><MessageCircle size={17} /></a>{#if booking.status === 'confirmed'}<button class="btn btn-ghost btn-square btn-sm text-primary" type="button" aria-label="Marquer terminée" onclick={() => onStatusChange(booking.id, 'completed')}><CheckCircle2 size={17} /></button>{/if}{#if booking.status === 'confirmed' || booking.status === 'pending_payment'}<button class="btn btn-ghost btn-square btn-sm text-error" type="button" aria-label="Annuler" onclick={() => onStatusChange(booking.id, 'cancelled')}><XCircle size={17} /></button>{/if}</div></td>
 			</tr>
 		{/each}</tbody>
@@ -32,7 +42,7 @@
 	<div class="modal modal-open" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
 		<div class="modal-box max-w-2xl"><button class="btn btn-ghost btn-sm btn-circle absolute right-3 top-3" type="button" aria-label="Fermer" onclick={() => (selected = null)}>✕</button><h2 id="booking-modal-title" class="text-xl font-bold">Détails de la réservation</h2>
 			<div class="mt-5 grid gap-4 sm:grid-cols-2">
-				{#each [['Nom', selected.customerName], ['Email', selected.customerEmail], ['WhatsApp', selected.customerWhatsapp], ['Service', serviceTitle(selected.serviceId)], ['Date et heure coach', `${formatDateTimeInTimezone(selected.startAt, selected.coachTimezone).date} · ${formatDateTimeInTimezone(selected.startAt, selected.coachTimezone).time}`], ['Fuseau client', selected.customerTimezone], ['Fuseau coach', selected.coachTimezone], ['Montant', selected.amount ? `${selected.amount.toLocaleString('fr-FR')} HTG` : 'Gratuit'], ['Paiement', selected.paymentStatus], ['Créée le', new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(selected.createdAt))]] as field}
+				{#each [['Nom', selected.customerName], ['Email', selected.customerEmail], ['WhatsApp', selected.customerWhatsapp], ['Service', serviceTitle(selected.serviceId)], ['Date et heure coach', `${formatDateTimeInTimezone(selected.startAt, selected.coachTimezone).date} · ${formatDateTimeInTimezone(selected.startAt, selected.coachTimezone).time}`], ['Fuseau client', selected.customerTimezone], ['Fuseau coach', selected.coachTimezone], ['Montant', formatAmount(selected)], ['Paiement', selected.paymentStatus], ['Créée le', new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(selected.createdAt))]] as field}
 					<div><p class="text-xs text-base-content/50">{field[0]}</p><p class="mt-1 font-medium">{field[1]}</p></div>
 				{/each}
 			</div>

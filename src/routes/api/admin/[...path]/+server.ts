@@ -420,7 +420,37 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 		}
 
 		if (parts[0] === "bookings" && parts.length === 1) {
-			return json((await listAllRows(tables, "bookings")).map(mapBooking));
+			const [bookingRows, paidOrderRows] = await Promise.all([
+				listAllRows(tables, "bookings"),
+				tables.listRows({
+					databaseId: DATABASE_ID,
+					tableId: "orders",
+					queries: [Query.equal("product_type", "coaching"), Query.equal("status", "paid"), Query.limit(100)]
+				}).catch(() => ({ rows: [] }))
+			]);
+			const paidBookingIds = new Set(paidOrderRows.rows.map((o: any) => o.product_id));
+			for (const b of bookingRows) {
+				if ((b.status === "pending_payment" || b.payment_status === "pending") && paidBookingIds.has(b.$id)) {
+					const paidAt = new Date().toISOString();
+					await tables.updateRow({
+						databaseId: DATABASE_ID,
+						tableId: "bookings",
+						rowId: b.$id,
+						data: { status: "confirmed", payment_status: "paid", hold_expires_at: null, updated_at: paidAt }
+					}).catch(() => undefined);
+					if (b.slot_id) {
+						await tables.updateRow({
+							databaseId: DATABASE_ID,
+							tableId: "coaching_slots",
+							rowId: b.slot_id,
+							data: { status: "booked" }
+						}).catch(() => undefined);
+					}
+					b.status = "confirmed";
+					b.payment_status = "paid";
+				}
+			}
+			return json(bookingRows.map(mapBooking));
 		}
 
 		if (parts[0] === 'verifications' && parts.length === 1) {
