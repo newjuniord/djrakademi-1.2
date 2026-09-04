@@ -16,32 +16,65 @@
 	}
 
 	onMount(async () => {
+		const orderId = page.url.searchParams.get('orderId') || '';
 		const userId = page.url.searchParams.get('userId') || '';
-		const secret = page.url.searchParams.get('secret') || '';
+		const token = page.url.searchParams.get('token') || '';
+		const legacySecret = page.url.searchParams.get('secret') || '';
 		const destination = safeDestination(page.url.searchParams.get('next'));
 		const downloadEbook = page.url.searchParams.get('downloadEbook');
-		if (!userId || !secret) {
+
+		if (!userId || (!token && !legacySecret)) {
 			status = 'error';
 			message = 'Lyen koneksyon sa a pa konplè.';
 			return;
 		}
+
 		try {
 			let currentUser = await account.get().catch(() => null);
-			if (currentUser?.$id !== userId) {
-				if (currentUser) await account.deleteSession({ sessionId: 'current' });
-				await account.createSession({ userId, secret });
-				currentUser = await account.get();
+
+			// If current user is already logged in as the buyer, proceed directly
+			if (currentUser?.$id === userId) {
+				await authState.check();
+				status = 'success';
+				message = downloadEbook ? 'N ap prepare ebook ou an…' : 'Aksè konfime. Redireksyon…';
+				if (downloadEbook) await downloadOwnedEbook(downloadEbook).catch(() => undefined);
+				await goto(destination, { replaceState: true });
+				return;
 			}
-			if (currentUser.$id !== userId) throw new Error('Kont ki konekte a pa koresponn ak achte sa a.');
+
+			// Logout current user if logged in as someone else
+			if (currentUser) {
+				await account.deleteSession({ sessionId: 'current' }).catch(() => undefined);
+			}
+
+			let activeSecret = legacySecret;
+
+			// If using permanent HMAC token, authenticate via /api/account/purchase-login
+			if (orderId && token) {
+				const res = await fetch('/api/account/purchase-login', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ orderId, userId, token })
+				});
+				const data = await res.json().catch(() => ({}));
+				if (!res.ok || !data.secret) {
+					throw new Error(data.message || 'Nou pa ka debloke aksè sa a.');
+				}
+				activeSecret = data.secret;
+			}
+
+			if (!activeSecret) throw new Error('Secret de connexion invalide.');
+
+			await account.createSession({ userId, secret: activeSecret });
 			await authState.check();
 			status = 'success';
 			message = downloadEbook ? 'Koneksyon an reyisi. N ap prepare ebook ou an…' : 'Koneksyon an reyisi. Redireksyon…';
-			if (downloadEbook) await downloadOwnedEbook(downloadEbook);
+			if (downloadEbook) await downloadOwnedEbook(downloadEbook).catch(() => undefined);
 			await goto(destination, { replaceState: true });
-		} catch (error) {
+		} catch (error: any) {
 			console.error('[Purchase access]:', error);
 			status = 'error';
-			message = 'Lyen sa a fin pase oswa li te deja itilize sou yon lòt aparèy. Konekte w nòmalman pou w jwenn achte w la.';
+			message = error?.message || 'Yon erè rive pandan koneksyon an. Konekte w sou kont ou pou w jwenn achte w la.';
 		}
 	});
 </script>

@@ -46,10 +46,13 @@ function productLabel(order: Order): string {
 	return 'votre rendez-vous de coaching';
 }
 
-function magicUrl(origin: string, userId: string, secret: string, next: string, downloadEbook?: string): string {
+import { createPurchaseAccessToken } from '$lib/server/purchase-token';
+
+function magicUrl(origin: string, orderId: string, userId: string, token: string, next: string, downloadEbook?: string): string {
 	const url = new URL('/account/purchase-access', origin);
+	url.searchParams.set('orderId', orderId);
 	url.searchParams.set('userId', userId);
-	url.searchParams.set('secret', secret);
+	url.searchParams.set('token', token);
 	url.searchParams.set('next', next);
 	if (downloadEbook) url.searchParams.set('downloadEbook', downloadEbook);
 	return url.toString();
@@ -69,13 +72,12 @@ export async function sendPurchaseConfirmationEmail(order: Order): Promise<Purch
 	if (!order.userId) throw new Error('La commande ne contient pas d’utilisateur.');
 	if (!EMAIL_PATTERN.test(order.customerEmail) || !EMAIL_PATTERN.test(replyTo)) throw new Error('Adresse e-mail de commande invalide.');
 
-	const { users } = adminServices();
-	const token = await users.createToken({ userId: order.userId, length: 64, expire: 60 * 60 });
+	const token = createPurchaseAccessToken(order.id, order.userId);
 	const origin = publicAppUrl();
 	const destination = productDestination(order);
-	const accessUrl = magicUrl(origin, order.userId, token.secret, destination);
+	const accessUrl = magicUrl(origin, order.id, order.userId, token, destination);
 	const downloadUrl = order.productType === 'ebook'
-		? magicUrl(origin, order.userId, token.secret, destination, order.productId)
+		? magicUrl(origin, order.id, order.userId, token, destination, order.productId)
 		: undefined;
 
 	let attachment: { filename: string; content: string } | undefined;
@@ -96,7 +98,7 @@ export async function sendPurchaseConfirmationEmail(order: Order): Promise<Purch
 	const text = [
 		`Bonjour ${order.customerName || 'Client'},`, '', `Votre paiement de ${amount} a été confirmé.`,
 		`${order.productTitle} est maintenant disponible.`, '',
-		`Accéder à ${label} (lien de connexion unique, valable 1 heure) :`, accessUrl,
+		`Accéder à ${label} (lien d'accès permanent) :`, accessUrl,
 		...(downloadUrl ? ['', 'Télécharger votre ebook :', downloadUrl, attachment ? 'Le PDF est aussi joint à cet e-mail.' : ''] : []),
 		'', `Commande : ${order.id}`, '', 'Besoin d’aide ? Répondez simplement à cet e-mail.', 'DJR Akademi'
 	].join('\n');
@@ -109,7 +111,7 @@ export async function sendPurchaseConfirmationEmail(order: Order): Promise<Purch
 			body: JSON.stringify({
 				from, to: [order.customerEmail], reply_to: replyTo,
 				subject: `Votre achat est disponible — ${order.productTitle}`, text,
-				html: `<!doctype html><html lang="fr"><body style="margin:0;background:#f4f4f5;font-family:Arial,sans-serif;color:#18181b"><div style="display:none;max-height:0;overflow:hidden">Votre achat DJR Akademi est maintenant disponible.</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:28px 12px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fff;border-radius:16px;overflow:hidden"><tr><td style="background:#18181b;padding:26px 32px;color:#fff"><div style="font-size:22px;font-weight:800">DJR Akademi</div><div style="margin-top:6px;color:#d4d4d8">Paiement confirmé</div></td></tr><tr><td style="padding:32px"><p style="margin:0 0 16px">Bonjour ${name},</p><h1 style="font-size:23px;line-height:1.3;margin:0 0 14px">Votre achat est prêt</h1><p style="line-height:1.6;color:#52525b">Le paiement de <strong>${escapeHtml(amount)}</strong> pour <strong>${title}</strong> a bien été confirmé.</p><p style="margin:26px 0"><a href="${escapeHtml(accessUrl)}" style="display:inline-block;background:#fbbf24;color:#18181b;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:9px">Accéder à ${escapeHtml(label)}</a></p><p style="font-size:13px;color:#71717a;line-height:1.5">Ce lien vous connecte automatiquement à votre compte. Il est personnel, utilisable une seule fois et expire dans 1 heure. Ne le transférez pas.</p>${ebookSection}<hr style="border:0;border-top:1px solid #e4e4e7;margin:28px 0"><p style="font-size:13px;color:#71717a;line-height:1.6">Commande <strong>${escapeHtml(order.id)}</strong><br>Besoin d’aide ? Répondez simplement à cet e-mail.</p></td></tr><tr><td style="background:#fafafa;padding:18px 32px;color:#71717a;font-size:12px">E-mail transactionnel envoyé à la suite de votre achat sur DJR Akademi.</td></tr></table></td></tr></table></body></html>`,
+				html: `<!doctype html><html lang="fr"><body style="margin:0;background:#f4f4f5;font-family:Arial,sans-serif;color:#18181b"><div style="display:none;max-height:0;overflow:hidden">Votre achat DJR Akademi est maintenant disponible.</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:28px 12px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fff;border-radius:16px;overflow:hidden"><tr><td style="background:#18181b;padding:26px 32px;color:#fff"><div style="font-size:22px;font-weight:800">DJR Akademi</div><div style="margin-top:6px;color:#d4d4d8">Paiement confirmé</div></td></tr><tr><td style="padding:32px"><p style="margin:0 0 16px">Bonjour ${name},</p><h1 style="font-size:23px;line-height:1.3;margin:0 0 14px">Votre achat est prêt</h1><p style="line-height:1.6;color:#52525b">Le paiement de <strong>${escapeHtml(amount)}</strong> pour <strong>${title}</strong> a bien été confirmé.</p><p style="margin:26px 0"><a href="${escapeHtml(accessUrl)}" style="display:inline-block;background:#fbbf24;color:#18181b;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:9px">Accéder à ${escapeHtml(label)}</a></p><p style="font-size:13px;color:#71717a;line-height:1.5">Ce lien vous connecte directement à votre espace. Vous pouvez le conserver et l'utiliser à tout moment pour accéder à votre contenu sans limite de durée.</p>${ebookSection}<hr style="border:0;border-top:1px solid #e4e4e7;margin:28px 0"><p style="font-size:13px;color:#71717a;line-height:1.6">Commande <strong>${escapeHtml(order.id)}</strong><br>Besoin d’aide ? Répondez simplement à cet e-mail.</p></td></tr><tr><td style="background:#fafafa;padding:18px 32px;color:#71717a;font-size:12px">E-mail transactionnel envoyé à la suite de votre achat sur DJR Akademi.</td></tr></table></td></tr></table></body></html>`,
 				...(attachment ? { attachments: [attachment] } : {})
 			})
 		});
