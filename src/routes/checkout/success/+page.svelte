@@ -248,14 +248,23 @@
 					<!-- Assistance Footer -->
 					<div class="text-center pt-4 border-t border-base-200 text-xs text-base-content/60 print:hidden flex items-center justify-between">
 						<span>Ou gen yon kesyon sou kòmand ou an ?</span>
-						<a
-							href="https://wa.me/50937001234?text=Bonjour,%20j'ai%20une%20question%20sur%20ma%20commande%20"
-							target="_blank"
-							rel="noreferrer"
-							class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"
-						>
-							<MessageSquare size={14} /> Sipò WhatsApp
-						</a>
+						{#if order.productType === 'coaching'}
+							<a
+								href="https://wa.me/50937001234?text=Bonjou,%20mwen%20gen%20yon%20kesyon%20sou%20rez%C3%A8vasyon%20coaching%20mwen%20an"
+								target="_blank"
+								rel="noreferrer"
+								class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"
+							>
+								<MessageSquare size={14} /> Sipò WhatsApp Coaching
+							</a>
+						{:else}
+							<a
+								href="/contact"
+								class="text-primary font-bold hover:underline inline-flex items-center gap-1"
+							>
+								Paj Kontakte n
+							</a>
+						{/if}
 					</div>
 				</div>
 			</div>

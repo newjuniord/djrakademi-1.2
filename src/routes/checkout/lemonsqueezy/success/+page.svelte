@@ -184,15 +184,13 @@
 				<div class="p-4 rounded-2xl bg-base-200/50 border border-base-300/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-left">
 					<div class="space-y-0.5">
 						<span class="font-bold text-base-content block">Peman an te debouse deja ?</span>
-						<span class="text-base-content/60">Si tranzaksyon ou an konfime sou kat ou men li toujou endisponib, kontakte sipò a rapidman.</span>
+						<span class="text-base-content/60">Si tranzaksyon ou an konfime sou kat ou men li toujou endisponib, kontakte sipò nou an.</span>
 					</div>
 					<a
-						href={`https://wa.me/50937001234?text=Bonjou,%20mwen%20f%C3%A8%20yon%20peman%20kat%20LemonSqueezy%20pou%20k%C3%B2mand%20%23${encodeURIComponent(orderId)}%20men%20verifikasyon%20an%20toujou%20en%20pou.`}
-						target="_blank"
-						rel="noreferrer"
-						class="btn text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border-none font-bold rounded-xl shrink-0 gap-1.5"
+						href="/contact"
+						class="btn btn-outline btn-xs sm:btn-sm border-base-300 font-bold rounded-xl shrink-0 gap-1.5"
 					>
-						<MessageSquare size={14} /> Sipò WhatsApp
+						Sipò Kliyan (Contact)
 					</a>
 				</div>
 			</div>
@@ -335,14 +333,23 @@
 					<!-- Assistance Footer -->
 					<div class="text-center pt-4 border-t border-base-200 text-xs text-base-content/60 print:hidden flex items-center justify-between">
 						<span>Ou gen yon kesyon sou peman pa kat ou an ?</span>
-						<a
-							href="https://wa.me/50937001234?text=Bonjour,%20j'ai%20une%20question%20sur%20mon%20paiement%20Lemon%20Squeezy%20"
-							target="_blank"
-							rel="noreferrer"
-							class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"
-						>
-							<MessageSquare size={14} /> Sipò WhatsApp
-						</a>
+						{#if order.productType === 'coaching'}
+							<a
+								href="https://wa.me/50937001234?text=Bonjou,%20mwen%20gen%20yon%20kesyon%20sou%20rez%C3%A8vasyon%20coaching%20mwen%20an"
+								target="_blank"
+								rel="noreferrer"
+								class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"
+							>
+								<MessageSquare size={14} /> Sipò WhatsApp Coaching
+							</a>
+						{:else}
+							<a
+								href="/contact"
+								class="text-primary font-bold hover:underline inline-flex items-center gap-1"
+							>
+								Paj Kontakte n
+							</a>
+						{/if}
 					</div>
 				</div>
 			</div>
