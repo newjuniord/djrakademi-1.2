@@ -129,7 +129,7 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 					user_id: userId,
 					item_type: productType,
 					item_id: productId,
-					granted_by: 'lemonsqueezy',
+					granted_by: 'purchase',
 					created_at: paidAt
 				}
 			}).catch((e) => console.error('[Access grant create error in fulfillOrder]:', e));
@@ -401,7 +401,7 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 						user_id: targetUserId,
 						item_type: matchedProduct.type,
 						item_id: matchedProduct.id,
-						granted_by: 'lemonsqueezy_email_verify',
+						granted_by: 'purchase',
 						created_at: paidAt
 					}
 				}).catch((e) => console.error('[Access grant error]:', e));
@@ -595,7 +595,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
 						user_id: targetUserId,
 						item_type: orderRow.product_type,
 						item_id: orderRow.product_id,
-						granted_by: 'lemonsqueezy_get_verify',
+						granted_by: 'purchase',
 						created_at: new Date().toISOString()
 					}
 				}).catch((e) => console.error('[Access grant create error]:', e));

@@ -51,7 +51,7 @@ export const GET: RequestHandler = async ({ request }) => {
 							user_id: user.$id,
 							item_type: orderRow.product_type,
 							item_id: orderRow.product_id,
-							granted_by: 'library_auto_heal',
+							granted_by: 'purchase',
 							created_at: new Date().toISOString()
 						}
 					}).catch(() => null);
