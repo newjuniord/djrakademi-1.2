@@ -22,14 +22,13 @@ function tablesClient(req) {
 
 function providerConfig() {
   const clientId = String(process.env.PLOPPLOP_CLIENT_ID || '').trim();
-  if (!clientId) throw new Error('PLOPPLOP_CLIENT_ID manquant.');
   const apiKey = String(process.env.PLOPPLOP_API_KEY || process.env.PLOPPLOP_SECRET_KEY || '').trim();
   const headers = { 'Content-Type': 'application/json' };
   if (apiKey) {
     headers.Authorization = `Bearer ${apiKey}`;
     headers['x-api-key'] = apiKey;
   }
-  return { clientId, headers };
+  return { clientId, headers, hasClient: Boolean(clientId) };
 }
 
 async function verifyOrder(order, config) {
@@ -274,6 +273,10 @@ async function processOrder(tables, order, config) {
   if (order.payment_provider === 'lemonsqueezy') {
     return { state: 'pending' };
   }
+  if (!config.hasClient) {
+    await writeLog(tables, order, undefined, 'PLOPPLOP_CLIENT_ID manquant.');
+    return { state: 'error', message: 'PLOPPLOP_CLIENT_ID manquant dans l’environnement Appwrite.' };
+  }
   let verification;
   try {
     verification = await verifyOrder(order, config);
@@ -378,7 +381,7 @@ export default async ({ req, res, log, error }) => {
     return res.json(summary);
   } catch (caught) {
     const message = caught instanceof Error ? caught.message : String(caught);
-    error(message);
-    return res.json({ message: 'Vérification automatique impossible.' }, 500);
+    error(`[payment-maintenance error]: ${message}`);
+    return res.json({ success: false, message: 'Vérification automatique impossible.', error: message }, 500);
   }
 };
