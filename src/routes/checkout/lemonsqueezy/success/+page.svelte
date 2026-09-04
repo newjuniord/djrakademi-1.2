@@ -142,18 +142,6 @@
 						Ale nan Espas mwen
 					</a>
 				</div>
-
-				<div class="pt-4 border-t border-base-200 flex flex-wrap items-center justify-center gap-2 text-xs text-base-content/60">
-					<span>Ou bezwen èd ?</span>
-					<a
-						href="https://wa.me/50937001234?text=Bonjou,%20mwen%20sou%20paj%20verifikasyon%20Lemon%20Squeezy%20men%20mwen%20pa%20gen%20order_id"
-						target="_blank"
-						rel="noreferrer"
-						class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"
-					>
-						<MessageSquare size={14} /> Kòmanse yon chat WhatsApp
-					</a>
-				</div>
 			</div>
 		{:else if error && (!order || order.status !== 'paid')}
 			<!-- Pending / Error State with orderId present -->
