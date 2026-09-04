@@ -176,8 +176,7 @@
 									<input
 										class="input input-sm join-item border-none bg-transparent min-w-0 flex-1 text-xs font-mono font-black text-base-content focus:outline-none"
 										type="number"
-										min="0"
-										step="50"
+										min="50"
 										bind:value={price}
 										required
 									/>
