@@ -267,8 +267,8 @@
 							</div>
 						</div>
 
-						<!-- Right: Cover image or Video Player -->
-						<div class="relative hidden lg:block">
+						<!-- Cover image or Video Player (Visible on all screen sizes) -->
+						<div class="relative w-full">
 							{#if videoSource && playInlineVideo}
 								<div class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video bg-black border border-white/20">
 									{#if videoSource.type === 'iframe'}
