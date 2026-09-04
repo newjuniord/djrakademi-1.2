@@ -20,6 +20,7 @@ export interface CoachingService {
 	slug: string;
 	description: string;
 	price: number;
+	priceUsd?: number;
 	currency: 'HTG';
 	isFree: boolean;
 	durationMinutes: CoachingDuration;
@@ -87,6 +88,7 @@ export interface CoachingFormValue {
 	slug: string;
 	description: string;
 	price: number;
+	priceUsd?: number;
 	isFree: boolean;
 	durationMinutes: CoachingDuration;
 	active: boolean;

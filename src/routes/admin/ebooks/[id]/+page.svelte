@@ -36,6 +36,7 @@
 					title: updated.title || 'Ebook',
 					description: updated.description || '',
 					price: updated.price ?? 0,
+					priceUsd: updated.priceUsd,
 					isFree: Boolean(updated.isFree),
 					published: Boolean(updated.published),
 					variantId: updated.variantId || updated.lemonsqueezyVariantId || '',

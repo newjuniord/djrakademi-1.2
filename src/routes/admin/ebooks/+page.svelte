@@ -227,7 +227,7 @@
 									{#if ebook.isFree || ebook.price === 0}
 										<span class="text-success font-semibold">Gratuit</span>
 									{:else}
-										<span>{ebook.price.toLocaleString('fr-FR')} HTG</span>
+										<span>{ebook.price.toLocaleString('fr-FR')} HTG{#if ebook.priceUsd && ebook.priceUsd > 0} (${ebook.priceUsd} USD){/if}</span>
 									{/if}
 								</td>
 

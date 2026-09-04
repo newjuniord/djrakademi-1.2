@@ -236,6 +236,9 @@
 									{:else}
 										<span class="text-4xl font-black text-white">{ebook.price.toLocaleString('fr-FR')}</span>
 										<span class="text-white/40 text-sm font-medium ml-1">HTG</span>
+										{#if ebook.priceUsd && ebook.priceUsd > 0}
+											<span class="text-amber-400 text-sm font-bold ml-2">(${ebook.priceUsd} USD)</span>
+										{/if}
 									{/if}
 								</div>
 								<button
@@ -325,7 +328,7 @@
 						{#if ebook.isFree || ebook.price === 0}
 							<span class="text-3xl font-black text-emerald-400">Gratis</span>
 						{:else}
-							<span class="text-3xl font-black">{ebook.price.toLocaleString('fr-FR')} HTG</span>
+							<span class="text-3xl font-black">{ebook.price.toLocaleString('fr-FR')} HTG {#if ebook.priceUsd && ebook.priceUsd > 0}(${ebook.priceUsd} USD){/if}</span>
 						{/if}
 						<button
 							type="button"

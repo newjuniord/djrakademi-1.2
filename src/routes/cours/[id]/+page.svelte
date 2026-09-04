@@ -6,7 +6,8 @@
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import { claimFreeCourse, getCourseById, hasCourseAccess } from '$lib/services/courses';
 	import type { Course } from '$lib/types/admin';
-	import { BookOpen, Users, ChevronLeft, Play, CheckCircle2, Clock, Lock } from 'lucide-svelte';
+	import { BookOpen, Users, ChevronLeft, Play, CheckCircle2, Clock, Lock, X, Video } from 'lucide-svelte';
+	import { parseVideoUrl } from '$lib/utils/video';
 
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
 	import { initiatePlopplopPayment } from '$lib/services/payments';
@@ -17,6 +18,10 @@
 	let loading = $state(true);
 	let checkoutLoading = $state(false);
 	let showPaymentModal = $state(false);
+	let showVideoModal = $state(false);
+	let playInlineVideo = $state(false);
+
+	const videoSource = $derived(parseVideoUrl(course?.videoUrl || course?.previewVideoUrl));
 
 	$effect(() => {
 		const id = courseId;
@@ -220,6 +225,16 @@
 									<Clock size={15} class="text-white/30" />
 									<span class="font-semibold text-white">{totalLessons}</span> leson
 								</div>
+								{#if videoSource}
+									<button
+										type="button"
+										onclick={() => (showVideoModal = true)}
+										class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 text-xs font-bold rounded-full border border-amber-400/30 transition-colors cursor-pointer"
+									>
+										<Play size={13} class="fill-amber-300" />
+										Gade videyo prezantasyon
+									</button>
+								{/if}
 							</div>
 
 							<!-- Price + CTA -->
@@ -230,6 +245,9 @@
 									{:else}
 										<span class="text-4xl font-black text-white">{course.price.toLocaleString('fr-FR')}</span>
 										<span class="text-white/40 text-sm font-medium ml-1">HTG</span>
+										{#if course.priceUsd && course.priceUsd > 0}
+											<span class="text-amber-400 text-sm font-bold ml-2">(${course.priceUsd} USD)</span>
+										{/if}
 									{/if}
 								</div>
 								<button
@@ -249,21 +267,74 @@
 							</div>
 						</div>
 
-						<!-- Right: Cover image -->
+						<!-- Right: Cover image or Video Player -->
 						<div class="relative hidden lg:block">
-							{#if course.cover}
-								<div class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video">
-									<img
-										src={course.cover}
-										alt={course.title}
-										class="w-full h-full object-cover"
-									/>
-									<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-									<div class="absolute inset-0 flex items-center justify-center">
-										<div class="size-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
-											<Play size={24} class="text-white fill-white ml-1" />
+							{#if videoSource && playInlineVideo}
+								<div class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video bg-black border border-white/20">
+									{#if videoSource.type === 'iframe'}
+										<iframe
+											src={videoSource.embedUrl}
+											title={course.title}
+											class="w-full h-full border-0"
+											allow="autoplay; fullscreen; picture-in-picture"
+											allowfullscreen
+										></iframe>
+									{:else}
+										<video
+											src={videoSource.src}
+											controls
+											autoplay
+											class="w-full h-full object-contain bg-black"
+										>
+											<track kind="captions" />
+										</video>
+									{/if}
+									<button
+										type="button"
+										onclick={() => (playInlineVideo = false)}
+										class="absolute top-3 right-3 size-8 bg-black/70 hover:bg-black text-white rounded-full grid place-items-center transition-colors border border-white/20"
+										title="Fèmen videyo"
+									>
+										<X size={16} />
+									</button>
+								</div>
+							{:else if course.cover || videoSource}
+								<div
+									role="button"
+									tabindex="0"
+									onclick={() => {
+										if (videoSource) playInlineVideo = true;
+									}}
+									onkeydown={(e) => {
+										if (videoSource && (e.key === 'Enter' || e.key === ' ')) playInlineVideo = true;
+									}}
+									class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video group {videoSource ? 'cursor-pointer' : ''}"
+								>
+									{#if course.cover}
+										<img
+											src={course.cover}
+											alt={course.title}
+											class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+										/>
+									{:else}
+										<div class="w-full h-full bg-zinc-900 flex flex-col items-center justify-center text-white/40 gap-3">
+											<Video size={48} />
+											<span class="text-xs font-bold uppercase tracking-wider">Vidéo de présentation</span>
 										</div>
-									</div>
+									{/if}
+
+									<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+									{#if videoSource}
+										<div class="absolute inset-0 flex flex-col items-center justify-center gap-3">
+											<div class="size-16 bg-amber-400 text-black rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+												<Play size={26} class="fill-black ml-1" />
+											</div>
+											<span class="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-bold border border-white/20">
+												Gade prezantasyon an
+											</span>
+										</div>
+									{/if}
 								</div>
 							{/if}
 						</div>
@@ -332,7 +403,7 @@
 						{#if course.isFree || course.price === 0}
 							<span class="text-3xl font-black text-emerald-400">Gratis</span>
 						{:else}
-							<span class="text-3xl font-black">{course.price.toLocaleString('fr-FR')} HTG</span>
+							<span class="text-3xl font-black">{course.price.toLocaleString('fr-FR')} HTG {#if course.priceUsd && course.priceUsd > 0}(${course.priceUsd} USD){/if}</span>
 						{/if}
 						<button
 							type="button"
@@ -365,4 +436,47 @@
 		onSelectMethod={handleSelectPaymentMethod}
 		onClose={() => (showPaymentModal = false)}
 	/>
+
+	{#if showVideoModal && videoSource}
+		<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
+			<div class="relative w-full max-w-4xl bg-zinc-950 rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl">
+				<!-- Header -->
+				<div class="flex items-center justify-between p-4 sm:p-5 border-b border-zinc-800 bg-zinc-900">
+					<div class="flex items-center gap-2">
+						<Video size={18} class="text-amber-400" />
+						<h3 class="text-sm font-bold text-white truncate">Vidéo de présentation — {course.title}</h3>
+					</div>
+					<button
+						type="button"
+						onclick={() => (showVideoModal = false)}
+						class="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+					>
+						<X size={18} />
+					</button>
+				</div>
+
+				<!-- Video Embed -->
+				<div class="relative w-full aspect-video bg-black">
+					{#if videoSource.type === 'iframe'}
+						<iframe
+							src={videoSource.embedUrl}
+							title={course.title}
+							class="w-full h-full border-0"
+							allow="autoplay; fullscreen; picture-in-picture"
+							allowfullscreen
+						></iframe>
+					{:else}
+						<video
+							src={videoSource.src}
+							controls
+							autoplay
+							class="w-full h-full object-contain"
+						>
+							<track kind="captions" />
+						</video>
+					{/if}
+				</div>
+			</div>
+		</div>
+	{/if}
 {/if}

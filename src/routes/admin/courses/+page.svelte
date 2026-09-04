@@ -152,7 +152,7 @@
 
 	function formatPrice(course: Course): string {
 		if (course.isFree || course.price === 0) return 'Gratuit';
-		return `${course.price.toLocaleString('fr-FR')} HTG`;
+		return `${course.price.toLocaleString('fr-FR')} HTG${course.priceUsd && course.priceUsd > 0 ? ` ($${course.priceUsd} USD)` : ''}`;
 	}
 </script>
 

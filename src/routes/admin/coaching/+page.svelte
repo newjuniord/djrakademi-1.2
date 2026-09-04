@@ -126,7 +126,7 @@
 								<div class="min-w-0 flex-1">
 									<div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
 										<div><div class="flex flex-wrap items-center gap-2"><h4 class="font-semibold">{service.title}</h4><span class={`badge badge-sm ${service.active ? 'badge-success badge-soft' : 'badge-ghost'}`}>{service.active ? 'Publiée' : 'Brouillon'}</span></div><p class="mt-1 line-clamp-1 text-sm text-base-content/55">{service.description}</p></div>
-										<p class="shrink-0 text-sm font-semibold">{service.isFree ? 'Gratuit' : `${service.price.toLocaleString('fr-FR')} HTG`}</p>
+										<p class="shrink-0 text-sm font-semibold">{service.isFree ? 'Gratuit' : `${service.price.toLocaleString('fr-FR')} HTG${service.priceUsd && service.priceUsd > 0 ? ` ($${service.priceUsd} USD)` : ''}`}</p>
 									</div>
 									<div class="mt-4 flex flex-wrap items-center justify-between gap-3">
 										<div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-base-content/55"><span class="flex items-center gap-1.5"><Clock3 size={14} /> {service.durationMinutes} min</span><span class="flex items-center gap-1.5"><CalendarClock size={14} /> {availableFor(service.id)} créneaux disponibles</span></div>

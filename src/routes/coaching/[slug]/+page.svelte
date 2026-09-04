@@ -255,7 +255,7 @@
 						<div class="p-3.5 rounded-xl bg-base-200/40 border border-base-300/60">
 							<dt class="text-[11px] font-bold uppercase tracking-wider text-base-content/50">Prix sesyon an</dt>
 							<dd class="mt-1 text-sm font-extrabold text-primary">
-								{service.isFree ? 'Gratis' : `${service.price.toLocaleString('fr-FR')} HTG`}
+								{service.isFree ? 'Gratis' : `${service.price.toLocaleString('fr-FR')} HTG ${service.priceUsd && service.priceUsd > 0 ? `($${service.priceUsd} USD)` : ''}`}
 							</dd>
 						</div>
 					</div>

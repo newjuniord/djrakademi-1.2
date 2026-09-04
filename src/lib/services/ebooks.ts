@@ -27,6 +27,7 @@ export function mapEbookDoc(doc: any): Ebook {
 	const coverUrl = coverFileId ? `/api/ebooks/${encodeURIComponent(doc.$id)}/cover` : doc.cover || '';
 	const pdfUrl: undefined = undefined;
 	const vId = doc.lemonsqueezy_variant_id || doc.variant_id || doc.variantId || '';
+	const pUsd = typeof doc.price_usd === 'number' ? doc.price_usd : (typeof doc.priceUsd === 'number' ? doc.priceUsd : undefined);
 
 	return {
 		id: doc.$id,
@@ -38,6 +39,7 @@ export function mapEbookDoc(doc: any): Ebook {
 		pdfUrl,
 		fileName: pdfFileId ? `ebook-${pdfFileId.slice(0, 8)}.pdf` : undefined,
 		price: typeof doc.price === 'number' ? doc.price : 0,
+		priceUsd: pUsd && pUsd > 0 ? pUsd : undefined,
 		isFree: Boolean(doc.is_free),
 		published: Boolean(doc.published),
 		salesCount: typeof doc.sales_count === 'number' ? doc.sales_count : 0,
@@ -119,6 +121,7 @@ export async function createEbook(
 		title: string;
 		description: string;
 		price: number;
+		priceUsd?: number;
 		isFree: boolean;
 		published: boolean;
 		variantId?: string;
@@ -152,6 +155,7 @@ export async function createEbook(
 		title: data.title || 'Nouvel Ebook',
 		description: data.description || '',
 		price: typeof data.price === 'number' ? Math.max(0, data.price) : 0,
+		price_usd: typeof data.priceUsd === 'number' && data.priceUsd > 0 ? data.priceUsd : undefined,
 		is_free: Boolean(data.isFree),
 		published: Boolean(data.published),
 		sales_count: 0,
@@ -177,12 +181,12 @@ export async function createEbook(
 		doc = await tryCreate(payload);
 	} catch (e: any) {
 		const msg = String(e?.message || '');
-		if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
-			delete payload.lemonsqueezy_variant_id;
-			doc = await tryCreate(payload);
-		} else if (msg.includes('Unknown attribute: "variant_id"')) {
-			delete payload.variant_id;
-			doc = await tryCreate(payload);
+		if (msg.includes('Unknown attribute:')) {
+			const fallback = { ...payload };
+			if (msg.includes('price_usd')) delete fallback.price_usd;
+			if (msg.includes('lemonsqueezy_variant_id')) delete fallback.lemonsqueezy_variant_id;
+			if (msg.includes('variant_id')) delete fallback.variant_id;
+			doc = await tryCreate(fallback);
 		} else {
 			console.error('[Appwrite Ebooks Service] Failed to create ebook document in Appwrite:', e);
 			throw new Error(e?.message || "Erreur lors de la création de l'ebook dans Appwrite.");
@@ -201,6 +205,7 @@ export async function updateEbook(
 		title: string;
 		description: string;
 		price: number;
+		priceUsd?: number;
 		isFree: boolean;
 		published: boolean;
 		variantId?: string;
@@ -250,6 +255,7 @@ export async function updateEbook(
 		title: data.title || 'Ebook',
 		description: data.description || '',
 		price: typeof data.price === 'number' ? Math.max(0, data.price) : 0,
+		price_usd: typeof data.priceUsd === 'number' && data.priceUsd > 0 ? data.priceUsd : 0,
 		is_free: Boolean(data.isFree),
 		published: Boolean(data.published),
 		lemonsqueezy_variant_id: vId,
@@ -273,12 +279,12 @@ export async function updateEbook(
 		updatedDoc = await tryUpdate(payload);
 	} catch (e: any) {
 		const msg = String(e?.message || '');
-		if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
-			delete payload.lemonsqueezy_variant_id;
-			updatedDoc = await tryUpdate(payload);
-		} else if (msg.includes('Unknown attribute: "variant_id"')) {
-			delete payload.variant_id;
-			updatedDoc = await tryUpdate(payload);
+		if (msg.includes('Unknown attribute:')) {
+			const fallback = { ...payload };
+			if (msg.includes('price_usd')) delete fallback.price_usd;
+			if (msg.includes('lemonsqueezy_variant_id')) delete fallback.lemonsqueezy_variant_id;
+			if (msg.includes('variant_id')) delete fallback.variant_id;
+			updatedDoc = await tryUpdate(fallback);
 		} else {
 			console.error('[Appwrite Ebooks Service] Failed to update ebook document in Appwrite:', e);
 			throw new Error(e?.message || "Erreur lors de la mise à jour de l'ebook.");

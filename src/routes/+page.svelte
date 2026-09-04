@@ -325,7 +325,7 @@
 										</span>
 									{:else}
 										<span class="px-3 py-1 bg-white/90 backdrop-blur-sm text-zinc-950 text-[11px] font-black rounded-full shadow-md">
-											{course.price.toLocaleString('fr-FR')} HTG
+											{course.price.toLocaleString('fr-FR')} HTG {#if course.priceUsd && course.priceUsd > 0}(${course.priceUsd} USD){/if}
 										</span>
 									{/if}
 								</div>
@@ -448,7 +448,7 @@
 										</span>
 									{:else}
 										<span class="px-2.5 py-1 bg-white text-zinc-950 text-[10px] font-black rounded-full shadow">
-											{ebook.price.toLocaleString('fr-FR')} HTG
+											{ebook.price.toLocaleString('fr-FR')} HTG {#if ebook.priceUsd && ebook.priceUsd > 0}(${ebook.priceUsd} USD){/if}
 										</span>
 									{/if}
 								</div>

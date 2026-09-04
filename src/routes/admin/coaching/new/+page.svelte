@@ -16,6 +16,7 @@
 				slug: value.slug,
 				description: value.description,
 				price: value.price,
+				priceUsd: value.priceUsd,
 				isFree: value.isFree,
 				durationMinutes: value.durationMinutes,
 				active: value.active,

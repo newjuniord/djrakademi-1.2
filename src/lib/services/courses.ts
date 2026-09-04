@@ -70,12 +70,15 @@ export async function uploadCourseCover(file: File): Promise<string> {
 // Map Appwrite document to Course object
 function mapCourseDoc(doc: any, modules: CourseModule[] = []): Course {
 	const vId = doc.lemonsqueezy_variant_id || doc.variant_id || doc.variantId || '';
+	const pUsd = typeof doc.price_usd === 'number' ? doc.price_usd : (typeof doc.priceUsd === 'number' ? doc.priceUsd : undefined);
+	const vUrl = doc.preview_video_url || doc.previewVideoUrl || doc.video_url || doc.videoUrl || '';
 	return {
 		id: doc.$id,
 		title: doc.title || '',
 		description: doc.description || '',
 		cover: doc.cover || '',
 		price: typeof doc.price === 'number' ? doc.price : 0,
+		priceUsd: pUsd && pUsd > 0 ? pUsd : undefined,
 		isFree: Boolean(doc.is_free ?? doc.isFree),
 		published: Boolean(doc.published),
 		studentCount: typeof doc.student_count === 'number'
@@ -85,6 +88,8 @@ function mapCourseDoc(doc: any, modules: CourseModule[] = []): Course {
 				: 0,
 		variantId: vId,
 		lemonsqueezyVariantId: vId,
+		videoUrl: vUrl || undefined,
+		previewVideoUrl: vUrl || undefined,
 		modules
 	};
 }
@@ -257,29 +262,39 @@ export async function createCourse(data: Partial<Course>, coverFile?: File | nul
 			}
 		}
 
+		const videoUrl = (data.videoUrl || data.previewVideoUrl || '').trim();
 		const payload: Record<string, any> = {
 			title: data.title || 'Nouveau cours',
 			description: data.description || '',
 			cover: (coverUrl || '').slice(0, 64000),
 			price: coursePrice,
+			price_usd: typeof data.priceUsd === 'number' && data.priceUsd > 0 ? data.priceUsd : undefined,
 			is_free: Boolean(data.isFree),
 			published: Boolean(data.published),
 			student_count: data.studentCount ?? 0,
 			lemonsqueezy_variant_id: (data.variantId || data.lemonsqueezyVariantId || '').trim(),
-			variant_id: (data.variantId || data.lemonsqueezyVariantId || '').trim()
+			variant_id: (data.variantId || data.lemonsqueezyVariantId || '').trim(),
+			preview_video_url: videoUrl || undefined,
+			video_url: videoUrl || undefined
+		};
+
+		const tryCreate = async (p: Record<string, any>) => {
+			return await tables.createRow(DATABASE_ID, COURSES_COLLECTION, ID.unique(), p);
 		};
 
 		let doc: any;
 		try {
-			doc = await tables.createRow(DATABASE_ID, COURSES_COLLECTION, ID.unique(), payload);
+			doc = await tryCreate(payload);
 		} catch (e: any) {
 			const msg = String(e?.message || '');
-			if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
-				delete payload.lemonsqueezy_variant_id;
-				doc = await tables.createRow(DATABASE_ID, COURSES_COLLECTION, ID.unique(), payload);
-			} else if (msg.includes('Unknown attribute: "variant_id"')) {
-				delete payload.variant_id;
-				doc = await tables.createRow(DATABASE_ID, COURSES_COLLECTION, ID.unique(), payload);
+			if (msg.includes('Unknown attribute:')) {
+				const fallback = { ...payload };
+				if (msg.includes('price_usd')) delete fallback.price_usd;
+				if (msg.includes('lemonsqueezy_variant_id')) delete fallback.lemonsqueezy_variant_id;
+				if (msg.includes('variant_id')) delete fallback.variant_id;
+				if (msg.includes('preview_video_url')) delete fallback.preview_video_url;
+				if (msg.includes('video_url')) delete fallback.video_url;
+				doc = await tryCreate(fallback);
 			} else {
 				throw e;
 			}
@@ -316,6 +331,7 @@ export async function updateCourse(courseId: string, data: Partial<Course>, cove
 		if (data.title !== undefined) payload.title = data.title;
 		if (data.description !== undefined) payload.description = data.description;
 		if (coursePrice !== undefined) payload.price = coursePrice;
+		if (data.priceUsd !== undefined) payload.price_usd = typeof data.priceUsd === 'number' && data.priceUsd > 0 ? data.priceUsd : 0;
 		if (data.isFree !== undefined) {
 			payload.is_free = Boolean(data.isFree);
 		}
@@ -324,6 +340,11 @@ export async function updateCourse(courseId: string, data: Partial<Course>, cove
 			const vId = (data.variantId || data.lemonsqueezyVariantId || '').trim();
 			payload.lemonsqueezy_variant_id = vId;
 			payload.variant_id = vId;
+		}
+		if (data.videoUrl !== undefined || data.previewVideoUrl !== undefined) {
+			const vUrl = (data.videoUrl || data.previewVideoUrl || '').trim();
+			payload.preview_video_url = vUrl;
+			payload.video_url = vUrl;
 		}
 
 		if (coverFile) {
@@ -337,16 +358,22 @@ export async function updateCourse(courseId: string, data: Partial<Course>, cove
 			payload.cover = (data.cover || '').slice(0, 64000);
 		}
 
+		const tryUpdate = async (p: Record<string, any>) => {
+			return await tables.updateRow(DATABASE_ID, COURSES_COLLECTION, courseId, p);
+		};
+
 		try {
-			await tables.updateRow(DATABASE_ID, COURSES_COLLECTION, courseId, payload);
+			await tryUpdate(payload);
 		} catch (e: any) {
 			const msg = String(e?.message || '');
-			if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
-				delete payload.lemonsqueezy_variant_id;
-				await tables.updateRow(DATABASE_ID, COURSES_COLLECTION, courseId, payload);
-			} else if (msg.includes('Unknown attribute: "variant_id"')) {
-				delete payload.variant_id;
-				await tables.updateRow(DATABASE_ID, COURSES_COLLECTION, courseId, payload);
+			if (msg.includes('Unknown attribute:')) {
+				const fallback = { ...payload };
+				if (msg.includes('price_usd')) delete fallback.price_usd;
+				if (msg.includes('lemonsqueezy_variant_id')) delete fallback.lemonsqueezy_variant_id;
+				if (msg.includes('variant_id')) delete fallback.variant_id;
+				if (msg.includes('preview_video_url')) delete fallback.preview_video_url;
+				if (msg.includes('video_url')) delete fallback.video_url;
+				await tryUpdate(fallback);
 			} else {
 				throw e;
 			}

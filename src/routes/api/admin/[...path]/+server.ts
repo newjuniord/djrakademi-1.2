@@ -155,17 +155,27 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 				if (grant.user_id) users.add(grant.user_id);
 				learners.set(grant.item_id, users);
 			}
-			return json(courses.map((course) => ({
-				id: course.$id,
-				title: course.title || '',
-				description: course.description || '',
-				cover: course.cover || '',
-				price: Number(course.price) || 0,
-				isFree: Boolean(course.is_free),
-				published: Boolean(course.published),
-				studentCount: learners.get(course.$id)?.size || 0,
-				modules: []
-			})));
+			return json(courses.map((course: any) => {
+				const vId = course.lemonsqueezy_variant_id || course.variant_id || course.variantId || '';
+				const pUsd = typeof course.price_usd === 'number' ? course.price_usd : (typeof course.priceUsd === 'number' ? course.priceUsd : undefined);
+				const vUrl = course.preview_video_url || course.previewVideoUrl || course.video_url || course.videoUrl || '';
+				return {
+					id: course.$id,
+					title: course.title || '',
+					description: course.description || '',
+					cover: course.cover || '',
+					price: Number(course.price) || 0,
+					priceUsd: pUsd && pUsd > 0 ? pUsd : undefined,
+					isFree: Boolean(course.is_free),
+					published: Boolean(course.published),
+					studentCount: learners.get(course.$id)?.size || 0,
+					variantId: vId || undefined,
+					lemonsqueezyVariantId: vId || undefined,
+					videoUrl: vUrl || undefined,
+					previewVideoUrl: vUrl || undefined,
+					modules: []
+				};
+			}));
 		}
 
 		if (parts[0] === 'health' && parts.length === 1) {

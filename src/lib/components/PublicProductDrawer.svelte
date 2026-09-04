@@ -301,9 +301,16 @@
 				{#if ('isFree' in item && item.isFree) || item.price === 0}
 					<span class="text-xl font-extrabold text-success">Gratis</span>
 				{:else}
-					<span class="text-2xl font-black text-base-content">
-						{item.price.toLocaleString('fr-FR')} HTG
-					</span>
+					<div class="text-right">
+						<span class="text-xl font-black text-base-content block">
+							{item.price.toLocaleString('fr-FR')} HTG
+						</span>
+						{#if 'priceUsd' in item && item.priceUsd && item.priceUsd > 0}
+							<span class="text-xs font-bold text-amber-600 block">
+								(${item.priceUsd} USD)
+							</span>
+						{/if}
+					</div>
 				{/if}
 			</div>
 

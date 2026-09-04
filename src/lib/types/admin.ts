@@ -81,11 +81,14 @@ export type Course = {
 	description: string;
 	cover?: string;
 	price: number;
+	priceUsd?: number;
 	isFree: boolean;
 	published: boolean;
 	studentCount: number;
 	variantId?: string;
 	lemonsqueezyVariantId?: string;
+	videoUrl?: string;
+	previewVideoUrl?: string;
 	modules: CourseModule[];
 	progress?: { completedLessonIds: string[]; lastLessonId?: string };
 };
@@ -100,6 +103,7 @@ export type Ebook = {
 	pdfUrl?: string;
 	fileName?: string;
 	price: number;
+	priceUsd?: number;
 	isFree: boolean;
 	published: boolean;
 	salesCount: number;

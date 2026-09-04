@@ -19,6 +19,7 @@ export const DEFAULT_SETTINGS: CoachingSettings = {
 // Map Appwrite document to CoachingService
 export function mapServiceDoc(doc: any): CoachingService {
 	const vId = doc.lemonsqueezy_variant_id || doc.variant_id || doc.variantId || '';
+	const pUsd = typeof doc.price_usd === 'number' ? doc.price_usd : (typeof doc.priceUsd === 'number' ? doc.priceUsd : undefined);
 	return {
 		id: doc.$id,
 		ownerId: doc.owner_id || 'admin',
@@ -26,6 +27,7 @@ export function mapServiceDoc(doc: any): CoachingService {
 		slug: doc.slug || '',
 		description: doc.description || '',
 		price: typeof doc.price === 'number' ? doc.price : 0,
+		priceUsd: pUsd && pUsd > 0 ? pUsd : undefined,
 		currency: doc.currency || 'HTG',
 		isFree: Boolean(doc.is_free),
 		durationMinutes: doc.duration_minutes || 60,
@@ -125,6 +127,7 @@ export async function createCoachingService(data: {
 	slug: string;
 	description: string;
 	price: number;
+	priceUsd?: number;
 	isFree: boolean;
 	durationMinutes: number;
 	active: boolean;
@@ -139,6 +142,7 @@ export async function createCoachingService(data: {
 		slug: data.slug,
 		description: data.description,
 		price: data.price,
+		price_usd: typeof data.priceUsd === 'number' && data.priceUsd > 0 ? data.priceUsd : undefined,
 		currency: 'HTG',
 		is_free: data.isFree,
 		duration_minutes: data.durationMinutes,
@@ -154,12 +158,12 @@ export async function createCoachingService(data: {
 		doc = await tables.createRow(DATABASE_ID, SERVICES_COLLECTION, ID.unique(), payload);
 	} catch (e: any) {
 		const msg = String(e?.message || '');
-		if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
-			delete payload.lemonsqueezy_variant_id;
-			doc = await tables.createRow(DATABASE_ID, SERVICES_COLLECTION, ID.unique(), payload);
-		} else if (msg.includes('Unknown attribute: "variant_id"')) {
-			delete payload.variant_id;
-			doc = await tables.createRow(DATABASE_ID, SERVICES_COLLECTION, ID.unique(), payload);
+		if (msg.includes('Unknown attribute:')) {
+			const fallback = { ...payload };
+			if (msg.includes('price_usd')) delete fallback.price_usd;
+			if (msg.includes('lemonsqueezy_variant_id')) delete fallback.lemonsqueezy_variant_id;
+			if (msg.includes('variant_id')) delete fallback.variant_id;
+			doc = await tables.createRow(DATABASE_ID, SERVICES_COLLECTION, ID.unique(), fallback);
 		} else {
 			throw e;
 		}
@@ -175,6 +179,7 @@ export async function updateCoachingService(
 		slug: string;
 		description: string;
 		price: number;
+		priceUsd?: number;
 		isFree: boolean;
 		durationMinutes: number;
 		active: boolean;
@@ -188,6 +193,7 @@ export async function updateCoachingService(
 		slug: data.slug,
 		description: data.description,
 		price: data.price,
+		price_usd: typeof data.priceUsd === 'number' && data.priceUsd > 0 ? data.priceUsd : 0,
 		is_free: data.isFree,
 		duration_minutes: data.durationMinutes,
 		active: data.active,
@@ -201,12 +207,12 @@ export async function updateCoachingService(
 		updatedDoc = await tables.updateRow(DATABASE_ID, SERVICES_COLLECTION, id, payload);
 	} catch (e: any) {
 		const msg = String(e?.message || '');
-		if (msg.includes('Unknown attribute: "lemonsqueezy_variant_id"')) {
-			delete payload.lemonsqueezy_variant_id;
-			updatedDoc = await tables.updateRow(DATABASE_ID, SERVICES_COLLECTION, id, payload);
-		} else if (msg.includes('Unknown attribute: "variant_id"')) {
-			delete payload.variant_id;
-			updatedDoc = await tables.updateRow(DATABASE_ID, SERVICES_COLLECTION, id, payload);
+		if (msg.includes('Unknown attribute:')) {
+			const fallback = { ...payload };
+			if (msg.includes('price_usd')) delete fallback.price_usd;
+			if (msg.includes('lemonsqueezy_variant_id')) delete fallback.lemonsqueezy_variant_id;
+			if (msg.includes('variant_id')) delete fallback.variant_id;
+			updatedDoc = await tables.updateRow(DATABASE_ID, SERVICES_COLLECTION, id, fallback);
 		} else {
 			throw e;
 		}

@@ -35,8 +35,10 @@
 	let cover = $state(initialCourse?.cover ?? '');
 	let isFree = $state(initialCourse?.isFree ?? false);
 	let price = $state(initialCourse?.price ?? 2500);
+	let priceUsd = $state<number | undefined>(initialCourse?.priceUsd);
 	let published = $state(initialCourse?.published ?? false);
 	let variantId = $state(initialCourse?.variantId ?? initialCourse?.lemonsqueezyVariantId ?? '');
+	let videoUrl = $state(initialCourse?.videoUrl ?? initialCourse?.previewVideoUrl ?? '');
 
 	let coverFile = $state<File | null>(null);
 	let coverInputRef = $state<HTMLInputElement | null>(null);
@@ -196,10 +198,13 @@
 			cover: cover.trim() || undefined,
 			isFree,
 			price: isFree ? 0 : price,
+			priceUsd: isFree ? undefined : (priceUsd && priceUsd > 0 ? priceUsd : undefined),
 			published,
 			studentCount: initialCourse?.studentCount ?? 0,
 			variantId: variantId.trim() || undefined,
 			lemonsqueezyVariantId: variantId.trim() || undefined,
+			videoUrl: videoUrl.trim() || undefined,
+			previewVideoUrl: videoUrl.trim() || undefined,
 			modules
 		};
 		try {
@@ -303,6 +308,23 @@
 				</div>
 			{/if}
 		</div>
+
+		<!-- Vidéo de présentation -->
+		<div class="form-control w-full">
+			<label class="label font-semibold text-xs text-base-content/70" for="videoUrl">
+				Vidéo de présentation / Bande-annonce (URL optionnelle)
+			</label>
+			<input
+				id="videoUrl"
+				type="url"
+				placeholder="Ex: https://www.youtube.com/watch?v=... ou https://vimeo.com/..."
+				bind:value={videoUrl}
+				class="input input-bordered bg-base-200/40 w-full rounded-none focus:bg-base-100 text-sm border-base-300"
+			/>
+			<span class="text-[11px] text-base-content/50 mt-1">
+				Lien YouTube, Vimeo, Loom ou MP4 direct pour la vidéo de présentation sur la page du cours (optionnel).
+			</span>
+		</div>
 	</div>
 
 	<!-- Section: Vente & Publication -->
@@ -311,7 +333,7 @@
 			Tarification & Publication
 		</h2>
 
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+		<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
 			<!-- Gratuit Switch -->
 			<div class="flex items-center justify-between p-4 bg-base-200/40 rounded-none border border-base-200">
 				<div>
@@ -325,10 +347,10 @@
 				/>
 			</div>
 
-			<!-- Prix -->
+			<!-- Prix HTG -->
 			<div class="form-control w-full">
 				<label class="label font-semibold text-xs text-base-content/70" for="price">
-					Prix (HTG)
+					Prix (HTG) *
 				</label>
 				<input
 					id="price"
@@ -342,6 +364,25 @@
 					class="input input-bordered bg-base-200/40 w-full rounded-none focus:bg-base-100 text-sm border-base-300 disabled:bg-base-200/20 disabled:text-base-content/40"
 				/>
 				<p class="mt-1 text-[10px] text-base-content/50">Entre 100 et 100 000 HTG.</p>
+			</div>
+
+			<!-- Prix USD -->
+			<div class="form-control w-full">
+				<label class="label font-semibold text-xs text-base-content/70" for="priceUsd">
+					Prix (USD $) <span class="text-base-content/40 font-normal">(Optionnel)</span>
+				</label>
+				<input
+					id="priceUsd"
+					type="number"
+					min="1"
+					max="10000"
+					step="0.01"
+					disabled={isFree}
+					bind:value={priceUsd}
+					placeholder="Ex: 15"
+					class="input input-bordered bg-base-200/40 w-full rounded-none focus:bg-base-100 text-sm border-base-300 disabled:bg-base-200/20 disabled:text-base-content/40"
+				/>
+				<p class="mt-1 text-[10px] text-base-content/50">Affiché à côté du prix HTG.</p>
 			</div>
 		</div>
 

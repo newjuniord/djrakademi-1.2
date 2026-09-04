@@ -13,6 +13,7 @@
 	let slug = $state(defaults?.slug ?? '');
 	let description = $state(defaults?.description ?? '');
 	let price = $state(defaults?.price ?? 3000);
+	let priceUsd = $state<number | undefined>(defaults?.priceUsd);
 	let isFree = $state(defaults?.isFree ?? false);
 	let durationMinutes = $state<CoachingDuration>(defaults?.durationMinutes ?? 60);
 	let active = $state(defaults?.active ?? true);
@@ -34,6 +35,7 @@
 			slug: slugify(slug),
 			description: description.trim(),
 			price: isFree ? 0 : Number(price),
+			priceUsd: isFree ? undefined : (priceUsd && priceUsd > 0 ? Number(priceUsd) : undefined),
 			isFree,
 			durationMinutes,
 			active,
@@ -167,20 +169,39 @@
 					</label>
 
 					{#if !isFree}
-						<div class="form-control gap-1 pt-1">
-							<span class="text-[10px] font-bold uppercase tracking-wider text-base-content/50">Prix par consultation</span>
-							<div class="join w-full shadow-2xs rounded-xl overflow-hidden border border-base-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all bg-base-100">
-								<input
-									class="input input-sm join-item border-none bg-transparent min-w-0 flex-1 text-xs font-mono font-black text-base-content focus:outline-none"
-									type="number"
-									min="0"
-									step="50"
-									bind:value={price}
-									required
-								/>
-								<span class="join-item bg-base-200/60 text-base-content/70 text-xs font-bold px-3 flex items-center border-l border-base-300">
-									HTG
-								</span>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+							<div class="form-control gap-1">
+								<span class="text-[10px] font-bold uppercase tracking-wider text-base-content/50">Prix (HTG) *</span>
+								<div class="join w-full shadow-2xs rounded-xl overflow-hidden border border-base-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all bg-base-100">
+									<input
+										class="input input-sm join-item border-none bg-transparent min-w-0 flex-1 text-xs font-mono font-black text-base-content focus:outline-none"
+										type="number"
+										min="0"
+										step="50"
+										bind:value={price}
+										required
+									/>
+									<span class="join-item bg-base-200/60 text-base-content/70 text-xs font-bold px-3 flex items-center border-l border-base-300">
+										HTG
+									</span>
+								</div>
+							</div>
+
+							<div class="form-control gap-1">
+								<span class="text-[10px] font-bold uppercase tracking-wider text-base-content/50">Prix (USD $) (Optionnel)</span>
+								<div class="join w-full shadow-2xs rounded-xl overflow-hidden border border-base-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all bg-base-100">
+									<input
+										class="input input-sm join-item border-none bg-transparent min-w-0 flex-1 text-xs font-mono font-black text-base-content focus:outline-none"
+										type="number"
+										min="1"
+										step="0.01"
+										bind:value={priceUsd}
+										placeholder="Ex: 20"
+									/>
+									<span class="join-item bg-base-200/60 text-base-content/70 text-xs font-bold px-3 flex items-center border-l border-base-300">
+										USD
+									</span>
+								</div>
 							</div>
 						</div>
 

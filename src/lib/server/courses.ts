@@ -35,17 +35,22 @@ async function courseRows(courseId: string) {
 
 function mapCourse(course: any, modules: any[], lessons: any[], includeContent: boolean) {
 	const vId = course.lemonsqueezy_variant_id || course.variant_id || course.variantId || '';
+	const pUsd = typeof course.price_usd === 'number' ? course.price_usd : (typeof course.priceUsd === 'number' ? course.priceUsd : undefined);
+	const vUrl = course.preview_video_url || course.previewVideoUrl || course.video_url || course.videoUrl || '';
 	return {
 		id: course.$id,
 		title: course.title || '',
 		description: course.description || '',
 		cover: course.cover || '',
 		price: Number(course.price) || 0,
+		priceUsd: pUsd && pUsd > 0 ? pUsd : undefined,
 		isFree: Boolean(course.is_free),
 		published: Boolean(course.published),
 		studentCount: Number(course.student_count) || 0,
 		variantId: vId,
 		lemonsqueezyVariantId: vId,
+		videoUrl: vUrl || undefined,
+		previewVideoUrl: vUrl || undefined,
 		modules: modules.map((module) => ({
 			id: module.$id,
 			title: module.title || '',

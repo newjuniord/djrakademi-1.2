@@ -20,6 +20,7 @@
 	let fileName = $state('');
 	let isFree = $state(false);
 	let price = $state(750);
+	let priceUsd = $state<number | undefined>(undefined);
 	let published = $state(false);
 	let variantId = $state('');
 
@@ -34,6 +35,7 @@
 			fileName = ebook.fileName ?? '';
 			isFree = ebook.isFree;
 			price = ebook.price;
+			priceUsd = ebook.priceUsd;
 			published = ebook.published;
 			variantId = ebook.variantId ?? ebook.lemonsqueezyVariantId ?? '';
 		}
@@ -96,6 +98,7 @@
 				fileName: fileName.trim() || 'ebook-document.pdf',
 				isFree,
 				price: isFree ? 0 : Number(price),
+				priceUsd: isFree ? undefined : (priceUsd && priceUsd > 0 ? Number(priceUsd) : undefined),
 				published,
 				variantId: variantId.trim() || undefined,
 				lemonsqueezyVariantId: variantId.trim() || undefined,
@@ -265,24 +268,47 @@
 		</div>
 
 		{#if !isFree}
-			<!-- Champ Prix -->
-			<div class="form-control w-full sm:w-1/2">
-				<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="ebook-price">
-					Prix (HTG) *
-				</label>
-				<div class="relative">
-					<input
-						id="ebook-price"
-						type="number"
-						min="100"
-						required
-						bind:value={price}
-						placeholder="Ex: 750"
-						class="input input-sm bg-base-100 w-full rounded-none font-bold text-xs border border-base-300 text-base-content shadow-2xs pr-14 focus:bg-base-100"
-					/>
-					<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-base-content/50 select-none">
-						HTG
-					</span>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+				<!-- Champ Prix HTG -->
+				<div class="form-control w-full">
+					<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="ebook-price">
+						Prix (HTG) *
+					</label>
+					<div class="relative">
+						<input
+							id="ebook-price"
+							type="number"
+							min="100"
+							required
+							bind:value={price}
+							placeholder="Ex: 750"
+							class="input input-sm bg-base-100 w-full rounded-none font-bold text-xs border border-base-300 text-base-content shadow-2xs pr-14 focus:bg-base-100"
+						/>
+						<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-base-content/50 select-none">
+							HTG
+						</span>
+					</div>
+				</div>
+
+				<!-- Champ Prix USD -->
+				<div class="form-control w-full">
+					<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="ebook-priceusd">
+						Prix (USD $) <span class="text-base-content/40 font-normal">(Optionnel)</span>
+					</label>
+					<div class="relative">
+						<input
+							id="ebook-priceusd"
+							type="number"
+							min="1"
+							step="0.01"
+							bind:value={priceUsd}
+							placeholder="Ex: 10"
+							class="input input-sm bg-base-100 w-full rounded-none text-xs border border-base-300 text-base-content shadow-2xs pr-14 focus:bg-base-100"
+						/>
+						<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-base-content/50 select-none">
+							USD
+						</span>
+					</div>
 				</div>
 			</div>
 		{/if}

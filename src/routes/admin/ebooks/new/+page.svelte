@@ -16,6 +16,7 @@
 					title: newEbook.title || 'Nouvel Ebook',
 					description: newEbook.description || '',
 					price: newEbook.price ?? 0,
+					priceUsd: newEbook.priceUsd,
 					isFree: Boolean(newEbook.isFree),
 					published: Boolean(newEbook.published),
 					variantId: newEbook.variantId || newEbook.lemonsqueezyVariantId || '',
