@@ -16,8 +16,10 @@ function verifySignature(rawBody: string, signatureHeader: string | null, secret
 	if (!signatureHeader || !secret) return false;
 	try {
 		const hmac = crypto.createHmac('sha256', secret);
-		const digest = Buffer.from(hmac.update(rawBody).digest('hex'), 'utf8');
+		const digestHex = hmac.update(rawBody).digest('hex');
+		const digest = Buffer.from(digestHex, 'utf8');
 		const signature = Buffer.from(signatureHeader, 'utf8');
+		if (digest.length !== signature.length) return false;
 		return crypto.timingSafeEqual(digest, signature);
 	} catch {
 		return false;
@@ -27,20 +29,77 @@ function verifySignature(rawBody: string, signatureHeader: string | null, secret
 /**
  * Valide une commande Lemon Squeezy et accorde l'accès dans Appwrite.
  */
-async function fulfillOrder(orderId: string, customData?: Record<string, any>, lqOrderId?: string) {
+async function fulfillOrder(orderId?: string, customData?: Record<string, any>, lqOrderId?: string) {
 	const { tables } = adminServices();
 	const paidAt = new Date().toISOString();
 
-	let orderRow: any;
-	try {
-		orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId });
-	} catch {
-		console.warn('[Lemon Squeezy Webhook]: Order introuvable dans Appwrite par ID:', orderId);
+	let orderRow: any = null;
+
+	// 1. Recherche par rowId (Appwrite order_id)
+	if (orderId) {
+		try {
+			orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId });
+		} catch {
+			// handled in fallbacks below
+		}
+	}
+
+	// 2. Fallback: Recherche par payment_id (Identifiant Lemon Squeezy)
+	if (!orderRow) {
+		try {
+			const queries = [];
+			if (orderId) queries.push(Query.equal('payment_id', orderId));
+			if (lqOrderId) queries.push(Query.equal('payment_id', lqOrderId));
+			if (queries.length) {
+				const listByPayment = await tables.listRows({
+					databaseId: DATABASE_ID,
+					tableId: ORDERS_TABLE,
+					queries: [Query.or(queries), Query.limit(1)]
+				});
+				if (listByPayment.rows.length) {
+					orderRow = listByPayment.rows[0];
+				}
+			}
+		} catch (e) {
+			console.warn('[Lemon Squeezy Webhook]: Recherche par payment_id echouee:', e);
+		}
+	}
+
+	// 3. Fallback: Recherche par user_id + product_id + status pending
+	if (!orderRow && customData?.user_id && customData?.product_id) {
+		try {
+			const listByUserProduct = await tables.listRows({
+				databaseId: DATABASE_ID,
+				tableId: ORDERS_TABLE,
+				queries: [
+					Query.equal('user_id', customData.user_id),
+					Query.equal('product_id', customData.product_id),
+					Query.equal('status', 'pending'),
+					Query.orderDesc('created_at'),
+					Query.limit(1)
+				]
+			});
+			if (listByUserProduct.rows.length) {
+				orderRow = listByUserProduct.rows[0];
+			}
+		} catch (e) {
+			console.warn('[Lemon Squeezy Webhook]: Recherche par user/product echouee:', e);
+		}
+	}
+
+	if (!orderRow) {
+		console.warn('[Lemon Squeezy Webhook]: Impossible de trouver la commande dans Appwrite.', {
+			orderId,
+			lqOrderId,
+			customData
+		});
 		return false;
 	}
 
+	const targetOrderId = orderRow.$id;
+
 	if (orderRow.status === 'paid') {
-		console.log('[Lemon Squeezy Webhook]: Commande déjà payée:', orderId);
+		console.log('[Lemon Squeezy Webhook]: Commande déjà marquée payée:', targetOrderId);
 		return true;
 	}
 
@@ -108,7 +167,7 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, l
 		orderRow = await tables.updateRow({
 			databaseId: DATABASE_ID,
 			tableId: ORDERS_TABLE,
-			rowId: orderId,
+			rowId: targetOrderId,
 			transactionId: transaction.$id,
 			data: {
 				status: 'paid',
@@ -118,6 +177,7 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, l
 		});
 
 		await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
+		console.log('[Lemon Squeezy Webhook]: Accès accordé et commande validée avec succès:', targetOrderId);
 
 		// Email de confirmation
 		try {
@@ -158,7 +218,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const webhookSecret = (env.LEMONSQUEEZY_WEBHOOK_SECRET || env.LEMONSQUEEZY_SIGNING_SECRET || '').trim();
 
 		if (webhookSecret && !verifySignature(rawBody, signature, webhookSecret)) {
-			console.warn('[Lemon Squeezy Webhook]: Signature HMAC invalide.');
+			console.warn('[Lemon Squeezy Webhook]: Signature HMAC invalide. Vérifiez LEMONSQUEEZY_WEBHOOK_SECRET.');
 			return json({ success: false, message: 'Signature Webhook invalide.' }, { status: 401 });
 		}
 
@@ -175,7 +235,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const lqOrderId = String(payload?.data?.id || payload?.id || '');
 		const status = payload?.data?.attributes?.status || 'paid';
 
-		console.log(`[Lemon Squeezy Webhook Reçu]: Événement="${eventName}", OrderID="${orderId}", Status="${status}"`);
+		console.log(`[Lemon Squeezy Webhook Reçu]: Événement="${eventName}", OrderID="${orderId}", LQ_ID="${lqOrderId}", Status="${status}"`);
 
 		if (
 			eventName === 'order_created' ||
@@ -183,10 +243,11 @@ export const POST: RequestHandler = async ({ request }) => {
 			eventName === 'order_paid' ||
 			status === 'paid'
 		) {
-			if (orderId) {
-				await fulfillOrder(orderId, customData, lqOrderId);
+			const fulfilled = await fulfillOrder(orderId, customData, lqOrderId);
+			if (fulfilled) {
 				return json({ success: true, message: 'Commande validée et accès accordé.' });
 			}
+			return json({ success: true, message: 'Webhook reçu, mais commande non trouvée dans la base.' });
 		}
 
 		return json({ success: true, message: `Événement "${eventName}" bien reçu.` });
