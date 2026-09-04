@@ -275,7 +275,7 @@ export async function initiateLemonSqueezyPaymentServer(
 			product_id: purchase.productId,
 			product_title: purchase.productTitle,
 			amount: purchase.amount,
-			currency: 'USD',
+			currency: 'HTG',
 			payment_provider: 'lemonsqueezy',
 			status: 'pending',
 			created_at: now
