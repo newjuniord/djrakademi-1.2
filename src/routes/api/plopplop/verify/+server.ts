@@ -261,6 +261,35 @@ async function verifyAndFulfillByPlopplopReference(referenceId: string, userId: 
 	};
 }
 
+async function logVerification(
+	userId: string,
+	inputValue: string,
+	method: 'carte' | 'mobile',
+	status: 'success' | 'failed',
+	message: string,
+	grantedItems?: string
+) {
+	try {
+		const { tables } = adminServices();
+		await tables.createRow({
+			databaseId: DATABASE_ID,
+			tableId: 'verification_logs',
+			rowId: ID.unique(),
+			data: {
+				user_id: userId,
+				input_value: inputValue,
+				method,
+				status,
+				message: (message || '').substring(0, 1000),
+				granted_items: (grantedItems || '').substring(0, 500),
+				created_at: new Date().toISOString()
+			}
+		});
+	} catch (e) {
+		console.warn('[Verification log save error]:', e);
+	}
+}
+
 /**
  * Endpoint POST : Vérification d'une référence MonCash / Natcash (nécessite d'être connecté)
  */
@@ -289,6 +318,16 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		const result = await verifyAndFulfillByPlopplopReference(reference, user.$id);
+
+		await logVerification(
+			user.$id,
+			reference,
+			'mobile',
+			result.success ? 'success' : 'failed',
+			result.message || '',
+			result.courseId || ''
+		);
+
 		return json(result, { status: result.success ? 200 : (result.notFound ? 404 : 400) });
 	} catch (error) {
 		console.error('[API Verify Error]:', error instanceof Error ? error.message : error);

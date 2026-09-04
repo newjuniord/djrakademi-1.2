@@ -471,6 +471,35 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 	};
 }
 
+async function logVerification(
+	userId: string,
+	inputValue: string,
+	method: 'carte' | 'mobile',
+	status: 'success' | 'failed',
+	message: string,
+	grantedItems?: string
+) {
+	try {
+		const { tables } = adminServices();
+		await tables.createRow({
+			databaseId: DATABASE_ID,
+			tableId: 'verification_logs',
+			rowId: ID.unique(),
+			data: {
+				user_id: userId,
+				input_value: inputValue,
+				method,
+				status,
+				message: (message || '').substring(0, 1000),
+				granted_items: (grantedItems || '').substring(0, 500),
+				created_at: new Date().toISOString()
+			}
+		});
+	} catch (e) {
+		console.warn('[Verification log save error]:', e);
+	}
+}
+
 /**
  * Endpoint POST : Vérification par Email depuis le formulaire du site OU Webhook
  */
@@ -507,6 +536,16 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 			const inputEmail = payload.email.trim().toLowerCase();
 			const result = await verifyAndFulfillByEmail(inputEmail, undefined, user.$id);
+
+			await logVerification(
+				user.$id,
+				inputEmail,
+				'carte',
+				result.success ? 'success' : 'failed',
+				result.message || '',
+				result.grantedProducts?.join(', ') || ''
+			);
+
 			return json(result, { status: result.success ? 200 : 404 });
 		}
 
