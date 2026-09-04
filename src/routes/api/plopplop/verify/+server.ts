@@ -59,7 +59,7 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, t
 					user_id: userId,
 					item_type: productType,
 					item_id: productId,
-					granted_by: 'purchase',
+					granted_by: 'mobile_verify',
 					created_at: paidAt
 				}
 			}).catch((e) => console.error('[Access grant error in plopplop fulfillOrder]:', e));
