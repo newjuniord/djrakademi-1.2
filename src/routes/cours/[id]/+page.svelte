@@ -237,6 +237,78 @@
 								{/if}
 							</div>
 
+							<!-- Cover image or Video Player (Placed BEFORE Price & CTA) -->
+							<div class="relative w-full my-6">
+								{#if videoSource && playInlineVideo}
+									<div class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video bg-black border border-white/20">
+										{#if videoSource.type === 'iframe'}
+											<iframe
+												src={videoSource.embedUrl}
+												title={course.title}
+												class="w-full h-full border-0"
+												allow="autoplay; fullscreen; picture-in-picture"
+												allowfullscreen
+											></iframe>
+										{:else}
+											<video
+												src={videoSource.src}
+												controls
+												autoplay
+												class="w-full h-full object-contain bg-black"
+											>
+												<track kind="captions" />
+											</video>
+										{/if}
+										<button
+											type="button"
+											onclick={() => (playInlineVideo = false)}
+											class="absolute top-3 right-3 size-8 bg-black/70 hover:bg-black text-white rounded-full grid place-items-center transition-colors border border-white/20"
+											title="Fèmen videyo"
+										>
+											<X size={16} />
+										</button>
+									</div>
+								{:else if course.cover || videoSource}
+									<div
+										role="button"
+										tabindex="0"
+										onclick={() => {
+											if (videoSource) playInlineVideo = true;
+										}}
+										onkeydown={(e) => {
+											if (videoSource && (e.key === 'Enter' || e.key === ' ')) playInlineVideo = true;
+										}}
+										class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video group {videoSource ? 'cursor-pointer' : ''}"
+									>
+										{#if course.cover}
+											<img
+												src={course.cover}
+												alt={course.title}
+												class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+											/>
+										{:else}
+											<div class="w-full h-full bg-zinc-900 flex flex-col items-center justify-center text-white/40 gap-3">
+												<Video size={48} />
+												<span class="text-xs font-bold uppercase tracking-wider">Vidéo de présentation</span>
+											</div>
+										{/if}
+
+										<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+										{#if videoSource}
+											<div class="absolute inset-0 flex flex-col items-center justify-center gap-3">
+												<div class="size-16 bg-amber-400 text-black rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+													<Play size={26} class="fill-black ml-1" />
+												</div>
+												<span class="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-bold border border-white/20">
+													Gade prezantasyon an
+												</span>
+											</div>
+										{/if}
+									</div>
+								{/if}
+							</div>
+
 							<!-- Price + CTA -->
 							<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
 								<div>
@@ -265,78 +337,6 @@
 									{/if}
 								</button>
 							</div>
-						</div>
-
-						<!-- Cover image or Video Player (Visible on all screen sizes) -->
-						<div class="relative w-full">
-							{#if videoSource && playInlineVideo}
-								<div class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video bg-black border border-white/20">
-									{#if videoSource.type === 'iframe'}
-										<iframe
-											src={videoSource.embedUrl}
-											title={course.title}
-											class="w-full h-full border-0"
-											allow="autoplay; fullscreen; picture-in-picture"
-											allowfullscreen
-										></iframe>
-									{:else}
-										<video
-											src={videoSource.src}
-											controls
-											autoplay
-											class="w-full h-full object-contain bg-black"
-										>
-											<track kind="captions" />
-										</video>
-									{/if}
-									<button
-										type="button"
-										onclick={() => (playInlineVideo = false)}
-										class="absolute top-3 right-3 size-8 bg-black/70 hover:bg-black text-white rounded-full grid place-items-center transition-colors border border-white/20"
-										title="Fèmen videyo"
-									>
-										<X size={16} />
-									</button>
-								</div>
-							{:else if course.cover || videoSource}
-								<div
-									role="button"
-									tabindex="0"
-									onclick={() => {
-										if (videoSource) playInlineVideo = true;
-									}}
-									onkeydown={(e) => {
-										if (videoSource && (e.key === 'Enter' || e.key === ' ')) playInlineVideo = true;
-									}}
-									class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video group {videoSource ? 'cursor-pointer' : ''}"
-								>
-									{#if course.cover}
-										<img
-											src={course.cover}
-											alt={course.title}
-											class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-										/>
-									{:else}
-										<div class="w-full h-full bg-zinc-900 flex flex-col items-center justify-center text-white/40 gap-3">
-											<Video size={48} />
-											<span class="text-xs font-bold uppercase tracking-wider">Vidéo de présentation</span>
-										</div>
-									{/if}
-
-									<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-
-									{#if videoSource}
-										<div class="absolute inset-0 flex flex-col items-center justify-center gap-3">
-											<div class="size-16 bg-amber-400 text-black rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-												<Play size={26} class="fill-black ml-1" />
-											</div>
-											<span class="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-bold border border-white/20">
-												Gade prezantasyon an
-											</span>
-										</div>
-									{/if}
-								</div>
-							{/if}
 						</div>
 					</div>
 				</div>
