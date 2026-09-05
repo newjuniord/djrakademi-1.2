@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { X, CreditCard, Smartphone, Check, Loader2, Globe, MapPin } from 'lucide-svelte';
+	import { dev } from '$app/environment';
+	import { onMount } from 'svelte';
 
 	let {
 		open = false,
@@ -22,6 +24,15 @@
 	} = $props();
 
 	let selectedMethod = $state<'moncash' | 'natcash' | 'carte'>('moncash');
+	let isLocalhost = $state(false);
+
+	onMount(() => {
+		isLocalhost = dev || (typeof window !== 'undefined' && (
+			window.location.hostname === 'localhost' ||
+			window.location.hostname === '127.0.0.1' ||
+			window.location.hostname.startsWith('192.168.')
+		));
+	});
 
 	function handleConfirm() {
 		if (loading) return;
@@ -171,6 +182,23 @@
 
 			<!-- Footer CTA (Bouton Noir & Texte Blanc avec Anti-Double Click & Curseur) -->
 			<div class="p-6 border-t border-zinc-100 bg-zinc-50/50 space-y-3">
+				{#if isLocalhost}
+					<div class="p-3 bg-amber-50 border border-amber-300 rounded-2xl flex items-center justify-between gap-3 text-xs">
+						<div class="flex items-center gap-2 text-amber-900 font-bold">
+							<span class="px-2 py-0.5 rounded-md bg-amber-400 text-black text-[10px] font-black uppercase">DEV TEST</span>
+							<span>Test Localhost (Kat / USD)</span>
+						</div>
+						<button
+							type="button"
+							disabled={loading}
+							onclick={() => onSelectMethod('carte')}
+							class="px-3.5 py-1.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white font-black text-xs shadow-xs transition-all cursor-pointer shrink-0"
+						>
+							Peye pa Kat (Test) 💳
+						</button>
+					</div>
+				{/if}
+
 				<button
 					type="button"
 					disabled={loading}
