@@ -51,14 +51,15 @@
 </script>
 
 <div class="overflow-x-auto">
-	<table class="table min-w-[980px]">
-		<thead><tr><th>Client</th><th>WhatsApp</th><th>Coaching</th><th>Date</th><th>Heure</th><th>Montant</th><th>Statut</th><th class="text-right">Actions</th></tr></thead>
+	<table class="table min-w-[1050px]">
+		<thead><tr><th>Client</th><th>WhatsApp</th><th>Coaching</th><th>Date Session</th><th>Heure</th><th>Créé le</th><th>Montant</th><th>Statut</th><th class="text-right">Actions</th></tr></thead>
 		<tbody>{#each bookings as booking (booking.id)}
 			{@const local = formatDateTimeInTimezone(booking.startAt, coachTimezone)}
+			{@const created = formatDateTimeInTimezone(booking.createdAt, coachTimezone)}
 			<tr>
 				<td><button class="font-medium hover:text-primary" type="button" onclick={() => (selected = booking)}>{booking.customerName}</button><span class="block text-xs text-base-content/50">{booking.customerEmail}</span></td>
 				<td><a class="link link-primary" href={whatsappLink(booking.customerWhatsapp, `Bonjour ${booking.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer">{booking.customerWhatsapp}</a></td>
-				<td>{serviceTitle(booking.serviceId)}</td><td class="capitalize">{local.date}</td><td>{local.time}</td><td>{formatAmount(booking)}</td><td><BookingStatusBadge status={booking.status} /></td>
+				<td>{serviceTitle(booking.serviceId)}</td><td class="capitalize">{local.date}</td><td>{local.time}</td><td><span class="text-xs font-medium text-base-content/80">{created.date}</span><span class="block text-[11px] text-base-content/45">{created.time}</span></td><td>{formatAmount(booking)}</td><td><BookingStatusBadge status={booking.status} /></td>
 				<td><div class="flex justify-end gap-1"><button class="btn btn-ghost btn-square btn-sm" type="button" aria-label="Voir la réservation" onclick={() => (selected = booking)}><Eye size={17} /></button><a class="btn btn-ghost btn-square btn-sm text-success" aria-label="Ouvrir WhatsApp" href={whatsappLink(booking.customerWhatsapp, `Bonjour ${booking.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer"><MessageCircle size={17} /></a>{#if booking.status === 'confirmed'}<button class="btn btn-ghost btn-square btn-sm text-primary" type="button" aria-label="Marquer terminée" onclick={() => requestComplete(booking)}><CheckCircle2 size={17} /></button>{/if}{#if booking.status === 'confirmed' || booking.status === 'pending_payment'}<button class="btn btn-ghost btn-square btn-sm text-error" type="button" aria-label="Annuler" onclick={() => requestCancel(booking)}><XCircle size={17} /></button>{/if}</div></td>
 			</tr>
 		{/each}</tbody>

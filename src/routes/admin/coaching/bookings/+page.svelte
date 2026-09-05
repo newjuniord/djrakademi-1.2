@@ -26,17 +26,39 @@
 		}
 	});
 
+	import { toast } from '$lib/toast.svelte';
+
 	let filter = $state<BookingStatus | 'all'>('all');
 	let search = $state('');
-	let visible = $derived(
-		bookings.filter(
-			(item) =>
-				(filter === 'all' || item.status === filter) &&
-				`${item.customerName} ${item.customerEmail}`.toLowerCase().includes(search.toLowerCase())
-		)
-	);
 
-	import { toast } from '$lib/toast.svelte';
+	function sortByClosestDate(a: Booking, b: Booking): number {
+		const now = Date.now();
+		const timeA = new Date(a.startAt).getTime() || 0;
+		const timeB = new Date(b.startAt).getTime() || 0;
+
+		const isUpcomingA = timeA >= now - 3600000;
+		const isUpcomingB = timeB >= now - 3600000;
+
+		if (isUpcomingA && isUpcomingB) {
+			if (timeA !== timeB) return timeA - timeB;
+			return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+		}
+		if (!isUpcomingA && !isUpcomingB) {
+			if (timeA !== timeB) return timeB - timeA;
+			return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+		}
+		return isUpcomingA ? -1 : 1;
+	}
+
+	let visible = $derived(
+		bookings
+			.filter(
+				(item) =>
+					(filter === 'all' || item.status === filter) &&
+					`${item.customerName} ${item.customerEmail}`.toLowerCase().includes(search.toLowerCase())
+			)
+			.sort(sortByClosestDate)
+	);
 
 	async function updateStatus(id: string, status: BookingStatus) {
 		if (status !== 'completed' && status !== 'cancelled') return;
