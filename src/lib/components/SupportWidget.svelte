@@ -9,8 +9,6 @@
 		Clock,
 		AlertCircle,
 		Send,
-		PhoneCall,
-		HelpCircle,
 		Sparkles,
 		ShoppingBag,
 		Loader2,
@@ -36,6 +34,9 @@
 	// Active tab: 'new' or 'history'
 	let activeTab = $state<'new' | 'history'>('new');
 
+	// Step-by-step wizard (1 par 1)
+	let currentStep = $state<1 | 2 | 3>(1);
+
 	async function loadStatus() {
 		if (!authState.user) {
 			statusData = null;
@@ -46,7 +47,6 @@
 			const res = await fetchUserSupportStatus();
 			statusData = res;
 			if (res && res.messages && res.messages.length > 0 && activeTab === 'new') {
-				// Pre-fill whatsapp from last message if available
 				const lastWa = res.messages.find((m) => m.whatsapp)?.whatsapp;
 				if (lastWa && !whatsappNumber) whatsappNumber = lastWa;
 			}
@@ -94,6 +94,12 @@
 		Boolean(selectedPreset?.requiresWhatsapp || selectedOrder?.productType === 'coaching')
 	);
 
+	function resetForm() {
+		selectedOrderId = '';
+		selectedPresetId = '';
+		currentStep = 1;
+	}
+
 	async function handleSubmit() {
 		if (!selectedPresetId) {
 			toast.error('Tanpri chwazi yon mesaj ki korresponn ak pwoblèm ou an.');
@@ -120,8 +126,7 @@
 
 			if (res.success && res.message) {
 				toast.success('Mesaj sipò w la voye ak siksè! Ekip la ap suiv li.');
-				selectedPresetId = '';
-				selectedOrderId = '';
+				resetForm();
 				activeTab = 'history';
 				await loadStatus();
 			} else {
@@ -281,7 +286,36 @@
 						</p>
 					</div>
 				{:else if activeTab === 'new'}
-					<!-- NEW SUPPORT MESSAGE TAB -->
+					<!-- STEP INDICATOR WIZARD (1 par 1) -->
+					<div class="flex items-center justify-between px-2 py-1.5 bg-zinc-100 rounded-xl text-[11px] font-bold">
+						<button
+							type="button"
+							onclick={() => (currentStep = 1)}
+							class="flex items-center gap-1 transition-colors {currentStep === 1 ? 'text-zinc-950 font-black' : 'text-zinc-400 hover:text-zinc-600'}"
+						>
+							<span class="size-4 rounded-full border grid place-items-center text-[10px] {currentStep === 1 ? 'bg-zinc-950 text-white border-zinc-950' : 'bg-zinc-200 border-zinc-300'}">1</span>
+							<span>Kòmande</span>
+						</button>
+						<span class="text-zinc-300">➔</span>
+						<button
+							type="button"
+							onclick={() => { if (selectedOrderId || currentStep > 1) currentStep = 2; }}
+							class="flex items-center gap-1 transition-colors {currentStep === 2 ? 'text-zinc-950 font-black' : 'text-zinc-400 hover:text-zinc-600'}"
+						>
+							<span class="size-4 rounded-full border grid place-items-center text-[10px] {currentStep === 2 ? 'bg-zinc-950 text-white border-zinc-950' : 'bg-zinc-200 border-zinc-300'}">2</span>
+							<span>Mesaj</span>
+						</button>
+						<span class="text-zinc-300">➔</span>
+						<button
+							type="button"
+							onclick={() => { if (selectedPresetId) currentStep = 3; }}
+							class="flex items-center gap-1 transition-colors {currentStep === 3 ? 'text-zinc-950 font-black' : 'text-zinc-400 hover:text-zinc-600'}"
+						>
+							<span class="size-4 rounded-full border grid place-items-center text-[10px] {currentStep === 3 ? 'bg-zinc-950 text-white border-zinc-950' : 'bg-zinc-200 border-zinc-300'}">3</span>
+							<span>Konfime</span>
+						</button>
+					</div>
+
 					{#if statusData.dailyQuota.remaining <= 0}
 						<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-800 space-y-1">
 							<p class="font-bold flex items-center gap-1.5">
@@ -294,108 +328,193 @@
 						</div>
 					{/if}
 
-					<!-- Step 1: Select Order (Optional) -->
-					{#if statusData.orders && statusData.orders.length > 0}
-						<div class="space-y-1.5">
-							<label class="block text-xs font-bold text-zinc-700" for="support-order-select">
-								1. Chwazi kòmande ki gen pwoblèm nan :
-							</label>
-							<select
-								id="support-order-select"
-								bind:value={selectedOrderId}
-								class="w-full text-xs font-medium bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-zinc-950"
+					<!-- STEP 1: SELECT ORDER (Displayed 1 by 1) -->
+					{#if currentStep === 1}
+						<div class="space-y-3 animate-in fade-in duration-150">
+							<div>
+								<h4 class="font-black text-sm text-zinc-950">1. Chwazi kòmande ki gen pwoblèm nan :</h4>
+								<p class="text-xs text-zinc-500 mt-0.5">Klike sou tranzaksyon kote w bezwen asistans lan</p>
+							</div>
+
+							{#if statusData.orders && statusData.orders.length > 0}
+								<div class="space-y-2 max-h-[35vh] overflow-y-auto pr-1">
+									{#each statusData.orders as order (order.id)}
+										<button
+											type="button"
+											onclick={() => {
+												selectedOrderId = order.id;
+												currentStep = 2;
+											}}
+											class="w-full text-left p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 group {selectedOrderId === order.id
+												? 'bg-zinc-950 text-white border-zinc-950 shadow-md'
+												: 'bg-zinc-50 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100'}"
+										>
+											<div class="flex items-center gap-3 min-w-0">
+												<div class="size-9 rounded-xl bg-white border border-zinc-200 grid place-items-center text-zinc-900 font-extrabold text-[10px] uppercase shrink-0 shadow-2xs">
+													{order.productType.slice(0, 3)}
+												</div>
+												<div class="min-w-0">
+													<p class="font-bold text-xs truncate leading-snug">{order.productTitle}</p>
+													<p class="text-[11px] mt-0.5 truncate opacity-70">
+														{order.amount} HTG · <span class="font-mono">{order.status}</span>
+													</p>
+												</div>
+											</div>
+
+											<span class="text-xs font-bold px-2 py-1 rounded-lg bg-amber-400 text-black shrink-0">
+												Chwazi ➔
+											</span>
+										</button>
+									{/each}
+								</div>
+							{/if}
+
+							<button
+								type="button"
+								onclick={() => {
+									selectedOrderId = '';
+									currentStep = 2;
+								}}
+								class="w-full py-2.5 rounded-xl border border-dashed border-zinc-300 hover:border-zinc-400 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 font-bold text-xs transition-all cursor-pointer"
 							>
-								<option value="">-- Tout tranzaksyon ou yo ({statusData.orders.length}) --</option>
-								{#each statusData.orders as order (order.id)}
-									<option value={order.id}>
-										[{order.productType.toUpperCase()}] {order.productTitle} - {order.amount} HTG ({order.status})
-									</option>
-								{/each}
-							</select>
+								Oubyen klike la a pou yon kesyon jeneral kont
+							</button>
 						</div>
 					{/if}
 
-					<!-- Step 2: Select Click-to-Send Preset Message (ONLY AUTOMATED PRESETS ALLOWED) -->
-					<div class="space-y-2">
-						<span class="block text-xs font-bold text-zinc-700">
-							2. Klike sou mesaj ki deskri pwoblèm ou an :
-						</span>
-
-						<div class="space-y-2 max-h-[30vh] overflow-y-auto pr-1">
-							{#each statusData.presets as preset (preset.id)}
+					<!-- STEP 2: SELECT PRESET MESSAGE (Displayed 1 by 1) -->
+					{#if currentStep === 2}
+						<div class="space-y-3 animate-in fade-in duration-150">
+							<!-- Back to Step 1 summary banner -->
+							<div class="p-2.5 bg-zinc-100 rounded-xl flex items-center justify-between gap-2 text-xs">
+								<div class="min-w-0">
+									<span class="text-zinc-500 font-medium">Kòmande :</span>
+									<span class="font-bold text-zinc-900 truncate">
+										{selectedOrder ? selectedOrder.productTitle : 'Kesyon jeneral kont'}
+									</span>
+								</div>
 								<button
 									type="button"
-									onclick={() => (selectedPresetId = preset.id)}
-									class="w-full text-left p-3 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 text-xs group {selectedPresetId === preset.id
-										? 'bg-zinc-950 text-white border-zinc-950 shadow-md'
-										: 'bg-zinc-50 border-zinc-200 text-zinc-900 hover:border-zinc-300 hover:bg-zinc-100/80'}"
+									onclick={() => (currentStep = 1)}
+									class="text-[11px] font-bold text-zinc-900 underline hover:text-zinc-600 cursor-pointer shrink-0"
 								>
-									<div class="size-6 rounded-full border grid place-items-center shrink-0 mt-0.5 {selectedPresetId === preset.id ? 'bg-amber-400 text-black border-amber-400 font-bold' : 'border-zinc-300 bg-white'}">
-										{#if selectedPresetId === preset.id}
-											<CheckCircle2 size={14} />
-										{:else}
-											<span class="text-[10px] text-zinc-500">•</span>
-										{/if}
-									</div>
-
-									<div class="flex-1 min-w-0">
-										<p class="font-bold text-xs leading-snug">{preset.label}</p>
-										<p class="text-[11px] mt-0.5 truncate {selectedPresetId === preset.id ? 'text-zinc-300' : 'text-zinc-500'}">
-											{preset.description}
-										</p>
-									</div>
+									Chanje ✏️
 								</button>
-							{/each}
+							</div>
+
+							<div>
+								<h4 class="font-black text-sm text-zinc-950">2. Klike sou mesaj ki deskri pwoblèm ou an :</h4>
+								<p class="text-xs text-zinc-500 mt-0.5">Chwazi mesaj otomatik ki pi kòrèk la</p>
+							</div>
+
+							<div class="space-y-2 max-h-[35vh] overflow-y-auto pr-1">
+								{#each statusData.presets as preset (preset.id)}
+									<button
+										type="button"
+										onclick={() => {
+											selectedPresetId = preset.id;
+											currentStep = 3;
+										}}
+										class="w-full text-left p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 text-xs group {selectedPresetId === preset.id
+											? 'bg-zinc-950 text-white border-zinc-950 shadow-md'
+											: 'bg-zinc-50 border-zinc-200 text-zinc-900 hover:border-zinc-300 hover:bg-zinc-100'}"
+									>
+										<div class="size-6 rounded-full border grid place-items-center shrink-0 mt-0.5 {selectedPresetId === preset.id ? 'bg-amber-400 text-black border-amber-400 font-bold' : 'border-zinc-300 bg-white'}">
+											{#if selectedPresetId === preset.id}
+												<CheckCircle2 size={14} />
+											{:else}
+												<span class="text-[10px] text-zinc-500">•</span>
+											{/if}
+										</div>
+
+										<div class="flex-1 min-w-0">
+											<p class="font-bold text-xs leading-snug">{preset.label}</p>
+											<p class="text-[11px] mt-0.5 truncate {selectedPresetId === preset.id ? 'text-zinc-300' : 'text-zinc-500'}">
+												{preset.description}
+											</p>
+										</div>
+
+										<span class="text-xs font-bold text-amber-500 shrink-0 self-center">
+											Chwazi ➔
+										</span>
+									</button>
+								{/each}
+							</div>
 						</div>
-					</div>
+					{/if}
 
-					<!-- Step 3: WhatsApp Number Input (Mandatory if Coaching or requiresWhatsapp) -->
-					{#if requiresWhatsapp || selectedPresetId}
-						<div class="space-y-1.5 pt-2 border-t border-zinc-100">
-							<label class="block text-xs font-bold text-zinc-700 flex items-center justify-between" for="support-whatsapp">
-								<span class="flex items-center gap-1.5">
-									<MessageCircle size={14} class="text-emerald-600" />
-									<span>Nimewo WhatsApp ou :</span>
-								</span>
-								{#if requiresWhatsapp}
-									<span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">Obligatwa</span>
-								{:else}
-									<span class="text-[10px] text-zinc-400 font-medium">Opksyonèl</span>
+					<!-- STEP 3: WHATSAPP & FINAL CONFIRMATION (Displayed 1 by 1) -->
+					{#if currentStep === 3}
+						<div class="space-y-3.5 animate-in fade-in duration-150">
+							<!-- Summary of selected order & preset -->
+							<div class="p-3 bg-zinc-900 text-white rounded-2xl text-xs space-y-1.5">
+								<div class="flex items-center justify-between text-[11px] text-zinc-400">
+									<span>Rezime demann ou an :</span>
+									<button
+										type="button"
+										onclick={() => (currentStep = 2)}
+										class="text-amber-400 underline font-bold cursor-pointer"
+									>
+										Chanje mesaj ✏️
+									</button>
+								</div>
+								<p class="font-bold text-xs text-white leading-snug">{selectedPreset?.label}</p>
+								{#if selectedOrder}
+									<p class="text-[11px] text-zinc-300">
+										Pwodui : <strong class="text-amber-300">{selectedOrder.productTitle}</strong> ({selectedOrder.amount} HTG)
+									</p>
 								{/if}
-							</label>
+							</div>
 
-							<div class="relative">
+							<div>
+								<h4 class="font-black text-sm text-zinc-950">3. Konfime epi voye demann lan :</h4>
+							</div>
+
+							<!-- WhatsApp Input -->
+							<div class="space-y-1.5 bg-zinc-50 p-3.5 rounded-2xl border border-zinc-200">
+								<label class="block text-xs font-bold text-zinc-700 flex items-center justify-between" for="support-whatsapp">
+									<span class="flex items-center gap-1.5">
+										<MessageCircle size={15} class="text-emerald-600" />
+										<span>Nimewo WhatsApp ou :</span>
+									</span>
+									{#if requiresWhatsapp}
+										<span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">Obligatwa</span>
+									{:else}
+										<span class="text-[10px] text-zinc-400 font-medium">Opksyonèl</span>
+									{/if}
+								</label>
+
 								<input
 									id="support-whatsapp"
 									type="tel"
 									placeholder="+509 XXXX-XXXX"
 									bind:value={whatsappNumber}
-									class="w-full text-xs font-mono font-bold bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-zinc-950"
+									class="w-full text-xs font-mono font-bold bg-white border border-zinc-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-zinc-950"
 								/>
+								<p class="text-[11px] text-zinc-500">
+									Ekip la va kontakte w sou WhatsApp si yo bezwen plis enfòmasyon pou ede w rapide.
+								</p>
 							</div>
-							<p class="text-[11px] text-zinc-500">
-								Ekip la va kontakte w sou WhatsApp si yo bezwen plis enfòmasyon sou tranzaksyon w lan.
-							</p>
+
+							<!-- Final Submit Button -->
+							<div class="pt-1">
+								<button
+									type="button"
+									disabled={submitting || !selectedPresetId || statusData.dailyQuota.remaining <= 0}
+									onclick={handleSubmit}
+									class="w-full h-12 rounded-2xl bg-zinc-950 hover:bg-zinc-800 active:scale-[0.99] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									{#if submitting}
+										<Loader2 size={16} class="animate-spin text-white" />
+										<span>N ap voye demann lan...</span>
+									{:else}
+										<Send size={16} class="text-amber-400" />
+										<span>Voye demann asistans lan 🚀</span>
+									{/if}
+								</button>
+							</div>
 						</div>
 					{/if}
-
-					<!-- Submit Button -->
-					<div class="pt-2">
-						<button
-							type="button"
-							disabled={submitting || !selectedPresetId || statusData.dailyQuota.remaining <= 0}
-							onclick={handleSubmit}
-							class="w-full h-11 rounded-2xl bg-zinc-950 hover:bg-zinc-800 active:scale-[0.99] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							{#if submitting}
-								<Loader2 size={16} class="animate-spin text-white" />
-								<span>N ap voye demann lan...</span>
-							{:else}
-								<Send size={16} class="text-amber-400" />
-								<span>Voye demann asistans lan</span>
-							{/if}
-						</button>
-					</div>
 				{:else}
 					<!-- HISTORY TAB -->
 					<div class="space-y-3">
