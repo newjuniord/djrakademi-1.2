@@ -143,9 +143,9 @@ async function confirmPaidOrder(tables, order, transactionId) {
         databaseId: DATABASE_ID, tableId: TABLES.slots, rowId: booking.slot_id, transactionId: tx.$id
       });
       const alreadyConfirmed = booking.status === 'confirmed' && booking.payment_status === 'paid';
-      const canRecoverExpired = booking.status === 'expired' && slot.status === 'available';
-      const canConfirmPending = booking.status === 'pending_payment' && slot.status === 'held';
-      if (!alreadyConfirmed && !canRecoverExpired && !canConfirmPending) {
+      const slotIsFreeOrHeld = slot.status === 'held' || slot.status === 'available';
+      const canConfirmBooking = (booking.status === 'pending_payment' || booking.status === 'expired') && slotIsFreeOrHeld;
+      if (!alreadyConfirmed && !canConfirmBooking) {
         throw new Error('Le créneau de coaching ne peut plus être confirmé automatiquement.');
       }
       accessAlreadyExisted = alreadyConfirmed;

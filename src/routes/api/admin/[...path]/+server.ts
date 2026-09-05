@@ -430,7 +430,7 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 			]);
 			const paidBookingIds = new Set(paidOrderRows.rows.map((o: any) => o.product_id));
 			for (const b of bookingRows) {
-				if ((b.status === "pending_payment" || b.payment_status === "pending") && paidBookingIds.has(b.$id)) {
+				if ((b.status === "pending_payment" || b.payment_status === "pending" || b.status === "expired") && paidBookingIds.has(b.$id)) {
 					const paidAt = new Date().toISOString();
 					await tables.updateRow({
 						databaseId: DATABASE_ID,
