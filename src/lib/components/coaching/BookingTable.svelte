@@ -9,7 +9,11 @@
 		bookings: Booking[]; services: CoachingService[]; coachTimezone: string;
 		onStatusChange: (id: string, status: BookingStatus) => void;
 	} = $props();
+
 	let selected = $state<Booking | null>(null);
+	let confirmAction = $state<{ booking: Booking; type: 'completed' | 'cancelled' } | null>(null);
+	let confirmInputText = $state('');
+
 	const getService = (id: string) => services.find((service) => service.id === id);
 	const serviceTitle = (id: string) => getService(id)?.title ?? 'Coaching';
 	const formatAmount = (b: Booking) => {
@@ -21,6 +25,29 @@
 		}
 		return s?.isFree ? 'Gratuit' : 'Paiement en attente';
 	};
+
+	function requestCancel(b: Booking) {
+		confirmInputText = '';
+		confirmAction = { booking: b, type: 'cancelled' };
+	}
+
+	function requestComplete(b: Booking) {
+		confirmInputText = '';
+		confirmAction = { booking: b, type: 'completed' };
+	}
+
+	function handleConfirm() {
+		if (!confirmAction) return;
+		const expected = confirmAction.type === 'cancelled' ? 'ANNULER' : 'TERMINER';
+		if (confirmInputText.trim() !== expected) return;
+
+		onStatusChange(confirmAction.booking.id, confirmAction.type);
+		if (selected?.id === confirmAction.booking.id) {
+			selected = null;
+		}
+		confirmAction = null;
+		confirmInputText = '';
+	}
 </script>
 
 <div class="overflow-x-auto">
@@ -32,7 +59,7 @@
 				<td><button class="font-medium hover:text-primary" type="button" onclick={() => (selected = booking)}>{booking.customerName}</button><span class="block text-xs text-base-content/50">{booking.customerEmail}</span></td>
 				<td><a class="link link-primary" href={whatsappLink(booking.customerWhatsapp, `Bonjour ${booking.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer">{booking.customerWhatsapp}</a></td>
 				<td>{serviceTitle(booking.serviceId)}</td><td class="capitalize">{local.date}</td><td>{local.time}</td><td>{formatAmount(booking)}</td><td><BookingStatusBadge status={booking.status} /></td>
-				<td><div class="flex justify-end gap-1"><button class="btn btn-ghost btn-square btn-sm" type="button" aria-label="Voir la réservation" onclick={() => (selected = booking)}><Eye size={17} /></button><a class="btn btn-ghost btn-square btn-sm text-success" aria-label="Ouvrir WhatsApp" href={whatsappLink(booking.customerWhatsapp, `Bonjour ${booking.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer"><MessageCircle size={17} /></a>{#if booking.status === 'confirmed'}<button class="btn btn-ghost btn-square btn-sm text-primary" type="button" aria-label="Marquer terminée" onclick={() => onStatusChange(booking.id, 'completed')}><CheckCircle2 size={17} /></button>{/if}{#if booking.status === 'confirmed' || booking.status === 'pending_payment'}<button class="btn btn-ghost btn-square btn-sm text-error" type="button" aria-label="Annuler" onclick={() => onStatusChange(booking.id, 'cancelled')}><XCircle size={17} /></button>{/if}</div></td>
+				<td><div class="flex justify-end gap-1"><button class="btn btn-ghost btn-square btn-sm" type="button" aria-label="Voir la réservation" onclick={() => (selected = booking)}><Eye size={17} /></button><a class="btn btn-ghost btn-square btn-sm text-success" aria-label="Ouvrir WhatsApp" href={whatsappLink(booking.customerWhatsapp, `Bonjour ${booking.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer"><MessageCircle size={17} /></a>{#if booking.status === 'confirmed'}<button class="btn btn-ghost btn-square btn-sm text-primary" type="button" aria-label="Marquer terminée" onclick={() => requestComplete(booking)}><CheckCircle2 size={17} /></button>{/if}{#if booking.status === 'confirmed' || booking.status === 'pending_payment'}<button class="btn btn-ghost btn-square btn-sm text-error" type="button" aria-label="Annuler" onclick={() => requestCancel(booking)}><XCircle size={17} /></button>{/if}</div></td>
 			</tr>
 		{/each}</tbody>
 	</table>
@@ -46,7 +73,83 @@
 					<div><p class="text-xs text-base-content/50">{field[0]}</p><p class="mt-1 font-medium">{field[1]}</p></div>
 				{/each}
 			</div>
-			<div class="modal-action flex-wrap"><a class="btn btn-success" href={whatsappLink(selected.customerWhatsapp, `Bonjour ${selected.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer"><MessageCircle size={18} /> WhatsApp</a>{#if selected.status === 'confirmed'}<button class="btn btn-primary" type="button" onclick={() => { onStatusChange(selected!.id, 'completed'); selected = null; }}>Terminer</button>{/if}{#if selected.status !== 'cancelled' && selected.status !== 'completed'}<button class="btn btn-outline btn-error" type="button" onclick={() => { onStatusChange(selected!.id, 'cancelled'); selected = null; }}>Annuler</button>{/if}</div>
+			<div class="modal-action flex-wrap"><a class="btn btn-success" href={whatsappLink(selected.customerWhatsapp, `Bonjour ${selected.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer"><MessageCircle size={18} /> WhatsApp</a>{#if selected.status === 'confirmed'}<button class="btn btn-primary" type="button" onclick={() => requestComplete(selected!)}>Terminer</button>{/if}{#if selected.status !== 'cancelled' && selected.status !== 'completed'}<button class="btn btn-outline btn-error" type="button" onclick={() => requestCancel(selected!)}>Annuler</button>{/if}</div>
 		</div><button class="modal-backdrop" type="button" aria-label="Fermer" onclick={() => (selected = null)}>close</button>
+	</div>
+{/if}
+
+{#if confirmAction}
+	{@const isCancel = confirmAction.type === 'cancelled'}
+	{@const expectedWord = isCancel ? 'ANNULER' : 'TERMINER'}
+	<div class="modal modal-open z-50" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+		<div class="modal-box max-w-md space-y-4">
+			<button
+				class="btn btn-ghost btn-sm btn-circle absolute right-3 top-3"
+				type="button"
+				aria-label="Fermer"
+				onclick={() => { confirmAction = null; confirmInputText = ''; }}
+			>✕</button>
+			<div class="flex items-center gap-3">
+				<div class="grid size-12 place-items-center rounded-2xl {isCancel ? 'bg-error/10 text-error' : 'bg-primary/10 text-primary'}">
+					{#if isCancel}
+						<XCircle size={26} />
+					{:else}
+						<CheckCircle2 size={26} />
+					{/if}
+				</div>
+				<div>
+					<h3 id="confirm-modal-title" class="text-lg font-bold">
+						{isCancel ? 'Konfime anilasyon coaching' : 'Konfime coaching ki fini'}
+					</h3>
+					<p class="text-xs text-base-content/60">
+						{confirmAction.booking.customerName} · {serviceTitle(confirmAction.booking.serviceId)}
+					</p>
+				</div>
+			</div>
+
+			<div class="rounded-xl border border-base-300 bg-base-200/50 p-4 text-xs space-y-2">
+				<p class="text-base-content/80 font-medium">
+					{#if isCancel}
+						Tanpri tape <strong class="text-error font-mono font-bold">ANNULER</strong> anba a pou w ka konfime anilasyon rezèvasyon sa a.
+					{:else}
+						Tanpri tape <strong class="text-primary font-mono font-bold">TERMINER</strong> anba a pou w ka konfime ke coaching an fini.
+					{/if}
+				</p>
+			</div>
+
+			<form onsubmit={(e) => { e.preventDefault(); handleConfirm(); }} class="space-y-4">
+				<div class="form-control">
+					<label class="label text-xs font-semibold" for="confirm-input">
+						Tape "{expectedWord}" pou w ka konfime :
+					</label>
+					<input
+						id="confirm-input"
+						type="text"
+						class="input input-bordered w-full font-mono uppercase font-bold tracking-wider"
+						placeholder={`Tape ${expectedWord} la...`}
+						bind:value={confirmInputText}
+						autocomplete="off"
+					/>
+				</div>
+
+				<div class="modal-action">
+					<button
+						type="button"
+						class="btn btn-ghost"
+						onclick={() => { confirmAction = null; confirmInputText = ''; }}
+					>
+						Fèmen
+					</button>
+					<button
+						type="submit"
+						disabled={confirmInputText.trim() !== expectedWord}
+						class="btn {isCancel ? 'btn-error' : 'btn-primary'} font-bold"
+					>
+						{isCancel ? 'Konfime Anilasyon an' : 'Konfime ke li Fini'}
+					</button>
+				</div>
+			</form>
+		</div>
+		<button class="modal-backdrop" type="button" aria-label="Fermer" onclick={() => { confirmAction = null; confirmInputText = ''; }}>close</button>
 	</div>
 {/if}
