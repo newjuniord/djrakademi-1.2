@@ -319,6 +319,29 @@
         "key(order_id)",
         "key(event_type)"
       ]
+    },
+    {
+      "id": "support_messages",
+      "permissions": [],
+      "columns": {
+        "user_id": "varchar(36) required",
+        "order_id": "varchar(36) optional",
+        "product_type": "enum[course,ebook,coaching] optional",
+        "product_title": "varchar(255) optional",
+        "preset_id": "varchar(64) required",
+        "preset_label": "text required",
+        "whatsapp": "varchar(32) optional",
+        "status": "enum[open,in_progress,resolved] required",
+        "admin_reply": "text optional",
+        "created_at": "datetime required",
+        "updated_at": "datetime required"
+      },
+      "indexes": [
+        "key(user_id)",
+        "key(status)",
+        "key(created_at)",
+        "key(user_id,created_at)"
+      ]
     }
   ]
 }

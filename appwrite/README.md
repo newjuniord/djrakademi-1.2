@@ -73,8 +73,31 @@ Never return authorization headers, cookies, passwords, API keys, webhook signat
 - No public execute permission.
 - Schedule: `*/15 * * * *`.
 - TablesDB scopes: rows read/write.
-- It marks pending orders older than 60 minutes as failed without calling Plopplop (up to 200 per run), then verifies up to 50 recent pending orders per run.
+- It expires pending orders older than 60 minutes without calling Plopplop (up to 200 per run). For a coaching order, this same transaction expires the booking and releases its held slot.
+- It verifies up to 50 recent MonCash, NatCash or card pending orders per run. Lemon Squeezy orders are finalized only through their signed webhook and are never sent to Plopplop.
 - Only `trans_status: "ok"` can mark an order paid and grant course/ebook access or confirm coaching.
 - Access grants use the unique `(user_id,item_type,item_id)` index and an Appwrite transaction to prevent duplicates.
 
 Required Function variables: `PAYMENTS_DATABASE_ID=djrakademi` and `PLOPPLOP_CLIENT_ID`. `PLOPPLOP_API_KEY` or `PLOPPLOP_SECRET_KEY` can optionally be added as secret variables; `PLOPPLOP_VERIFY_URL` is optional.
+
+
+
+
+-------------------------
+À l’expiration d’un paiement coaching, le cron expire aussi la réservation et libère son créneau dans la même
+    transaction.
+
+  - Les cours et ebooks reçoivent toujours leur accès après validation Plopplop.
+  - Le cron ne tente plus de vérifier les paiements Lemon Squeezy auprès de Plopplop ; ceux-ci restent finalisés par
+    webhook signé.
+
+  - Une configuration Plopplop absente ne bloque plus l’expiration des commandes ; elle est remontée dans la réponse
+    du cron.
+
+  Modifications : appwrite/functions/payment-maintenance/index.js et README Appwrite (appwrite/README.md).
+
+  Vérifié : syntaxe JavaScript, git diff --check, et npm run check — 0 erreur, 0 warning.
+
+  Il reste à redéployer la fonction payment-maintenance sur Appwrite pour activer ces changements.
+
+─ Worked for 4m 43s ─────────────

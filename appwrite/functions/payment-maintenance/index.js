@@ -4,6 +4,10 @@ const DATABASE_ID = process.env.PAYMENTS_DATABASE_ID || 'djrakademi';
 const VERIFY_URL = process.env.PLOPPLOP_VERIFY_URL || 'https://plopplop.solutionip.app/api/paiement-verify';
 const ORDER_EXPIRATION_MS = 60 * 60 * 1000;
 const MAX_EXPIRED_PER_RUN = 200;
+// Lemon Squeezy is finalized exclusively by its signed webhook. Sending one
+// of its orders to the Plopplop endpoint can never confirm it and needlessly
+// delays verification of MonCash/NatCash orders.
+const PLOPPLOP_PROVIDERS = ['moncash', 'natcash', 'carte', 'card'];
 const TABLES = {
   orders: 'orders',
   access: 'access_grants',
@@ -300,12 +304,46 @@ async function expireOldOrder(tables, order) {
       await tables.updateTransaction({ transactionId: tx.$id, rollback: true });
       return false;
     }
+    const now = new Date().toISOString();
+
+    // A coaching order owns a temporary hold on a slot. Do this in the same
+    // transaction as the order expiry so an expired payment cannot leave a slot
+    // blocked until the separate booking-maintenance cron runs.
+    if (current.product_type === 'coaching' && current.product_id) {
+      const booking = await tables.getRow({
+        databaseId: DATABASE_ID, tableId: TABLES.bookings, rowId: current.product_id, transactionId: tx.$id
+      }).catch((caught) => {
+        if (caught?.code === 404) return null;
+        throw caught;
+      });
+
+      if (booking?.status === 'pending_payment' && booking.payment_status === 'pending') {
+        if (booking.slot_id) {
+          const slot = await tables.getRow({
+            databaseId: DATABASE_ID, tableId: TABLES.slots, rowId: booking.slot_id, transactionId: tx.$id
+          }).catch((caught) => {
+            if (caught?.code === 404) return null;
+            throw caught;
+          });
+          // Never turn a booked slot back into available: it may have been
+          // finalized concurrently by a payment confirmation.
+          if (slot?.status === 'held') {
+            await tables.updateRow({
+              databaseId: DATABASE_ID, tableId: TABLES.slots, rowId: slot.$id,
+              transactionId: tx.$id, data: { status: 'available' }
+            });
+          }
+        }
+        await tables.updateRow({
+          databaseId: DATABASE_ID, tableId: TABLES.bookings, rowId: booking.$id, transactionId: tx.$id,
+          data: { status: 'expired', payment_status: 'expired', hold_expires_at: null, updated_at: now }
+        });
+      }
+    }
+
     await tables.updateRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLES.orders,
-      rowId: current.$id,
-      transactionId: tx.$id,
-      data: { status: 'failed' }
+      databaseId: DATABASE_ID, tableId: TABLES.orders, rowId: current.$id,
+      transactionId: tx.$id, data: { status: 'expired' }
     });
     await tables.updateTransaction({ transactionId: tx.$id, commit: true });
     await writeExpirationLog(tables, order);
@@ -343,7 +381,6 @@ async function expireOldOrders(tables, cutoff) {
 export default async ({ req, res, log, error }) => {
   try {
     const tables = tablesClient(req);
-    const config = providerConfig();
     const cutoff = new Date(Date.now() - ORDER_EXPIRATION_MS).toISOString();
     const expired = await expireOldOrders(tables, cutoff);
     const pendingOrders = await tables.listRows({
@@ -352,15 +389,25 @@ export default async ({ req, res, log, error }) => {
       ttl: 0,
       queries: [
         Query.equal('status', ['pending']),
+        Query.equal('payment_provider', PLOPPLOP_PROVIDERS),
         Query.greaterThanEqual('created_at', cutoff),
         Query.orderAsc('created_at'),
         Query.limit(50)
       ]
     });
+    let config;
+    let configurationError;
+    try {
+      config = providerConfig();
+    } catch (caught) {
+      configurationError = caught instanceof Error ? caught.message : String(caught);
+    }
     const results = [];
-    for (let index = 0; index < pendingOrders.rows.length; index += 5) {
-      const batch = pendingOrders.rows.slice(index, index + 5);
-      results.push(...await Promise.all(batch.map((order) => processOrder(tables, order, config))));
+    if (config) {
+      for (let index = 0; index < pendingOrders.rows.length; index += 5) {
+        const batch = pendingOrders.rows.slice(index, index + 5);
+        results.push(...await Promise.all(batch.map((order) => processOrder(tables, order, config))));
+      }
     }
     const summary = {
       checked: results.length,
@@ -369,10 +416,14 @@ export default async ({ req, res, log, error }) => {
       alreadyOwned: results.filter((item) => item.accessAlreadyExisted).length,
       pending: results.filter((item) => item.state === 'pending').length,
       skipped: results.filter((item) => ['already_paid', 'skipped', 'race_lost'].includes(item.state)).length,
-      errors: results.filter((item) => item.state === 'error').length
+      errors: results.filter((item) => item.state === 'error').length,
+      ...(configurationError ? {
+        configurationError,
+        pendingVerificationSkipped: pendingOrders.rows.length
+      } : {})
     };
     log(`Commandes expirées: ${summary.expired}; vérifiées: ${summary.checked}; confirmées: ${summary.confirmed}; en attente: ${summary.pending}; erreurs: ${summary.errors}`);
-    return res.json(summary);
+    return res.json(summary, configurationError ? 503 : 200);
   } catch (caught) {
     const message = caught instanceof Error ? caught.message : String(caught);
     error(message);

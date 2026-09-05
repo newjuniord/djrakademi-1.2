@@ -87,7 +87,7 @@ function getBasePath(): string {
 	return configured.replace(/\/$/, '');
 }
 
-async function adminRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function adminRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
 	let jwt: string;
 	try {
 		jwt = await getAdminJwt();

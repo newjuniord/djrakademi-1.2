@@ -12,7 +12,8 @@
 		ShieldCheck,
 		Sparkles,
 		ChevronRight,
-		Activity
+		Activity,
+		MessageSquare
 	} from 'lucide-svelte';
 
 	type NavItem = {
@@ -48,7 +49,8 @@
 		{
 			title: 'Finances & Ventes',
 			items: [
-				{ label: 'Commandes', href: '/admin/orders', icon: ShoppingBag }
+				{ label: 'Commandes', href: '/admin/orders', icon: ShoppingBag },
+				{ label: 'Sipò Support', href: '/admin/support', icon: MessageSquare }
 			]
 		},
 		{
