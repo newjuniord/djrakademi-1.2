@@ -99,7 +99,7 @@
 				</div>
 				<div>
 					<h3 id="confirm-modal-title" class="text-lg font-bold">
-						{isCancel ? 'Konfime anilasyon coaching' : 'Konfime coaching ki fini'}
+						{isCancel ? 'Confirmer l’annulation du coaching' : 'Confirmer la fin du coaching'}
 					</h3>
 					<p class="text-xs text-base-content/60">
 						{confirmAction.booking.customerName} · {serviceTitle(confirmAction.booking.serviceId)}
@@ -110,9 +110,9 @@
 			<div class="rounded-xl border border-base-300 bg-base-200/50 p-4 text-xs space-y-2">
 				<p class="text-base-content/80 font-medium">
 					{#if isCancel}
-						Tanpri tape <strong class="text-error font-mono font-bold">ANNULER</strong> anba a pou w ka konfime anilasyon rezèvasyon sa a.
+						Veuillez saisir <strong class="text-error font-mono font-bold">ANNULER</strong> ci-dessous pour confirmer l’annulation de cette réservation.
 					{:else}
-						Tanpri tape <strong class="text-primary font-mono font-bold">TERMINER</strong> anba a pou w ka konfime ke coaching an fini.
+						Veuillez saisir <strong class="text-primary font-mono font-bold">TERMINER</strong> ci-dessous pour confirmer que le coaching est terminé.
 					{/if}
 				</p>
 			</div>
@@ -120,13 +120,13 @@
 			<form onsubmit={(e) => { e.preventDefault(); handleConfirm(); }} class="space-y-4">
 				<div class="form-control">
 					<label class="label text-xs font-semibold" for="confirm-input">
-						Tape "{expectedWord}" pou w ka konfime :
+						Saisissez « {expectedWord} » pour confirmer :
 					</label>
 					<input
 						id="confirm-input"
 						type="text"
 						class="input input-bordered w-full font-mono uppercase font-bold tracking-wider"
-						placeholder={`Tape ${expectedWord} la...`}
+						placeholder={`Saisissez ${expectedWord} ici...`}
 						bind:value={confirmInputText}
 						autocomplete="off"
 					/>
@@ -138,14 +138,14 @@
 						class="btn btn-ghost"
 						onclick={() => { confirmAction = null; confirmInputText = ''; }}
 					>
-						Fèmen
+						Fermer
 					</button>
 					<button
 						type="submit"
 						disabled={confirmInputText.trim() !== expectedWord}
 						class="btn {isCancel ? 'btn-error' : 'btn-primary'} font-bold"
 					>
-						{isCancel ? 'Konfime Anilasyon an' : 'Konfime ke li Fini'}
+						{isCancel ? 'Confirmer l’annulation' : 'Confirmer la fin'}
 					</button>
 				</div>
 			</form>
