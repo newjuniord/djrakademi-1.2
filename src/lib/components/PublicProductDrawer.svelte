@@ -153,7 +153,7 @@
 		}
 	}
 
-	async function handleSelectPaymentMethod(method: 'moncash' | 'natcash' | 'carte') {
+	async function handleSelectPaymentMethod(method: 'moncash' | 'natcash' | 'carte' | 'plopplop_carte') {
 		if (!item || checkoutLoading) return;
 		if (await showMaintenanceIfEnabled()) {
 			showPaymentModal = false;

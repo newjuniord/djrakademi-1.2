@@ -29,8 +29,8 @@ export const POST: RequestHandler = async ({ request, url }) => {
 			return json({ success: false, message: 'Type de produit ou ID invalide.' }, { status: 400 });
 		}
 
-		if (!['moncash', 'natcash'].includes(paymentMethod)) {
-			return json({ success: false, message: 'Méthode de paiement Plopplop invalide (MonCash ou Natcash requis).' }, { status: 400 });
+		if (!['moncash', 'natcash', 'carte'].includes(paymentMethod)) {
+			return json({ success: false, message: 'Méthode de paiement Plopplop invalide.' }, { status: 400 });
 		}
 
 		const result = await initiatePlopplopPaymentServer(

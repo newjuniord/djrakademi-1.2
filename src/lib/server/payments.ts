@@ -382,9 +382,6 @@ export async function initiatePlopplopPaymentServer(
 	user: AuthenticatedUser,
 	onTrace?: PaymentTraceHandler
 ): Promise<PaymentInitiationResult> {
-	if (params.paymentMethod === 'carte') {
-		throw new PaymentServerError('Les paiements par carte bancaire sont traités exclusivement via Lemon Squeezy.', 400);
-	}
 	const purchase = await resolvePurchase(params, user);
 	const { tables } = adminServices();
 	await rejectRecentPendingOrder(tables, user.$id, params.productType, purchase.productId);

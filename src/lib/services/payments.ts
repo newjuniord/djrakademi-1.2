@@ -11,7 +11,7 @@ export interface InitiatePaymentParams {
 	productTitle: string;
 	amount: number;
 	bookingId?: string;
-	paymentMethod?: 'moncash' | 'natcash' | 'carte';
+	paymentMethod?: 'moncash' | 'natcash' | 'carte' | 'plopplop_carte';
 }
 
 export interface PaymentInitiationResult {
@@ -79,7 +79,7 @@ export async function initiatePlopplopPayment(
 				productType: params.productType,
 				productId: params.productId,
 				bookingId: params.bookingId,
-				paymentMethod: params.paymentMethod
+				paymentMethod: params.paymentMethod === 'plopplop_carte' ? 'carte' : params.paymentMethod
 			})
 		});
 		const data = await response.json();

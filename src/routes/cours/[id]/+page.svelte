@@ -111,7 +111,7 @@
 		}
 	}
 
-	async function handleSelectPaymentMethod(method: 'moncash' | 'natcash' | 'carte') {
+	async function handleSelectPaymentMethod(method: 'moncash' | 'natcash' | 'carte' | 'plopplop_carte') {
 		if (!course || checkoutLoading) return;
 
 		// 1. Vérifier si l'utilisateur est connecté

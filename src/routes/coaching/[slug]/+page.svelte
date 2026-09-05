@@ -140,7 +140,7 @@
 		}
 	}
 
-	async function handleCoachingSelectPaymentMethod(method: "moncash" | "natcash" | "carte") {
+	async function handleCoachingSelectPaymentMethod(method: "moncash" | "natcash" | "carte" | "plopplop_carte") {
 		if (!service || !liveBookingId) return;
 		if (await showMaintenanceIfEnabled()) {
 			showCoachingPaymentModal = false;

@@ -19,7 +19,7 @@
 		amountUsd?: number;
 		isFree?: boolean;
 		loading?: boolean;
-		onSelectMethod: (method: 'moncash' | 'natcash' | 'carte') => void;
+		onSelectMethod: (method: 'moncash' | 'natcash' | 'carte' | 'plopplop_carte') => void;
 		onClose: () => void;
 	} = $props();
 
@@ -84,33 +84,54 @@
 					</div>
 
 					<!-- Option MonCash -->
-					<button
-						type="button"
-						disabled={loading}
-						onclick={() => (selectedMethod = 'moncash')}
-						class="w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer disabled:cursor-not-allowed group {selectedMethod === 'moncash'
-							? 'bg-red-50/80 border-red-500 ring-1 ring-red-500/30'
-							: 'bg-zinc-50/80 border-zinc-200/80 hover:border-zinc-300 hover:bg-zinc-100/60'}"
-					>
-						<div class="flex items-center gap-3.5">
-							<div class="size-11 rounded-xl bg-white border border-zinc-200 flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform overflow-hidden p-1">
-								<img src="/moncash.png" alt="MonCash Logo" class="w-full h-full object-contain" />
-							</div>
-							<div>
-								<div class="flex items-center gap-2">
-									<span class="font-bold text-sm text-zinc-950">MonCash</span>
-									<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-extrabold">MonCash</span>
+					<div class="space-y-1.5">
+						<button
+							type="button"
+							disabled={loading}
+							onclick={() => (selectedMethod = 'moncash')}
+							class="w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer disabled:cursor-not-allowed group {selectedMethod === 'moncash'
+								? 'bg-red-50/80 border-red-500 ring-1 ring-red-500/30'
+								: 'bg-zinc-50/80 border-zinc-200/80 hover:border-zinc-300 hover:bg-zinc-100/60'}"
+						>
+							<div class="flex items-center gap-3.5">
+								<div class="size-11 rounded-xl bg-white border border-zinc-200 flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform overflow-hidden p-1">
+									<img src="/moncash.png" alt="MonCash Logo" class="w-full h-full object-contain" />
 								</div>
-								<p class="text-xs text-zinc-500">Peman mobil rapid ak Digicel MonCash</p>
+								<div>
+									<div class="flex items-center gap-2">
+										<span class="font-bold text-sm text-zinc-950">MonCash</span>
+										<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-extrabold">MonCash</span>
+									</div>
+									<p class="text-xs text-zinc-500">Peman mobil rapid ak Digicel MonCash</p>
+								</div>
 							</div>
-						</div>
 
-						<div class="size-5 rounded-full border grid place-items-center shrink-0 {selectedMethod === 'moncash' ? 'bg-red-500 border-red-500 text-white' : 'border-zinc-300'}">
-							{#if selectedMethod === 'moncash'}
-								<Check size={12} strokeWidth={3} />
-							{/if}
-						</div>
-					</button>
+							<div class="size-5 rounded-full border grid place-items-center shrink-0 {selectedMethod === 'moncash' ? 'bg-red-500 border-red-500 text-white' : 'border-zinc-300'}">
+								{#if selectedMethod === 'moncash'}
+									<Check size={12} strokeWidth={3} />
+								{/if}
+							</div>
+						</button>
+
+						{#if isLocalhost}
+							<div class="p-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-2 text-xs">
+								<div class="flex items-center gap-1.5 text-amber-900 font-bold text-[11px]">
+									<span class="px-1.5 py-0.5 rounded bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider">DEV TEST</span>
+									<span>Plopplop (Kat HTG)</span>
+								</div>
+								<button
+									type="button"
+									disabled={loading}
+									onclick={() => onSelectMethod('plopplop_carte')}
+									class="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-[11px] shadow-xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+									title="Tester le paiement Plopplop avec Carte en local"
+								>
+									<CreditCard size={12} />
+									<span>Test Kat Plopplop</span>
+								</button>
+							</div>
+						{/if}
+					</div>
 
 					<!-- Option NatCash -->
 					<button
@@ -182,23 +203,6 @@
 
 			<!-- Footer CTA (Bouton Noir & Texte Blanc avec Anti-Double Click & Curseur) -->
 			<div class="p-6 border-t border-zinc-100 bg-zinc-50/50 space-y-3">
-				{#if isLocalhost}
-					<div class="p-3 bg-amber-50 border border-amber-300 rounded-2xl flex items-center justify-between gap-3 text-xs">
-						<div class="flex items-center gap-2 text-amber-900 font-bold">
-							<span class="px-2 py-0.5 rounded-md bg-amber-400 text-black text-[10px] font-black uppercase">DEV TEST</span>
-							<span>Test Localhost (Kat / USD)</span>
-						</div>
-						<button
-							type="button"
-							disabled={loading}
-							onclick={() => onSelectMethod('carte')}
-							class="px-3.5 py-1.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white font-black text-xs shadow-xs transition-all cursor-pointer shrink-0"
-						>
-							Peye pa Kat (Test) 💳
-						</button>
-					</div>
-				{/if}
-
 				<button
 					type="button"
 					disabled={loading}
