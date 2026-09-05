@@ -575,33 +575,8 @@
 				<div class="absolute bottom-0 right-10 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl"></div>
 			</div>
 
-			<div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-					
-					<!-- Left Side: Banana 3D Image Illustration -->
-					<div class="lg:col-span-5 relative group">
-						<div class="relative rounded-3xl overflow-hidden border border-white/15 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl p-2 shadow-2xl">
-							<img
-								src="/payment-banana.png"
-								alt="Sipò Peman DJR Akademi - Banana Assistant"
-								class="w-full h-auto object-cover rounded-2xl group-hover:scale-102 transition-transform duration-500"
-							/>
-							<div class="absolute bottom-6 left-6 right-6 bg-zinc-950/85 backdrop-blur-md border border-white/15 p-4 rounded-xl shadow-xl">
-								<div class="flex items-center gap-3">
-									<div class="size-10 bg-amber-400 text-black grid place-items-center rounded-lg font-black shrink-0">
-										<ShieldCheck size={20} />
-									</div>
-									<div>
-										<p class="text-xs font-bold text-white">Verifikasyon Otomatik</p>
-										<p class="text-[11px] text-white/60">Debloke aksè nan kou ou a san retada</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Right Side: Interactive UX Form -->
-					<div class="lg:col-span-7 space-y-6">
+			<div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="space-y-6">
 						<div class="space-y-3">
 							<div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-400/10 border border-amber-400/20 rounded-full text-amber-400 text-xs font-bold uppercase tracking-wider">
 								<HelpCircle size={14} />
@@ -711,8 +686,6 @@
 							</div>
 						{/if}
 					</div>
-
-				</div>
 			</div>
 		</section>
 
