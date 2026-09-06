@@ -11,6 +11,7 @@ export interface SupportPreset {
 export interface SupportMessage {
 	id: string;
 	userId: string;
+	userEmail?: string;
 	orderId?: string;
 	productType?: 'course' | 'ebook' | 'coaching';
 	productTitle?: string;

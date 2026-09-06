@@ -31,23 +31,14 @@ export const SUPPORT_PRESETS: SupportPreset[] = [
 		requiresWhatsapp: true,
 		suggestedProductType: 'coaching'
 	},
-	{
-		id: 'payment_failed_debited',
-		label: 'Peman an te echwe sou sit la men yo debite kòb mwen',
-		description: 'Yo retire lajan an sou kont mwen men sit la montre yon erè.'
-	},
-	{
-		id: 'ebook_download_issue',
-		label: 'Mwen pa ka telechaje ebook mwen an',
-		description: 'Mwen wè ebook la nan bibliyotèk mwen an men telechajman an pa kòmanse.',
-		suggestedProductType: 'ebook'
-	}
+
 ];
 
-export function mapSupportMessage(row: any): SupportMessage {
+export function mapSupportMessage(row: any, userEmail?: string): SupportMessage {
 	return {
 		id: row.$id,
 		userId: row.user_id || '',
+		userEmail: userEmail || undefined,
 		orderId: row.order_id || undefined,
 		productType: row.product_type || undefined,
 		productTitle: row.product_title || undefined,
@@ -91,7 +82,7 @@ export async function getSupportUserStatusServer(userId: string): Promise<Suppor
 			tableId: 'support_messages',
 			queries: [Query.equal('user_id', userId), Query.orderDesc('created_at'), Query.limit(50)]
 		});
-		userMessages = msgsRes.rows.map(mapSupportMessage);
+		userMessages = msgsRes.rows.map((row: any) => mapSupportMessage(row));
 	} catch {
 		userMessages = [];
 	}
@@ -212,7 +203,26 @@ export async function getAdminSupportMessagesServer(
 			tableId: 'support_messages',
 			queries
 		});
-		return res.rows.map(mapSupportMessage);
+
+		// Batch-fetch emails from profiles table
+		const userIds = [...new Set(res.rows.map((r: any) => r.user_id).filter(Boolean))];
+		const emailMap: Record<string, string> = {};
+		if (userIds.length > 0) {
+			try {
+				const profilesRes = await tables.listRows({
+					databaseId: DATABASE_ID,
+					tableId: 'profiles',
+					queries: [Query.equal('user_id', userIds as string[]), Query.limit(100)]
+				});
+				for (const p of profilesRes.rows) {
+					if (p.user_id && p.email) emailMap[p.user_id] = p.email;
+				}
+			} catch {
+				// profiles fetch failed, continue without emails
+			}
+		}
+
+		return res.rows.map((row: any) => mapSupportMessage(row, emailMap[row.user_id]));
 	} catch (error) {
 		console.error('[Admin Support Messages List Error]:', error);
 		return [];
@@ -241,4 +251,47 @@ export async function updateAdminSupportMessageServer(
 		console.error('[Admin Support Message Update Error]:', error);
 		throw new SupportServerError('Impossible de mettre à jour le ticket de support.', 500);
 	}
+}
+
+/**
+ * Purge support messages older than `days` days.
+ * Optionally filter by status. Returns count of deleted rows.
+ */
+export async function purgeOldSupportMessagesServer(
+	days: number = 30,
+	statusFilter?: SupportTicketStatus | 'all'
+): Promise<{ deleted: number }> {
+	const { tables } = adminServices();
+	const cutoff = new Date();
+	cutoff.setDate(cutoff.getDate() - days);
+	const cutoffIso = cutoff.toISOString();
+
+	const queries = [Query.lessThan('created_at', cutoffIso), Query.limit(100)];
+	if (statusFilter && statusFilter !== 'all') {
+		queries.push(Query.equal('status', statusFilter));
+	}
+
+	let deleted = 0;
+	try {
+		const res = await tables.listRows({
+			databaseId: DATABASE_ID,
+			tableId: 'support_messages',
+			queries
+		});
+
+		await Promise.all(
+			res.rows.map((row: any) =>
+				tables.deleteRow({
+					databaseId: DATABASE_ID,
+					tableId: 'support_messages',
+					rowId: row.$id
+				}).then(() => { deleted++; }).catch(() => {})
+			)
+		);
+	} catch (error) {
+		console.error('[Purge Support Messages Error]:', error);
+		throw new SupportServerError('Erreur lors de la purge des tickets.', 500);
+	}
+
+	return { deleted };
 }
