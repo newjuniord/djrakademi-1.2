@@ -268,7 +268,7 @@
 						<div class="size-14 rounded-full bg-amber-50 grid place-items-center mx-auto">
 							<ShoppingBag size={24} class="text-amber-500" />
 						</div>
-						<h3 class="font-bold text-zinc-900">Okenn kòmande jwenn</h3>
+						<h3 class="font-bold text-zinc-900">Nou pa jwenn kenn kòmande</h3>
 						<p class="text-sm text-zinc-500 leading-relaxed max-w-xs mx-auto">
 							Sipò sa a disponib sèlman pou moun ki gen yon tranzaksyon aktif (kou, ebook, oubyen coaching).
 						</p>
