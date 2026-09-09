@@ -586,7 +586,7 @@
 								Ou peye epi w pa jwenn aksè ?
 							</h2>
 							<p class="text-white/60 text-sm leading-relaxed max-w-xl">
-								Pa enkyete w ! Antre enfòmasyon peman w yo anba a epi n ap verifye tranzaksyon w lan imedyatman pou n ka debloke kont ou.
+								Si ou te peye deja sou lòt sit la epi ou pa jwenn kou an, mete imèl ou anba a epi n ap verifye tranzaksyon w lan imedyatman.
 							</p>
 						</div>
 

@@ -145,8 +145,8 @@
 								<HelpCircle size={14} />
 								Sipò & Verifikasyon Directe
 							</div>
-							<h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
-								Antre enfòmasyon peman ou yo
+							<h2 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+								Si ou te peye deja sou lòt sit la epi ou pa jwenn kou an, mete imèl ou.
 							</h2>
 							<p class="text-white/60 text-sm leading-relaxed max-w-xl">
 								Si w te peye pa kat bancaire sou Lemon Squeezy oubyen via MonCash / Natcash epi aksè a pa aktive otomatikman, n ap verifye li pou w imedyatman.
@@ -195,7 +195,7 @@
 										/>
 									</div>
 									<p class="text-[11px] text-white/40">
-										API Lemon Squeezy a ap verifye peman ki lye ak imel sa a epi matche li ak pwodui DJR Akademi an.
+										Lemon Squeezy a ap verifye peman ki lye ak imel sa a epi matche li ak pwodui DJR Akademi an.
 									</p>
 								</div>
 							{:else}
