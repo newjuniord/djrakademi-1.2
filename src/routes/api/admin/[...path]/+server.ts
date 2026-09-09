@@ -430,7 +430,7 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 			]);
 			const paidBookingIds = new Set(paidOrderRows.rows.map((o: any) => o.product_id));
 			for (const b of bookingRows) {
-				if ((b.status === "pending_payment" || b.payment_status === "pending" || b.status === "expired") && paidBookingIds.has(b.$id)) {
+				if ((b.status === "pending_payment" || b.payment_status === "pending") && paidBookingIds.has(b.$id)) {
 					const paidAt = new Date().toISOString();
 					await tables.updateRow({
 						databaseId: DATABASE_ID,
@@ -438,14 +438,6 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 						rowId: b.$id,
 						data: { status: "confirmed", payment_status: "paid", hold_expires_at: null, updated_at: paidAt }
 					}).catch(() => undefined);
-					if (b.slot_id) {
-						await tables.updateRow({
-							databaseId: DATABASE_ID,
-							tableId: "coaching_slots",
-							rowId: b.slot_id,
-							data: { status: "booked" }
-						}).catch(() => undefined);
-					}
 					b.status = "confirmed";
 					b.payment_status = "paid";
 				}
@@ -505,14 +497,10 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
 				if (body.status === "completed" && booking.status !== "confirmed") throw new AdminServerError("Seule une réservation confirmée peut être terminée.", 409);
 				if (body.status === "cancelled" && !["confirmed", "pending_payment"].includes(booking.status)) throw new AdminServerError("Cette réservation ne peut plus être annulée.", 409);
 				if (body.status === "cancelled") {
-					const slot: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: "coaching_slots", rowId: booking.slot_id, transactionId: transaction.$id });
-					if (Date.parse(slot.start_at) > Date.now() && ["held", "booked"].includes(slot.status)) {
-						await tables.updateRow({ databaseId: DATABASE_ID, tableId: "coaching_slots", rowId: slot.$id, transactionId: transaction.$id, data: { status: "available" } });
-					}
 					const orders = await tables.listRows({ databaseId: DATABASE_ID, tableId: "orders", transactionId: transaction.$id, queries: [Query.equal("product_type", "coaching"), Query.equal("product_id", booking.$id), Query.equal("status", "pending"), Query.limit(10)] });
 					for (const order of orders.rows) await tables.updateRow({ databaseId: DATABASE_ID, tableId: "orders", rowId: order.$id, transactionId: transaction.$id, data: { status: "failed" } });
 				}
-				const updated = await tables.updateRow({ databaseId: DATABASE_ID, tableId: "bookings", rowId: booking.$id, transactionId: transaction.$id, data: { status: body.status, ...(body.status === "cancelled" && booking.payment_status === "pending" ? { payment_status: "failed" } : {}), updated_at: new Date().toISOString() } });
+				const updated = await tables.updateRow({ databaseId: DATABASE_ID, tableId: "bookings", rowId: booking.$id, transactionId: transaction.$id, data: { status: body.status, ...(body.status === "cancelled" ? { reservation_key: booking.$id } : {}), ...(body.status === "cancelled" && booking.payment_status === "pending" ? { payment_status: "failed" } : {}), updated_at: new Date().toISOString() } });
 				await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
 				return json(mapBooking(updated));
 			} catch (error) {

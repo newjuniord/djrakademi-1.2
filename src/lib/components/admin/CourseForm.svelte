@@ -186,8 +186,8 @@
 	async function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
 		if (submitting || saving) return;
-		if (!isFree && (!Number.isInteger(price) || price < 100 || price > 100000)) {
-			alert('Le prix doit être un montant entier compris entre 100 et 100 000 HTG.');
+		if (!isFree && (!Number.isInteger(price) || price < 1 || price > 100000)) {
+			alert('Le prix doit être un montant entier compris entre 1 et 100 000 HTG.');
 			return;
 		}
 		submitting = true;
@@ -355,7 +355,7 @@
 				<input
 					id="price"
 					type="number"
-					min="100"
+					min="1"
 					max="100000"
 					step="1"
 					required={!isFree}
@@ -363,7 +363,7 @@
 					bind:value={price}
 					class="input input-bordered bg-base-200/40 w-full rounded-none focus:bg-base-100 text-sm border-base-300 disabled:bg-base-200/20 disabled:text-base-content/40"
 				/>
-				<p class="mt-1 text-[10px] text-base-content/50">Entre 100 et 100 000 HTG.</p>
+				<p class="mt-1 text-[10px] text-base-content/50">Entre 1 et 100 000 HTG.</p>
 			</div>
 
 			<!-- Prix USD -->

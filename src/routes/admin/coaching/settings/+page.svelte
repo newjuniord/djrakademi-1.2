@@ -23,6 +23,12 @@
 	let whatsapp = $state('+50937000000');
 	let timezone = $state('America/Port-au-Prince');
 	let timezoneOpen = $state(false);
+	let workingDays = $state([1, 2, 3, 4, 5]);
+	let workStart = $state('09:00');
+	let workEnd = $state('17:00');
+	let breakDuration = $state(0);
+	let noticeHours = $state(24);
+	let maxAdvanceDays = $state(90);
 
 	let currentTime = $state('');
 	let timeSeoul = $state('');
@@ -46,6 +52,12 @@
 		getCoachingSettings()
 			.then((s) => {
 				country = s.country || 'HT';
+				workingDays = [...s.workingDays];
+				workStart = s.workStart;
+				workEnd = s.workEnd;
+				breakDuration = s.breakDuration;
+				noticeHours = s.noticeHours;
+				maxAdvanceDays = s.maxAdvanceDays;
 				whatsapp = s.whatsapp || '+50937000000';
 				if (s.timezone && isValidTimezone(s.timezone)) {
 					timezone = s.timezone;
@@ -88,7 +100,13 @@
 			await updateCoachingSettings({
 				country,
 				timezone,
-				whatsapp
+				whatsapp,
+				workingDays,
+				workStart,
+				workEnd,
+				breakDuration,
+				noticeHours,
+				maxAdvanceDays
 			});
 			toast.success('Paramètres de coaching enregistrés avec succès.');
 			saved = true;

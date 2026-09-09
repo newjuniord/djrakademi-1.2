@@ -12,7 +12,6 @@ const TABLES = {
   orders: 'orders',
   access: 'access_grants',
   bookings: 'bookings',
-  slots: 'coaching_slots',
   logs: 'payment_logs'
 };
 
@@ -143,24 +142,13 @@ async function confirmPaidOrder(tables, order, transactionId) {
       if (current.user_id && booking.user_id && booking.user_id !== current.user_id) {
         throw new Error('La réservation appartient à un autre utilisateur.');
       }
-      const slot = await tables.getRow({
-        databaseId: DATABASE_ID, tableId: TABLES.slots, rowId: booking.slot_id, transactionId: tx.$id
-      });
       const alreadyConfirmed = booking.status === 'confirmed' && booking.payment_status === 'paid';
-      const slotIsFreeOrHeld = slot.status === 'held' || slot.status === 'available';
-      const canConfirmBooking = (booking.status === 'pending_payment' || booking.status === 'expired') && slotIsFreeOrHeld;
+      const canConfirmBooking = booking.status === 'pending_payment';
       if (!alreadyConfirmed && !canConfirmBooking) {
         throw new Error('Le créneau de coaching ne peut plus être confirmé automatiquement.');
       }
       accessAlreadyExisted = alreadyConfirmed;
       if (!alreadyConfirmed) {
-        await tables.updateRow({
-          databaseId: DATABASE_ID,
-          tableId: TABLES.slots,
-          rowId: slot.$id,
-          transactionId: tx.$id,
-          data: { status: 'booked' }
-        });
         await tables.updateRow({
           databaseId: DATABASE_ID,
           tableId: TABLES.bookings,
@@ -306,9 +294,7 @@ async function expireOldOrder(tables, order) {
     }
     const now = new Date().toISOString();
 
-    // A coaching order owns a temporary hold on a slot. Do this in the same
-    // transaction as the order expiry so an expired payment cannot leave a slot
-    // blocked until the separate booking-maintenance cron runs.
+    // Release the unique reservation key in the same transaction as the order expiry.
     if (current.product_type === 'coaching' && current.product_id) {
       const booking = await tables.getRow({
         databaseId: DATABASE_ID, tableId: TABLES.bookings, rowId: current.product_id, transactionId: tx.$id
@@ -318,25 +304,9 @@ async function expireOldOrder(tables, order) {
       });
 
       if (booking?.status === 'pending_payment' && booking.payment_status === 'pending') {
-        if (booking.slot_id) {
-          const slot = await tables.getRow({
-            databaseId: DATABASE_ID, tableId: TABLES.slots, rowId: booking.slot_id, transactionId: tx.$id
-          }).catch((caught) => {
-            if (caught?.code === 404) return null;
-            throw caught;
-          });
-          // Never turn a booked slot back into available: it may have been
-          // finalized concurrently by a payment confirmation.
-          if (slot?.status === 'held') {
-            await tables.updateRow({
-              databaseId: DATABASE_ID, tableId: TABLES.slots, rowId: slot.$id,
-              transactionId: tx.$id, data: { status: 'available' }
-            });
-          }
-        }
         await tables.updateRow({
           databaseId: DATABASE_ID, tableId: TABLES.bookings, rowId: booking.$id, transactionId: tx.$id,
-          data: { status: 'expired', payment_status: 'expired', hold_expires_at: null, updated_at: now }
+          data: { status: 'expired', payment_status: 'expired', reservation_key: booking.$id, hold_expires_at: null, updated_at: now }
         });
       }
     }

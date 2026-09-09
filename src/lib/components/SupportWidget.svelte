@@ -56,7 +56,14 @@
 		}
 	}
 
-	onMount(() => { if (authState.user) loadStatus(); });
+	onMount(() => {
+		if (authState.user) loadStatus();
+		const handleOpenSupport = () => toggleWidget();
+		window.addEventListener('djr:open-support', handleOpenSupport);
+		return () => {
+			window.removeEventListener('djr:open-support', handleOpenSupport);
+		};
+	});
 
 	$effect(() => {
 		if (authState.user && open && !statusData && !loading) loadStatus();
@@ -166,25 +173,6 @@
 			: ''
 	);
 </script>
-
-<!-- ─── Bouton flottant ─────────────────────────────────────── -->
-<div class="fixed bottom-6 right-6 z-40">
-	<button
-		type="button"
-		onclick={toggleWidget}
-		class="group flex items-center gap-2 px-4 py-3 rounded-full bg-zinc-950 text-white text-sm font-semibold shadow-xl hover:shadow-zinc-900/40 hover:bg-zinc-800 transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10 cursor-pointer"
-		aria-label="Ouvrir le support"
-	>
-		<div class="relative">
-			<MessageSquare size={18} class="text-amber-400" />
-			{#if statusData?.messages?.some((m) => m.status === 'open')}
-				<span class="absolute -top-1 -right-1 size-2 rounded-full bg-red-500 animate-ping"></span>
-				<span class="absolute -top-1 -right-1 size-2 rounded-full bg-red-500"></span>
-			{/if}
-		</div>
-		<span>Sipò Asistans</span>
-	</button>
-</div>
 
 <!-- ─── Modal ──────────────────────────────────────────────── -->
 {#if open}

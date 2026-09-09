@@ -1,8 +1,10 @@
 import { ID, Query, type Models } from 'node-appwrite';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
+import { generateDynamicSlots } from '$lib/coaching/availability';
+import { DEFAULT_SETTINGS, mapServiceDoc, mapSettingsDoc } from '$lib/services/coaching';
 
 const HOLD_MINUTES = 60;
-const TABLES = { services: 'coaching_services', slots: 'coaching_slots', bookings: 'bookings', orders: 'orders', settings: 'coaching_settings' };
+const TABLES = { services: 'coaching_services', bookings: 'bookings', orders: 'orders', settings: 'coaching_settings', unavailability: 'coaching_unavailability' };
 
 export class BookingServerError extends Error {
 	constructor(message: string, public status = 500) {
@@ -26,7 +28,7 @@ function validTimezone(value: unknown): boolean {
 
 export function mapBooking(row: any) {
 	return {
-		id: row.$id, serviceId: row.service_id || '', slotId: row.slot_id || '', userId: row.user_id || null,
+		id: row.$id, serviceId: row.service_id || '', userId: row.user_id || null,
 		customerName: row.customer_name || '', customerEmail: row.customer_email || '', customerWhatsapp: row.customer_whatsapp || '',
 		customerTimezone: row.customer_timezone || 'America/Port-au-Prince', coachTimezone: row.coach_timezone || 'America/Port-au-Prince',
 		startAt: row.start_at || '', endAt: row.end_at || '', amount: Number(row.amount) || 0, currency: 'HTG' as const,
@@ -36,38 +38,70 @@ export function mapBooking(row: any) {
 }
 
 export async function createBookingServer(body: any, user: Models.User<Models.Preferences>) {
-	const slotId = typeof body?.slotId === 'string' ? body.slotId.trim() : '';
+	const serviceId = typeof body?.serviceId === 'string' ? body.serviceId.trim() : '';
+	const startAt = typeof body?.startAt === 'string' ? body.startAt.trim() : '';
+	const endAt = typeof body?.endAt === 'string' ? body.endAt.trim() : '';
 	const customerName = typeof body?.customerName === 'string' ? body.customerName.trim() : '';
 	const customerWhatsapp = typeof body?.customerWhatsapp === 'string' ? body.customerWhatsapp.trim() : '';
 	const customerTimezone = typeof body?.customerTimezone === 'string' ? body.customerTimezone.trim() : '';
-	if (!slotId || customerName.length < 2 || customerName.length > 160 || !validPhone(customerWhatsapp) || !validTimezone(customerTimezone)) {
+	const startTime = Date.parse(startAt);
+	const endTime = Date.parse(endAt);
+	if (!serviceId || !Number.isFinite(startTime) || !Number.isFinite(endTime) || endTime <= startTime ||
+		customerName.length < 2 || customerName.length > 160 || !validPhone(customerWhatsapp) || !validTimezone(customerTimezone)) {
 		throw new BookingServerError('Informations de réservation invalides.', 400);
 	}
 
 	const { tables } = adminServices();
 	const transaction = await tables.createTransaction({ ttl: 60 });
 	try {
-		const slot: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: TABLES.slots, rowId: slotId, transactionId: transaction.$id });
-		if (slot.status !== 'available' || Date.parse(slot.start_at) <= Date.now()) throw new BookingServerError('Ce créneau n’est plus disponible.', 409);
-		const service: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: TABLES.services, rowId: slot.service_id, transactionId: transaction.$id });
+		const service: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: TABLES.services, rowId: serviceId, transactionId: transaction.$id });
 		if (!service.active) throw new BookingServerError('Cette offre de coaching n’est plus disponible.', 409);
-
+		const settingsPage = await tables.listRows({
+			databaseId: DATABASE_ID, tableId: TABLES.settings, transactionId: transaction.$id, queries: [Query.limit(1)]
+		});
+		const settings = settingsPage.rows[0] ? mapSettingsDoc(settingsPage.rows[0]) : DEFAULT_SETTINGS;
+		const unavailablePage = await tables.listRows({
+			databaseId: DATABASE_ID,
+			tableId: TABLES.unavailability,
+			transactionId: transaction.$id,
+			queries: [Query.equal('service_id', serviceId), Query.lessThan('start_at', endAt), Query.greaterThan('end_at', startAt), Query.limit(100)]
+		});
+		const bookingPage = await tables.listRows({
+			databaseId: DATABASE_ID,
+			tableId: TABLES.bookings,
+			transactionId: transaction.$id,
+			queries: [Query.equal('service_id', serviceId), Query.lessThan('start_at', endAt), Query.greaterThan('end_at', startAt), Query.limit(100)]
+		});
 		const now = new Date();
+		const bookings = bookingPage.rows.map((booking: any) => ({
+			startAt: booking.start_at, endAt: booking.end_at, status: booking.status, holdExpiresAt: booking.hold_expires_at
+		}));
+		const requestedDays = Math.max(1, Math.ceil((startTime - now.getTime()) / 86_400_000) + 1);
+		const validSlot = generateDynamicSlots(
+			mapServiceDoc(service), settings, bookings,
+			unavailablePage.rows.map((item: any) => ({
+				id: item.$id, serviceId: item.service_id || null, startAt: item.start_at, endAt: item.end_at, reason: item.reason || ''
+			})),
+			{ now, days: requestedDays }
+		).some((slot) => slot.startAt === new Date(startTime).toISOString() && slot.endAt === new Date(endTime).toISOString());
+		if (!validSlot) throw new BookingServerError('Ce créneau n’est plus disponible.', 409);
+
 		const isFree = Boolean(service.is_free) || Number(service.price) <= 0;
 		const amount = isFree ? 0 : Number(service.price);
 		if (!Number.isFinite(amount) || amount < 0) throw new BookingServerError('Le tarif du coaching est invalide.', 409);
 		const bookingId = ID.unique();
 		const holdExpiresAt = isFree ? null : new Date(now.getTime() + HOLD_MINUTES * 60_000).toISOString();
+		const reservationKey = `${serviceId}:${new Date(startTime).toISOString()}`;
 
-		await tables.updateRow({ databaseId: DATABASE_ID, tableId: TABLES.slots, rowId: slot.$id, transactionId: transaction.$id, data: { status: isFree ? 'booked' : 'held' } });
 		await tables.createRow({
 			databaseId: DATABASE_ID, tableId: TABLES.bookings, rowId: bookingId, transactionId: transaction.$id,
 			data: {
-				service_id: service.$id, slot_id: slot.$id, user_id: user.$id, customer_name: customerName, customer_email: user.email,
-				customer_whatsapp: customerWhatsapp, customer_timezone: customerTimezone, coach_timezone: slot.coach_timezone,
-				start_at: slot.start_at, end_at: slot.end_at, amount, currency: 'HTG', status: isFree ? 'confirmed' : 'pending_payment',
-				payment_status: isFree ? 'not_required' : 'pending', hold_expires_at: holdExpiresAt || undefined,
-				created_at: now.toISOString(), updated_at: now.toISOString()
+				service_id: service.$id, reservation_key: reservationKey, user_id: user.$id,
+				customer_name: customerName, customer_email: user.email, customer_whatsapp: customerWhatsapp,
+				customer_timezone: customerTimezone, coach_timezone: settings.timezone,
+				start_at: new Date(startTime).toISOString(), end_at: new Date(endTime).toISOString(), amount, currency: 'HTG',
+				status: isFree ? 'confirmed' : 'pending_payment', payment_status: isFree ? 'not_required' : 'pending',
+				hold_expires_at: holdExpiresAt || undefined, created_at: now.toISOString(), updated_at: now.toISOString()
 			}
 		});
 
@@ -122,14 +156,6 @@ export async function getOwnedBookingServer(bookingId: string, userId: string) {
 			booking.status = 'confirmed';
 			booking.payment_status = 'paid';
 
-			if (booking.slot_id) {
-				await tables.updateRow({
-					databaseId: DATABASE_ID,
-					tableId: TABLES.slots,
-					rowId: booking.slot_id,
-					data: { status: 'booked' }
-				}).catch(() => undefined);
-			}
 		}
 	}
 

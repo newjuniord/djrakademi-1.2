@@ -25,6 +25,7 @@
 				<a href="/catalogue" class="hover:text-amber-400 transition-colors">Katalòg</a>
 				<a href="/verify" class="hover:text-amber-400 transition-colors">Verifye Peman</a>
 				<a href="/about" class="hover:text-amber-400 transition-colors">Konsènan nou</a>
+				<a href="/terms" class="hover:text-amber-400 transition-colors">Kondisyon Sèvis</a>
 				<a href="/contact" class="flex items-center gap-1.5 hover:text-amber-400 transition-colors">
 					<Mail size={14} class="text-amber-400" />
 					<span>Kontak</span>
@@ -39,6 +40,8 @@
 			</p>
 
 			<div class="flex items-center gap-4 text-[11px] font-mono text-zinc-400">
+				<a href="/terms" class="hover:text-amber-400 transition-colors underline">Kondisyon d'Itilizasyon</a>
+				<span>·</span>
 				<span>Pòtoprens, Ayiti</span>
 				<span>·</span>
 				<span>Peman MonCash ak Natcash</span>

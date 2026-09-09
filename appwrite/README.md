@@ -1,25 +1,23 @@
 # Coaching booking — Appwrite setup
 
-`schema.json` is the single source of truth for the TablesDB data model. Storage fields use `snake_case`; Svelte/TypeScript models use `camelCase` and are converted only by the service mappers. To create every missing database/table from this schema, run `APPWRITE_API_KEY=... npm run setup:schema` from the `appwrite/` directory. Existing tables are preserved and must be migrated separately before renaming columns.
+`schema.json` is the single source of truth for the TablesDB data model. Storage fields use `snake_case`; Svelte/TypeScript models use `camelCase` and are converted only by the service mappers. To create every missing database/table from this schema, run `APPWRITE_API_KEY=... npm run setup:schema` from the `appwrite/` directory. Existing tables are preserved. For this change, run `npm run setup:schema`, then `npm run migrate:dynamic-coaching`. After validating production, rerun the migration with `CONFIRM_DROP_COACHING_SLOTS=yes` to remove the legacy table.
 
 ## Security model
 
 - `coaching_services`: public read, admin team write.
-- `coaching_slots`: public read only. All writes go through an authenticated admin surface or Functions.
+- `coaching_unavailability`: admin-managed date ranges; public availability is exposed only through the server API.
+- `bookings.reservation_key`: unique lock for active dynamic reservations; cancelled or expired bookings replace it with their own ID.
 - `bookings` and `payments`: no client permissions. Functions have the required TablesDB scopes.
 - Never expose `APPWRITE_FUNCTION_API_KEY` or payment-provider secrets to SvelteKit public environment variables.
-- Keep the final price, slot hold, payment state and confirmation inside Functions.
+- Keep the final price, availability validation, temporary hold, payment state and confirmation on the server.
 
 ## Functions
 
 Use `appwrite/` as the root directory for both Functions, `npm install` as the build command, and the relevant `functions/.../index.js` file as each entrypoint. This keeps the booking rules shared and tested once.
 
-### `booking-api`
+### Dynamic booking API
 
-- Execute permission: `any` (guest bookings are supported).
-- TablesDB scopes: rows read/write and transactions read/write.
-- POST `{ slotId, customerName, customerEmail, customerWhatsapp, customerTimezone }` to create an atomic hold.
-- POST `{ action: "create_payment", bookingId }` to create the provider payment.
+The SvelteKit routes `GET /api/coaching/[serviceId]/availability` and `POST /api/bookings` calculate and validate availability. The former `booking-api` Function returns HTTP 410 so stale clients cannot write through the removed slot model.
 
 ### `booking-maintenance`
 
@@ -73,7 +71,7 @@ Never return authorization headers, cookies, passwords, API keys, webhook signat
 - No public execute permission.
 - Schedule: `*/15 * * * *`.
 - TablesDB scopes: rows read/write.
-- It expires pending orders older than 60 minutes without calling Plopplop (up to 200 per run). For a coaching order, this same transaction expires the booking and releases its held slot.
+- It expires pending orders older than 60 minutes without calling Plopplop (up to 200 per run). For a coaching order, this same transaction expires the booking and releases its unique reservation key.
 - It verifies up to 50 recent MonCash, NatCash or card pending orders per run. Lemon Squeezy orders are finalized only through their signed webhook and are never sent to Plopplop.
 - Only `trans_status: "ok"` can mark an order paid and grant course/ebook access or confirm coaching.
 - Access grants use the unique `(user_id,item_type,item_id)` index and an Appwrite transaction to prevent duplicates.

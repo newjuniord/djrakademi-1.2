@@ -77,21 +77,13 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, t
 		}
 		if (productType === 'coaching' && productId) {
 			const booking: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: BOOKINGS_TABLE, rowId: productId }).catch(() => null);
-			if (booking && (booking.status !== 'confirmed' || booking.payment_status !== 'paid')) {
+			if (booking && ['pending_payment', 'confirmed'].includes(booking.status) && (booking.status !== 'confirmed' || booking.payment_status !== 'paid')) {
 				await tables.updateRow({
 					databaseId: DATABASE_ID,
 					tableId: BOOKINGS_TABLE,
 					rowId: booking.$id,
 					data: { status: 'confirmed', payment_status: 'paid', payment_id: transactionId || orderRow.payment_id || undefined, hold_expires_at: null, updated_at: paidAt }
 				}).catch(() => null);
-				if (booking.slot_id) {
-					await tables.updateRow({
-						databaseId: DATABASE_ID,
-						tableId: 'coaching_slots',
-						rowId: booking.slot_id,
-						data: { status: 'booked' }
-					}).catch(() => null);
-				}
 			}
 		}
 		return true; // Déjà confirmé
@@ -109,6 +101,7 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, t
 			}).catch(() => null);
 
 			if (booking) {
+				if (!['pending_payment', 'confirmed'].includes(booking.status)) throw new Error('La réservation a expiré avant la confirmation du paiement.');
 				await tables.updateRow({
 					databaseId: DATABASE_ID,
 					tableId: BOOKINGS_TABLE,
@@ -122,15 +115,6 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, t
 						updated_at: paidAt
 					}
 				});
-				if (booking.slot_id) {
-					await tables.updateRow({
-						databaseId: DATABASE_ID,
-						tableId: 'coaching_slots',
-						rowId: booking.slot_id,
-						transactionId: transaction.$id,
-						data: { status: 'booked' }
-					}).catch((err) => console.warn('[Slot update error]:', err));
-				}
 			}
 		}
 

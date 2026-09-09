@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { CalendarPlus, ChevronDown, Clock3, Plus, Trash2, X, Zap, Check, Sparkles, Loader2 } from 'lucide-svelte';
+	import { CalendarPlus, ChevronDown, Clock3, Plus, Trash2, X, Zap, Check, Sparkles, Loader2, Eye, CheckCircle2 } from 'lucide-svelte';
 	import { formatDateTimeInTimezone, getTimezoneLabel, localDateTimeToUtc } from '$lib/coaching/timezone';
 	import type { CoachingSlot } from '$lib/types/coaching';
 
-	let { slots, timezone, serviceId, serviceDuration = 60, onAdd, onAddBatch, onDelete }: {
+	let { slots, timezone, serviceId, serviceDuration = 60, onAdd, onAddBatch, onDelete, onDeleteBatch }: {
 		slots: CoachingSlot[];
 		timezone: string;
 		serviceId: string;
@@ -11,11 +11,16 @@
 		onAdd: (slot: CoachingSlot) => void;
 		onAddBatch?: (batch: { startAt: string; endAt: string }[]) => Promise<number>;
 		onDelete: (id: string) => void;
+		onDeleteBatch?: (ids: string[]) => Promise<void>;
 	} = $props();
 
 	let adding = $state(false);
 	let mode = $state<'bulk' | 'single'>('bulk');
 	let generatingBatch = $state(false);
+	let showReviewModal = $state(false);
+	let selectedSlotIds = $state<string[]>([]);
+	let showBulkDeleteConfirm = $state(false);
+	let deletingBatch = $state(false);
 
 	// Single Slot State
 	let date = $state(new Date().toISOString().slice(0, 10));
@@ -75,11 +80,47 @@
 	}
 
 	function setPresetDateRange(days: number) {
-		const start = new Date();
-		bulkStartDate = start.toISOString().slice(0, 10);
-		const end = new Date();
-		end.setDate(end.getDate() + days);
+		const cappedDays = Math.min(days, 190);
+		const start = bulkStartDate ? new Date(bulkStartDate) : new Date();
+		const baseStart = isNaN(start.getTime()) ? new Date() : start;
+		bulkStartDate = baseStart.toISOString().slice(0, 10);
+		const end = new Date(baseStart);
+		end.setDate(end.getDate() + cappedDays);
 		bulkEndDate = end.toISOString().slice(0, 10);
+	}
+
+	let maximumEndDate = $derived.by(() => {
+		if (!bulkStartDate) return undefined;
+		const parts = bulkStartDate.split('-').map(Number);
+		if (parts.length !== 3) return undefined;
+		const start = new Date(parts[0], parts[1] - 1, parts[2]);
+		if (isNaN(start.getTime())) return undefined;
+		start.setDate(start.getDate() + 190);
+		return start.toISOString().slice(0, 10);
+	});
+
+	$effect(() => {
+		if (maximumEndDate && bulkEndDate && bulkEndDate > maximumEndDate) {
+			bulkEndDate = maximumEndDate;
+		}
+	});
+
+	function formatHumanDate(dateStr: string) {
+		if (!dateStr) return '...';
+		const parts = dateStr.split('-');
+		if (parts.length !== 3) return dateStr;
+		const year = parseInt(parts[0], 10);
+		const month = parseInt(parts[1], 10) - 1;
+		const day = parseInt(parts[2], 10);
+		const d = new Date(year, month, day);
+		if (isNaN(d.getTime())) return dateStr;
+		const today = new Date();
+		const isToday =
+			d.getFullYear() === today.getFullYear() &&
+			d.getMonth() === today.getMonth() &&
+			d.getDate() === today.getDate();
+		const formatted = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+		return isToday ? `aujourd’hui (${formatted})` : formatted;
 	}
 
 	// Calculate generated slots in real-time
@@ -146,6 +187,13 @@
 		return result;
 	});
 
+	let activeDaysLabel = $derived(
+		selectedDays
+			.map((id) => daysMap.find((d) => d.id === id)?.full)
+			.filter(Boolean)
+			.join(', ')
+	);
+
 	function addSlot() {
 		const startAt = localDateTimeToUtc(date, startTime, timezone);
 		const endAt = localDateTimeToUtc(date, endTime, timezone);
@@ -171,9 +219,49 @@
 				endAt: item.endAt
 			}));
 			await onAddBatch(batchPayload);
+			showReviewModal = false;
 			adding = false;
 		} finally {
 			generatingBatch = false;
+		}
+	}
+
+	let availableSlots = $derived(visibleSlots.filter((s) => s.status === 'available'));
+	let allAvailableSelected = $derived(
+		availableSlots.length > 0 && availableSlots.every((s) => selectedSlotIds.includes(s.id))
+	);
+
+	function toggleSelectSlot(id: string) {
+		if (selectedSlotIds.includes(id)) {
+			selectedSlotIds = selectedSlotIds.filter((item) => item !== id);
+		} else {
+			selectedSlotIds = [...selectedSlotIds, id];
+		}
+	}
+
+	function toggleSelectAllAvailable() {
+		if (allAvailableSelected) {
+			selectedSlotIds = [];
+		} else {
+			selectedSlotIds = availableSlots.map((s) => s.id);
+		}
+	}
+
+	async function handleConfirmBulkDelete() {
+		if (selectedSlotIds.length === 0 || deletingBatch) return;
+		deletingBatch = true;
+		try {
+			if (onDeleteBatch) {
+				await onDeleteBatch(selectedSlotIds);
+			} else {
+				for (const id of selectedSlotIds) {
+					await onDelete(id);
+				}
+			}
+			selectedSlotIds = [];
+			showBulkDeleteConfirm = false;
+		} finally {
+			deletingBatch = false;
 		}
 	}
 </script>
@@ -201,11 +289,36 @@
 	</div>
 
 	<div class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 bg-base-200/35 px-5 py-3 sm:px-6">
-		<p class="flex items-center gap-2 text-xs text-base-content/60">
-			<Clock3 size={15} />
-			<span>Fizo orè : <strong class="text-base-content font-bold">{getTimezoneLabel(timezone)}</strong></span>
-		</p>
-		<p class="text-xs text-base-content/50 font-semibold">{availableCount} disponible{availableCount > 1 ? 's' : ''} sur {slots.length} au total</p>
+		<div class="flex items-center gap-3">
+			{#if availableSlots.length > 0}
+				<label class="flex items-center gap-2 text-xs font-bold text-base-content/70 cursor-pointer select-none">
+					<input
+						type="checkbox"
+						class="checkbox checkbox-primary checkbox-sm rounded-md"
+						checked={allAvailableSelected}
+						onchange={toggleSelectAllAvailable}
+					/>
+					<span>Tout sélectionner ({availableSlots.length})</span>
+				</label>
+			{/if}
+			<p class="flex items-center gap-2 text-xs text-base-content/60 border-l border-base-300 pl-3">
+				<Clock3 size={15} />
+				<span>Fuseau horaire : <strong class="text-base-content font-bold">{getTimezoneLabel(timezone)}</strong></span>
+			</p>
+		</div>
+		<div class="flex items-center gap-3">
+			{#if selectedSlotIds.length > 0}
+				<button
+					type="button"
+					class="btn btn-error btn-xs font-extrabold gap-1.5 rounded-lg px-3 shadow-xs"
+					onclick={() => (showBulkDeleteConfirm = true)}
+				>
+					<Trash2 size={13} />
+					Supprimer la sélection ({selectedSlotIds.length})
+				</button>
+			{/if}
+			<p class="text-xs text-base-content/50 font-semibold">{availableCount} disponible{availableCount > 1 ? 's' : ''} sur {slots.length} au total</p>
+		</div>
 	</div>
 
 	{#if adding}
@@ -235,27 +348,43 @@
 				<div class="space-y-6 bg-base-100 p-5 sm:p-6 rounded-2xl border border-base-300/80 shadow-xs">
 					<!-- Step 1: Date Range -->
 					<div class="space-y-3">
-						<div class="flex items-center justify-between">
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
 							<span class="text-xs font-extrabold uppercase tracking-wider text-base-content/70 flex items-center gap-1.5">
 								<span class="size-5 rounded-full bg-primary/10 text-primary text-[10px] font-black grid place-items-center">1</span>
-								Période de réservation
+								Période de réservation (Max 190 jours)
 							</span>
-							<div class="flex items-center gap-1.5 text-[11px] font-bold">
-								<button type="button" class="px-2.5 py-1 bg-base-200 hover:bg-base-300 rounded-lg transition-colors" onclick={() => setPresetDateRange(7)}>+7 jours</button>
-								<button type="button" class="px-2.5 py-1 bg-base-200 hover:bg-base-300 rounded-lg transition-colors" onclick={() => setPresetDateRange(14)}>+14 jours</button>
-								<button type="button" class="px-2.5 py-1 bg-base-200 hover:bg-base-300 rounded-lg transition-colors" onclick={() => setPresetDateRange(30)}>+30 jours</button>
+							<div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
+								<button type="button" class="px-2 py-1 bg-base-200 hover:bg-base-300 rounded-lg transition-colors cursor-pointer" onclick={() => setPresetDateRange(7)}>+7j</button>
+								<button type="button" class="px-2 py-1 bg-base-200 hover:bg-base-300 rounded-lg transition-colors cursor-pointer" onclick={() => setPresetDateRange(14)}>+14j</button>
+								<button type="button" class="px-2 py-1 bg-base-200 hover:bg-base-300 rounded-lg transition-colors cursor-pointer" onclick={() => setPresetDateRange(30)}>+30j</button>
+								<button type="button" class="px-2 py-1 bg-base-200 hover:bg-base-300 rounded-lg transition-colors cursor-pointer" onclick={() => setPresetDateRange(60)}>+60j</button>
+								<button type="button" class="px-2 py-1 bg-base-200 hover:bg-base-300 rounded-lg transition-colors cursor-pointer" onclick={() => setPresetDateRange(90)}>+90j</button>
+								<button type="button" class="px-2.5 py-1 bg-primary/15 text-primary hover:bg-primary/20 rounded-lg transition-colors font-extrabold cursor-pointer" onclick={() => setPresetDateRange(190)}>+190j (Max)</button>
 							</div>
 						</div>
 
 						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 							<label class="form-control">
-								<span class="label pb-1.5 text-xs font-bold text-base-content/70">Date de début</span>
+								<span class="label pb-1 text-xs font-bold text-base-content/70">Date de début</span>
 								<input class="input input-bordered input-sm bg-base-100 rounded-xl font-bold text-xs" type="date" min={minimumDate} bind:value={bulkStartDate} />
+								<span class="text-[11px] text-base-content/50 font-medium mt-1">Jour d’ouverture des réservations</span>
 							</label>
 							<label class="form-control">
-								<span class="label pb-1.5 text-xs font-bold text-base-content/70">Date de fin</span>
-								<input class="input input-bordered input-sm bg-base-100 rounded-xl font-bold text-xs" type="date" min={bulkStartDate} bind:value={bulkEndDate} />
+								<span class="label pb-1 text-xs font-bold text-base-content/70">Date de fin</span>
+								<input class="input input-bordered input-sm bg-base-100 rounded-xl font-bold text-xs" type="date" min={bulkStartDate} max={maximumEndDate} bind:value={bulkEndDate} />
+								<span class="text-[11px] text-base-content/50 font-medium mt-1">Dernier jour (jusqu’à 190 jours max)</span>
 							</label>
+						</div>
+
+						<!-- Dynamic Beginner-Friendly UX Explanation Banner -->
+						<div class="rounded-2xl border border-primary/20 bg-primary/5 p-3.5 text-xs text-base-content space-y-1">
+							<div class="flex items-center gap-2 text-primary font-extrabold text-xs">
+								<Sparkles size={15} class="fill-primary/20" />
+								<span>Explication simple (en un coup d’œil) :</span>
+							</div>
+							<p class="text-xs font-medium leading-relaxed text-base-content/80">
+								Vos créneaux seront automatiquement créés du <strong class="text-base-content font-bold">{formatHumanDate(bulkStartDate)}</strong> au <strong class="text-base-content font-bold">{formatHumanDate(bulkEndDate)}</strong> (chaque jour sélectionné de <strong class="text-base-content font-bold">{bulkWorkStart}</strong> à <strong class="text-base-content font-bold">{bulkWorkEnd}</strong>).
+							</p>
 						</div>
 					</div>
 
@@ -346,16 +475,16 @@
 
 						<button
 							type="button"
-							class="btn btn-primary min-h-12 rounded-xl font-extrabold text-xs gap-2 px-6 shadow-md shrink-0"
+							class="btn btn-primary min-h-12 rounded-xl font-extrabold text-xs gap-2 px-6 shadow-md shrink-0 cursor-pointer"
 							disabled={calculatedBatch.length === 0 || generatingBatch}
-							onclick={handleBulkSubmit}
+							onclick={() => (showReviewModal = true)}
 						>
 							{#if generatingBatch}
 								<Loader2 size={16} class="animate-spin" />
 								<span>Génération en cours…</span>
 							{:else}
-								<Sparkles size={16} class="text-amber-300" />
-								<span>Générer les {calculatedBatch.length} créneaux en 1 clic</span>
+								<Eye size={16} class="text-amber-300" />
+								<span>Revoir & Générer ({calculatedBatch.length} créneaux)</span>
 							{/if}
 						</button>
 					</div>
@@ -396,7 +525,19 @@
 		{#each visibleSlots as slot (slot.id)}
 			{@const formatted = formatDateTimeInTimezone(slot.startAt, timezone)}
 			{@const end = formatDateTimeInTimezone(slot.endAt, timezone)}
-			<div class="flex items-center gap-3 border-b border-base-300 px-4 py-4 last:border-b-0 sm:gap-4 sm:px-6 hover:bg-base-200/20 transition-colors">
+			{@const isSelected = selectedSlotIds.includes(slot.id)}
+			<div class="flex items-center gap-3 border-b border-base-300 px-4 py-4 last:border-b-0 sm:gap-4 sm:px-6 transition-colors {isSelected ? 'bg-primary/5' : 'hover:bg-base-200/20'}">
+				{#if slot.status === 'available'}
+					<input
+						type="checkbox"
+						class="checkbox checkbox-primary checkbox-sm rounded-md shrink-0 cursor-pointer"
+						checked={isSelected}
+						onchange={() => toggleSelectSlot(slot.id)}
+						aria-label="Sélectionner ce créneau"
+					/>
+				{:else}
+					<div class="size-5 shrink-0"></div>
+				{/if}
 				<div class="grid size-10 shrink-0 place-items-center rounded-xl border border-base-300 bg-base-200/50 text-primary">
 					<CalendarPlus size={18} />
 				</div>
@@ -445,3 +586,174 @@
 		</button>
 	{/if}
 </section>
+
+{#if showReviewModal}
+	<div class="modal modal-open z-50" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
+		<div class="modal-box max-w-2xl space-y-5 rounded-3xl p-6 sm:p-8">
+			<button
+				class="btn btn-ghost btn-sm btn-circle absolute right-4 top-4"
+				type="button"
+				aria-label="Fermer"
+				onclick={() => (showReviewModal = false)}
+			>
+				<X size={18} />
+			</button>
+
+			<!-- Header -->
+			<div class="flex items-center gap-3.5 border-b border-base-200 pb-4">
+				<div class="grid size-12 shrink-0 place-items-center rounded-2xl bg-amber-500/10 text-amber-500">
+					<Sparkles size={24} />
+				</div>
+				<div>
+					<h3 id="review-modal-title" class="text-lg font-bold text-base-content">
+						Révision du planning avant création
+					</h3>
+					<p class="text-xs text-base-content/60 font-medium">
+						Vérifiez la liste exacte des créneaux qui vont être générés.
+					</p>
+				</div>
+			</div>
+
+			<!-- Configuration Summary Grid -->
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border border-base-200 bg-base-200/40 p-4 text-xs">
+				<div>
+					<span class="text-[11px] font-bold uppercase tracking-wider text-base-content/50 block">Période</span>
+					<p class="font-bold text-base-content mt-0.5">
+						Du {formatHumanDate(bulkStartDate)} au {formatHumanDate(bulkEndDate)}
+					</p>
+				</div>
+				<div>
+					<span class="text-[11px] font-bold uppercase tracking-wider text-base-content/50 block">Jours sélectionnés</span>
+					<p class="font-bold text-base-content mt-0.5">
+						{activeDaysLabel || 'Aucun jour'}
+					</p>
+				</div>
+				<div>
+					<span class="text-[11px] font-bold uppercase tracking-wider text-base-content/50 block">Plage horaire</span>
+					<p class="font-bold text-base-content mt-0.5">
+						De {bulkWorkStart} à {bulkWorkEnd} ({bulkSlotDuration} min / créneau{bulkBreakDuration ? `, pause: ${bulkBreakDuration} min` : ''})
+					</p>
+				</div>
+				<div>
+					<span class="text-[11px] font-bold uppercase tracking-wider text-base-content/50 block">Total à publier</span>
+					<p class="font-black text-primary text-sm mt-0.5">
+						{calculatedBatch.length} créneau{calculatedBatch.length > 1 ? 'x' : ''} prêt{calculatedBatch.length > 1 ? 's' : ''} à être généré{calculatedBatch.length > 1 ? 's' : ''}
+					</p>
+				</div>
+			</div>
+
+			<!-- Calculated Slots Scrollable Preview List -->
+			<div class="space-y-2">
+				<div class="flex items-center justify-between px-1">
+					<span class="text-xs font-bold text-base-content/70">Aperçu détaillé des créneaux :</span>
+					<span class="text-[11px] font-semibold text-base-content/50">{calculatedBatch.length} créneau{calculatedBatch.length > 1 ? 'x' : ''} au total</span>
+				</div>
+
+				<div class="max-h-60 overflow-y-auto rounded-2xl border border-base-200 bg-base-100 p-2 space-y-1.5 divide-y divide-base-200/60">
+					{#each calculatedBatch as slot, idx}
+						<div class="flex items-center justify-between px-3 py-2 text-xs">
+							<div class="flex items-center gap-2.5">
+								<span class="size-5 rounded-full bg-base-200 text-base-content/60 text-[10px] font-bold grid place-items-center">{idx + 1}</span>
+								<span class="font-bold text-base-content capitalize">{formatHumanDate(slot.dateStr)}</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<span class="font-extrabold text-primary font-mono bg-primary/10 px-2.5 py-1 rounded-lg text-[11px]">
+									{slot.startFormatted} – {slot.endFormatted}
+								</span>
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Modal Footer Actions -->
+			<div class="modal-action border-t border-base-200 pt-4">
+				<button
+					type="button"
+					class="btn btn-ghost rounded-xl text-xs font-bold"
+					disabled={generatingBatch}
+					onclick={() => (showReviewModal = false)}
+				>
+					Modifier les critères
+				</button>
+				<button
+					type="button"
+					class="btn btn-primary rounded-xl font-extrabold text-xs gap-2 px-6 shadow-md cursor-pointer"
+					disabled={generatingBatch || calculatedBatch.length === 0}
+					onclick={handleBulkSubmit}
+				>
+					{#if generatingBatch}
+						<Loader2 size={16} class="animate-spin" />
+						<span>Génération en cours…</span>
+					{:else}
+						<CheckCircle2 size={16} />
+						<span>Confirmer & Générer les {calculatedBatch.length} créneaux</span>
+					{/if}
+				</button>
+			</div>
+		</div>
+		<button class="modal-backdrop" type="button" aria-label="Fermer" onclick={() => (showReviewModal = false)}>close</button>
+	</div>
+{/if}
+
+{#if showBulkDeleteConfirm}
+	<div class="modal modal-open z-50" role="dialog" aria-modal="true" aria-labelledby="bulk-delete-title">
+		<div class="modal-box max-w-md space-y-4 rounded-3xl p-6">
+			<button
+				class="btn btn-ghost btn-sm btn-circle absolute right-3 top-3"
+				type="button"
+				aria-label="Fermer"
+				onclick={() => (showBulkDeleteConfirm = false)}
+			>
+				<X size={18} />
+			</button>
+
+			<div class="flex items-center gap-3.5">
+				<div class="grid size-12 shrink-0 place-items-center rounded-2xl bg-error/10 text-error">
+					<Trash2 size={24} />
+				</div>
+				<div>
+					<h3 id="bulk-delete-title" class="text-lg font-bold text-base-content">
+						Confirmer la suppression
+					</h3>
+					<p class="text-xs text-base-content/60 font-medium">
+						{selectedSlotIds.length} créneau{selectedSlotIds.length > 1 ? 'x' : ''} sélectionné{selectedSlotIds.length > 1 ? 's' : ''}
+					</p>
+				</div>
+			</div>
+
+			<div class="rounded-2xl border border-error/20 bg-error/5 p-4 text-xs space-y-1">
+				<p class="font-extrabold text-error">Attention :</p>
+				<p class="text-xs font-medium leading-relaxed text-base-content/80">
+					Vous allez supprimer définitivement <strong class="text-base-content font-bold">{selectedSlotIds.length} créneau{selectedSlotIds.length > 1 ? 'x' : ''} de disponibilité</strong> de votre planning. Les créneaux déjà réservés par des apprenants ne seront pas modifiés.
+				</p>
+			</div>
+
+			<div class="modal-action border-t border-base-200 pt-4">
+				<button
+					type="button"
+					class="btn btn-ghost rounded-xl text-xs font-bold"
+					disabled={deletingBatch}
+					onclick={() => (showBulkDeleteConfirm = false)}
+				>
+					Annuler
+				</button>
+				<button
+					type="button"
+					class="btn btn-error rounded-xl font-extrabold text-xs gap-2 px-5 cursor-pointer"
+					disabled={deletingBatch || selectedSlotIds.length === 0}
+					onclick={handleConfirmBulkDelete}
+				>
+					{#if deletingBatch}
+						<Loader2 size={16} class="animate-spin" />
+						<span>Suppression en cours…</span>
+					{:else}
+						<Trash2 size={16} />
+						<span>Supprimer les {selectedSlotIds.length} créneaux</span>
+					{/if}
+				</button>
+			</div>
+		</div>
+		<button class="modal-backdrop" type="button" aria-label="Fermer" onclick={() => (showBulkDeleteConfirm = false)}>close</button>
+	</div>
+{/if}

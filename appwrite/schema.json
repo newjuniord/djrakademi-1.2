@@ -30,6 +30,12 @@
         "country": "varchar(2) required",
         "timezone": "varchar(64) required",
         "whatsapp": "varchar(16) required",
+        "working_days": "varchar(32) optional",
+        "work_start": "varchar(5) optional",
+        "work_end": "varchar(5) optional",
+        "break_duration": "integer optional min:0",
+        "notice_hours": "integer optional min:0",
+        "max_advance_days": "integer optional min:1",
         "created_at": "datetime required",
         "updated_at": "datetime required"
       },
@@ -65,22 +71,22 @@
       ]
     },
     {
-      "id": "coaching_slots",
+      "id": "coaching_unavailability",
       "permissions": [
-        "read(\"any\")"
+        "read(\"team:admins\")",
+        "create(\"team:admins\")",
+        "delete(\"team:admins\")"
       ],
       "columns": {
         "service_id": "varchar(36) required",
         "start_at": "datetime required",
         "end_at": "datetime required",
-        "coach_timezone": "varchar(64) required",
-        "status": "enum[available,held,booked,cancelled] required",
+        "reason": "varchar(255) optional",
         "created_at": "datetime required"
       },
       "indexes": [
-        "key(service_id,status,start_at)",
-        "unique(service_id,start_at)",
-        "key(status)"
+        "key(service_id,start_at)",
+        "key(service_id,end_at)"
       ]
     },
     {
@@ -88,7 +94,7 @@
       "permissions": [],
       "columns": {
         "service_id": "varchar(36) required",
-        "slot_id": "varchar(36) required",
+        "reservation_key": "varchar(160) optional",
         "user_id": "varchar(36) optional",
         "customer_name": "varchar(160) required",
         "customer_email": "email required",
@@ -109,7 +115,7 @@
       "indexes": [
         "key(status,hold_expires_at)",
         "key(service_id,start_at)",
-        "key(slot_id)",
+        "unique(reservation_key)",
         "key(user_id)"
       ]
     },

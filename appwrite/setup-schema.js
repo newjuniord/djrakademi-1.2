@@ -46,6 +46,20 @@ function parseIndex(descriptor, position) {
   };
 }
 
+
+async function waitForColumn(tables, databaseId, tableId, key) {
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    const current = await tables.listColumns({ databaseId, tableId });
+    const column = current.columns.find((item) => item.key === key);
+    if (column?.status === 'available') return;
+    if (column?.status === 'failed' || column?.status === 'stuck') {
+      throw new Error('Column migration failed: ' + tableId + '.' + key);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error('Timed out waiting for column: ' + tableId + '.' + key);
+}
+
 async function setupSchema() {
   if (!apiKey) {
     console.error('APPWRITE_API_KEY is required.');
@@ -90,13 +104,19 @@ async function setupSchema() {
 	await tables.updateTable({ databaseId, tableId: table.id, permissions: table.permissions, rowSecurity: false, enabled: true, purge: true });
 	console.log("Permissions synchronized: " + table.id);
 
-	// Keep additive boolean columns synchronized for already existing tables.
+	// Add missing columns without mutating existing data.
 	const currentColumns = await tables.listColumns({ databaseId, tableId: table.id });
 	const existingColumnKeys = new Set(currentColumns.columns.map((column) => column.key));
 	for (const column of columns) {
 	  if (existingColumnKeys.has(column.key)) continue;
-	  if (column.type !== 'boolean') throw new Error('Automatic migration is not implemented for column type: ' + column.type);
-	  await tables.createBooleanColumn({ databaseId, tableId: table.id, key: column.key, required: column.required, ...(!column.required ? { xdefault: false } : {}) });
+	  const base = { databaseId, tableId: table.id, key: column.key, required: column.required };
+	  if (column.type === 'boolean') await tables.createBooleanColumn(base);
+	  else if (column.type === 'varchar') await tables.createStringColumn({ ...base, size: column.size });
+	  else if (column.type === 'integer') await tables.createIntegerColumn({ ...base, ...(column.min !== undefined ? { min: column.min } : {}) });
+	  else if (column.type === 'enum') await tables.createEnumColumn({ ...base, elements: column.elements });
+	  else if (column.type === 'datetime') await tables.createDatetimeColumn(base);
+	  else if (column.type === 'email') await tables.createEmailColumn(base);
+	  else throw new Error('Automatic migration is not implemented for column type: ' + column.type);
 	  console.log('Column created: ' + table.id + '.' + column.key);
 	}
 

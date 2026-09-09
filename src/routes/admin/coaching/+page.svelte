@@ -17,18 +17,16 @@
 	import BookingStatusBadge from '$lib/components/coaching/BookingStatusBadge.svelte';
 	import { formatDateTimeInTimezone, getTimezoneLabel } from '$lib/coaching/timezone';
 	import { whatsappLink } from '$lib/coaching/validation';
-	import type { CoachingService, CoachingSettings, CoachingSlot, Booking } from '$lib/types/coaching';
+	import type { CoachingService, CoachingSettings, Booking } from '$lib/types/coaching';
 	import {
 		getCoachingServices,
 		getCoachingSettings,
-		getCoachingSlots,
 		DEFAULT_SETTINGS
 	} from '$lib/services/coaching';
 	import { getAdminBookings } from '$lib/admin/admin-client';
 
 	let services = $state<CoachingService[]>([]);
 	let settings = $state<CoachingSettings>(DEFAULT_SETTINGS);
-	let slotsMap = $state<Record<string, CoachingSlot[]>>({});
 	let loading = $state(true);
 	let bookings = $state<Booking[]>([]);
 
@@ -42,24 +40,12 @@
 			services = fetchedServices;
 			settings = fetchedSettings;
 			bookings = fetchedBookings;
-
-			// Fetch slots for each service
-			const map: Record<string, CoachingSlot[]> = {};
-			await Promise.all(
-				fetchedServices.map(async (s) => {
-					map[s.id] = await getCoachingSlots(s.id);
-				})
-			);
-			slotsMap = map;
 		} finally {
 			loading = false;
 		}
 	});
 
 	let activeOffers = $derived(services.filter((s) => s.active).length);
-	let totalSlotsCount = $derived(
-		Object.values(slotsMap).flat().filter((slot) => slot.status === 'available').length
-	);
 	let confirmedBookings = $derived(bookings.filter((b) => b.status === 'confirmed' || b.status === 'completed').length);
 	let pendingBookings = $derived(bookings.filter((b) => b.status === 'pending_payment').length);
 
@@ -69,11 +55,6 @@
 			.sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
 			.slice(0, 5)
 	);
-
-	function availableFor(serviceId: string) {
-		const slots = slotsMap[serviceId] || [];
-		return slots.filter((s) => s.status === 'available').length;
-	}
 </script>
 
 <svelte:head><title>Coaching · Administration</title></svelte:head>
@@ -94,7 +75,7 @@
 	<section class="overflow-hidden rounded-xl border border-base-300 bg-base-100" aria-label="Résumé coaching">
 		<div class="grid grid-cols-2 divide-x divide-y divide-base-300 sm:grid-cols-4 sm:divide-y-0">
 			<div class="p-4 sm:p-5"><div class="flex items-center gap-2 text-sm text-base-content/55"><span class="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary"><CalendarDays size={17} /></span> Offres actives</div><p class="mt-3 text-2xl font-bold">{activeOffers}</p></div>
-			<div class="p-4 sm:p-5"><div class="flex items-center gap-2 text-sm text-base-content/55"><span class="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary"><CalendarClock size={17} /></span> Créneaux libres</div><p class="mt-3 text-2xl font-bold">{totalSlotsCount}</p></div>
+			<div class="p-4 sm:p-5"><div class="flex items-center gap-2 text-sm text-base-content/55"><span class="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary"><CalendarClock size={17} /></span> Horizon ouvert</div><p class="mt-3 text-2xl font-bold">{settings.maxAdvanceDays} j</p></div>
 			<div class="p-4 sm:p-5"><div class="flex items-center gap-2 text-sm text-base-content/55"><span class="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary"><Users size={17} /></span> Confirmées</div><p class="mt-3 text-2xl font-bold">{confirmedBookings}</p></div>
 			<div class="p-4 sm:p-5"><div class="flex items-center gap-2 text-sm text-base-content/55"><span class="grid size-8 place-items-center rounded-lg bg-warning/15 text-warning"><Clock3 size={17} /></span> En attente</div><p class="mt-3 text-2xl font-bold">{pendingBookings}</p></div>
 		</div>
@@ -129,7 +110,7 @@
 										<p class="shrink-0 text-sm font-semibold">{service.isFree ? 'Gratuit' : `${service.price.toLocaleString('fr-FR')} HTG${service.priceUsd && service.priceUsd > 0 ? ` ($${service.priceUsd} USD)` : ''}`}</p>
 									</div>
 									<div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-										<div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-base-content/55"><span class="flex items-center gap-1.5"><Clock3 size={14} /> {service.durationMinutes} min</span><span class="flex items-center gap-1.5"><CalendarClock size={14} /> {availableFor(service.id)} créneaux disponibles</span></div>
+										<div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-base-content/55"><span class="flex items-center gap-1.5"><Clock3 size={14} /> {service.durationMinutes} min</span><span class="flex items-center gap-1.5"><CalendarClock size={14} /> Créneaux générés automatiquement</span></div>
 										<div class="flex items-center gap-1"><a class="btn btn-ghost btn-sm" href={`/coaching/${service.slug}`} target="_blank" rel="noreferrer" aria-label={`Voir la page publique de ${service.title}`}><ExternalLink size={16} /></a><a class="btn btn-ghost btn-sm gap-1 text-primary" href={`/admin/coaching/${service.id}`}>Gérer <ChevronRight size={16} /></a></div>
 									</div>
 								</div>

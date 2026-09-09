@@ -317,7 +317,7 @@ export async function initiateLemonSqueezyPaymentServer(
 			? `${params.originUrl}/checkout/lemonsqueezy/success?order_id=${orderId}`
 			: `https://djrakademi.net/checkout/lemonsqueezy/success?order_id=${orderId}`;
 
-		const expiresAt = new Date(Date.now() + 12 * 60 * 1000).toISOString();
+		const expiresAt = new Date(Date.now() + 25 * 60 * 1000).toISOString();
 
 		const checkoutResponse = await createCheckout(storeId, variantId, {
 			expiresAt,
@@ -503,10 +503,8 @@ export async function confirmPlopplopPaymentServer(
 		} else if (current.product_type === "coaching") {
 			const booking: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: BOOKINGS_TABLE, rowId: current.product_id, transactionId: transaction.$id }).catch(() => null);
 			if (booking) {
+				if (!['pending_payment', 'confirmed'].includes(booking.status)) throw new PaymentServerError("La réservation a expiré avant la confirmation du paiement.", 409);
 				if (booking.user_id !== current.user_id) throw new PaymentServerError("La réservation appartient à un autre utilisateur.", 409);
-				if (booking.slot_id) {
-					await tables.updateRow({ databaseId: DATABASE_ID, tableId: "coaching_slots", rowId: booking.slot_id, transactionId: transaction.$id, data: { status: "booked" } }).catch(() => undefined);
-				}
 				await tables.updateRow({
 					databaseId: DATABASE_ID, tableId: BOOKINGS_TABLE, rowId: booking.$id, transactionId: transaction.$id,
 					data: { status: "confirmed", payment_status: "paid", payment_id: transactionId || undefined, hold_expires_at: null, updated_at: paidAt }

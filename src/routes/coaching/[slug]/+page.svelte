@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { ArrowLeft, CalendarDays, Check, Clock, Globe2, ShieldCheck, Loader2, Radio, Shield, Heart, TrendingUp, Zap, Star } from 'lucide-svelte';
+	import { ArrowLeft, CalendarDays, Check, Clock, Globe2, ShieldCheck, Loader2, Radio, Shield, Heart, TrendingUp, Zap, Star, LogIn } from 'lucide-svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import PhoneInput from '$lib/components/coaching/PhoneInput.svelte';
 	import TimezoneSelector from '$lib/components/coaching/TimezoneSelector.svelte';
@@ -10,7 +10,7 @@
 	import { validateBookingInput } from '$lib/coaching/validation';
 	import { startBooking } from '$lib/coaching/booking-client';
 	import type { BookingCustomerInput, CoachingService, CoachingSlot } from '$lib/types/coaching';
-	import { getCoachingServiceBySlug, getAvailableCoachingSlots } from '$lib/services/coaching';
+	import { getCoachingServiceBySlug, getDynamicCoachingSlots } from '$lib/services/coaching';
 	import { authState } from '$lib/auth.svelte';
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
 	import MaintenanceModal from '$lib/components/MaintenanceModal.svelte';
@@ -33,6 +33,13 @@
 	let error = $state('');
 	let loading = $state(false);
 	let liveBookingId = $state('');
+
+	$effect(() => {
+		if (authState.user) {
+			if (!name) name = authState.user.name || '';
+			if (!email) email = authState.user.email || '';
+		}
+	});
 
 	type DateGroup = {
 		dateKey: string;
@@ -78,17 +85,12 @@
 		const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
 		if (isValidTimezone(detected)) timezone = detected;
 
-		if (authState.user) {
-			if (!name) name = authState.user.name || '';
-			if (!email) email = authState.user.email || '';
-		}
-
 		if (slug) {
 			try {
 				const fetchedService = await getCoachingServiceBySlug(slug);
 				service = fetchedService;
 				if (fetchedService) {
-					slots = await getAvailableCoachingSlots(fetchedService.id);
+					slots = await getDynamicCoachingSlots(fetchedService.id);
 				}
 			} finally {
 				fetching = false;
@@ -120,13 +122,17 @@
 		error = validateBookingInput(customer) ?? "";
 		if (error) return;
 		if (!authState.user) {
-			error = "Vous devez être connecté pour réserver une session de coaching.";
+			error = "Tanpri konekte sou kont ou pou w ka rezève sesyon coaching sa a.";
+			toast.info("Tanpri konekte sou kont ou pou w ka kontinye.");
+			authState.openLogin(() => {
+				error = "";
+			});
 			return;
 		}
 
 		loading = true;
 		try {
-			const created = await startBooking(selected.id, customer);
+			const created = await startBooking(service.id, selected.startAt, selected.endAt, customer);
 			liveBookingId = created.bookingId;
 			if (created.status === "confirmed") {
 				await goto(`/booking/${created.bookingId}/success`);
@@ -375,6 +381,26 @@
 								<h2 class="text-lg font-black text-base-content tracking-tight">2. Enfòmasyon ou yo</h2>
 								<p class="mt-0.5 text-xs text-base-content/60 font-medium">Konfimasyon an ap lyen ak kont ou.</p>
 							</div>
+
+							{#if !authState.user}
+								<div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+									<div class="space-y-0.5">
+										<p class="text-xs font-bold text-zinc-950 flex items-center gap-1.5">
+											<LogIn size={14} class="text-amber-600" />
+											<span>Ou poko konekte sou kont ou?</span>
+										</p>
+										<p class="text-[11px] text-zinc-500">Konekte pou rezèvasyon an ka lyen ak kont ou otomatikman.</p>
+									</div>
+									<button
+										type="button"
+										onclick={() => authState.openLogin()}
+										class="px-3.5 py-1.5 bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold text-xs rounded-xl transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
+									>
+										<LogIn size={13} class="text-amber-400" />
+										<span>Konekte kounye a</span>
+									</button>
+								</div>
+							{/if}
 
 							{#if error}
 								<div class="alert alert-error text-xs font-bold shadow-xs rounded-2xl">

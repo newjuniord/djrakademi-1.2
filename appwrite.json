@@ -8,10 +8,11 @@
       "runtime": "node-25",
       "path": "appwrite/functions/booking-maintenance",
       "entrypoint": "index.js",
-      "schedule": "*/15 * * * *",
+      "schedule": "*/2 * * * *",
       "timeout": 120,
       "enabled": true,
       "logging": true,
+      "commands": "npm install",
       "scopes": ["rows.read", "rows.write"]
     },
     {
@@ -24,6 +25,7 @@
       "timeout": 120,
       "enabled": true,
       "logging": true,
+      "commands": "npm install",
       "scopes": ["rows.read", "rows.write"]
     }
   ]

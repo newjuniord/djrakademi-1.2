@@ -1,7 +1,7 @@
 import { Client, Query, TablesDB } from 'node-appwrite';
 
 const DATABASE_ID = process.env.COACHING_DATABASE_ID || 'djrakademi';
-const TABLES = { slots: 'coaching_slots', bookings: 'bookings', payments: 'payments' };
+const TABLES = { bookings: 'bookings', payments: 'payments' };
 const MAX_EXPIRED_PER_RUN = 200;
 
 function tablesClient(req) {
@@ -23,25 +23,10 @@ async function expireBooking(tables, booking, now) {
       await tables.updateTransaction({ transactionId: tx.$id, rollback: true });
       return false;
     }
-
-    const slot = await tables.getRow({
-      databaseId: DATABASE_ID, tableId: TABLES.slots, rowId: current.slot_id, transactionId: tx.$id
-    });
-    if (slot.status !== 'held' && slot.status !== 'available') {
-      await tables.updateTransaction({ transactionId: tx.$id, rollback: true });
-      return false;
-    }
-
-    if (slot.status === 'held') {
-      await tables.updateRow({
-        databaseId: DATABASE_ID, tableId: TABLES.slots, rowId: slot.$id,
-        transactionId: tx.$id, data: { status: 'available' }
-      });
-    }
     await tables.updateRow({
       databaseId: DATABASE_ID, tableId: TABLES.bookings, rowId: current.$id,
       transactionId: tx.$id,
-      data: { status: 'expired', payment_status: 'expired', hold_expires_at: null, updated_at: now }
+      data: { status: 'expired', payment_status: 'expired', reservation_key: current.$id, hold_expires_at: null, updated_at: now }
     });
 
     if (current.payment_id) {
@@ -76,7 +61,7 @@ export default async ({ req, res, log, error }) => {
       tableId: TABLES.bookings,
       ttl: 0,
       queries: [
-        Query.equal('status', ['pending_payment']),
+        Query.equal('status', 'pending_payment'),
         Query.lessThan('hold_expires_at', now),
         Query.orderAsc('hold_expires_at'),
         Query.limit(MAX_EXPIRED_PER_RUN)

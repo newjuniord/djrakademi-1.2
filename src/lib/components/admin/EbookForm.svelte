@@ -278,7 +278,7 @@
 						<input
 							id="ebook-price"
 							type="number"
-							min="100"
+							min="1"
 							required
 							bind:value={price}
 							placeholder="Ex: 750"

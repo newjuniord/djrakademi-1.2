@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { X, Mail, Lock, User as UserIcon, ArrowRight, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-svelte';
 	import { account, ID } from '$lib/appwrite';
-	import { goto } from '$app/navigation';
 	import { authState } from '$lib/auth.svelte';
 	import { getOrCreateProfile } from '$lib/services/profiles';
 
@@ -59,7 +58,6 @@
 					}
 					close();
 					onLogin();
-					goto('/dashboard');
 				}
 			} catch (error: any) {
 				errorMessage = error.message || 'Yon erè rive pandan w ap konekte a.';
@@ -85,7 +83,6 @@
 					}
 					close();
 					onLogin();
-					goto('/dashboard');
 				}
 			} catch (error: any) {
 				errorMessage = error.message || 'Yon erè rive pandan enskripsyon an.';

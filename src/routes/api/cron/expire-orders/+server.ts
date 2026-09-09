@@ -13,84 +13,128 @@ const BOOKINGS_TABLE = 'bookings';
 async function processExpiredOrders() {
 	const { tables } = adminServices();
 	const now = Date.now();
+	let expiredOrdersCount = 0;
+	let expiredBookingsCount = 0;
 
-	// Récupérer les commandes en attente
-	let pendingOrders: any[] = [];
+	// 1. Récupérer les commandes en attente (Orders)
 	try {
 		const res = await tables.listRows({
 			databaseId: DATABASE_ID,
 			tableId: ORDERS_TABLE,
 			queries: [Query.equal('status', 'pending'), Query.limit(100)]
 		});
-		pendingOrders = res.rows || [];
-	} catch (err) {
-		console.error('[Cron Expire Orders]: Erreur lecture des commandes:', err);
-		return { success: false, expiredCount: 0 };
-	}
+		const pendingOrders = res.rows || [];
 
-	let expiredCount = 0;
+		for (const order of pendingOrders) {
+			const provider = String(order.payment_provider || '').toLowerCase();
 
-	for (const order of pendingOrders) {
-		const createdAt = order.created_at || order.$createdAt;
-		const createdTime = new Date(createdAt).getTime();
+			// Ne traiter que Lemon Squeezy (Plopplop / MonCash / NatCash est géré par la fonction Appwrite payment-maintenance)
+			if (provider !== 'lemonsqueezy') continue;
 
-		if (Number.isNaN(createdTime)) continue;
+			const createdAt = order.created_at || order.$createdAt;
+			const createdTime = new Date(createdAt).getTime();
 
-		const ageMinutes = (now - createdTime) / (60 * 1000);
-		const provider = String(order.payment_provider || '').toLowerCase();
+			if (Number.isNaN(createdTime)) continue;
 
-		// Seuil d'expiration : 30 min pour Lemon Squeezy, 15 min pour Plopplop / autres
-		const thresholdMinutes = provider === 'lemonsqueezy' ? 30 : 15;
+			const ageMinutes = (now - createdTime) / (60 * 1000);
+			const thresholdMinutes = 30;
 
-		if (ageMinutes >= thresholdMinutes) {
-			const transaction = await tables.createTransaction({ ttl: 60 });
-			try {
-				// Mettre la commande en 'expired'
-				await tables.updateRow({
-					databaseId: DATABASE_ID,
-					tableId: ORDERS_TABLE,
-					rowId: order.$id,
-					transactionId: transaction.$id,
-					data: {
-						status: 'expired'
-					}
-				});
-
-				// Si c'est un coaching, annuler la réservation
-				if (order.product_type === 'coaching' && order.product_id) {
-					const booking: any = await tables.getRow({
+			if (ageMinutes >= thresholdMinutes) {
+				const transaction = await tables.createTransaction({ ttl: 60 });
+				try {
+					await tables.updateRow({
 						databaseId: DATABASE_ID,
-						tableId: BOOKINGS_TABLE,
-						rowId: order.product_id,
-						transactionId: transaction.$id
-					}).catch(() => null);
+						tableId: ORDERS_TABLE,
+						rowId: order.$id,
+						transactionId: transaction.$id,
+						data: { status: 'expired' }
+					});
 
-					if (booking && booking.status === 'pending_payment') {
-						await tables.updateRow({
+					if (order.product_type === 'coaching' && order.product_id) {
+						const booking: any = await tables.getRow({
 							databaseId: DATABASE_ID,
 							tableId: BOOKINGS_TABLE,
-							rowId: booking.$id,
-							transactionId: transaction.$id,
-							data: {
-								status: 'cancelled',
-								payment_status: 'expired',
-								updated_at: new Date().toISOString()
-							}
-						});
-					}
-				}
+							rowId: order.product_id,
+							transactionId: transaction.$id
+						}).catch(() => null);
 
-				await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
-				expiredCount++;
-				console.log(`[Cron Expire Orders]: Commande ${order.$id} (${provider}) expirée après ${Math.round(ageMinutes)} min.`);
-			} catch (err) {
-				await tables.updateTransaction({ transactionId: transaction.$id, rollback: true }).catch(() => undefined);
-				console.error(`[Cron Expire Orders Error]: Échec expiration commande ${order.$id}:`, err);
+						if (booking && booking.status === 'pending_payment') {
+							await tables.updateRow({
+								databaseId: DATABASE_ID,
+								tableId: BOOKINGS_TABLE,
+								rowId: booking.$id,
+								transactionId: transaction.$id,
+								data: {
+									status: 'cancelled',
+									payment_status: 'expired',
+									hold_expires_at: null,
+									updated_at: new Date().toISOString()
+								}
+							});
+						}
+					}
+
+					await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
+					expiredOrdersCount++;
+					console.log(`[Cron Expire Orders]: Commande ${order.$id} (${provider}) expirée après ${Math.round(ageMinutes)} min.`);
+				} catch (err) {
+					await tables.updateTransaction({ transactionId: transaction.$id, rollback: true }).catch(() => undefined);
+					console.error(`[Cron Expire Orders Error]: Échec expiration commande ${order.$id}:`, err);
+				}
 			}
 		}
+	} catch (err) {
+		console.error('[Cron Expire Orders]: Erreur lecture des commandes:', err);
 	}
 
-	return { success: true, expiredCount };
+	// 2. Récupérer et expirer les réservations en attente (Bookings) directement (abandonnées ou >60min)
+	try {
+		const res = await tables.listRows({
+			databaseId: DATABASE_ID,
+			tableId: BOOKINGS_TABLE,
+			queries: [Query.equal('status', 'pending_payment'), Query.limit(100)]
+		});
+		const pendingBookings = res.rows || [];
+
+		for (const booking of pendingBookings) {
+			const holdTime = booking.hold_expires_at ? new Date(booking.hold_expires_at).getTime() : NaN;
+			const startTime = booking.start_at ? new Date(booking.start_at).getTime() : NaN;
+			const createdTime = new Date(booking.created_at || booking.$createdAt).getTime();
+
+			const isHoldExpired = Number.isFinite(holdTime) && holdTime <= now;
+			const isStartPassed = Number.isFinite(startTime) && startTime <= now;
+			const isAgeExpired = Number.isFinite(createdTime) && (now - createdTime) >= 60 * 60 * 1000;
+
+			if (isHoldExpired || isStartPassed || isAgeExpired || !booking.hold_expires_at) {
+				const transaction = await tables.createTransaction({ ttl: 60 });
+				try {
+					await tables.updateRow({
+						databaseId: DATABASE_ID,
+						tableId: BOOKINGS_TABLE,
+						rowId: booking.$id,
+						transactionId: transaction.$id,
+						data: {
+							status: 'cancelled',
+							payment_status: 'expired',
+							hold_expires_at: null,
+							updated_at: new Date().toISOString()
+						}
+					});
+
+					await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
+					expiredBookingsCount++;
+					console.log(`[Cron Expire Bookings]: Réservation ${booking.$id} expirée et créneau libéré.`);
+				} catch (err) {
+					await tables.updateTransaction({ transactionId: transaction.$id, rollback: true }).catch(() => undefined);
+					console.error(`[Cron Expire Bookings Error]: Échec annulation réservation ${booking.$id}:`, err);
+				}
+			}
+		}
+	} catch (err) {
+		console.error('[Cron Expire Bookings]: Erreur lecture des réservations:', err);
+	}
+
+	return { success: true, expiredOrdersCount, expiredBookingsCount, expiredCount: expiredOrdersCount + expiredBookingsCount };
 }
 
 export const GET: RequestHandler = async () => {

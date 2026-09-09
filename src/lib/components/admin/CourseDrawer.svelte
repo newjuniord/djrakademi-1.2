@@ -101,8 +101,8 @@
 	async function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
 		if (submitting || saving) return;
-		if (!isFree && (!Number.isInteger(price) || price < 100 || price > 100000)) {
-			alert('Le prix doit être un montant entier compris entre 100 et 100 000 HTG.');
+		if (!isFree && (!Number.isInteger(price) || price < 1 || price > 100000)) {
+			alert('Le prix doit être un montant entier compris entre 1 et 100 000 HTG.');
 			return;
 		}
 		submitting = true;
@@ -295,7 +295,7 @@
 						<input
 							id="drawer-price-input"
 							type="number"
-							min="100"
+							min="1"
 							max="100000"
 							step="1"
 							required={!isFree}

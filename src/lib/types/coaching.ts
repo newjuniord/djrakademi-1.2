@@ -9,8 +9,22 @@ export interface CoachingSettings {
 	country: string;
 	timezone: string;
 	whatsapp: string;
+	workingDays: number[];
+	workStart: string;
+	workEnd: string;
+	breakDuration: number;
+	noticeHours: number;
+	maxAdvanceDays: number;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface CoachingUnavailability {
+	id: string;
+	serviceId: string | null;
+	startAt: string;
+	endAt: string;
+	reason: string;
 }
 
 export interface CoachingService {
@@ -44,7 +58,6 @@ export interface CoachingSlot {
 export interface Booking {
 	id: string;
 	serviceId: string;
-	slotId: string;
 	userId: string | null;
 	customerName: string;
 	customerEmail: string;

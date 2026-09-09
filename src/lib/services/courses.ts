@@ -243,8 +243,8 @@ export async function getAdminCourseById(courseId: string): Promise<Course | nul
 function validatedCoursePrice(data: Partial<Course>): number {
 	if (data.isFree) return 0;
 	const price = Number(data.price);
-	if (!Number.isInteger(price) || price < 100 || price > 100000) {
-		throw new Error('Le prix du cours doit être un montant entier compris entre 100 et 100 000 HTG.');
+	if (!Number.isInteger(price) || price < 1 || price > 100000) {
+		throw new Error('Le prix du cours doit être un montant entier compris entre 1 et 100 000 HTG.');
 	}
 	return price;
 }

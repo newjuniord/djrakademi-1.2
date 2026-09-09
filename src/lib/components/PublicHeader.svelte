@@ -10,7 +10,8 @@
 		ExternalLink,
 		LogOut,
 		LogIn,
-		Megaphone
+		Megaphone,
+		HelpCircle
 	} from 'lucide-svelte';
 	
 	import AuthModal from './AuthModal.svelte';
@@ -87,6 +88,12 @@
 	function login() {
 		// Used by modal to trigger view updates if needed
 	}
+
+	function toggleHelp() {
+		if (typeof window !== 'undefined') {
+			window.dispatchEvent(new CustomEvent('djr:open-support'));
+		}
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -122,7 +129,18 @@
 		</a>
 
 		<!-- Right Action Button -->
-		<div class="flex items-center gap-3 shrink-0">
+		<div class="flex items-center gap-2.5 shrink-0">
+			<!-- Help Icon Button -->
+			<button
+				type="button"
+				onclick={toggleHelp}
+				class="size-11 rounded-xl bg-zinc-100 hover:bg-amber-400/20 hover:text-amber-600 text-zinc-600 grid place-items-center transition-all cursor-pointer border border-zinc-200/80 active:scale-95"
+				aria-label="Èd ak Asistans"
+				title="Èd ak Asistans"
+			>
+				<HelpCircle size={20} />
+			</button>
+
 			{#if authState.loading}
 				<div class="h-11 w-32 bg-zinc-100 rounded-xl animate-pulse"></div>
 			{:else if authState.user !== null}

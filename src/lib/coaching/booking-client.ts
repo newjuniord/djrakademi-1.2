@@ -20,11 +20,13 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 	return data as T;
 }
 
-export function startBooking(slotId: string, customer: BookingCustomerInput): Promise<BookingStart> {
+export function startBooking(serviceId: string, startAt: string, endAt: string, customer: BookingCustomerInput): Promise<BookingStart> {
 	return request<BookingStart>('/api/bookings', {
 		method: 'POST',
 		body: JSON.stringify({
-			slotId,
+			serviceId,
+			startAt,
+			endAt,
 			customerName: customer.name,
 			customerWhatsapp: customer.whatsapp,
 			customerTimezone: customer.timezone

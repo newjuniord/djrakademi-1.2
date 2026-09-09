@@ -117,17 +117,17 @@
 							<div class="p-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-2 text-xs">
 								<div class="flex items-center gap-1.5 text-amber-900 font-bold text-[11px]">
 									<span class="px-1.5 py-0.5 rounded bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider">DEV TEST</span>
-									<span>Plopplop (Kat HTG)</span>
+									<span>Kat HTG (Local)</span>
 								</div>
 								<button
 									type="button"
 									disabled={loading}
 									onclick={() => onSelectMethod('plopplop_carte')}
 									class="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-[11px] shadow-xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
-									title="Tester le paiement Plopplop avec Carte en local"
+									title="Tester le paiement Carte HTG en local"
 								>
 									<CreditCard size={12} />
-									<span>Test Kat Plopplop</span>
+									<span>Test Kat HTG</span>
 								</button>
 							</div>
 						{/if}
@@ -188,7 +188,7 @@
 									<span class="font-bold text-sm text-zinc-950">Kat Visa / Mastercard</span>
 									<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold">Entènasyonal</span>
 								</div>
-								<p class="text-xs text-zinc-500">Kat entènasyonal (Visa, MasterCard, AMEX)</p>
+								<p class="text-xs text-zinc-500">Visa, MasterCard ak lòt kat bankè ak Lemon Squeezy</p>
 							</div>
 						</div>
 
