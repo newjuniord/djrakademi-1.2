@@ -60,4 +60,40 @@ class AuthState {
 	}
 }
 
+export function translateAuthError(error: any): string {
+	const rawMessage = String(error?.message || error || '');
+	const msg = rawMessage.toLowerCase();
+	const type = String(error?.type || '').toLowerCase();
+
+	if (
+		msg.includes('invalid `password` param') ||
+		msg.includes('password must be between 8 and 256') ||
+		(msg.includes('password') && msg.includes('between 8'))
+	) {
+		return 'Modpas la dwe gen ant 8 ak 256 karaktè.';
+	}
+	if (
+		msg.includes('invalid credentials') ||
+		msg.includes('invalid email or password') ||
+		type.includes('user_invalid_credentials')
+	) {
+		return 'Imel oubyen modpas sa a pa bon. Tanpri tcheke yo epi eseye ankò.';
+	}
+	if (
+		msg.includes('user with the same email already exists') ||
+		msg.includes('already exists') ||
+		type.includes('user_already_exists')
+	) {
+		return 'Yon kont gen imel sa a deja. Tanpri konekte oubyen sèvi ak yon lòt imel.';
+	}
+	if (msg.includes('rate limit') || type.includes('rate_limit')) {
+		return 'Ou fè twòp tentativ nan yon ti tan. Tanpri tann yon ti moman anvan ou eseye ankò.';
+	}
+	if (msg.includes('invalid `email` param') || (msg.includes('email') && msg.includes('invalid'))) {
+		return 'Tanpri antre yon adres imel ki valab.';
+	}
+
+	return rawMessage || 'Yon erè rive. Tanpri eseye ankò.';
+}
+
 export const authState = new AuthState();

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { X, Mail, Lock, User as UserIcon, ArrowRight, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-svelte';
 	import { account, ID } from '$lib/appwrite';
-	import { authState } from '$lib/auth.svelte';
+	import { authState, translateAuthError } from '$lib/auth.svelte';
 	import { getOrCreateProfile } from '$lib/services/profiles';
 
 	let { isOpen = $bindable(false), onLogin } = $props<{
@@ -60,7 +60,7 @@
 					onLogin();
 				}
 			} catch (error: any) {
-				errorMessage = error.message || 'Yon erè rive pandan w ap konekte a.';
+				errorMessage = translateAuthError(error);
 			} finally {
 				loading = false;
 			}
@@ -85,7 +85,7 @@
 					onLogin();
 				}
 			} catch (error: any) {
-				errorMessage = error.message || 'Yon erè rive pandan enskripsyon an.';
+				errorMessage = translateAuthError(error);
 			} finally {
 				loading = false;
 			}
@@ -101,7 +101,7 @@
 				if (!response.ok) throw new Error(result.message || 'Impossible d’envoyer le lien de récupération.');
 				successMessage = result.message;
 			} catch (error: any) {
-				errorMessage = error.message || 'Impossible d’envoyer le lien de récupération.';
+				errorMessage = translateAuthError(error);
 			} finally {
 				loading = false;
 			}

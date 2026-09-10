@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { authState } from '$lib/auth.svelte';
+	import { authState, translateAuthError } from '$lib/auth.svelte';
 	import { account, ID } from '$lib/appwrite';
 	import { getOrCreateProfile } from '$lib/services/profiles';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
@@ -59,7 +59,7 @@
 			}
 		} catch (err: any) {
 			console.error('[LoginPage] Auth error:', err);
-			errorMessage = err?.message || (mode === 'login' ? 'Koneksyon an pa reyisi. Tcheke imel ak modpas ou.' : 'Enskripsyon an pa reyisi. Eseye ankò.');
+			errorMessage = translateAuthError(err);
 		} finally {
 			loading = false;
 		}

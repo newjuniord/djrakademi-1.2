@@ -3,6 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { ArrowLeft, CheckCircle2, Eye, EyeOff, Home, KeyRound, Loader2, ShieldCheck } from 'lucide-svelte';
 
+	import { translateAuthError } from '$lib/auth.svelte';
+
 	let password = $state('');
 	let confirmation = $state('');
 	let loading = $state(false);
@@ -15,11 +17,11 @@
 		event.preventDefault();
 		errorMessage = '';
 		if (password.length < 8) {
-			errorMessage = 'Mopas la dwe gen omwens 8 karaktè.';
+			errorMessage = 'Modpas la dwe gen ant 8 ak 256 karaktè.';
 			return;
 		}
 		if (password !== confirmation) {
-			errorMessage = 'Mopas yo pa menm.';
+			errorMessage = 'Modpas yo pa menm.';
 			return;
 		}
 		const userId = page.url.searchParams.get('userId') || '';
@@ -36,10 +38,10 @@
 				body: JSON.stringify({ userId, secret, password })
 			});
 			const result = await response.json().catch(() => ({}));
-			if (!response.ok) throw new Error(result.message || 'Nou pa ka chanje mopas la.');
+			if (!response.ok) throw new Error(result.message || 'Nou pa ka chanje modpas la.');
 			completed = true;
 		} catch (error) {
-			errorMessage = error instanceof Error ? error.message : 'Nou pa ka chanje mopas la.';
+			errorMessage = translateAuthError(error);
 		} finally {
 			loading = false;
 		}
