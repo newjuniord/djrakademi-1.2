@@ -123,7 +123,7 @@
 		<!-- Brand Logo Image & Name -->
 		<a href="/" class="flex items-center gap-3 group shrink-0">
 			<img src="/logo.png" alt="DJR Akademi" class="h-10 sm:h-11 w-auto object-contain" />
-			<span class="font-black text-lg sm:text-xl tracking-tight text-zinc-950 uppercase group-hover:text-amber-500 transition-colors">
+			<span class="hidden min-[430px]:inline-block font-black text-lg sm:text-xl tracking-tight text-zinc-950 uppercase group-hover:text-amber-500 transition-colors">
 				DJR AKADEMI
 			</span>
 		</a>

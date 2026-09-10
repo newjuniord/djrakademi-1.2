@@ -193,7 +193,7 @@
 		<div class="mx-auto flex min-h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
 			<a class="flex items-center gap-2.5 font-black text-lg tracking-tight text-base-content" href="/">
 				<img src="/logo.png" alt="DJR Akademi" class="h-9 w-auto object-contain" />
-				<span>DJR Akademi</span>
+				<span class="hidden min-[430px]:inline-block">DJR Akademi</span>
 			</a>
 			<div class="flex items-center gap-1.5 text-xs font-bold text-base-content/60 bg-base-200 px-3 py-1.5 rounded-full border border-base-300/60">
 				<ShieldCheck size={14} class="text-emerald-500" />
