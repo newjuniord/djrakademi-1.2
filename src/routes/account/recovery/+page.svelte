@@ -17,7 +17,7 @@
 		event.preventDefault();
 		errorMessage = '';
 		if (password.length < 8) {
-			errorMessage = 'Modpas la dwe gen ant 8 ak 256 karaktè.';
+			errorMessage = 'Modpas la dwe gen omwens 8 karaktè.';
 			return;
 		}
 		if (password !== confirmation) {

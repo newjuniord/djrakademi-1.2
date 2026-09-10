@@ -70,7 +70,7 @@ export function translateAuthError(error: any): string {
 		msg.includes('password must be between 8 and 256') ||
 		(msg.includes('password') && msg.includes('between 8'))
 	) {
-		return 'Modpas la dwe gen ant 8 ak 256 karaktè.';
+		return 'Modpas la dwe gen omwens 8 karaktè.';
 	}
 	if (
 		msg.includes('invalid credentials') ||
