@@ -30,12 +30,14 @@
 			showBanner = true;
 		});
 
-		// On iOS Safari, show prompt after 3s if not standalone
-		if (isIos && !isStandalone) {
-			setTimeout(() => {
+		// Display banner after 2 seconds for all browser visitors
+		const timer = setTimeout(() => {
+			if (!isStandalone) {
 				showBanner = true;
-			}, 3000);
-		}
+			}
+		}, 2000);
+
+		return () => clearTimeout(timer);
 	});
 
 	async function handleInstall() {
