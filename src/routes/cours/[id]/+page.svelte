@@ -78,22 +78,22 @@
 			if (course.isFree || course.price === 0) {
 				await handleFreeEnrollment();
 			} else {
-				const verification = await verifyLemonSqueezyPurchase(authState.user.email, 'course', course.id);
-				if (verification.ok && verification.success) {
-					const purchasedCourseId = course.id;
-					toast.success(verification.message, 5000);
-					setTimeout(() => goto(`/learn/${purchasedCourseId}`), 1800);
-					return;
-				}
-				if (!verification.ok || !verification.notFound) {
-					toast.error(verification.message || 'Nou pa ka verifye acha ou a kounye a. Tanpri eseye ankò.');
-					return;
+				try {
+					const verification = await verifyLemonSqueezyPurchase(authState.user.email, 'course', course.id);
+					if (verification.ok && verification.success) {
+						const purchasedCourseId = course.id;
+						toast.success(verification.message, 5000);
+						setTimeout(() => goto(`/learn/${purchasedCourseId}`), 1800);
+						return;
+					}
+				} catch (err) {
+					console.warn('[Checkout] Lemon Squeezy precheck failed, fallback to payment modal:', err);
 				}
 				showPaymentModal = true;
 			}
 		} catch (e) {
 			console.error('Check access error:', e);
-			toast.error('Nou pa ka verifye acha ou a kounye a. Tanpri eseye ankò.');
+			showPaymentModal = true;
 		} finally {
 			checkoutLoading = false;
 		}

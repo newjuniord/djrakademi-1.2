@@ -112,24 +112,22 @@
 					return;
 				}
 				if (!currentIsFree) {
-					const verification = await verifyLemonSqueezyPurchase(authState.user.email, type, item.id);
-					if (verification.ok && verification.success) {
-						const purchasedType = type;
-						const purchasedId = item.id;
-						toast.success(verification.message, 5000);
-						onClose();
-						setTimeout(() => goto(purchasedType === 'course' ? `/learn/${purchasedId}` : '/dashboard#sec-ebooks'), 1800);
-						return;
-					}
-					if (!verification.ok || !verification.notFound) {
-						toast.error(verification.message || 'Nou pa ka verifye acha ou a kounye a. Tanpri eseye ankò.');
-						return;
+					try {
+						const verification = await verifyLemonSqueezyPurchase(authState.user.email, type, item.id);
+						if (verification.ok && verification.success) {
+							const purchasedType = type;
+							const purchasedId = item.id;
+							toast.success(verification.message, 5000);
+							onClose();
+							setTimeout(() => goto(purchasedType === 'course' ? `/learn/${purchasedId}` : '/dashboard#sec-ebooks'), 1800);
+							return;
+						}
+					} catch (err) {
+						console.warn('[Checkout] Lemon Squeezy precheck failed, fallback to payment modal:', err);
 					}
 				}
 			} catch (e) {
 				console.error('Check access error:', e);
-				toast.error('Nou pa ka verifye acha ou a kounye a. Tanpri eseye ankò.');
-				return;
 			} finally {
 				checkoutLoading = false;
 			}
