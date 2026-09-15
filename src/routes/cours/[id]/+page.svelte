@@ -445,9 +445,9 @@
 		<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
 			<div class="relative w-full max-w-4xl bg-zinc-950 rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl">
 				<!-- Header -->
-				<div class="flex items-center justify-between p-4 sm:p-5 border-b border-zinc-800 bg-zinc-900">
-					<div class="flex items-center gap-2">
-						<Video size={18} class="text-amber-400" />
+				<div class="flex items-center justify-end sm:justify-between p-3 sm:p-5 border-b border-zinc-800 bg-zinc-900">
+					<div class="hidden sm:flex items-center gap-2 min-w-0">
+						<Video size={18} class="text-amber-400 shrink-0" />
 						<h3 class="text-sm font-bold text-white truncate">Vidéo de présentation — {course.title}</h3>
 					</div>
 					<button
