@@ -5,7 +5,7 @@
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
-	import { getBundleById, type Bundle } from '$lib/services/bundles';
+	import { getBundleById, ownsBundle, type Bundle } from '$lib/services/bundles';
 	import { initiatePlopplopPayment, verifyLemonSqueezyPurchase } from '$lib/services/payments';
 	import { authState } from '$lib/auth.svelte';
 	import { toast } from '$lib/toast.svelte';
@@ -53,6 +53,15 @@
 		}
 		checkoutLoading = true;
 		try {
+			// 1. Vérifier si l'utilisateur possède déjà l'intégralité des produits du bundle dans Appwrite
+			const fullyOwned = await ownsBundle(bundle);
+			if (fullyOwned) {
+				toast.info('Ou gen tout fòmasyon ak ebook ki nan pak sa a deja! N ap redirije w nan espas ou an.');
+				goto('/dashboard');
+				return;
+			}
+
+			// 2. Vérification Lemon Squeezy Pré-Checkout
 			const verification = await verifyLemonSqueezyPurchase(authState.user.email, 'bundle', bundle.id);
 			if (verification.ok && verification.success) {
 				toast.success(verification.message, 5000);
