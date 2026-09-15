@@ -636,9 +636,6 @@ export const POST: RequestHandler = async ({ request }) => {
 				);
 			}
 			const inputEmail = payload.email.trim().toLowerCase();
-			if (inputEmail !== user.email.trim().toLowerCase()) {
-				return json({ success: false, message: 'Imel la dwe menm ak imel kont ou a.' }, { status: 403 });
-			}
 
 			if (payload.mode === 'precheckout') {
 				const productType = payload.productType;
