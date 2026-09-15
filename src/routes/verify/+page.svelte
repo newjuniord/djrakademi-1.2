@@ -28,6 +28,12 @@
 	let supportSuccessMessage = $state<string | null>(null);
 	let supportErrorMessage = $state<string | null>(null);
 
+	$effect(() => {
+		if (authState.user?.email && !supportEmail) {
+			supportEmail = authState.user.email;
+		}
+	});
+
 	async function handleVerifySubmit(e: SubmitEvent) {
 		e.preventDefault();
 		supportSuccessMessage = null;
@@ -182,20 +188,20 @@
 								<!-- Lemon Squeezy Card Email Input -->
 								<div class="space-y-2">
 									<label for="verify-card-email" class="block text-xs font-bold text-white/90">
-										Imel kont ou a (menm ak sa ou te itilize sou Lemon Squeezy) *
+										Imel ou te itilize pou w peye sou Lemon Squeezy an *
 									</label>
 									<div class="relative">
 										<input
 											id="verify-card-email"
 											type="email"
 											required
-											placeholder="ex: nom.prenom@gmail.com"
+											placeholder="ex: imel-peman-ou@gmail.com"
 											bind:value={supportEmail}
 											class="w-full h-12 px-4 bg-zinc-900/90 border border-white/15 focus:border-amber-400 rounded-xl text-sm font-medium text-white placeholder-white/30 outline-none transition-colors"
 										/>
 									</div>
-									<p class="text-[11px] text-white/40">
-										Pou sekirite, itilize imel kont ou a : {authState.user?.email || "konekte pou wè imel ou"}.
+									<p class="text-[11px] text-white/50 leading-relaxed">
+										Mete imel ou te antre lè w t ap peye an. Aksè a ap debloke sou kont ou an sèlman (<span class="text-amber-400 font-bold">{authState.user?.email || "konekte pou wè imel ou"}</span>).
 									</p>
 								</div>
 							{:else}
