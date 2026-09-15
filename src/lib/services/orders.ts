@@ -9,7 +9,7 @@ export interface Order {
 	customerName: string;
 	customerEmail: string;
 	customerPhone?: string;
-	productType: 'course' | 'ebook' | 'coaching';
+	productType: 'course' | 'ebook' | 'coaching' | 'bundle';
 	productId: string;
 	productTitle: string;
 	amount: number;

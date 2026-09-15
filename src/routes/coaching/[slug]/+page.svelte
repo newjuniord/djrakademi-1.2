@@ -170,8 +170,8 @@
 			if (!result?.success || !redirectTarget) {
 				throw new Error(result?.message || "Nou pa ka lanse peman an. Tanpri eseye ankò.");
 			}
-			showCoachingPaymentModal = false;
 			window.location.href = redirectTarget;
+			return;
 		} catch (caught) {
 			error = caught instanceof Error ? caught.message : "Yon erè rive pandan n ap trete peman pou sèvis sa a.";
 			toast.error(error);

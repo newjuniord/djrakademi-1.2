@@ -1,3 +1,4 @@
+import { grantBundleAccess } from '$lib/server/bundles';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
 import { verifyPurchaseAccessToken } from '$lib/server/purchase-token';
@@ -31,7 +32,14 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ message: 'Cette commande n’est pas encore validée.' }, { status: 400 });
 		}
 
+		if (orderRow.user_id && orderRow.user_id !== 'admin' && orderRow.user_id !== userId) {
+			return json({ message: 'Cette commande appartient à un autre compte.' }, { status: 403 });
+		}
+
 		// 3. Ensure user has access grant (auto-heal)
+		if (orderRow.product_type === 'bundle' && orderRow.status === 'paid') {
+			await grantBundleAccess(tables, orderRow, userId);
+		}
 		if (orderRow.product_id && (orderRow.product_type === 'course' || orderRow.product_type === 'ebook')) {
 			const existingGrants = await tables.listRows({
 				databaseId: DATABASE_ID,

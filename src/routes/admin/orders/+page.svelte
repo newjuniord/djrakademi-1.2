@@ -200,6 +200,7 @@
 					<option value="all">Tous les produits</option>
 					<option value="course">Cours</option>
 					<option value="ebook">Ebook</option>
+					<option value="bundle">Bundle</option>
 					<option value="coaching">Coaching</option>
 				</select>
 
@@ -280,6 +281,8 @@
 										<span class="badge badge-secondary badge-sm font-bold text-[10px] border-none">
 											Ebook
 										</span>
+									{:else if order.type === 'bundle'}
+										<span class="badge badge-warning badge-sm font-bold text-[10px] border-none">Bundle</span>
 									{:else}
 										<span class="badge badge-accent badge-sm font-bold text-[10px] border-none">
 											Coaching

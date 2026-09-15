@@ -11,9 +11,39 @@ const PLOPPLOP_PROVIDERS = ['moncash', 'natcash', 'carte', 'card'];
 const TABLES = {
   orders: 'orders',
   access: 'access_grants',
+  bundles: 'bundles',
   bookings: 'bookings',
   logs: 'payment_logs'
 };
+
+function parseBundleItems(value) {
+  let parsed = value;
+  if (typeof value === 'string') {
+    try { parsed = JSON.parse(value); } catch { return []; }
+  }
+  if (!Array.isArray(parsed)) return [];
+
+  const seen = new Set();
+  const items = [];
+  for (const raw of parsed) {
+    let type;
+    let id;
+    if (typeof raw === 'string') {
+      const separator = raw.indexOf(':');
+      type = separator < 0 ? '' : raw.slice(0, separator);
+      id = separator < 0 ? '' : raw.slice(separator + 1).trim();
+    } else if (raw && typeof raw === 'object') {
+      type = raw.type;
+      id = String(raw.id || '').trim();
+    }
+    if ((type !== 'course' && type !== 'ebook') || !id) continue;
+    const key = `${type}:${id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    items.push({ type, id });
+  }
+  return items;
+}
 
 function tablesClient(req) {
   const endpoint = process.env.APPWRITE_FUNCTION_API_ENDPOINT;
@@ -88,7 +118,7 @@ function validatePaidResponse(order, verification) {
   return { paid: true, transactionId: returnedTransaction || String(order.payment_id || '') };
 }
 
-async function confirmPaidOrder(tables, order, transactionId) {
+export async function confirmPaidOrder(tables, order, transactionId) {
   const tx = await tables.createTransaction({ ttl: 60 });
   const now = new Date().toISOString();
   let accessAlreadyExisted = false;
@@ -130,6 +160,48 @@ async function confirmPaidOrder(tables, order, transactionId) {
             user_id: current.user_id,
             item_type: current.product_type,
             item_id: current.product_id,
+            granted_by: 'purchase',
+            created_at: now
+          }
+        });
+      }
+    } else if (current.product_type === 'bundle') {
+      if (!current.user_id) throw new Error('Commande sans utilisateur: accès au bundle impossible.');
+      let items = parseBundleItems(current.bundle_items_json);
+      if (!items.length) {
+        if (!current.product_id) throw new Error('Commande du bundle sans identifiant de produit.');
+        const bundle = await tables.getRow({
+          databaseId: DATABASE_ID, tableId: TABLES.bundles, rowId: current.product_id, transactionId: tx.$id
+        });
+        items = parseBundleItems(bundle.items_json);
+      }
+      if (!items.length) throw new Error('Le bundle ne contient aucun cours ou ebook valide.');
+
+      accessAlreadyExisted = true;
+      for (const item of items) {
+        const access = await tables.listRows({
+          databaseId: DATABASE_ID,
+          tableId: TABLES.access,
+          transactionId: tx.$id,
+          ttl: 0,
+          queries: [
+            Query.equal('user_id', current.user_id),
+            Query.equal('item_type', item.type),
+            Query.equal('item_id', item.id),
+            Query.limit(1)
+          ]
+        });
+        if (access.rows.length) continue;
+        accessAlreadyExisted = false;
+        await tables.createRow({
+          databaseId: DATABASE_ID,
+          tableId: TABLES.access,
+          rowId: ID.unique(),
+          transactionId: tx.$id,
+          data: {
+            user_id: current.user_id,
+            item_type: item.type,
+            item_id: item.id,
             granted_by: 'purchase',
             created_at: now
           }

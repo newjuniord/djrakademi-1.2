@@ -9,6 +9,7 @@
 		amount = 0,
 		amountUsd,
 		isFree = false,
+		cardEnabled = true,
 		loading = false,
 		onSelectMethod,
 		onClose
@@ -18,6 +19,7 @@
 		amount: number;
 		amountUsd?: number;
 		isFree?: boolean;
+		cardEnabled?: boolean;
 		loading?: boolean;
 		onSelectMethod: (method: 'moncash' | 'natcash' | 'carte' | 'plopplop_carte') => void;
 		onClose: () => void;
@@ -25,6 +27,21 @@
 
 	let selectedMethod = $state<'moncash' | 'natcash' | 'carte'>('moncash');
 	let isLocalhost = $state(false);
+	let localLoading = $state(false);
+
+	$effect(() => {
+		if (!open) {
+			localLoading = false;
+		}
+	});
+
+	$effect(() => {
+		if (!loading) {
+			localLoading = false;
+		}
+	});
+
+	const isLoading = $derived(loading || localLoading);
 
 	onMount(() => {
 		isLocalhost = dev || (typeof window !== 'undefined' && (
@@ -35,7 +52,8 @@
 	});
 
 	function handleConfirm() {
-		if (loading) return;
+		if (isLoading || (selectedMethod === 'carte' && !cardEnabled)) return;
+		localLoading = true;
 		onSelectMethod(selectedMethod);
 	}
 </script>
@@ -66,7 +84,7 @@
 				<button
 					type="button"
 					onclick={onClose}
-					disabled={loading}
+					disabled={isLoading}
 					class="size-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-900 grid place-items-center transition-colors shrink-0 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
 					aria-label="Fèmen an"
 				>
@@ -87,7 +105,7 @@
 					<div class="space-y-1.5">
 						<button
 							type="button"
-							disabled={loading}
+							disabled={isLoading}
 							onclick={() => (selectedMethod = 'moncash')}
 							class="w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer disabled:cursor-not-allowed group {selectedMethod === 'moncash'
 								? 'bg-red-50/80 border-red-500 ring-1 ring-red-500/30'
@@ -121,7 +139,7 @@
 								</div>
 								<button
 									type="button"
-									disabled={loading}
+									disabled={isLoading}
 									onclick={() => onSelectMethod('plopplop_carte')}
 									class="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-[11px] shadow-xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
 									title="Tester le paiement Carte HTG en local"
@@ -136,7 +154,7 @@
 					<!-- Option NatCash -->
 					<button
 						type="button"
-						disabled={loading}
+						disabled={isLoading}
 						onclick={() => (selectedMethod = 'natcash')}
 						class="w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer disabled:cursor-not-allowed group {selectedMethod === 'natcash'
 							? 'bg-emerald-50/80 border-emerald-500 ring-1 ring-emerald-500/30'
@@ -163,6 +181,7 @@
 					</button>
 				</div>
 
+				{#if cardEnabled}
 				<!-- Section 2: International (Carte Bancaire) -->
 				<div class="space-y-2.5 pt-2 border-t border-zinc-100">
 					<div class="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
@@ -173,7 +192,7 @@
 					<!-- Option Carte Bancaire -->
 					<button
 						type="button"
-						disabled={loading}
+						disabled={isLoading}
 						onclick={() => (selectedMethod = 'carte')}
 						class="w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer disabled:cursor-not-allowed group {selectedMethod === 'carte'
 							? 'bg-blue-50/80 border-blue-500 ring-1 ring-blue-500/30'
@@ -199,17 +218,18 @@
 						</div>
 					</button>
 				</div>
+				{/if}
 			</div>
 
 			<!-- Footer CTA (Bouton Noir & Texte Blanc avec Anti-Double Click & Curseur) -->
 			<div class="p-6 border-t border-zinc-100 bg-zinc-50/50 space-y-3">
 				<button
 					type="button"
-					disabled={loading}
+					disabled={isLoading}
 					onclick={handleConfirm}
 					class="w-full h-12 rounded-2xl bg-black hover:bg-zinc-800 active:scale-[0.99] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
 				>
-					{#if loading}
+					{#if isLoading}
 						<Loader2 size={18} class="animate-spin text-white shrink-0" />
 						<span class="text-white animate-pulse">Peman an ap prepare...</span>
 					{:else}

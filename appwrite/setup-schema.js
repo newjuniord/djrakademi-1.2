@@ -115,9 +115,22 @@ async function setupSchema() {
 	  else if (column.type === 'integer') await tables.createIntegerColumn({ ...base, ...(column.min !== undefined ? { min: column.min } : {}) });
 	  else if (column.type === 'enum') await tables.createEnumColumn({ ...base, elements: column.elements });
 	  else if (column.type === 'datetime') await tables.createDatetimeColumn(base);
+	  else if (column.type === 'text') await tables.createTextColumn(base);
 	  else if (column.type === 'email') await tables.createEmailColumn(base);
 	  else throw new Error('Automatic migration is not implemented for column type: ' + column.type);
 	  console.log('Column created: ' + table.id + '.' + column.key);
+	}
+
+	// Keep enum values in sync when adding a new product type.
+	for (const column of columns) {
+	  if (column.type !== 'enum') continue;
+	  const live = currentColumns.columns.find((item) => item.key === column.key);
+	  if (!live || live.type !== 'enum') continue;
+	  const missing = column.elements.filter((value) => !live.elements.includes(value));
+	  if (missing.length) {
+	    await tables.updateEnumColumn({ databaseId, tableId: table.id, key: column.key, elements: [...new Set([...live.elements, ...column.elements])], required: column.required });
+	    await waitForColumn(tables, databaseId, table.id, column.key);
+	  }
 	}
 
 	const current = await tables.listIndexes({ databaseId, tableId: table.id });

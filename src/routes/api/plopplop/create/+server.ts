@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
 		const paymentMethod = (body?.paymentMethod || 'moncash') as PaymentMethod;
 		safeRequest = { productType, productId, bookingId, paymentMethod };
 
-		if (!productId || !['course', 'ebook', 'coaching'].includes(productType)) {
+		if (!productId || !['course', 'ebook', 'coaching', 'bundle'].includes(productType)) {
 			return json({ success: false, message: 'Type de produit ou ID invalide.' }, { status: 400 });
 		}
 

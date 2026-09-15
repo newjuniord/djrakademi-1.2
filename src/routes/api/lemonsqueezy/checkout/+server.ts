@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
 		const bookingId = typeof body?.bookingId === 'string' ? body.bookingId.trim() : undefined;
 		const variantId = body?.variantId ? String(body.variantId).trim() : undefined;
 
-		if (!productId || !['course', 'ebook', 'coaching'].includes(productType)) {
+		if (!productId || !['course', 'ebook', 'coaching', 'bundle'].includes(productType)) {
 			return json({ success: false, message: 'Type de produit ou ID invalide.' }, { status: 400 });
 		}
 

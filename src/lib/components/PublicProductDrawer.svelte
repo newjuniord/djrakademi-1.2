@@ -41,7 +41,7 @@
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
 	import MaintenanceModal from '$lib/components/MaintenanceModal.svelte';
 	import { getMaintenanceStatus } from '$lib/services/maintenance';
-	import { initiatePlopplopPayment } from '$lib/services/payments';
+	import { initiatePlopplopPayment, verifyLemonSqueezyPurchase } from '$lib/services/payments';
 	import { claimFreeEbook, ownsEbook } from '$lib/services/ebook-access';
 
 	let checkoutSuccess = $state(false);
@@ -76,11 +76,16 @@
 	}
 
 	async function handleStartCheckout() {
-		if (!item) return;
-		if (await showMaintenanceIfEnabled()) return;
+		if (!item || checkoutLoading) return;
+		checkoutLoading = true;
+		if (await showMaintenanceIfEnabled()) {
+			checkoutLoading = false;
+			return;
+		}
 
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
+			checkoutLoading = false;
 			toast.info('Tanpri konekte sou kont ou pou w ka kontinye.');
 			authState.openLogin(() => {
 				handleStartCheckout();
@@ -89,6 +94,7 @@
 		}
 
 		if (type === "coaching" && coachingItem) {
+			checkoutLoading = false;
 			onClose();
 			await goto(`/coaching/${coachingItem.slug}`);
 			return;
@@ -105,8 +111,25 @@
 					goto('/dashboard');
 					return;
 				}
+				if (!currentIsFree) {
+					const verification = await verifyLemonSqueezyPurchase(authState.user.email, type, item.id);
+					if (verification.ok && verification.success) {
+						const purchasedType = type;
+						const purchasedId = item.id;
+						toast.success(verification.message, 5000);
+						onClose();
+						setTimeout(() => goto(purchasedType === 'course' ? `/learn/${purchasedId}` : '/dashboard#sec-ebooks'), 1800);
+						return;
+					}
+					if (!verification.ok || !verification.notFound) {
+						toast.error(verification.message || 'Nou pa ka verifye acha ou a kounye a. Tanpri eseye ankò.');
+						return;
+					}
+				}
 			} catch (e) {
 				console.error('Check access error:', e);
+				toast.error('Nou pa ka verifye acha ou a kounye a. Tanpri eseye ankò.');
+				return;
 			} finally {
 				checkoutLoading = false;
 			}
@@ -165,7 +188,7 @@
 			showPaymentModal = false;
 			toast.info('Tanpri konekte sou kont ou pou w ka fè peman an.');
 			authState.openLogin(() => {
-				showPaymentModal = true;
+				handleStartCheckout();
 			});
 			return;
 		}
@@ -201,8 +224,8 @@
 
 			const redirectTarget = res?.url || res?.redirectUrl;
 			if (res && res.success && redirectTarget) {
-				showPaymentModal = false;
 				window.location.href = redirectTarget;
+				return;
 			} else {
 				toast.error(res?.message || 'Nou pa ka lanse peman an. Tanpri eseye ankò.');
 			}

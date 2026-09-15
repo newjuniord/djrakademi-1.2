@@ -1,3 +1,4 @@
+import { grantBundleAccess, parseBundleItems } from '$lib/server/bundles';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { ID, Query } from 'node-appwrite';
 import { requirePaymentUser, PaymentServerError } from '$lib/server/payments';
@@ -38,6 +39,15 @@ export const GET: RequestHandler = async ({ request }) => {
 		}
 
 		for (const orderRow of allPaidOrdersMap.values()) {
+			if (orderRow.product_type === 'bundle') {
+				await grantBundleAccess(tables, orderRow, user.$id);
+				for (const item of parseBundleItems(orderRow.bundle_items_json)) {
+					if (!grants.some((grant) => grant.item_type === item.type && grant.item_id === item.id)) {
+						grants.push({ user_id: user.$id, item_type: item.type, item_id: item.id });
+					}
+				}
+				continue;
+			}
 			if (orderRow.product_id) {
 				if (orderRow.product_type === 'course' || orderRow.product_type === 'ebook') {
 					const hasGrant = grants.some(

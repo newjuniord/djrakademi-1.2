@@ -44,7 +44,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
 		const bookingId = typeof body?.bookingId === 'string' ? body.bookingId.trim() : undefined;
 		const paymentMethod = body?.paymentMethod as PaymentMethod;
 		safeRequest = { productType, productId, bookingId, paymentMethod };
-		if (!productId || !['course', 'ebook', 'coaching'].includes(productType)) {
+		if (!productId || !['course', 'ebook', 'coaching', 'bundle'].includes(productType)) {
 			await recordPaymentEvent({
 				eventType: 'initiation', statusCode: 400, requestPayload: safeRequest,
 				responsePayload: { durationMs: Date.now() - startedAt }, errorMessage: 'Produit invalide.'

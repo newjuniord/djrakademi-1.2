@@ -128,6 +128,12 @@
 			</span>
 		</a>
 
+		<nav class="hidden items-center gap-6 text-sm font-bold text-zinc-600 lg:flex" aria-label="Catalogue public">
+			<a href="/" class="transition-colors hover:text-zinc-950">Akey</a>
+			<a href="/catalogue" class="transition-colors hover:text-zinc-950">Katalòg</a>
+			<a href="/bundles" class="transition-colors hover:text-amber-700">Bundles</a>
+		</nav>
+
 		<!-- Right Action Button -->
 		<div class="flex items-center gap-2.5 shrink-0">
 			<!-- Help Icon Button -->

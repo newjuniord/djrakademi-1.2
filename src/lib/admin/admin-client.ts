@@ -176,7 +176,7 @@ export function getAdminOrders(params: {
 	limit: number;
 	search?: string;
 	status?: 'pending' | 'paid' | 'failed' | 'expired';
-	type?: 'course' | 'ebook' | 'coaching';
+	type?: 'course' | 'ebook' | 'coaching' | 'bundle';
 }): Promise<AdminOrdersResult> {
 	return adminRequest(`/orders${queryString(params)}`);
 }

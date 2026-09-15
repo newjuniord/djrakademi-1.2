@@ -3,6 +3,8 @@
 	import { goto } from '$app/navigation';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
+	import BundleCard from '$lib/components/BundleCard.svelte';
+	import { getPublishedBundles, type Bundle } from '$lib/services/bundles';
 
 	import { getPublishedCourses } from '$lib/services/courses';
 	import { getPublishedEbooks } from '$lib/services/ebooks';
@@ -35,6 +37,7 @@
 	let publishedCourses = $state<Course[]>([]);
 	let publishedEbooks = $state<Ebook[]>([]);
 	let activeCoaching = $state<CoachingService[]>([]);
+	let publishedBundles = $state<Bundle[]>([]);
 
 	// Support Peman state
 	let supportMethod = $state<'carte' | 'mobile'>('carte');
@@ -53,6 +56,7 @@
 		publishedCourses = courses;
 		publishedEbooks = ebooks;
 		activeCoaching = coaching;
+		getPublishedBundles().then((bundles) => publishedBundles = bundles).catch(() => undefined);
 	});
 
 	async function handleSupportSubmit(e: SubmitEvent) {
@@ -487,6 +491,15 @@
 			</div>
 		</section>
 
+		{#if publishedBundles.length > 0}
+			<section class="border-y border-zinc-200 bg-amber-50/50 py-16 sm:py-20" aria-labelledby="home-bundles-title">
+				<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+					<div class="mb-8 flex flex-wrap items-end justify-between gap-5"><div><span class="text-xs font-black uppercase tracking-widest text-amber-700">Plis ansanm</span><h2 id="home-bundles-title" class="mt-2 text-3xl font-black tracking-tight text-zinc-950">Bundles fòmasyon + e-books</h2><p class="mt-2 max-w-2xl text-sm text-zinc-600">Yon sèl pak pou jwenn resous ki mache ansanm, ak yon pri espesyal.</p></div><a href="/bundles" class="inline-flex items-center gap-2 text-sm font-black text-zinc-950 hover:text-amber-700">Gade tout bundles yo <ArrowRight size={17} /></a></div>
+					<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{#each publishedBundles.slice(0, 3) as bundle (bundle.id)}<BundleCard {bundle} />{/each}</div>
+				</div>
+			</section>
+		{/if}
+
 		<!-- ═══════════════════════════════════════════════════
 		     SECTION: COACHING
 		     ═══════════════════════════════════════════════════ -->
@@ -619,7 +632,7 @@
 								<!-- Lemon Squeezy Card Email Input -->
 								<div class="space-y-2">
 									<label for="support-card-email" class="block text-xs font-bold text-white/90">
-										Imel ou te itilize sou Lemon Squeezy lè w t ap peye pa kat la *
+										Imel kont ou a (menm ak sa ou te itilize sou Lemon Squeezy) *
 									</label>
 									<div class="relative">
 										<input
@@ -632,7 +645,7 @@
 										/>
 									</div>
 									<p class="text-[11px] text-white/40">
-										Sistèm nan ap chèche tranzaksyon Lemon Squeezy ki lye ak imel sa a pou debloke aksè w la.
+										Pou sekirite, itilize imel kont ou a : {authState.user?.email || "konekte pou wè imel ou"}.
 									</p>
 								</div>
 							{:else}

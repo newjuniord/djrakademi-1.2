@@ -182,7 +182,7 @@
 								<!-- Lemon Squeezy Card Email Input -->
 								<div class="space-y-2">
 									<label for="verify-card-email" class="block text-xs font-bold text-white/90">
-										Imel ou te itilize sou Lemon Squeezy lè w t ap peye pa kat la *
+										Imel kont ou a (menm ak sa ou te itilize sou Lemon Squeezy) *
 									</label>
 									<div class="relative">
 										<input
@@ -195,7 +195,7 @@
 										/>
 									</div>
 									<p class="text-[11px] text-white/40">
-										Lemon Squeezy a ap verifye peman ki lye ak imel sa a epi matche li ak pwodui DJR Akademi an.
+										Pou sekirite, itilize imel kont ou a : {authState.user?.email || "konekte pou wè imel ou"}.
 									</p>
 								</div>
 							{:else}

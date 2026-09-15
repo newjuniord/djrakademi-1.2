@@ -24,7 +24,7 @@
 		id: string;
 		customerName: string;
 		customerEmail: string;
-		productType: 'course' | 'ebook' | 'coaching';
+		productType: 'course' | 'ebook' | 'coaching' | 'bundle';
 		productId: string;
 		productTitle: string;
 		amount: number;
@@ -234,7 +234,7 @@
 							</div>
 							<div>
 								<span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
-									{order.productType === 'course' ? 'Fòmasyon sou entènèt' : order.productType === 'ebook' ? 'E-book PDF' : 'Sesyon Coaching'}
+									{order.productType === 'course' ? 'Fòmasyon sou entènèt' : order.productType === 'ebook' ? 'E-book PDF' : order.productType === 'bundle' ? 'Bundle' : 'Sesyon Coaching'}
 								</span>
 								<h2 class="text-base sm:text-lg font-bold text-base-content mt-1 line-clamp-1">{order.productTitle}</h2>
 								<p class="text-xs text-base-content/50">Kliyan : {order.customerName}</p>
@@ -302,6 +302,8 @@
 								<span>Swiv &amp; Telechaje E-book la</span>
 								<ArrowRight size={18} />
 							</a>
+						{:else if order.productType === 'bundle'}
+							<a href="/dashboard" class="btn btn-primary w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2">Gade resous mwen yo <ArrowRight size={18} /></a>
 						{:else}
 							<a
 								href={`/booking/${order.productId}/success`}

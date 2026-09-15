@@ -10,7 +10,7 @@
 	import { parseVideoUrl } from '$lib/utils/video';
 
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
-	import { initiatePlopplopPayment } from '$lib/services/payments';
+	import { initiatePlopplopPayment, verifyLemonSqueezyPurchase } from '$lib/services/payments';
 	import { authState } from '$lib/auth.svelte';
 
 	const courseId = $derived(page.params.id);
@@ -54,7 +54,7 @@
 	import { toast } from '$lib/toast.svelte';
 
 	async function handleBuyClick() {
-		if (!course) return;
+		if (!course || checkoutLoading) return;
 
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
@@ -78,10 +78,22 @@
 			if (course.isFree || course.price === 0) {
 				await handleFreeEnrollment();
 			} else {
+				const verification = await verifyLemonSqueezyPurchase(authState.user.email, 'course', course.id);
+				if (verification.ok && verification.success) {
+					const purchasedCourseId = course.id;
+					toast.success(verification.message, 5000);
+					setTimeout(() => goto(`/learn/${purchasedCourseId}`), 1800);
+					return;
+				}
+				if (!verification.ok || !verification.notFound) {
+					toast.error(verification.message || 'Nou pa ka verifye acha ou a kounye a. Tanpri eseye ankò.');
+					return;
+				}
 				showPaymentModal = true;
 			}
 		} catch (e) {
 			console.error('Check access error:', e);
+			toast.error('Nou pa ka verifye acha ou a kounye a. Tanpri eseye ankò.');
 		} finally {
 			checkoutLoading = false;
 		}
@@ -119,7 +131,7 @@
 			showPaymentModal = false;
 			toast.info('Tanpri konekte sou kont ou pou w ka fè peman an.');
 			authState.openLogin(() => {
-				showPaymentModal = true;
+				handleBuyClick();
 			});
 			return;
 		}
@@ -152,8 +164,8 @@
 
 			const redirectTarget = res?.url || res?.redirectUrl;
 			if (res && res.success && redirectTarget) {
-				showPaymentModal = false;
 				window.location.href = redirectTarget;
+				return;
 			} else {
 				toast.error(res?.message || 'Nou pa ka lanse peman an. Tanpri eseye ankò.');
 			}

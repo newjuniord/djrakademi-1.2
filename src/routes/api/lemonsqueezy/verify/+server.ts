@@ -1,3 +1,5 @@
+import { grantBundleAccess } from '$lib/server/bundles';
+import { verifyPurchaseBeforeCheckout } from '$lib/server/lemonsqueezy-precheck';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
@@ -106,6 +108,9 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 
 	const productType = orderRow.product_type || customData?.product_type;
 	const productId = orderRow.product_id || customData?.product_id;
+	if (productType === 'bundle' && (!userId || userId === 'admin')) {
+		throw new Error('Impossible d’accorder le bundle sans utilisateur Appwrite valide.');
+	}
 
 	// TOUJOURS vérifier et créer l'accès dans access_grants
 	if ((productType === 'course' || productType === 'ebook') && userId && productId) {
@@ -137,6 +142,7 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 	}
 
 	if (orderRow.status === 'paid') {
+		if (productType === 'bundle') await grantBundleAccess(tables, orderRow, userId);
 		if (userId && (!orderRow.user_id || orderRow.user_id === 'admin')) {
 			await tables.updateRow({
 				databaseId: DATABASE_ID,
@@ -161,6 +167,7 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 
 	const transaction = await tables.createTransaction({ ttl: 60 });
 	try {
+		if (productType === 'bundle') await grantBundleAccess(tables, orderRow, userId, transaction.$id);
 		if (productType === 'coaching' && productId) {
 			// Accès Coaching
 			const booking: any = await tables.getRow({
@@ -233,6 +240,63 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 	}
 }
 
+async function fulfillVerifiedBundleByEmail(
+	tables: ReturnType<typeof adminServices>['tables'],
+	bundleId: string,
+	userId: string,
+	email: string,
+	appOrderId: string | undefined,
+	lemonsqueezyOrderId: string,
+	paidAt: string
+): Promise<boolean> {
+	let orderRow: any = null;
+	if (appOrderId) {
+		orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: appOrderId }).catch(() => null);
+	}
+	if (!orderRow) {
+		const pending = await tables.listRows({
+			databaseId: DATABASE_ID,
+			tableId: ORDERS_TABLE,
+			queries: [
+				Query.equal('product_type', 'bundle'),
+				Query.equal('product_id', bundleId),
+				Query.equal('user_id', userId),
+				Query.equal('customer_email', email),
+				Query.equal('status', 'pending'),
+				Query.orderDesc('created_at'),
+				Query.limit(1)
+			]
+		});
+		orderRow = pending.rows[0] || null;
+	}
+	if (!orderRow || orderRow.product_type !== 'bundle' || orderRow.product_id !== bundleId) return false;
+	if (orderRow.payment_provider !== 'lemonsqueezy') return false;
+	if (String(orderRow.customer_email || '').trim().toLowerCase() !== email) return false;
+	if (orderRow.user_id && orderRow.user_id !== 'admin' && orderRow.user_id !== userId) return false;
+	if (orderRow.status === 'paid') {
+		await grantBundleAccess(tables, orderRow, userId);
+		return true;
+	}
+	if (orderRow.status !== 'pending') return false;
+
+	const transaction = await tables.createTransaction({ ttl: 60 });
+	try {
+		await grantBundleAccess(tables, orderRow, userId, transaction.$id);
+		await tables.updateRow({
+			databaseId: DATABASE_ID,
+			tableId: ORDERS_TABLE,
+			rowId: orderRow.$id,
+			transactionId: transaction.$id,
+			data: { status: 'paid', user_id: userId, payment_id: lemonsqueezyOrderId || undefined, paid_at: paidAt }
+		});
+		await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
+		return true;
+	} catch (error) {
+		await tables.updateTransaction({ transactionId: transaction.$id, rollback: true }).catch(() => undefined);
+		throw error;
+	}
+}
+
 /**
  * Interroge l'API Lemon Squeezy par email, extrait le variant_id et débloque le produit Appwrite correspondant.
  */
@@ -287,11 +351,12 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 		}
 	}
 
-	// 3. Charger tous les cours, ebooks et services de coaching avec leur variant_id
-	const [coursesRes, ebooksRes, coachingRes] = await Promise.all([
+	// 3. Charger les produits et bundles associés à une variante Lemon Squeezy.
+	const [coursesRes, ebooksRes, coachingRes, bundlesRes] = await Promise.all([
 		tables.listRows({ databaseId: DATABASE_ID, tableId: 'courses', queries: [Query.limit(100)] }).catch(() => ({ rows: [] })),
 		tables.listRows({ databaseId: DATABASE_ID, tableId: 'ebooks', queries: [Query.limit(100)] }).catch(() => ({ rows: [] })),
-		tables.listRows({ databaseId: DATABASE_ID, tableId: 'coaching_services', queries: [Query.limit(100)] }).catch(() => ({ rows: [] }))
+		tables.listRows({ databaseId: DATABASE_ID, tableId: 'coaching_services', queries: [Query.limit(100)] }).catch(() => ({ rows: [] })),
+		tables.listRows({ databaseId: DATABASE_ID, tableId: 'bundles', queries: [Query.limit(100)] }).catch(() => ({ rows: [] }))
 	]);
 
 	const allProducts = [
@@ -311,6 +376,12 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 			id: r.$id,
 			title: r.title || 'Coaching',
 			type: 'coaching' as const,
+			variantId: String(r.lemonsqueezy_variant_id || r.variant_id || '').trim()
+		})),
+		...bundlesRes.rows.map((r: any) => ({
+			id: r.$id,
+			title: r.title || 'Bundle',
+			type: 'bundle' as const,
 			variantId: String(r.lemonsqueezy_variant_id || r.variant_id || '').trim()
 		}))
 	];
@@ -340,8 +411,8 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 
 		// Matcher avec un produit Appwrite ayant le même Lemon Squeezy Variant ID
 		let matchedProduct = allProducts.find(
-			(p) => (lqVariantId && p.variantId === lqVariantId) || (metaProductId && p.id === metaProductId)
-		);
+			(p) => metaProductId && metaProductType && p.id === metaProductId && p.type === metaProductType
+		) || allProducts.find((p) => lqVariantId && p.variantId === lqVariantId);
 
 		if (!matchedProduct && metaProductId) {
 			matchedProduct = {
@@ -391,6 +462,23 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 				console.warn(`[Lemon Squeezy Verify]: Commande ${lqOrderId} déjà réclamée par l'utilisateur ${existingClaimedOrder.user_id}`);
 				alreadyClaimedByOtherCount++;
 				continue; // Déjà attribuée à un autre compte (premier arrivé, premier servi !)
+			}
+
+			if (matchedProduct.type === 'bundle' && existingClaimedOrder) {
+				if (existingClaimedOrder.product_type === 'bundle' && existingClaimedOrder.product_id === matchedProduct.id) {
+					await grantBundleAccess(tables, existingClaimedOrder, targetUserId);
+					if (!grantedProducts.includes(matchedProduct.title)) grantedProducts.push(matchedProduct.title);
+				}
+				continue;
+			}
+			if (matchedProduct.type === 'bundle' && !lqOrderId) continue;
+
+			if (matchedProduct.type === 'bundle') {
+				const fulfilled = await fulfillVerifiedBundleByEmail(
+					tables, matchedProduct.id, targetUserId, normalizedEmail, metaOrderId, lqOrderId, paidAt
+				);
+				if (fulfilled && !grantedProducts.includes(matchedProduct.title)) grantedProducts.push(matchedProduct.title);
+				continue;
 			}
 
 			// Créer l'accès dans access_grants pour targetUserId
@@ -520,7 +608,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const rawBody = await request.text();
 		const signature = request.headers.get('x-signature');
-		const webhookSecret = env.LEMONSQUEEZY_WEBHOOK_SECRET?.trim();
+		const webhookSecret = (env.LEMONSQUEEZY_WEBHOOK_SECRET || env.LEMONSQUEEZY_SIGNING_SECRET || '').trim();
 
 		// Si un secret est configuré et une signature est présente -> vérification webhook
 		if (signature && webhookSecret) {
@@ -548,43 +636,40 @@ export const POST: RequestHandler = async ({ request }) => {
 				);
 			}
 			const inputEmail = payload.email.trim().toLowerCase();
+			if (inputEmail !== user.email.trim().toLowerCase()) {
+				return json({ success: false, message: 'Imel la dwe menm ak imel kont ou a.' }, { status: 403 });
+			}
 
-			// 1. Pre-check dans verification_logs avant d'appeler l'API Lemon Squeezy
-			const { tables } = adminServices();
-			const existingSuccessLog = await tables.listRows({
-				databaseId: DATABASE_ID,
-				tableId: 'verification_logs',
-				queries: [
-					Query.equal('input_value', inputEmail),
-					Query.equal('status', 'success'),
-					Query.limit(1)
-				]
-			}).catch(() => ({ rows: [] }));
+			if (payload.mode === 'precheckout') {
+				const productType = payload.productType;
+				const productId = typeof payload.productId === 'string' ? payload.productId.trim() : '';
+				if (!['course', 'ebook', 'bundle'].includes(productType) || !productId) {
+					return json({ success: false, message: 'Pwodwi pou verifye a pa valab.' }, { status: 400 });
+				}
+				const result = await verifyPurchaseBeforeCheckout(inputEmail, user.$id, productType, productId);
+				return json(result);
+			}
 
-			if (existingSuccessLog.rows.length > 0) {
-				const message = `Imel sa a ("${inputEmail}") te deja itilize ak siksè pou debloke yon fòmasyon sou yon kont. Peman sa a pa ka re-itilize.`;
+			// La réclamation est contrôlée par identifiant de commande Lemon Squeezy,
+			// afin qu’un même e-mail puisse acheter plusieurs produits.
+			const result = await verifyAndFulfillByEmail(inputEmail, undefined, user.$id);
+
+			if (result.success) {
 				await logVerification(
 					user.$id,
 					inputEmail,
 					'carte',
-					'failed',
-					message
+					'success',
+					result.message || '',
+					result.grantedProducts?.join(', ') || ''
 				);
-				return json({ success: false, message }, { status: 400 });
 			}
 
-			const result = await verifyAndFulfillByEmail(inputEmail, undefined, user.$id);
-
-			await logVerification(
-				user.$id,
-				inputEmail,
-				'carte',
-				result.success ? 'success' : 'failed',
-				result.message || '',
-				result.grantedProducts?.join(', ') || ''
-			);
-
 			return json(result, { status: result.success ? 200 : 404 });
+		}
+
+		if (!webhookSecret || !verifySignature(rawBody, signature, webhookSecret)) {
+			return json({ success: false, message: 'Signature Webhook invalide ou absente.' }, { status: 401 });
 		}
 
 		// CAS 2 : Webhook Lemon Squeezy (order_created, subscription_created)
@@ -592,6 +677,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		const customData = payload?.meta?.custom_data || payload?.custom_data || {};
 		const orderId = customData?.order_id || payload?.order_id;
 		const lqOrderId = String(payload?.data?.id || payload?.id || '');
+		const paymentStatus = String(payload?.data?.attributes?.status || payload?.status || '').toLowerCase();
+		if (customData?.product_type === 'bundle' && paymentStatus !== 'paid') {
+			return json({ success: true, message: 'Paiement du bundle encore en attente.' });
+		}
+
 
 		console.log(`[Lemon Squeezy Webhook Received]: Événement: "${eventName}", Order ID: "${orderId}"`);
 
@@ -648,7 +738,14 @@ export const GET: RequestHandler = async ({ request, url }) => {
 			return json({ success: false, message: 'Commande introuvable.' }, { status: 404 });
 		}
 
-		const targetUserId = user?.$id || (orderRow.user_id && orderRow.user_id !== 'admin' ? orderRow.user_id : null);
+		const orderOwnerId = orderRow.user_id && orderRow.user_id !== 'admin' ? String(orderRow.user_id) : null;
+		if (orderRow.product_type === 'bundle' && user && orderOwnerId && user.$id !== orderOwnerId) {
+			return json({ success: false, message: 'Cette commande appartient à un autre compte.' }, { status: 403 });
+		}
+		if (orderRow.product_type === 'bundle' && orderRow.payment_provider !== 'lemonsqueezy') {
+			return json({ success: false, message: 'Cette commande ne relève pas de Lemon Squeezy.' }, { status: 400 });
+		}
+		const targetUserId = orderRow.product_type === 'bundle' ? (orderOwnerId || user?.$id || null) : (user?.$id || orderOwnerId);
 
 		// 2. Toujours s'assurer atomiquement que l'accès existe dans access_grants pour cet utilisateur
 		if (targetUserId && orderRow.product_id && (orderRow.product_type === 'course' || orderRow.product_type === 'ebook')) {
@@ -696,6 +793,10 @@ export const GET: RequestHandler = async ({ request, url }) => {
 			} catch (e) {
 				console.warn('[Lemon Squeezy GET Verify Fallback Error]:', e);
 			}
+		}
+
+		if (orderRow.product_type === 'bundle' && orderRow.status === 'paid' && targetUserId) {
+			await grantBundleAccess(tables, orderRow, targetUserId);
 		}
 
 		return json({

@@ -1,3 +1,4 @@
+import { grantBundleAccess } from '$lib/server/bundles';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
@@ -67,6 +68,7 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, t
 	}
 
 	if (orderRow.status === 'paid') {
+		if (productType === 'bundle' && userId) await grantBundleAccess(tables, orderRow, userId);
 		if (userId && (!orderRow.user_id || orderRow.user_id === 'admin')) {
 			await tables.updateRow({
 				databaseId: DATABASE_ID,
@@ -91,6 +93,7 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, t
 
 	const transaction = await tables.createTransaction({ ttl: 60 });
 	try {
+		if (productType === 'bundle' && userId) await grantBundleAccess(tables, orderRow, userId, transaction.$id);
 		if (productType === 'coaching' && productId) {
 			// Accès Coaching
 			const booking: any = await tables.getRow({

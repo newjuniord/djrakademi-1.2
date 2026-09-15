@@ -19,6 +19,7 @@ import {
 	validateLogo
 } from '$lib/server/admin-appwrite';
 import { mapBooking } from '$lib/server/bookings';
+import { parseBundleItems } from '$lib/server/bundles';
 
 function responseError(error: unknown) {
 	if (error instanceof AdminServerError) return json({ message: error.message }, { status: error.status });
@@ -41,6 +42,15 @@ function grantCounts(grants: any[]) {
 		counts.set(grant.user_id, current);
 	}
 	return counts;
+}
+
+function orderAccessGranted(order: any, grants: Set<string>): boolean | undefined {
+	if (order.product_type === 'coaching') return undefined;
+	if (order.product_type === 'bundle') {
+		const items = parseBundleItems(order.bundle_items_json);
+		return items.length > 0 && items.every((item) => grants.has(`${order.user_id}:${item.type}:${item.id}`));
+	}
+	return grants.has(`${order.user_id}:${order.product_type}:${order.product_id}`);
 }
 
 function accessKeys(grants: any[]) {
@@ -265,7 +275,7 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 			const grantSet = accessKeys(grants);
 			const serviceTitles = new Map(services.map((service) => [service.$id, service.title || service.$id]));
 			const recentOrders = [...orders].sort((a, b) => Date.parse(b.created_at || b.$createdAt) - Date.parse(a.created_at || a.$createdAt)).slice(0, 5)
-				.map((order) => mapOrder(order, order.product_type === 'coaching' ? undefined : grantSet.has(`${order.user_id}:${order.product_type}:${order.product_id}`)));
+				.map((order) => mapOrder(order, orderAccessGranted(order, grantSet)));
 			
 			const recentUsers = allCombinedUsers.slice(0, 5);
 
@@ -414,7 +424,7 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 			const grantSet = accessKeys(grants);
 			const summary = { paid: summaryPages[0].total, pending: summaryPages[1].total, failed: summaryPages[2].total, expired: summaryPages[3].total };
 			return json({
-				items: orderPage.rows.map((order) => mapOrder(order, order.product_type === 'coaching' ? undefined : grantSet.has(`${order.user_id}:${order.product_type}:${order.product_id}`))),
+				items: orderPage.rows.map((order) => mapOrder(order, orderAccessGranted(order, grantSet))),
 				total: orderPage.total, summary, page, limit
 			});
 		}

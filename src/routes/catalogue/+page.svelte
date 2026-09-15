@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
+	import BundleCard from '$lib/components/BundleCard.svelte';
+	import { getPublishedBundles, type Bundle } from '$lib/services/bundles';
 	import { getPublishedCourses } from '$lib/services/courses';
 	import { getPublishedEbooks } from '$lib/services/ebooks';
 	import { getActiveCoachingServices } from '$lib/services/coaching';
@@ -33,6 +35,7 @@
 	let publishedCourses = $state<Course[]>([]);
 	let publishedEbooks = $state<Ebook[]>([]);
 	let activeCoaching = $state<CoachingService[]>([]);
+	let publishedBundles = $state<Bundle[]>([]);
 
 	onMount(async () => {
 		const [courses, ebooks, coaching] = await Promise.all([
@@ -43,6 +46,7 @@
 		publishedCourses = courses;
 		publishedEbooks = ebooks;
 		activeCoaching = coaching;
+		getPublishedBundles().then((bundles) => publishedBundles = bundles).catch(() => undefined);
 	});
 
 	// Search filter
@@ -62,6 +66,8 @@
 		)
 	);
 
+	const filteredBundles = $derived(publishedBundles.filter((b) => b.title.toLowerCase().includes(searchQuery.toLowerCase()) || b.description.toLowerCase().includes(searchQuery.toLowerCase()) || b.items.some((item) => item.title.toLowerCase().includes(searchQuery.toLowerCase()))));
+
 	const filteredCoaching = $derived(
 		activeCoaching.filter(
 			(s) =>
@@ -76,11 +82,11 @@
 	const displayedCoaching = $derived(filteredCoaching.slice(0, coachingLimit));
 
 	const totalTotal = $derived(
-		publishedCourses.length + publishedEbooks.length + activeCoaching.length
+		publishedCourses.length + publishedEbooks.length + publishedBundles.length + activeCoaching.length
 	);
 
 	const totalFiltered = $derived(
-		filteredCourses.length + filteredEbooks.length + filteredCoaching.length
+		filteredCourses.length + filteredEbooks.length + filteredBundles.length + filteredCoaching.length
 	);
 </script>
 
@@ -159,6 +165,7 @@
 						<FileText size={15} class="text-emerald-500" />
 						Ebook PDF ({filteredEbooks.length})
 					</a>
+					<a href="#sec-bundles" class="inline-flex items-center gap-2 rounded-xl bg-amber-100 px-4 py-2 text-xs font-bold text-zinc-800 transition-colors hover:bg-amber-400 shrink-0"><Layers size={15} /> Bundles ({filteredBundles.length})</a>
 					<a
 						href="#sec-coaching"
 						class="inline-flex items-center gap-2 px-4 py-2 bg-zinc-100 hover:bg-zinc-950 hover:text-white rounded-xl text-xs font-bold text-zinc-800 transition-colors shrink-0"
@@ -374,6 +381,10 @@
 							</div>
 						{/if}
 					</section>
+				{/if}
+
+				{#if filteredBundles.length > 0}
+					<section id="sec-bundles" class="scroll-mt-36 space-y-6"><div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200 pb-4"><div><span class="text-xs font-black uppercase tracking-widest text-amber-700">Pak espesyal</span><h2 class="mt-1 text-2xl font-black text-zinc-950">Bundles fòmasyon + e-books ({filteredBundles.length})</h2><p class="mt-1 text-xs text-zinc-500">Aprann ak plizyè resous nan yon sèl achte.</p></div><a href="/bundles" class="inline-flex items-center gap-2 text-xs font-black text-zinc-950 hover:text-amber-700">Tout bundles yo <ArrowRight size={15} /></a></div><div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{#each filteredBundles as bundle (bundle.id)}<BundleCard {bundle} />{/each}</div></section>
 				{/if}
 
 				<!-- ═══════════════════════════════════════════════════

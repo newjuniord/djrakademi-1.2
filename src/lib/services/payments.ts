@@ -6,7 +6,7 @@ export interface InitiatePaymentParams {
 	customerName: string;
 	customerEmail: string;
 	customerPhone?: string;
-	productType: 'course' | 'ebook' | 'coaching';
+	productType: 'course' | 'ebook' | 'coaching' | 'bundle';
 	productId: string;
 	productTitle: string;
 	amount: number;
@@ -145,6 +145,39 @@ export async function verifyLemonSqueezyEmail(email: string) {
 		return {
 			success: false,
 			message: error instanceof Error ? error.message : 'Erreur de connexion lors de la vérification.'
+		};
+	}
+}
+
+export interface LemonPurchasePrecheckResult {
+	status?: number;
+	ok?: boolean;
+	success: boolean;
+	notFound: boolean;
+	message: string;
+	productType?: 'course' | 'ebook' | 'bundle';
+	productId?: string;
+}
+
+export async function verifyLemonSqueezyPurchase(
+	email: string,
+	productType: 'course' | 'ebook' | 'bundle',
+	productId: string
+): Promise<LemonPurchasePrecheckResult> {
+	try {
+		const jwt = await paymentJwt();
+		const response = await fetch('/api/lemonsqueezy/verify', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+			body: JSON.stringify({ mode: 'precheckout', email, productType, productId })
+		});
+		const data = await response.json();
+		return { status: response.status, ok: response.ok, notFound: false, ...data };
+	} catch (error) {
+		return {
+			success: false,
+			notFound: false,
+			message: error instanceof Error ? error.message : 'Nou pa ka verifye acha Lemon Squeezy a kounye a.'
 		};
 	}
 }

@@ -37,12 +37,14 @@ function publicAppUrl(): string {
 function productDestination(order: Order): string {
 	if (order.productType === 'course') return `/learn/${encodeURIComponent(order.productId)}`;
 	if (order.productType === 'ebook') return `/ebooks/${encodeURIComponent(order.productId)}`;
+	if (order.productType === 'bundle') return '/dashboard';
 	return `/booking/${encodeURIComponent(order.productId)}/success`;
 }
 
 function productLabel(order: Order): string {
 	if (order.productType === 'course') return 'votre formation';
 	if (order.productType === 'ebook') return 'votre ebook';
+	if (order.productType === 'bundle') return 'votre bundle';
 	return 'votre rendez-vous de coaching';
 }
 

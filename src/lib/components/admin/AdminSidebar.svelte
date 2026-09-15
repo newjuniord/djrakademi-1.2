@@ -11,6 +11,7 @@
 		Users,
 		ShieldCheck,
 		Sparkles,
+		Layers3,
 		ChevronRight,
 		Activity,
 		MessageSquare
@@ -43,6 +44,7 @@
 			items: [
 				{ label: 'Cours', href: '/admin/courses', icon: BookOpen },
 				{ label: 'Ebooks', href: '/admin/ebooks', icon: FileText },
+				{ label: 'Bundles', href: '/admin/bundles', icon: Layers3 },
 				{ label: 'Coaching', href: '/admin/coaching', icon: CalendarCheck }
 			]
 		},

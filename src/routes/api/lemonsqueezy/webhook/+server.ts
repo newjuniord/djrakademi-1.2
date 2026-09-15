@@ -1,3 +1,4 @@
+import { grantBundleAccess } from '$lib/server/bundles';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
@@ -109,6 +110,12 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 
 	const productType = orderRow.product_type || customData?.product_type;
 	const productId = orderRow.product_id || customData?.product_id;
+	if (productType === 'bundle' && orderRow.payment_provider !== 'lemonsqueezy') {
+		throw new Error('La commande du bundle n’est pas une commande Lemon Squeezy.');
+	}
+	if (productType === 'bundle' && (!userId || userId === 'admin')) {
+		throw new Error('Impossible d’accorder le bundle sans utilisateur Appwrite valide.');
+	}
 
 	// TOUJOURS créer l'accès dans access_grants
 	if ((productType === 'course' || productType === 'ebook') && userId && productId) {
@@ -140,6 +147,7 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 	}
 
 	if (orderRow.status === 'paid') {
+		if (productType === 'bundle') await grantBundleAccess(tables, orderRow, userId);
 		if (userId && (!orderRow.user_id || orderRow.user_id === 'admin')) {
 			await tables.updateRow({
 				databaseId: DATABASE_ID,
@@ -165,6 +173,7 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 
 	const transaction = await tables.createTransaction({ ttl: 60 });
 	try {
+		if (productType === 'bundle') await grantBundleAccess(tables, orderRow, userId, transaction.$id);
 		if (productType === 'coaching' && productId) {
 			// Confirmation Coaching
 			const booking: any = await tables.getRow({
@@ -263,7 +272,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		const customData = payload?.meta?.custom_data || payload?.custom_data || {};
 		const orderId = customData?.order_id || payload?.data?.attributes?.order_number;
 		const lqOrderId = String(payload?.data?.id || payload?.id || '');
-		const status = payload?.data?.attributes?.status || 'paid';
+		const paymentStatus = String(payload?.data?.attributes?.status || payload?.status || '').toLowerCase();
+		const status = paymentStatus || 'paid';
+		if (customData?.product_type === 'bundle' && paymentStatus !== 'paid') {
+			return json({ success: true, message: 'Paiement du bundle encore en attente.' });
+		}
 
 		console.log(`[Lemon Squeezy Webhook Reçu]: Événement="${eventName}", OrderID="${orderId}", LQ_ID="${lqOrderId}", Status="${status}"`);
 

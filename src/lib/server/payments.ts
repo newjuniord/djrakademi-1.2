@@ -3,6 +3,7 @@ import { PUBLIC_APPWRITE_ENDPOINT, PUBLIC_APPWRITE_PROJECT } from '$env/static/p
 import { Account, Client, ID, Query, type Models } from 'node-appwrite';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
 import type { Order } from '$lib/services/orders';
+import { getBundle, grantBundleAccess } from '$lib/server/bundles';
 import { sendPurchaseConfirmationEmail } from '$lib/server/purchase-email';
 import { lemonSqueezySetup, createCheckout } from '@lemonsqueezy/lemonsqueezy.js';
 
@@ -25,7 +26,7 @@ export class PaymentServerError extends Error {
 }
 
 export interface InitiatePaymentParams {
-	productType: 'course' | 'ebook' | 'coaching';
+	productType: 'course' | 'ebook' | 'coaching' | 'bundle';
 	productId: string;
 	bookingId?: string;
 	paymentMethod: PaymentMethod;
@@ -158,11 +159,19 @@ function mapOrder(row: any): Order {
 
 async function resolvePurchase(params: InitiatePaymentParams, user: AuthenticatedUser) {
 	const { tables } = adminServices();
-	if (!['course', 'ebook', 'coaching'].includes(params.productType)) {
+	if (!['course', 'ebook', 'coaching', 'bundle'].includes(params.productType)) {
 		throw new PaymentServerError('Type de produit invalide.', 400);
 	}
 	if (!PAYMENT_METHODS.includes(params.paymentMethod)) {
 		throw new PaymentServerError('Moyen de paiement invalide.', 400);
+	}
+
+	if (params.productType === 'bundle') {
+		const bundle = await getBundle(params.productId);
+		if (!bundle || bundle.price <= 0 || bundle.items.length < 2) throw new PaymentServerError('Bundle indisponible.', 404);
+		const existingOrder = await tables.listRows({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, queries: [Query.equal('user_id', user.$id), Query.equal('product_type', 'bundle'), Query.equal('product_id', bundle.id), Query.equal('status', 'paid'), Query.limit(1)] });
+		if (existingOrder.rows.length) throw new PaymentServerError('Vous possédez déjà ce bundle.', 409);
+		return { productId: bundle.id, productTitle: bundle.title, amount: bundle.price, amountUsd: bundle.priceUsd, customerPhone: '', variantId: bundle.variantId, bundleItemsJson: JSON.stringify(bundle.items.map(({ type, id }) => ({ type, id }))) };
 	}
 
 	if (params.productType === 'course' || params.productType === 'ebook') {
@@ -255,11 +264,14 @@ export async function initiateLemonSqueezyPaymentServer(
 	}
 
 	const purchase = await resolvePurchase(params, user);
+	if (params.productType === 'bundle' && (!purchase.variantId || purchase.amountUsd <= 0)) {
+		throw new PaymentServerError('Paiement par carte indisponible pour ce bundle : variante et prix USD requis.', 409);
+	}
 	const { tables } = adminServices();
 	await rejectRecentPendingOrder(tables, user.$id, params.productType, purchase.productId);
 
 	const variantId = (
-		params.variantId ||
+		(params.productType === 'bundle' ? '' : params.variantId) ||
 		purchase.variantId ||
 		env.LEMONSQUEEZY_VARIANT_ID ||
 		env.LEMONSQUEEZY_DEFAULT_VARIANT_ID ||
@@ -283,6 +295,7 @@ export async function initiateLemonSqueezyPaymentServer(
 		product_type: params.productType,
 		product_id: purchase.productId,
 		product_title: purchase.productTitle,
+		...(params.productType === 'bundle' ? { bundle_items_json: purchase.bundleItemsJson } : {}),
 		amount: purchase.amountUsd,
 		currency: 'USD',
 		payment_provider: 'lemonsqueezy',
@@ -400,6 +413,7 @@ export async function initiatePlopplopPaymentServer(
 			product_type: params.productType,
 			product_id: purchase.productId,
 			product_title: purchase.productTitle,
+			...(params.productType === 'bundle' ? { bundle_items_json: purchase.bundleItemsJson } : {}),
 			amount: purchase.amount,
 			currency: 'HTG',
 			payment_provider: params.paymentMethod,
@@ -454,7 +468,10 @@ export async function confirmPlopplopPaymentServer(
 	try { row = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId }); }
 	catch { throw new PaymentServerError('Commande introuvable.', 404); }
 	if (row.user_id !== user.$id) throw new PaymentServerError('Accès refusé à cette commande.', 403);
-	if (row.status === 'paid') return { success: true, order: mapOrder(row), message: 'Paiement déjà confirmé.' };
+	if (row.status === 'paid') {
+		if (row.product_type === 'bundle') await grantBundleAccess(tables, row, user.$id);
+		return { success: true, order: mapOrder(row), message: 'Paiement déjà confirmé.' };
+	}
 	if (row.status !== 'pending') throw new PaymentServerError('Cette commande ne peut plus être confirmée.', 409);
 
 	const { clientId, headers } = merchantConfig();
@@ -489,7 +506,9 @@ export async function confirmPlopplopPaymentServer(
 		}
 		if (current.status !== "pending") throw new PaymentServerError("Cette commande ne peut plus être confirmée.", 409);
 
-		if (current.product_type === "course" || current.product_type === "ebook") {
+		if (current.product_type === 'bundle') {
+			await grantBundleAccess(tables, current, current.user_id, transaction.$id);
+		} else if (current.product_type === "course" || current.product_type === "ebook") {
 			const existing = await tables.listRows({
 				databaseId: DATABASE_ID, tableId: ACCESS_TABLE, transactionId: transaction.$id,
 				queries: [Query.equal("user_id", current.user_id), Query.equal("item_type", current.product_type), Query.equal("item_id", current.product_id), Query.limit(1)]

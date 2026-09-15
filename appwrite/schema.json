@@ -150,9 +150,12 @@
       ],
       "columns": {
         "title": "varchar(255) required",
+        "lemonsqueezy_variant_id": "varchar(100) optional",
+        "variant_id": "varchar(100) optional",
         "description": "text required",
         "cover": "text optional",
         "price": "integer required min:0",
+        "price_usd": "integer optional min:0",
         "is_free": "boolean required",
         "published": "boolean required",
         "student_count": "integer required min:0"
@@ -210,10 +213,13 @@
       ],
       "columns": {
         "title": "varchar(255) required",
+        "lemonsqueezy_variant_id": "varchar(100) optional",
+        "variant_id": "varchar(100) optional",
         "description": "text optional",
         "cover_file_id": "varchar(255) optional",
         "pdf_file_id": "varchar(255) optional",
         "price": "integer required min:0",
+        "price_usd": "integer optional min:0",
         "is_free": "boolean required",
         "published": "boolean required",
         "created_at": "datetime optional",
@@ -245,6 +251,23 @@
       ]
     },
     {
+      "id": "bundles",
+      "permissions": [],
+      "columns": {
+        "title": "varchar(255) required",
+        "description": "text required",
+        "cover_url": "text optional",
+        "price": "integer required min:0",
+        "price_usd": "integer optional min:0",
+        "variant_id": "varchar(100) optional",
+        "published": "boolean required",
+        "items_json": "text required",
+        "created_at": "datetime required",
+        "updated_at": "datetime required"
+      },
+      "indexes": ["key(published)", "key(created_at)"]
+    },
+    {
       "id": "orders",
       "permissions": [],
       "columns": {
@@ -252,12 +275,13 @@
         "customer_name": "varchar(255) required",
         "customer_email": "email required",
         "customer_phone": "varchar(32) optional",
-        "product_type": "enum[course,ebook,coaching] required",
+        "product_type": "enum[course,ebook,coaching,bundle] required",
         "product_id": "varchar(36) required",
         "product_title": "varchar(255) required",
+        "bundle_items_json": "text optional",
         "amount": "integer required min:0",
-        "currency": "enum[HTG] required",
-        "payment_provider": "enum[moncash,natcash,carte,card,free,admin] required",
+        "currency": "enum[HTG,USD] required",
+        "payment_provider": "enum[moncash,natcash,carte,card,lemonsqueezy,free,admin] required",
         "payment_id": "varchar(160) optional",
         "status": "enum[pending,paid,failed,expired] required",
         "created_at": "datetime required",
@@ -304,6 +328,24 @@
       "indexes": [
         "unique(user_id,course_id)",
         "key(user_id)"
+      ]
+    },
+    {
+      "id": "verification_logs",
+      "permissions": [],
+      "columns": {
+        "user_id": "varchar(36) required",
+        "input_value": "varchar(255) required",
+        "method": "enum[carte,mobile] required",
+        "status": "enum[success,failed] required",
+        "message": "text required",
+        "granted_items": "text optional",
+        "created_at": "datetime required"
+      },
+      "indexes": [
+        "key(user_id)",
+        "key(status)",
+        "key(created_at)"
       ]
     },
     {

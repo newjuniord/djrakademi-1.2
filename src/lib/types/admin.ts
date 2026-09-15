@@ -113,7 +113,7 @@ export type Ebook = {
 	updatedAt?: string;
 };
 
-export type OrderType = 'course' | 'ebook' | 'coaching';
+export type OrderType = 'course' | 'ebook' | 'coaching' | 'bundle';
 
 export type OrderStatus = 'pending' | 'paid' | 'failed' | 'expired';
 

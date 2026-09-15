@@ -145,6 +145,8 @@
 						<span class="badge badge-secondary badge-sm font-bold text-[10px] shrink-0">
 							Ebook
 						</span>
+					{:else if order.type === 'bundle'}
+						<span class="badge badge-warning badge-sm font-bold text-[10px] shrink-0">Bundle</span>
 					{:else}
 						<span class="badge badge-accent badge-sm font-bold text-[10px] shrink-0">
 							Coaching
@@ -202,6 +204,8 @@
 								<span>Accès au cours : Accordé</span>
 							{:else if order.type === 'ebook'}
 								<span>Accès à l'ebook : Accordé</span>
+							{:else if order.type === 'bundle'}
+								<span>Accès aux contenus du bundle : Accordé</span>
 							{:else}
 								<span>Réservation : Confirmée</span>
 							{/if}
