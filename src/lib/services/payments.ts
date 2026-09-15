@@ -131,13 +131,13 @@ export async function verifyPlopplopReference(reference: string) {
 	}
 }
 
-export async function verifyLemonSqueezyEmail(email: string) {
+export async function verifyLemonSqueezyEmail(email: string, mode: "request_otp" | "confirm_otp" = "request_otp", challenge?: string, otp?: string) {
 	try {
 		const jwt = await paymentJwt();
 		const response = await fetch('/api/lemonsqueezy/verify', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
-			body: JSON.stringify({ email })
+			body: JSON.stringify({ email, mode, ...(challenge ? { challenge } : {}), ...(otp ? { otp } : {}) })
 		});
 		const data = await response.json();
 		return { status: response.status, ok: response.ok, ...data };

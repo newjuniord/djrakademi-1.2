@@ -647,8 +647,27 @@ export const POST: RequestHandler = async ({ request }) => {
 				return json(result);
 			}
 
-			// La réclamation est contrôlée par identifiant de commande Lemon Squeezy,
-			// afin qu’un même e-mail puisse acheter plusieurs produits.
+			// Vérifier si cet e-mail a DÉJÀ été réclamé / utilisé avec succès par UN AUTRE COMPTE
+			const previous = await adminServices().tables.listRows({
+				databaseId: DATABASE_ID,
+				tableId: 'verification_logs',
+				queries: [
+					Query.equal('input_value', inputEmail),
+					Query.equal('status', 'success'),
+					Query.limit(1)
+				]
+			}).catch(() => ({ rows: [] }));
+
+			const previousClaim: any = previous.rows[0];
+			if (previousClaim?.user_id && previousClaim.user_id !== user.$id) {
+				return json({
+					success: false,
+					alreadyClaimed: true,
+					message: `Peman ki lye ak imel "${inputEmail}" la te deja debloke sou yon lòt kont. Imel sa a pa ka itilize ankò.`
+				}, { status: 409 });
+			}
+
+			// Tenter de réclamer et débloquer les produits pour l'utilisateur actuellement connecté
 			const result = await verifyAndFulfillByEmail(inputEmail, undefined, user.$id);
 
 			if (result.success) {
@@ -664,6 +683,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 			return json(result, { status: result.success ? 200 : 404 });
 		}
+
 
 		if (!webhookSecret || !verifySignature(rawBody, signature, webhookSecret)) {
 			return json({ success: false, message: 'Signature Webhook invalide ou absente.' }, { status: 401 });

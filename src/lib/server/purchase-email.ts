@@ -122,3 +122,4 @@ export async function sendPurchaseConfirmationEmail(order: Order): Promise<Purch
 		return { sent: true, attachmentIncluded: Boolean(attachment) };
 	} finally { clearTimeout(timeout); }
 }
+

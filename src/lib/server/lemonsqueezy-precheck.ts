@@ -55,6 +55,10 @@ export async function verifyPurchaseBeforeCheckout(
   if (!apiKey) throw new Error('Vérification Lemon Squeezy indisponible pour le moment. Tanpri eseye ankò.');
 
   const { tables } = adminServices();
+
+  const previousClaims = await tables.listRows({ databaseId: DATABASE_ID, tableId: "verification_logs", queries: [Query.equal("input_value", normalizedEmail), Query.equal("status", "success"), Query.limit(25)] }).catch(() => ({ rows: [] }));
+  const foreignClaim = previousClaims.rows.find((row: any) => row.user_id && row.user_id !== userId);
+  if (foreignClaim) return { success: false, notFound: false, alreadyClaimed: true, message: `Imel ${normalizedEmail} la deja bay aksè sou yon lòt kont. Tanpri konekte ak kont ki te resevwa aksè a.` };
   const tableId = productType === 'course' ? 'courses' : productType === 'ebook' ? 'ebooks' : 'bundles';
   const product: any = await tables.getRow({ databaseId: DATABASE_ID, tableId, rowId: productId });
   const title = String(product.title || 'Pwogram');

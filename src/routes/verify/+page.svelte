@@ -27,6 +27,8 @@
 	let supportLoading = $state(false);
 	let supportSuccessMessage = $state<string | null>(null);
 	let supportErrorMessage = $state<string | null>(null);
+	let otpChallenge = $state<string | null>(null);
+	let otpCode = $state('');
 
 	$effect(() => {
 		if (authState.user?.email && !supportEmail) {
@@ -55,9 +57,9 @@
 					return;
 				}
 
-				const resData = await verifyLemonSqueezyEmail(email);
+				const resData = await verifyLemonSqueezyEmail(email, otpChallenge ? "confirm_otp" : "request_otp", otpChallenge || undefined, otpChallenge ? otpCode.trim() : undefined);
 
-				if (resData.ok && resData.success) {
+				if (resData.otpRequired && resData.challenge) { otpChallenge = resData.challenge; supportSuccessMessage = resData.message; toast.success("Nou voye kòd la sou imel ou."); } else if (resData.ok && resData.success) {
 					const targetUrl = resData.courseId ? `/learn/${resData.courseId}` : '/dashboard';
 					supportSuccessMessage = 'Peman pa kat ou a verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...';
 					toast.success('Aksè debloke ak siksè ! Redirèksyon en kous...');
@@ -198,12 +200,11 @@
 											placeholder="ex: imel-peman-ou@gmail.com"
 											bind:value={supportEmail}
 											class="w-full h-12 px-4 bg-zinc-900/90 border border-white/15 focus:border-amber-400 rounded-xl text-sm font-medium text-white placeholder-white/30 outline-none transition-colors"
-										/>
-									</div>
-									<p class="text-[11px] text-white/50 leading-relaxed">
-										Mete imel ou te antre lè w t ap peye an. Aksè a ap debloke sou kont ou an sèlman (<span class="text-amber-400 font-bold">{authState.user?.email || "konekte pou wè imel ou"}</span>).
-									</p>
-								</div>
+                                        />
+                                </div>
+                                <p class="text-[11px] text-white/50 leading-relaxed">Mete imel ou te antre lè w t ap peye an. Aksè a ap debloke sou kont ou an sèlman (<span class="text-amber-400 font-bold">{authState.user?.email || "konekte pou wè imel ou"}</span>).</p>
+                                {#if otpChallenge}<input id="verify-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required bind:value={otpCode} placeholder="Kòd OTP" class="w-full h-12 px-4 bg-zinc-900/90 border border-white/15 focus:border-amber-400 rounded-xl text-sm text-white" />{/if}
+                            </div>
 							{:else}
 								<!-- MonCash / Natcash Input -->
 								<div class="space-y-2">

@@ -20,3 +20,4 @@ export function verifyPurchaseAccessToken(orderId: string, userId: string, token
 	const expected = createPurchaseAccessToken(orderId, userId);
 	return token.trim().toLowerCase() === expected.toLowerCase();
 }
+
