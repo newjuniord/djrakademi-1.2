@@ -6,6 +6,7 @@
 	import ImpersonationBanner from '$lib/components/ImpersonationBanner.svelte';
 	import AuthModal from '$lib/components/AuthModal.svelte';
 	import SupportWidget from '$lib/components/SupportWidget.svelte';
+	import PwaInstallBanner from '$lib/components/PwaInstallBanner.svelte';
 	import { client } from '$lib/appwrite';
 
 	let { children } = $props();
@@ -28,4 +29,5 @@
 {@render children()}
 <AuthModal bind:isOpen={authState.showAuthModal} onLogin={handleLoginSuccess} />
 <SupportWidget />
+<PwaInstallBanner />
 <AdminToast />
