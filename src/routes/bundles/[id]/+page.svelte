@@ -192,46 +192,48 @@
 							{@const totalLessonsCount = isCourse && item.modules
 								? item.modules.reduce((sum, m) => sum + (m.lessons?.length || 0), 0)
 								: 0}
-							<div class="rounded-2xl border border-zinc-200 bg-white p-4 transition-all hover:border-amber-400/80 shadow-xs">
-								<div class="flex items-center gap-4">
-									<div class="grid size-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-zinc-100">
-										{#if item.cover}
-											<img src={item.cover} alt={item.title} class="h-full w-full object-cover" />
-										{:else if isCourse}
-											<BookOpen size={23} class="text-amber-600" />
-										{:else}
-											<FileText size={23} class="text-emerald-600" />
-										{/if}
-									</div>
-
-									<div class="min-w-0 flex-1">
-										<div class="flex items-center gap-2">
-											<span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-												{isCourse ? 'Fòmasyon videyo' : 'E-book PDF'}
-											</span>
-											{#if isCourse && totalLessonsCount > 0}
-												<span class="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
-													{totalLessonsCount} leçons
-												</span>
+							<div class="rounded-2xl border border-zinc-200 bg-white p-3.5 sm:p-4.5 transition-all hover:border-amber-400/80 shadow-xs min-w-0">
+								<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 min-w-0">
+									<div class="flex items-center gap-3.5 min-w-0 flex-1">
+										<div class="grid size-12 sm:size-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-zinc-100 border border-zinc-200/60">
+											{#if item.cover}
+												<img src={item.cover} alt={item.title} class="h-full w-full object-cover" />
+											{:else if isCourse}
+												<BookOpen size={22} class="text-amber-600" />
+											{:else}
+												<FileText size={22} class="text-emerald-600" />
 											{/if}
 										</div>
-										<h3 class="truncate font-bold text-zinc-950 text-base">
-											{item.title}
-										</h3>
+
+										<div class="min-w-0 flex-1">
+											<div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+												<span class="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+													{isCourse ? 'Fòmasyon videyo' : 'E-book PDF'}
+												</span>
+												{#if isCourse && totalLessonsCount > 0}
+													<span class="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+														{totalLessonsCount} leçons
+													</span>
+												{/if}
+											</div>
+											<h3 class="font-bold text-zinc-950 text-sm sm:text-base leading-snug break-words">
+												{item.title}
+											</h3>
+										</div>
 									</div>
 
-									<div class="flex items-center gap-2 shrink-0">
+									<div class="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2.5 sm:pt-0 border-t sm:border-t-0 border-zinc-100">
 										{#if isCourse}
 											<button
 												type="button"
 												onclick={() => toggleItem(item.id)}
-												class="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2 text-xs font-bold text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 cursor-pointer"
+												class="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 cursor-pointer"
 											>
-												<span>{isExpanded ? 'Masye leson yo' : 'Gade leson yo'}</span>
+												<span>{isExpanded ? 'Masye leson' : 'Gade leson'}</span>
 												{#if isExpanded}
-													<ChevronUp size={16} class="text-amber-600" />
+													<ChevronUp size={15} class="text-amber-600" />
 												{:else}
-													<ChevronDown size={16} class="text-zinc-500" />
+													<ChevronDown size={15} class="text-zinc-500" />
 												{/if}
 											</button>
 										{/if}
@@ -239,9 +241,9 @@
 										<a
 											href={isCourse ? `/cours/${item.id}` : `/ebooks/${item.id}`}
 											title="Gade paj la"
-											class="inline-flex size-9 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 transition-colors hover:bg-amber-400 hover:text-zinc-950"
+											class="inline-flex size-8.5 sm:size-9 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 transition-colors hover:bg-amber-400 hover:text-zinc-950"
 										>
-											<ArrowRight size={17} />
+											<ArrowRight size={16} />
 										</a>
 									</div>
 								</div>

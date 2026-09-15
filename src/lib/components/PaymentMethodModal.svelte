@@ -76,7 +76,7 @@
 					<h3 id="payment-modal-title" class="text-lg font-black text-zinc-950 tracking-tight">
 						Chwazi fason pou w peye
 					</h3>
-					<p class="text-xs text-zinc-500 mt-0.5 truncate max-w-xs font-medium">
+					<p class="text-xs text-zinc-500 mt-0.5 line-clamp-2 max-w-full font-medium leading-normal">
 						{productTitle} · <span class="font-bold text-zinc-900">{isFree ? 'Gratis' : `${amount.toLocaleString('fr-FR')} HTG${amountUsd && amountUsd > 0 ? ` ($${amountUsd} USD)` : ''}`}</span>
 					</p>
 				</div>
