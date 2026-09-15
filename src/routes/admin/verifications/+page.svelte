@@ -334,7 +334,7 @@
 							<span class="px-2 py-0.5 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold rounded-md text-[10px]">ECHÈK</span>
 						{/if}
 					</div>
-					<p class="text-base-content/80 font-medium leading-relaxed">{selectedLog.message}</p>
+					<p class="text-base-content/80 font-medium leading-relaxed break-words whitespace-pre-wrap [word-break:break-word]">{selectedLog.message}</p>
 				</div>
 
 				{#if selectedLog.grantedItems}
