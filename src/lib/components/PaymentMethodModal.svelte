@@ -48,9 +48,7 @@
 
 	onMount(() => {
 		const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-		localMethodsEnabled = dev ||
-			timezone === 'America/Port-au-Prince' ||
-			timezone === 'America/Santo_Domingo';
+		localMethodsEnabled = dev || timezone === 'America/Port-au-Prince';
 
 		isLocalhost = dev || (typeof window !== 'undefined' && (
 			window.location.hostname === 'localhost' ||
