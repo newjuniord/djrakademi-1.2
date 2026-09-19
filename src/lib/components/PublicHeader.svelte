@@ -9,7 +9,6 @@
 		BookOpen,
 		ExternalLink,
 		LogOut,
-		LogIn,
 		Megaphone,
 		HelpCircle
 	} from 'lucide-svelte';
@@ -22,6 +21,7 @@
 
 	let drawerOpen = $state(false);
 	let authModalOpen = $state(false);
+	let authModalInitialView = $state<"login" | "signup">("login");
 
 	let announcement = $state<{
 		enabled: boolean;
@@ -162,11 +162,19 @@
 			{:else}
 				<button
 					type="button"
-					onclick={() => (authModalOpen = true)}
-					class="inline-flex items-center gap-2.5 h-11 px-4 sm:px-5 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold transition-all shadow-sm rounded-xl focus:outline-none cursor-pointer"
+					onclick={() => { authModalInitialView = "signup"; authModalOpen = true; }}
+					class="inline-flex items-center h-11 px-3 sm:px-4 bg-amber-400 hover:bg-amber-300 text-zinc-950 text-xs font-bold transition-all shadow-sm rounded-xl focus:outline-none cursor-pointer whitespace-nowrap"
+					aria-label="Kreye yon kont"
+				>
+					<span>Kreye yon kont</span>
+				</button>
+
+				<button
+					type="button"
+					onclick={() => { authModalInitialView = "login"; authModalOpen = true; }}
+					class="inline-flex items-center h-11 px-3 sm:px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold transition-all shadow-sm rounded-xl focus:outline-none cursor-pointer whitespace-nowrap"
 					aria-label="Konekte"
 				>
-					<LogIn size={18} class="text-amber-400" />
 					<span>Koneksyon</span>
 				</button>
 			{/if}
@@ -324,5 +332,5 @@
 	</div>
 {/if}
 
-<AuthModal bind:isOpen={authModalOpen} onLogin={login} />
+<AuthModal bind:isOpen={authModalOpen} onLogin={login} initialView={authModalInitialView} />
 

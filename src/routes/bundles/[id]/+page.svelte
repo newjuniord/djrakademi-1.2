@@ -6,6 +6,7 @@
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
 	import { getBundleById, ownsBundle, type Bundle } from '$lib/services/bundles';
+	import { formatPublicPrice, useHTG } from '$lib/utils/public-price';
 	import { initiatePlopplopPayment, verifyLemonSqueezyPurchase } from '$lib/services/payments';
 	import { authState } from '$lib/auth.svelte';
 	import { toast } from '$lib/toast.svelte';
@@ -298,10 +299,10 @@
 				<aside class="h-fit rounded-3xl border border-zinc-200 bg-white p-6 shadow-lg lg:sticky lg:top-28">
 					<p class="text-xs font-bold uppercase tracking-wider text-zinc-500">Pri espesyal bundle</p>
 					<div class="mt-2 flex items-baseline gap-3">
-						<strong class="text-3xl font-black">{bundle.price.toLocaleString('fr-FR')} HTG</strong>
+						<strong class="text-3xl font-black">{formatPublicPrice(bundle.price, bundle.priceUsd)}</strong>
 					</div>
 
-					{#if bundle.originalPrice > bundle.price}
+					{#if useHTG && bundle.originalPrice > bundle.price}
 						<p class="mt-1 text-sm text-zinc-400 line-through">
 							{bundle.originalPrice.toLocaleString('fr-FR')} HTG separeman
 						</p>

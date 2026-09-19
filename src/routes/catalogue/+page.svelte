@@ -9,6 +9,7 @@
 	import { getActiveCoachingServices } from '$lib/services/coaching';
 	import type { Course, Ebook } from '$lib/types/admin';
 	import type { CoachingService } from '$lib/types/coaching';
+	import { formatPublicPrice } from '$lib/utils/public-price';
 	import {
 		BookOpen,
 		FileText,
@@ -248,7 +249,7 @@
 												<span class="px-3 py-1 bg-emerald-500 text-white text-[11px] font-black uppercase rounded-full shadow">Gratis</span>
 											{:else}
 												<span class="px-3 py-1 bg-white/95 text-zinc-950 text-[11px] font-black rounded-full shadow">
-													{course.price.toLocaleString('fr-FR')} HTG {#if course.priceUsd && course.priceUsd > 0}(${course.priceUsd} USD){/if}
+													{formatPublicPrice(course.price, course.priceUsd)}
 												</span>
 											{/if}
 										</div>
@@ -342,7 +343,7 @@
 												<span class="px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-black uppercase rounded-full shadow">Gratis</span>
 											{:else}
 												<span class="px-2.5 py-1 bg-white text-zinc-950 text-[10px] font-black rounded-full shadow">
-													{ebook.price.toLocaleString('fr-FR')} HTG {#if ebook.priceUsd && ebook.priceUsd > 0}(${ebook.priceUsd} USD){/if}
+													{formatPublicPrice(ebook.price, ebook.priceUsd)}
 												</span>
 											{/if}
 										</div>
@@ -426,7 +427,7 @@
 									<div class="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
 										<span class="text-xs text-zinc-500 font-medium">{coaching.durationMinutes} min</span>
 										<span class="font-black text-base text-zinc-950">
-											{coaching.isFree ? 'Gratis' : `${coaching.price.toLocaleString('fr-FR')} ${coaching.currency} ${coaching.priceUsd && coaching.priceUsd > 0 ? `($${coaching.priceUsd} USD)` : ''}`}
+											{coaching.isFree ? 'Gratis' : formatPublicPrice(coaching.price, coaching.priceUsd)}
 										</span>
 									</div>
 								</a>

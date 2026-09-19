@@ -12,6 +12,7 @@
 	import type { Course, Ebook } from '$lib/types/admin';
 	import type { CoachingService } from '$lib/types/coaching';
 	import { toast } from '$lib/toast.svelte';
+	import { formatPublicPrice } from '$lib/utils/public-price';
 
 	import {
 		ArrowRight,
@@ -338,7 +339,7 @@
 										</span>
 									{:else}
 										<span class="px-3 py-1 bg-white/90 backdrop-blur-sm text-zinc-950 text-[11px] font-black rounded-full shadow-md">
-											{course.price.toLocaleString('fr-FR')} HTG {#if course.priceUsd && course.priceUsd > 0}(${course.priceUsd} USD){/if}
+											{formatPublicPrice(course.price, course.priceUsd)}
 										</span>
 									{/if}
 								</div>
@@ -461,7 +462,7 @@
 										</span>
 									{:else}
 										<span class="px-2.5 py-1 bg-white text-zinc-950 text-[10px] font-black rounded-full shadow">
-											{ebook.price.toLocaleString('fr-FR')} HTG {#if ebook.priceUsd && ebook.priceUsd > 0}(${ebook.priceUsd} USD){/if}
+											{formatPublicPrice(ebook.price, ebook.priceUsd)}
 										</span>
 									{/if}
 								</div>
@@ -480,7 +481,7 @@
 								<h3 class="font-black text-sm text-zinc-950 group-hover:text-amber-600 transition-colors line-clamp-2 leading-snug">
 									{ebook.title}
 								</h3>
-								<p class="text-[11px] text-zinc-400 line-clamp-1 leading-relaxed hidden sm:block">
+								<p class="text-[11px] text-zinc-400 truncate leading-relaxed hidden sm:block">
 									{ebook.description}
 								</p>
 							</div>
@@ -559,8 +560,7 @@
 										<span class="font-black text-lg text-emerald-600">Gratis</span>
 									{:else}
 										<div>
-											<span class="font-black text-xl text-zinc-950">{coaching.price.toLocaleString('fr-FR')}</span>
-											<span class="text-zinc-400 text-xs font-medium ml-1">{coaching.currency}</span>
+											<span class="font-black text-xl text-zinc-950">{formatPublicPrice(coaching.price, coaching.priceUsd)}</span>
 										</div>
 									{/if}
 								</div>

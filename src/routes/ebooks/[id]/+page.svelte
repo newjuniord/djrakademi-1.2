@@ -6,6 +6,7 @@
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import { getEbookById } from '$lib/services/ebooks';
 	import type { Ebook } from '$lib/types/admin';
+	import { formatPublicPrice } from '$lib/utils/public-price';
 	import { FileText, ChevronLeft, Download, CheckCircle2, ShoppingBag, Loader2 } from 'lucide-svelte';
 
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
@@ -245,11 +246,7 @@
 									{#if ebook.isFree || ebook.price === 0}
 										<span class="text-4xl font-black text-emerald-400">Gratis</span>
 									{:else}
-										<span class="text-4xl font-black text-white">{ebook.price.toLocaleString('fr-FR')}</span>
-										<span class="text-white/40 text-sm font-medium ml-1">HTG</span>
-										{#if ebook.priceUsd && ebook.priceUsd > 0}
-											<span class="text-4xl font-black text-amber-400 ml-2">(${ebook.priceUsd} USD)</span>
-										{/if}
+										<span class="text-4xl font-black text-white">{formatPublicPrice(ebook.price, ebook.priceUsd)}</span>
 									{/if}
 								</div>
 								<button
@@ -339,7 +336,7 @@
 						{#if ebook.isFree || ebook.price === 0}
 							<span class="text-3xl font-black text-emerald-400">Gratis</span>
 						{:else}
-							<span class="text-3xl font-black">{ebook.price.toLocaleString('fr-FR')} HTG {#if ebook.priceUsd && ebook.priceUsd > 0}(${ebook.priceUsd} USD){/if}</span>
+							<span class="text-3xl font-black">{formatPublicPrice(ebook.price, ebook.priceUsd)}</span>
 						{/if}
 						<button
 							type="button"

@@ -27,11 +27,14 @@
 
 	let selectedMethod = $state<'moncash' | 'natcash' | 'carte'>('moncash');
 	let isLocalhost = $state(false);
+	let localMethodsEnabled = $state(dev);
 	let localLoading = $state(false);
 
 	$effect(() => {
 		if (!open) {
 			localLoading = false;
+		} else if (!localMethodsEnabled) {
+			selectedMethod = 'carte';
 		}
 	});
 
@@ -44,6 +47,11 @@
 	const isLoading = $derived(loading || localLoading);
 
 	onMount(() => {
+		const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+		localMethodsEnabled = dev ||
+			timezone === 'America/Port-au-Prince' ||
+			timezone === 'America/Santo_Domingo';
+
 		isLocalhost = dev || (typeof window !== 'undefined' && (
 			window.location.hostname === 'localhost' ||
 			window.location.hostname === '127.0.0.1' ||
@@ -52,7 +60,11 @@
 	});
 
 	function handleConfirm() {
-		if (isLoading || (selectedMethod === 'carte' && !cardEnabled)) return;
+		if (
+			isLoading ||
+			(!localMethodsEnabled && selectedMethod !== 'carte') ||
+			(selectedMethod === 'carte' && !cardEnabled)
+		) return;
 		localLoading = true;
 		onSelectMethod(selectedMethod);
 	}
@@ -95,7 +107,7 @@
 			<!-- Body: Payment Options Categorized -->
 			<div class="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
 				<!-- Section 1: Haïti (Méthodes Locales) -->
-				<div class="space-y-2.5">
+				<div class="space-y-2.5 {localMethodsEnabled ? '' : 'opacity-50'}">
 					<div class="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
 						<MapPin size={13} class="text-red-500" />
 						<span>Ayiti 🇭🇹 (Metòd Lokal)</span>
@@ -105,7 +117,7 @@
 					<div class="space-y-1.5">
 						<button
 							type="button"
-							disabled={isLoading}
+							disabled={isLoading || !localMethodsEnabled}
 							onclick={() => (selectedMethod = 'moncash')}
 							class="w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer disabled:cursor-not-allowed group {selectedMethod === 'moncash'
 								? 'bg-red-50/80 border-red-500 ring-1 ring-red-500/30'
@@ -154,7 +166,7 @@
 					<!-- Option NatCash -->
 					<button
 						type="button"
-						disabled={isLoading}
+						disabled={isLoading || !localMethodsEnabled}
 						onclick={() => (selectedMethod = 'natcash')}
 						class="w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer disabled:cursor-not-allowed group {selectedMethod === 'natcash'
 							? 'bg-emerald-50/80 border-emerald-500 ring-1 ring-emerald-500/30'

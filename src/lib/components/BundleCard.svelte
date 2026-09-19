@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Bundle } from '$lib/services/bundles';
+	import { formatPublicPrice, useHTG } from '$lib/utils/public-price';
 	import { ArrowRight, BookOpen, FileText, Layers3 } from 'lucide-svelte';
 	let { bundle }: { bundle: Bundle } = $props();
 	const courseCount = $derived(bundle.items.filter((item) => item.type === 'course').length);
@@ -25,7 +26,7 @@
 			{#if ebookCount}<span class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1"><FileText size={13} /> {ebookCount} e-book</span>{/if}
 		</div>
 		<div class="mt-auto flex items-end justify-between gap-3 border-t border-zinc-100 pt-4">
-			<div><span class="block text-[11px] font-semibold text-zinc-500">Pri bundle la</span><strong class="text-xl font-black text-zinc-950">{bundle.price.toLocaleString('fr-FR')} HTG</strong>{#if bundle.originalPrice > bundle.price}<span class="ml-2 text-xs text-zinc-400 line-through">{bundle.originalPrice.toLocaleString('fr-FR')}</span>{/if}</div>
+			<div><span class="block text-[11px] font-semibold text-zinc-500">Pri bundle la</span><strong class="text-xl font-black text-zinc-950">{formatPublicPrice(bundle.price, bundle.priceUsd)}</strong>{#if useHTG && bundle.originalPrice > bundle.price}<span class="ml-2 text-xs text-zinc-400 line-through">{bundle.originalPrice.toLocaleString('fr-FR')}</span>{/if}</div>
 			<span class="grid size-10 shrink-0 place-items-center rounded-full bg-zinc-950 text-white transition-colors group-hover:bg-amber-500 group-hover:text-zinc-950"><ArrowRight size={18} /></span>
 		</div>
 	</div>

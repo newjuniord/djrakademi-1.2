@@ -1,24 +1,35 @@
 <script lang="ts">
-	import { X, Mail, Lock, User as UserIcon, ArrowRight, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-svelte';
+	import { X, Mail, Lock, User as UserIcon, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-svelte';
 	import { account, ID } from '$lib/appwrite';
 	import { authState, translateAuthError } from '$lib/auth.svelte';
-	import { getOrCreateProfile } from '$lib/services/profiles';
+	import { getOrCreateProfile, updateProfile } from '$lib/services/profiles';
 
-	let { isOpen = $bindable(false), onLogin } = $props<{
+	let { isOpen = $bindable(false), onLogin, initialView = "login" } = $props<{
 		isOpen: boolean;
 		onLogin: () => void;
+		initialView?: "login" | "signup";
 	}>();
 
 	// 'login' | 'signup' | 'forgot'
 	let view = $state<'login' | 'signup' | 'forgot'>('login');
 	
 	let name = $state('');
+	let phone = $state('');
 	let email = $state('');
 	let password = $state('');
 	let showPassword = $state(false);
 	let loading = $state(false);
 	let errorMessage = $state<string | null>(null);
 	let successMessage = $state<string | null>(null);
+
+	$effect(() => {
+		if (isOpen) {
+			view = initialView;
+			errorMessage = null;
+			successMessage = null;
+			showPassword = false;
+		}
+	});
 
 	function close() {
 		isOpen = false;
@@ -27,6 +38,7 @@
 			errorMessage = null;
 			successMessage = null;
 			name = '';
+			phone = '';
 			email = '';
 			password = '';
 			showPassword = false;
@@ -77,7 +89,8 @@
 					authState.user = user;
 					// Automatically create user profile document in Appwrite profiles collection
 					try {
-						authState.profile = await getOrCreateProfile(user.$id, name, email);
+						await getOrCreateProfile(user.$id, name, email);
+						authState.profile = await updateProfile(user.$id, { whatsapp: phone.trim() });
 					} catch (pe) {
 						console.warn('[AuthModal] Profile creation warning:', pe);
 					}
@@ -184,6 +197,24 @@
 									disabled={loading}
 									class="w-full bg-zinc-50 border border-zinc-200 hover:border-zinc-300 focus:border-amber-400 focus:bg-white rounded-xl py-3 pl-11 pr-4 text-sm text-zinc-950 placeholder-zinc-400 outline-none transition-all disabled:opacity-60"
 									placeholder="Jean Dupont"
+								/>
+							</div>
+						</div>
+						<div class="space-y-1.5">
+							<label for="signup-phone" class="text-xs font-bold text-zinc-700 ml-1">Nimewo telefòn</label>
+							<div class="relative">
+								<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400">
+									<Phone size={16} />
+								</div>
+								<input
+									id="signup-phone"
+									type="tel"
+									autocomplete="tel"
+									required
+									bind:value={phone}
+									disabled={loading}
+									class="w-full bg-zinc-50 border border-zinc-200 hover:border-zinc-300 focus:border-amber-400 focus:bg-white rounded-xl py-3 pl-11 pr-4 text-sm text-zinc-950 placeholder-zinc-400 outline-none transition-all disabled:opacity-60"
+									placeholder="+509 00 00 0000"
 								/>
 							</div>
 						</div>

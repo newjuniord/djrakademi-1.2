@@ -6,6 +6,7 @@
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import { claimFreeCourse, getCourseById, hasCourseAccess } from '$lib/services/courses';
 	import type { Course } from '$lib/types/admin';
+	import { formatPublicPrice } from '$lib/utils/public-price';
 	import { BookOpen, Users, ChevronLeft, Play, CheckCircle2, Clock, Lock, X, Video } from 'lucide-svelte';
 	import { parseVideoUrl } from '$lib/utils/video';
 
@@ -313,11 +314,7 @@
 									{#if course.isFree || course.price === 0}
 										<span class="text-4xl font-black text-emerald-400">Gratis</span>
 									{:else}
-										<span class="text-4xl font-black text-white">{course.price.toLocaleString('fr-FR')}</span>
-										<span class="text-white/40 text-sm font-medium ml-1">HTG</span>
-										{#if course.priceUsd && course.priceUsd > 0}
-											<span class="text-4xl font-black text-amber-400 ml-2">(${course.priceUsd} USD)</span>
-										{/if}
+										<span class="text-4xl font-black text-white">{formatPublicPrice(course.price, course.priceUsd)}</span>
 									{/if}
 								</div>
 								<button
@@ -406,7 +403,7 @@
 						{#if course.isFree || course.price === 0}
 							<span class="text-3xl font-black text-emerald-400">Gratis</span>
 						{:else}
-							<span class="text-3xl font-black">{course.price.toLocaleString('fr-FR')} HTG {#if course.priceUsd && course.priceUsd > 0}(${course.priceUsd} USD){/if}</span>
+							<span class="text-3xl font-black">{formatPublicPrice(course.price, course.priceUsd)}</span>
 						{/if}
 						<button
 							type="button"

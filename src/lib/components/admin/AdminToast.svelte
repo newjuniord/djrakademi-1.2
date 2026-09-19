@@ -4,7 +4,7 @@
 </script>
 
 {#if toast.items.length > 0}
-	<div class="toast toast-end toast-bottom z-50 p-4 space-y-2 w-full max-w-md pointer-events-auto">
+	<div class="toast toast-end toast-bottom z-[100] p-4 space-y-2 w-full max-w-md pointer-events-auto">
 		{#each toast.items as item (item.id)}
 			<div
 				class={`alert shadow-xl font-medium text-xs sm:text-sm text-white rounded-2xl border flex items-start justify-between gap-3 animate-in slide-in-from-bottom-2 duration-200 p-4 ${
