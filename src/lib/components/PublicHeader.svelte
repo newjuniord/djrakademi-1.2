@@ -1,13 +1,11 @@
 <script lang="ts">
 	import {
 		User,
-		Sparkles,
 		Shield,
 		Menu,
 		X,
 		Receipt,
 		BookOpen,
-		ExternalLink,
 		LogOut,
 		Megaphone,
 		HelpCircle
@@ -18,6 +16,8 @@
 	import { goto } from '$app/navigation';
 	import { authState } from '$lib/auth.svelte';
 	import { onMount } from 'svelte';
+	import { cubicOut } from 'svelte/easing';
+	import { fade, fly } from 'svelte/transition';
 
 	const DEFAULT_SITE_NAME = 'DJR AKADEMI';
 	const DEFAULT_LOGO_URL = '/logo.png';
@@ -70,6 +70,16 @@
 			case 'rouge': return '#ef4444';
 			case 'blanc': default: return '#ffffff';
 		}
+	}
+
+	function portal(node: HTMLElement) {
+		document.body.appendChild(node);
+
+		return {
+			destroy() {
+				node.remove();
+			}
+		};
 	}
 
 	function closeDrawer() {
@@ -209,18 +219,22 @@
 
 <!-- MENI PRINCIPAL / ETIDYAN -->
 {#if drawerOpen}
+	<div use:portal class="fixed inset-0 z-[9999] pointer-events-none">
 	<button
 		type="button"
 		onclick={closeDrawer}
-		class="fixed inset-0 z-50 bg-black/40 cursor-default"
+		class="absolute inset-0 bg-black/40 cursor-default pointer-events-auto"
 		aria-label="Fèmen meni an"
+		transition:fade={{ duration: 180 }}
 	></button>
 
 	<div
 		role="dialog"
 		aria-modal="true"
 		aria-label="Meni prensipal"
-		class="fixed inset-y-0 right-0 z-50 flex w-full max-w-[360px] flex-col overflow-y-auto border-l border-zinc-200 bg-white text-zinc-950 shadow-2xl animate-in slide-in-from-right duration-300"
+		class="absolute inset-y-0 right-0 z-10 flex w-full max-w-[360px] flex-col overflow-y-auto border-l border-zinc-200 bg-white text-zinc-950 shadow-2xl pointer-events-auto"
+		in:fly={{ x: 360, duration: 260, easing: cubicOut }}
+		out:fly={{ x: 360, duration: 220, easing: cubicOut }}
 	>
 		<div class="flex items-center justify-between gap-4 border-b border-zinc-200 px-5 py-5">
 			{#if authState.user !== null}
@@ -287,17 +301,9 @@
 							<User size={19} class="shrink-0 text-zinc-500" />
 							<span>Pwofil mwen</span>
 						</a>
-						<a href="/catalogue" onclick={closeDrawer} class="flex min-h-14 items-center gap-3 px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
-							<Sparkles size={19} class="shrink-0 text-zinc-500" />
-							<span>Katalòg</span>
-						</a>
 						<a href="/transactions" onclick={closeDrawer} class="flex min-h-14 items-center gap-3 px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
 							<Receipt size={19} class="shrink-0 text-zinc-500" />
 							<span>Transaksyon mwen</span>
-						</a>
-						<a href="/verify" onclick={closeDrawer} class="flex min-h-14 items-center gap-3 px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
-							<Shield size={19} class="shrink-0 text-zinc-500" />
-							<span>Verifye peman</span>
 						</a>
 					</div>
 				</div>
@@ -344,7 +350,7 @@
 			{/if}
 		</div>
 	</div>
+	</div>
 {/if}
 
 <AuthModal bind:isOpen={authModalOpen} onLogin={login} initialView={authModalInitialView} />
-
