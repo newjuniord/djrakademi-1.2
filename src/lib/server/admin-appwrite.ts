@@ -116,7 +116,7 @@ export function mapAdminUser(row: any, counts = { courseCount: 0, ebookCount: 0 
 }
 
 export function mapSettings(row?: any) {
-	const logoFileId = row?.logo_file_id;
+	const logoFileId = typeof row?.logo_file_id === 'string' ? row.logo_file_id.trim() : '';
 	const logoUrl = logoFileId
 		? `${PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${BRANDING_BUCKET_ID}/files/${encodeURIComponent(logoFileId)}/view?project=${encodeURIComponent(PUBLIC_APPWRITE_PROJECT)}`
 		: undefined;

@@ -34,7 +34,7 @@
 		'Konseptyalize ebook pou vann',
 		'Kreye estrateji brand',
 		'Prepare diskou, prezantasyon, oswa mesaj piblik',
-		'Kreye prompt AI pou biznis ou ak kontni'
+		'Kreye prompt entelijans atifisyèl pou biznis ou ak kontni'
 	];
 
 	const consultationsList = [
@@ -43,7 +43,7 @@
 		'Konsiltasyon Biznis Dijital',
 		'Konsiltasyon Ekriti Liv / Ebook',
 		'Konsiltasyon Storytelling ak Kominikasyon',
-		'Konsiltasyon Estrateji AI pou travay oswa biznis ou'
+		'Konsiltasyon Estrateji entelijans atifisyèl pou travay oswa biznis ou'
 	];
 
 	function toggleFaq(index: number) {
@@ -51,7 +51,7 @@
 	}
 
 	const stats = [
-		{ value: '480+', label: 'Etidyan ki pasyone', detail: 'Nan tout Ayiti ak nan dyaspora a' },
+		{ value: '600+', label: 'Etidyan ki pasyone', detail: 'Nan tout Ayiti ak nan dyaspora a' },
 		{ value: '98%', label: 'Nivo satisfaksyon', detail: 'Avis pozitif ki verifye' },
 		{ value: '24/7', label: 'Aksè san limit', detail: 'Aprann nan pwòp rythm ou' }
 	];
@@ -105,7 +105,7 @@
 
 <svelte:head>
 	<title>Konsènan DJR Akademi · DJR Akademi</title>
-	<meta name="description" content="Dekouvri misyon DJR Akademi : Aprann sèvi ak IA pou w ka sispann razè. Kou, Ebook, Konsiltasyon ak Coaching Prive." />
+	<meta name="description" content="Dekouvri misyon DJR Akademi : Aprann sèvi ak entelijans atifisyèl pou w ka sispann razè. Kou, Ebook, Konsiltasyon ak Coaching Prive." />
 </svelte:head>
 
 <div class="min-h-screen bg-zinc-50 flex flex-col font-sans text-zinc-900 selection:bg-amber-400 selection:text-black">
@@ -125,11 +125,11 @@
 					</div>
 
 					<h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-zinc-950">
-						Aprann sèvi ak IA pou w ka sispann razè.
+						Aprann sèvi ak entelijans atifisyèl pou w ka sispann razè.
 					</h1>
 
 					<p class="text-zinc-600 text-sm sm:text-base lg:text-lg font-medium leading-relaxed">
-						DJR Akademi se pou Ayisyen ki pa vle rete dèyè nan epòk AI a. Li fèt pou kreyatè kontni, antreprenè, elèv, pwofesyonèl, lidè, pastè, paran, vandè, politisyen ak tout moun ki vle aprann pale pi byen, kreye pi byen, vann pi byen, epi konstwi yon lavi ki gen plis opòtinite.
+						DJR Akademi se pou Ayisyen ki pa vle rete dèyè nan epòk entelijans atifisyèl la. Li fèt pou kreyatè kontni, antreprenè, elèv, pwofesyonèl, lidè, pastè, paran, vandè, politisyen ak tout moun ki vle aprann pale pi byen, kreye pi byen, vann pi byen, epi konstwi yon lavi ki gen plis opòtinite.
 					</p>
 
 					<div class="space-y-3 pt-2 text-xs sm:text-sm font-semibold text-zinc-700">
@@ -270,7 +270,7 @@
 
 					<div class="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-200 font-medium space-y-2.5">
 						<p class="text-amber-400 font-bold text-sm sm:text-base">
-							DJR Akademi se pou Ayisyen ki pa vle rete dèyè nan epòk AI a.
+							DJR Akademi se pou Ayisyen ki pa vle rete dèyè nan epòk entelijans atifisyèl la.
 						</p>
 						<p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
 							Li fèt pou kreyatè kontni, antreprenè, elèv, pwofesyonèl, lidè, pastè, paran, vandè, politisyen ak tout moun ki vle aprann pale pi byen, kreye pi byen, vann pi byen, epi konstwi yon lavi ki gen plis opòtinite.
@@ -325,7 +325,7 @@
 							</div>
 						</div>
 						<p class="text-xs sm:text-sm text-zinc-600 leading-relaxed font-medium">
-							Fòmasyon videyo konplè ki bati pa modil pou w ka mèt sou AI, kreyasyon kontni, pale an piblik ak biznis dijital nan pwòp rit ou.
+							Fòmasyon videyo konplè ki bati pa modil pou w ka mèt sou entelijans atifisyèl, kreyasyon kontni, pale an piblik ak biznis dijital nan pwòp rit ou.
 						</p>
 					</div>
 

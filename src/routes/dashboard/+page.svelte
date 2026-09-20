@@ -127,35 +127,35 @@
 		<main class="flex-1 py-8 sm:py-12">
 
 		<!-- Welcome Banner -->
-		<section class="bg-zinc-950 text-white py-12 sm:py-16">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+		<section class="dashboard-hero bg-zinc-950 text-white py-12 sm:py-16">
+			<div class="dashboard-hero-inner max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="dashboard-user-row flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
 
 					<!-- User Info -->
-					<div class="flex items-center gap-4">
-						<div class="size-16 bg-gradient-to-br from-amber-400 to-orange-500 text-black text-xl font-black rounded-2xl grid place-items-center shadow-xl shrink-0">
+					<div class="dashboard-user flex items-center gap-4">
+						<div class="dashboard-avatar size-16 bg-gradient-to-br from-amber-400 to-orange-500 text-black text-xl font-black rounded-2xl grid place-items-center shadow-xl shrink-0">
 							{user.avatar}
 						</div>
 						<div>
-							<div class="flex items-center gap-2">
-								<h1 class="text-2xl sm:text-3xl font-black tracking-tight">{user.name}</h1>
-								<span class="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider rounded-md border border-emerald-500/30">
+							<div class="dashboard-name-line flex items-center gap-2">
+								<h1 class="dashboard-user-name text-2xl sm:text-3xl font-black tracking-tight">{user.name}</h1>
+								<span class="dashboard-member-status px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider rounded-md border border-emerald-500/30">
 									Manm Aktif
 								</span>
 							</div>
-							<p class="text-white/50 text-xs mt-1 font-mono">{user.email} · Manm depi {user.memberSince}</p>
+							<p class="dashboard-user-meta text-white/50 text-xs mt-1 font-mono">{user.email} · Manm depi {user.memberSince}</p>
 						</div>
 					</div>
 
 				</div>
 
 				<!-- Stats Overview Bar / Quick Jump Links -->
-				<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-white/10">
+				<div class="dashboard-quick-links grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-white/10">
 					<a
 						href="#sec-courses"
-						class="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 transition-colors text-left"
+						class="dashboard-quick-link flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 transition-colors text-left"
 					>
-						<div class="size-10 bg-amber-400/20 text-amber-400 rounded-lg grid place-items-center shrink-0">
+						<div class="dashboard-quick-icon size-10 bg-amber-400/20 text-amber-400 rounded-lg grid place-items-center shrink-0">
 							<BookOpen size={20} />
 						</div>
 						<div>
@@ -166,9 +166,9 @@
 
 					<a
 						href="#sec-ebooks"
-						class="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 transition-colors text-left"
+						class="dashboard-quick-link flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 transition-colors text-left"
 					>
-						<div class="size-10 bg-emerald-400/20 text-emerald-400 rounded-lg grid place-items-center shrink-0">
+						<div class="dashboard-quick-icon size-10 bg-emerald-400/20 text-emerald-400 rounded-lg grid place-items-center shrink-0">
 							<FileText size={20} />
 						</div>
 						<div>
@@ -179,9 +179,9 @@
 
 					<a
 						href="#sec-coaching"
-						class="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 transition-colors text-left"
+						class="dashboard-quick-link flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 transition-colors text-left"
 					>
-						<div class="size-10 bg-orange-400/20 text-orange-400 rounded-lg grid place-items-center shrink-0">
+						<div class="dashboard-quick-icon size-10 bg-orange-400/20 text-orange-400 rounded-lg grid place-items-center shrink-0">
 							<CalendarCheck size={20} />
 						</div>
 						<div>
@@ -210,7 +210,7 @@
 
 				<!-- SECTION 1: MES FORMATIONS -->
 				<section id="sec-courses" class="scroll-mt-24 space-y-6">
-					<div class="flex items-center justify-between pb-4 border-b border-zinc-200">
+					<div class="dashboard-section-head flex items-center justify-between pb-4 border-b border-zinc-200">
 						<div class="flex items-center gap-3">
 							<div class="size-9 bg-zinc-950 text-amber-400 rounded-xl grid place-items-center">
 								<BookOpen size={18} />
@@ -301,7 +301,7 @@
 
 				<!-- SECTION 2: MES EBOOKS -->
 				<section id="sec-ebooks" class="scroll-mt-24 space-y-6">
-					<div class="flex items-center justify-between pb-4 border-b border-zinc-200">
+					<div class="dashboard-section-head flex items-center justify-between pb-4 border-b border-zinc-200">
 						<div class="flex items-center gap-3">
 							<div class="size-9 bg-zinc-950 text-emerald-400 rounded-xl grid place-items-center">
 								<FileText size={18} />
@@ -365,7 +365,7 @@
 
 				<!-- SECTION 3: MES COACHING -->
 				<section id="sec-coaching" class="scroll-mt-24 space-y-6">
-					<div class="flex items-center justify-between pb-4 border-b border-zinc-200">
+					<div class="dashboard-section-head flex items-center justify-between pb-4 border-b border-zinc-200">
 						<div class="flex items-center gap-3">
 							<div class="size-9 bg-zinc-950 text-orange-400 rounded-xl grid place-items-center">
 								<CalendarCheck size={18} />
@@ -444,3 +444,247 @@
 	{/if}
 	<PublicFooter />
 </div>
+
+
+<style>
+
+
+	.dashboard-hero {
+		padding-top: 52px;
+		padding-bottom: 0;
+		background: #151513;
+	}
+
+	.dashboard-user-row {
+		padding-bottom: 34px;
+	}
+
+	.dashboard-avatar {
+		width: 58px;
+		height: 58px;
+		border-radius: 0;
+		background: #e2ad3d;
+		box-shadow: none;
+	}
+
+	.dashboard-user-name {
+		font-family: Georgia, 'Times New Roman', serif;
+		font-size: clamp(24px, 3vw, 34px);
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		line-height: 1.08;
+	}
+
+	.dashboard-member-status {
+		padding: 5px 8px;
+		border: 1px solid rgba(88, 199, 120, 0.35);
+		border-radius: 0;
+		background: transparent;
+		color: #75d58e;
+		font-size: 9px;
+		white-space: nowrap;
+	}
+
+	.dashboard-user-meta {
+		margin-top: 7px;
+		color: rgba(255, 255, 255, 0.5);
+		font-family: ui-sans-serif, system-ui, sans-serif;
+		font-size: 11px;
+		line-height: 1.5;
+	}
+
+	.dashboard-quick-links {
+		gap: 0;
+		margin-top: 0;
+		padding-top: 0;
+		border-top: 1px solid rgba(255, 255, 255, 0.13);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.13);
+	}
+
+	.dashboard-quick-link {
+		min-height: 88px;
+		gap: 14px;
+		padding: 18px 22px;
+		border: 0;
+		border-right: 1px solid rgba(255, 255, 255, 0.13);
+		border-radius: 0;
+		background: transparent;
+		transition: background-color 160ms ease;
+	}
+
+	.dashboard-quick-link:last-child { border-right: 0; }
+	.dashboard-quick-link:hover { background: rgba(255, 255, 255, 0.055); }
+
+	.dashboard-quick-icon {
+		width: 36px;
+		height: 36px;
+		border-radius: 0;
+		background: transparent;
+		color: #e2ad3d;
+	}
+
+	.dashboard-quick-link > div:last-child > span:first-child {
+		font-family: Georgia, 'Times New Roman', serif;
+		font-size: 25px;
+		font-weight: 700;
+		line-height: 1;
+	}
+
+	.dashboard-quick-link > div:last-child > span:last-child {
+		margin-top: 6px;
+		color: rgba(255, 255, 255, 0.5);
+		font-size: 11px;
+		line-height: 1.3;
+	}
+	.dashboard-section-head {
+		gap: 24px;
+		padding: 22px 24px;
+		border: 1px solid #ded7cc;
+		background: #fff;
+		box-shadow: 0 8px 28px rgba(37, 29, 18, 0.045);
+	}
+
+	.dashboard-section-head > div {
+		min-width: 0;
+	}
+
+	.dashboard-section-head > div > div:first-child {
+		width: 44px;
+		height: 44px;
+		border-radius: 0;
+		background: #171713;
+	}
+
+	.dashboard-section-head h2 {
+		margin: 0;
+		font-family: Georgia, 'Times New Roman', serif;
+		font-size: clamp(20px, 2.2vw, 27px);
+		font-weight: 700;
+		letter-spacing: -0.025em;
+		line-height: 1.15;
+	}
+
+	.dashboard-section-head h2 + p {
+		margin-top: 6px;
+		color: #777067;
+		font-size: 12px;
+		line-height: 1.5;
+	}
+
+	.dashboard-section-head > span {
+		display: inline-flex;
+		min-height: 34px;
+		align-items: center;
+		padding: 0 12px;
+		border: 1px solid #ddd5c9;
+		background: #f8f5ef;
+		color: #70685d;
+		font-size: 10px;
+		font-weight: 800;
+		white-space: nowrap;
+	}
+
+	.dashboard-section-head > a {
+		display: inline-flex;
+		min-height: 40px;
+		align-items: center;
+		justify-content: center;
+		gap: 7px;
+		padding: 0 14px;
+		border: 1px solid #d49b29;
+		background: #e3ad3d;
+		color: #17130d;
+		font-size: 11px;
+		font-weight: 850;
+		white-space: nowrap;
+		transition: background-color 160ms ease, transform 160ms ease;
+	}
+
+	.dashboard-section-head > a:hover {
+		background: #edbc55;
+		color: #17130d;
+		transform: translateY(-1px);
+	}
+
+	@media (max-width: 640px) {
+		.dashboard-section-head {
+			align-items: flex-start;
+			gap: 17px;
+			padding: 18px;
+			flex-direction: column;
+		}
+
+		.dashboard-section-head > div {
+			align-items: flex-start;
+		}
+
+		.dashboard-section-head > div > div:first-child {
+			width: 40px;
+			height: 40px;
+		}
+
+		.dashboard-section-head h2 {
+			font-size: 21px;
+		}
+
+		.dashboard-section-head > span {
+			display: inline-flex;
+		}
+
+		.dashboard-section-head > a {
+			width: 100%;
+		}
+	}
+
+
+	@media (max-width: 640px) {
+		.dashboard-hero {
+			padding-top: 34px;
+		}
+
+		.dashboard-user-row {
+			padding-bottom: 27px;
+		}
+
+		.dashboard-user {
+			align-items: flex-start;
+		}
+
+		.dashboard-avatar {
+			width: 50px;
+			height: 50px;
+			font-size: 16px;
+		}
+
+		.dashboard-name-line {
+			align-items: flex-start;
+			flex-direction: column;
+		}
+
+		.dashboard-user-name {
+			font-size: 25px;
+		}
+
+		.dashboard-user-meta {
+			max-width: 230px;
+			overflow-wrap: anywhere;
+		}
+
+		.dashboard-quick-links {
+			grid-template-columns: 1fr;
+		}
+
+		.dashboard-quick-link {
+			min-height: 72px;
+			padding: 14px 4px;
+			border-right: 0;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+		}
+
+		.dashboard-quick-link:last-child { border-bottom: 0; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.dashboard-section-head > a { transition: none; }
+	}
+</style>

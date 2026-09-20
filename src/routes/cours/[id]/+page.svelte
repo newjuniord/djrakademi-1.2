@@ -220,13 +220,13 @@
 						onkeydown={(e) => {
 							if (videoSource && (e.key === 'Enter' || e.key === ' ')) showVideoModal = true;
 						}}
-						class="relative rounded-2xl overflow-hidden shadow-2xl aspect-video group {videoSource ? 'cursor-pointer' : ''}"
+						class="relative w-full rounded-2xl overflow-hidden shadow-2xl group {course?.cover ? 'bg-black' : 'aspect-video'} {videoSource ? 'cursor-pointer' : ''}"
 					>
 						{#if course?.cover}
 							<img
 								src={course.cover}
 								alt={course.title}
-								class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+								class="block w-full h-auto object-contain"
 							/>
 						{:else}
 							<div class="w-full h-full bg-zinc-900 flex flex-col items-center justify-center text-white/40 gap-3">

@@ -924,7 +924,7 @@
 						bind:value={title}
 						maxlength="255"
 						required
-						placeholder="Ex. Pack Ultime Productivité & IA"
+						placeholder="Ex. Pack Ultime Productivité & entelijans atifisyèl"
 						class="input input-bordered w-full rounded-none h-11 text-xs focus:border-amber-400 focus:outline-none"
 					/>
 				</label>

@@ -124,3 +124,16 @@ html.is-impersonating .sticky.top-0 { top: 2.75rem; }
     padding: 8mm !important;
   }
 }
+/* Larger readable text throughout the app, excluding public/admin headers and footers. */
+body :not(header):not(header *):not(footer):not(footer *) .text-xs { font-size: 1rem; }
+body :not(header):not(header *):not(footer):not(footer *) .text-sm { font-size: 1.125rem; }
+body :not(header):not(header *):not(footer):not(footer *) .text-base { font-size: 1.25rem; }
+body :not(header):not(header *):not(footer):not(footer *) .text-lg { font-size: 1.375rem; }
+body :not(header):not(header *):not(footer):not(footer *) .text-xl { font-size: 1.5rem; }
+body :not(header):not(header *):not(footer):not(footer *) .text-2xl { font-size: 1.75rem; }
+body :not(header):not(header *):not(footer):not(footer *) .text-3xl { font-size: 2.125rem; }
+body :not(header):not(header *):not(footer):not(footer *) .text-4xl { font-size: 2.625rem; }
+body :not(header):not(header *):not(footer):not(footer *) [class*="text-[9px]"] { font-size: 0.8125rem; }
+body :not(header):not(header *):not(footer):not(footer *) [class*="text-[10px]"] { font-size: 0.875rem; }
+body :not(header):not(header *):not(footer):not(footer *) [class*="text-[11px]"] { font-size: 0.9375rem; }
+body :not(header):not(header *):not(footer):not(footer *) [class*="text-[12px]"] { font-size: 1rem; }

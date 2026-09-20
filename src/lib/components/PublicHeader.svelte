@@ -19,9 +19,14 @@
 	import { authState } from '$lib/auth.svelte';
 	import { onMount } from 'svelte';
 
+	const DEFAULT_SITE_NAME = 'DJR AKADEMI';
+	const DEFAULT_LOGO_URL = '/logo.png';
+
 	let drawerOpen = $state(false);
 	let authModalOpen = $state(false);
 	let authModalInitialView = $state<"login" | "signup">("login");
+	let siteName = $state(DEFAULT_SITE_NAME);
+	let logoUrl = $state(DEFAULT_LOGO_URL);
 
 	let announcement = $state<{
 		enabled: boolean;
@@ -36,6 +41,10 @@
 			const res = await fetch('/api/announcement', { cache: 'no-store' });
 			if (res.ok) {
 				const data = await res.json();
+				const configuredSiteName = typeof data.siteName === 'string' ? data.siteName.trim() : '';
+				const configuredLogoUrl = typeof data.logoUrl === 'string' ? data.logoUrl.trim() : '';
+				siteName = configuredSiteName || DEFAULT_SITE_NAME;
+				logoUrl = configuredLogoUrl || DEFAULT_LOGO_URL;
 				if (data.enabled && data.text) {
 					announcement = data;
 				}
@@ -89,6 +98,12 @@
 		// Used by modal to trigger view updates if needed
 	}
 
+	function openAuth(view: "login" | "signup") {
+		authModalInitialView = view;
+		authModalOpen = true;
+		closeDrawer();
+	}
+
 	function toggleHelp() {
 		if (typeof window !== 'undefined') {
 			window.dispatchEvent(new CustomEvent('djr:open-support'));
@@ -100,7 +115,7 @@
 
 {#if announcement.enabled && announcement.text && !announcementDismissed}
 	<aside
-		class="w-full py-2.5 px-4 text-xs font-bold text-center flex items-center justify-between shadow-xs transition-all border-b border-black/10 z-50 relative"
+		class="w-full py-2.5 px-4 text-[16px] font-bold text-center flex items-center justify-between shadow-xs transition-all border-b border-black/10 z-50 relative"
 		style={`background-color: ${getBgHex(announcement.bgColor)}; color: ${getTextHex(announcement.textColor)};`}
 	>
 		<div class="mx-auto flex items-center justify-center gap-2 px-2">
@@ -121,26 +136,36 @@
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-zinc-200/80">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6">
 		<!-- Brand Logo Image & Name -->
-		<a href="/" class="flex items-center gap-3 group shrink-0">
-			<img src="/logo.png" alt="DJR Akademi" class="h-10 sm:h-11 w-auto object-contain" />
-			<span class="hidden min-[430px]:inline-block font-black text-lg sm:text-xl tracking-tight text-zinc-950 uppercase group-hover:text-amber-500 transition-colors">
-				DJR AKADEMI
+		<a href="/" class="flex min-w-0 items-center gap-3 group">
+			<img src={logoUrl} alt={siteName} class="h-10 w-auto shrink-0 object-contain sm:h-11" />
+			<span class="hidden truncate font-black text-[22px] tracking-tight text-zinc-950 uppercase transition-colors group-hover:text-amber-500 min-[430px]:inline-block sm:text-[24px]">
+				{siteName}
 			</span>
 		</a>
 
-		<nav class="hidden items-center gap-6 text-sm font-bold text-zinc-600 lg:flex" aria-label="Catalogue public">
+		<nav class="hidden items-center gap-6 text-[18px] font-bold text-zinc-600 lg:flex" aria-label="Catalogue public">
 			<a href="/" class="transition-colors hover:text-zinc-950">Akey</a>
 			<a href="/catalogue" class="transition-colors hover:text-zinc-950">Katalòg</a>
 			<a href="/bundles" class="transition-colors hover:text-amber-700">Bundles</a>
 		</nav>
 
-		<!-- Right Action Button -->
-		<div class="flex items-center gap-2.5 shrink-0">
-			<!-- Help Icon Button -->
+		<!-- Mobile hamburger -->
+		<button
+			type="button"
+			onclick={() => (drawerOpen = true)}
+			class="grid size-11 shrink-0 place-items-center rounded-xl border border-zinc-200/80 bg-zinc-950 text-white shadow-sm transition-all active:scale-95 sm:hidden"
+			aria-label="Ouvri meni prensipal la"
+			aria-expanded={drawerOpen}
+		>
+			<Menu size={21} class="text-amber-400" />
+		</button>
+
+		<!-- Desktop actions -->
+		<div class="hidden shrink-0 items-center gap-2.5 sm:flex">
 			<button
 				type="button"
 				onclick={toggleHelp}
-				class="size-11 rounded-xl bg-zinc-100 hover:bg-amber-400/20 hover:text-amber-600 text-zinc-600 grid place-items-center transition-all cursor-pointer border border-zinc-200/80 active:scale-95"
+				class="grid size-11 place-items-center rounded-xl border border-zinc-200/80 bg-zinc-100 text-zinc-600 transition-all hover:bg-amber-400/20 hover:text-amber-600 active:scale-95 cursor-pointer"
 				aria-label="Èd ak Asistans"
 				title="Èd ak Asistans"
 			>
@@ -148,22 +173,22 @@
 			</button>
 
 			{#if authState.loading}
-				<div class="h-11 w-32 bg-zinc-100 rounded-xl animate-pulse"></div>
+				<div class="h-11 w-32 animate-pulse rounded-xl bg-zinc-100"></div>
 			{:else if authState.user !== null}
 				<button
 					type="button"
 					onclick={() => (drawerOpen = true)}
-					class="inline-flex items-center gap-2.5 h-11 px-4 sm:px-5 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold transition-all shadow-sm rounded-xl focus:outline-none cursor-pointer"
+					class="inline-flex h-11 items-center gap-2.5 rounded-xl bg-zinc-950 px-4 text-[16px] font-bold text-white shadow-sm transition-all hover:bg-zinc-800 focus:outline-none sm:px-5 cursor-pointer"
 					aria-label="Ouvri meni espas mwen"
 				>
 					<Menu size={18} class="text-amber-400" />
-					<span class="hidden sm:inline">Espas mwen</span>
+					<span>Espas mwen</span>
 				</button>
 			{:else}
 				<button
 					type="button"
-					onclick={() => { authModalInitialView = "signup"; authModalOpen = true; }}
-					class="inline-flex items-center h-11 px-3 sm:px-4 bg-amber-400 hover:bg-amber-300 text-zinc-950 text-xs font-bold transition-all shadow-sm rounded-xl focus:outline-none cursor-pointer whitespace-nowrap"
+					onclick={() => openAuth("signup")}
+					class="inline-flex h-11 items-center whitespace-nowrap rounded-xl bg-amber-400 px-3 text-[16px] font-bold text-zinc-950 shadow-sm transition-all hover:bg-amber-300 focus:outline-none sm:px-4 cursor-pointer"
 					aria-label="Kreye yon kont"
 				>
 					<span>Kreye yon kont</span>
@@ -171,8 +196,8 @@
 
 				<button
 					type="button"
-					onclick={() => { authModalInitialView = "login"; authModalOpen = true; }}
-					class="inline-flex items-center h-11 px-3 sm:px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold transition-all shadow-sm rounded-xl focus:outline-none cursor-pointer whitespace-nowrap"
+					onclick={() => openAuth("login")}
+					class="inline-flex h-11 items-center whitespace-nowrap rounded-xl bg-zinc-950 px-3 text-[16px] font-bold text-white shadow-sm transition-all hover:bg-zinc-800 focus:outline-none sm:px-4 cursor-pointer"
 					aria-label="Konekte"
 				>
 					<span>Koneksyon</span>
@@ -182,152 +207,141 @@
 	</div>
 </header>
 
-<!-- SLIDE-OVER DRAWER OVERLAY & PANEL -->
+<!-- MENI PRINCIPAL / ETIDYAN -->
 {#if drawerOpen}
-	<!-- Backdrop Overlay -->
 	<button
 		type="button"
 		onclick={closeDrawer}
-		class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity cursor-default"
+		class="fixed inset-0 z-50 bg-black/40 cursor-default"
 		aria-label="Fèmen meni an"
 	></button>
 
-	<!-- Drawer Sidebar Panel -->
 	<div
 		role="dialog"
 		aria-modal="true"
-		aria-label="Meni espas etidyan"
-		class="fixed top-0 bottom-0 right-0 z-50 w-full max-w-sm sm:w-96 bg-zinc-950 text-white shadow-2xl flex flex-col justify-between overflow-y-auto border-l border-zinc-800 animate-in slide-in-from-right duration-300"
+		aria-label="Meni prensipal"
+		class="fixed inset-y-0 right-0 z-50 flex w-full max-w-[360px] flex-col overflow-y-auto border-l border-zinc-200 bg-white text-zinc-950 shadow-2xl animate-in slide-in-from-right duration-300"
 	>
-		<!-- Drawer Header -->
-		<div class="p-6 border-b border-zinc-800 flex items-center justify-between gap-4">
-			<div class="flex items-center gap-3">
-				<div class="size-11 bg-gradient-to-br from-amber-400 to-orange-500 text-black text-sm font-black rounded-xl grid place-items-center shadow shrink-0">
-					<User size={20} />
+		<div class="flex items-center justify-between gap-4 border-b border-zinc-200 px-5 py-5">
+			{#if authState.user !== null}
+				<div class="flex min-w-0 items-center gap-3">
+					<div class="grid size-10 shrink-0 place-items-center rounded-full bg-amber-100 text-amber-800">
+						<User size={19} />
+					</div>
+					<div class="min-w-0">
+						<p class="truncate text-sm font-bold text-zinc-950">{authState.user.name || 'Kont mwen'}</p>
+						<p class="truncate text-xs text-zinc-500">{authState.user.email || ''}</p>
+					</div>
 				</div>
-				<div class="overflow-hidden">
-					<p class="font-black text-sm text-white truncate">{authState.user?.name || 'Kont Mwen'}</p>
-					<p class="text-[11px] text-white/50 font-mono truncate">{authState.user?.email || ''}</p>
+			{:else}
+				<div class="flex min-w-0 items-center gap-3">
+					<img src={logoUrl} alt={siteName} class="size-10 shrink-0 object-contain" />
+					<div class="min-w-0">
+						<p class="truncate text-sm font-black uppercase text-zinc-950">{siteName}</p>
+						<p class="text-xs text-zinc-500">Meni prensipal</p>
+					</div>
 				</div>
-			</div>
+			{/if}
 
 			<button
 				type="button"
 				onclick={closeDrawer}
-				class="size-9 rounded-xl bg-white/10 hover:bg-white/20 text-white grid place-items-center transition-colors shrink-0"
+				class="grid size-9 shrink-0 place-items-center text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-950 cursor-pointer"
 				aria-label="Fèmen meni an"
 			>
-				<X size={18} />
+				<X size={20} />
 			</button>
 		</div>
 
-		<!-- Drawer Main Navigation Links -->
-		<div class="p-6 flex-1 space-y-6">
-			<div>
-				<p class="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-3">Navigasyon Etidyan</p>
-				<div class="space-y-1.5">
-					<a
-						href="/dashboard"
-						onclick={closeDrawer}
-						class="flex items-center gap-3.5 p-3.5 rounded-2xl hover:bg-white/10 transition-colors group"
-					>
-						<div class="size-9 bg-amber-400/20 text-amber-400 rounded-xl grid place-items-center shrink-0 group-hover:scale-105 transition-transform">
-							<BookOpen size={18} />
-						</div>
-						<div>
-							<p class="font-black text-xs text-white">Espas Etidyan Mwen</p>
-							<p class="text-[11px] text-white/40 font-normal">Fòmasyon, ebook ak coaching</p>
-						</div>
-					</a>
-
-					<a
-						href="/profile"
-						onclick={closeDrawer}
-						class="flex items-center gap-3.5 p-3.5 rounded-2xl hover:bg-white/10 transition-colors group"
-					>
-						<div class="size-9 bg-white/10 text-white/80 rounded-xl grid place-items-center shrink-0 group-hover:scale-105 transition-transform">
-							<User size={18} />
-						</div>
-						<div>
-							<p class="font-black text-xs text-white">Profil Mwen</p>
-							<p class="text-[11px] text-white/40 font-normal">Enfòmasyon ak mo de pas</p>
-						</div>
-					</a>
-
-					<a
-						href="/catalogue"
-						onclick={closeDrawer}
-						class="flex items-center gap-3.5 p-3.5 rounded-2xl hover:bg-white/10 transition-colors group"
-					>
-						<div class="size-9 bg-emerald-400/20 text-emerald-400 rounded-xl grid place-items-center shrink-0 group-hover:scale-105 transition-transform">
-							<Sparkles size={18} />
-						</div>
-						<div>
-							<p class="font-black text-xs text-white">Eksplore katalòg la</p>
-							<p class="text-[11px] text-white/40 font-normal">Dekouvri tout pwogram nou yo</p>
-						</div>
-					</a>
-
-					<a
-						href="/transactions"
-						onclick={closeDrawer}
-						class="flex items-center gap-3.5 p-3.5 rounded-2xl hover:bg-white/10 transition-colors group"
-					>
-						<div class="size-9 bg-blue-400/20 text-blue-400 rounded-xl grid place-items-center shrink-0 group-hover:scale-105 transition-transform">
-							<Receipt size={18} />
-						</div>
-						<div>
-							<p class="font-black text-xs text-white">Transaksyon Mwen Yo</p>
-							<p class="text-[11px] text-white/40 font-normal">Istwa ak fakti PDF</p>
-						</div>
-					</a>
-
-					<a
-						href="/verify"
-						onclick={closeDrawer}
-						class="flex items-center gap-3.5 p-3.5 rounded-2xl hover:bg-white/10 transition-colors group"
-					>
-						<div class="size-9 bg-amber-400/20 text-amber-400 rounded-xl grid place-items-center shrink-0 group-hover:scale-105 transition-transform">
-							<Shield size={18} />
-						</div>
-						<div>
-							<p class="font-black text-xs text-white">Verifye yon peman</p>
-							<p class="text-[11px] text-white/40 font-normal">Debloke aksè apre achte</p>
-						</div>
-					</a>
+		<nav class="flex-1 px-4 py-5" aria-label="Navigasyon prensipal">
+			<div class="sm:hidden">
+				<p class="mb-2 px-3 text-xs font-bold text-zinc-500">Navigasyon</p>
+				<div class="divide-y divide-zinc-100 border-y border-zinc-100">
+					<a href="/" onclick={closeDrawer} class="flex min-h-14 items-center px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">Akey</a>
+					<a href="/catalogue" onclick={closeDrawer} class="flex min-h-14 items-center px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">Katalòg</a>
+					<a href="/bundles" onclick={closeDrawer} class="flex min-h-14 items-center px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">Bundles</a>
 				</div>
 			</div>
 
-			{#if authState.isAdmin}
-			<div class="pt-4 border-t border-zinc-800">
-				<p class="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-3">Administrasyon</p>
-				<a
-					href="/admin"
-					onclick={closeDrawer}
-					class="flex items-center gap-3.5 p-3.5 rounded-2xl hover:bg-white/10 text-white/70 hover:text-white transition-colors group"
+			<div class="mt-6">
+				<p class="mb-2 px-3 text-xs font-bold text-zinc-500">Asistans</p>
+				<button
+					type="button"
+					onclick={() => { closeDrawer(); toggleHelp(); }}
+					class="flex min-h-14 w-full items-center gap-3 border-y border-zinc-100 px-3 py-3 text-left text-sm font-semibold transition-colors hover:bg-zinc-50 cursor-pointer"
 				>
-					<div class="size-9 bg-white/5 text-white/40 rounded-xl grid place-items-center shrink-0 group-hover:scale-105 transition-transform">
-						<Shield size={18} />
-					</div>
-					<div>
-						<p class="font-black text-xs">Akse Administrasyon</p>
-						<p class="text-[11px] text-white/40 font-normal">Jere kou ak vant</p>
-					</div>
-				</a>
+					<HelpCircle size={19} class="shrink-0 text-amber-700" />
+					<span>Èd ak Asistans</span>
+				</button>
 			</div>
-			{/if}
-		</div>
 
-		<!-- Drawer Footer -->
-		<div class="p-6 border-t border-zinc-800 bg-zinc-900/50 space-y-3">
-			<button
-				type="button"
-				onclick={logout}
-				class="w-full flex items-center justify-between p-3.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-bold transition-colors cursor-pointer"
-			>
-				<span>Dekonekte</span>
-				<LogOut size={14} />
-			</button>
+			{#if authState.user !== null}
+				<div class="mt-6">
+					<p class="mb-2 px-3 text-xs font-bold text-zinc-500">Espas mwen</p>
+					<div class="divide-y divide-zinc-100 border-y border-zinc-100">
+						<a href="/dashboard" onclick={closeDrawer} class="flex min-h-14 items-center gap-3 px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
+							<BookOpen size={19} class="shrink-0 text-amber-700" />
+							<span>Kou mwen yo</span>
+						</a>
+						<a href="/profile" onclick={closeDrawer} class="flex min-h-14 items-center gap-3 px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
+							<User size={19} class="shrink-0 text-zinc-500" />
+							<span>Pwofil mwen</span>
+						</a>
+						<a href="/catalogue" onclick={closeDrawer} class="flex min-h-14 items-center gap-3 px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
+							<Sparkles size={19} class="shrink-0 text-zinc-500" />
+							<span>Katalòg</span>
+						</a>
+						<a href="/transactions" onclick={closeDrawer} class="flex min-h-14 items-center gap-3 px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
+							<Receipt size={19} class="shrink-0 text-zinc-500" />
+							<span>Transaksyon mwen</span>
+						</a>
+						<a href="/verify" onclick={closeDrawer} class="flex min-h-14 items-center gap-3 px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
+							<Shield size={19} class="shrink-0 text-zinc-500" />
+							<span>Verifye peman</span>
+						</a>
+					</div>
+				</div>
+
+				{#if authState.isAdmin}
+					<div class="mt-6">
+						<p class="mb-2 px-3 text-xs font-bold text-zinc-500">Administrasyon</p>
+						<a href="/admin" onclick={closeDrawer} class="flex min-h-14 items-center gap-3 border-y border-zinc-100 px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
+							<Shield size={19} class="shrink-0 text-zinc-500" />
+							<span>Jere platfòm nan</span>
+						</a>
+					</div>
+				{/if}
+			{/if}
+		</nav>
+
+		<div class="border-t border-zinc-200 p-4">
+			{#if authState.user !== null}
+				<button
+					type="button"
+					onclick={logout}
+					class="flex min-h-12 w-full items-center justify-between border border-red-200 px-4 text-sm font-bold text-red-700 transition-colors hover:bg-red-50 cursor-pointer"
+				>
+					<span>Dekonekte</span>
+					<LogOut size={17} />
+				</button>
+			{:else}
+				<div class="grid gap-2.5">
+					<button
+						type="button"
+						onclick={() => openAuth("signup")}
+						class="min-h-12 rounded-xl bg-amber-400 px-4 text-sm font-bold text-zinc-950 transition-colors hover:bg-amber-300 cursor-pointer"
+					>
+						Kreye yon kont
+					</button>
+					<button
+						type="button"
+						onclick={() => openAuth("login")}
+						class="min-h-12 rounded-xl bg-zinc-950 px-4 text-sm font-bold text-white transition-colors hover:bg-zinc-800 cursor-pointer"
+					>
+						Koneksyon
+					</button>
+				</div>
+			{/if}
 		</div>
 	</div>
 {/if}

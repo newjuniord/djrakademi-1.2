@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
-	import { User, ChevronLeft, Save, Shield, CheckCircle2, Key, Mail, Phone, Loader2, AlertCircle } from 'lucide-svelte';
+	import { User, ChevronLeft, Save, Shield, CheckCircle2, Mail, Phone, Loader2, AlertCircle } from 'lucide-svelte';
 	import { authState } from '$lib/auth.svelte';
 	import { goto } from '$app/navigation';
-	import { updateProfile, getOrCreateProfile } from '$lib/services/profiles';
+	import { updateProfile } from '$lib/services/profiles';
 
 	$effect(() => {
 		if (!authState.loading && !authState.user) {
@@ -65,161 +64,460 @@
 	<meta name="description" content="Gérez votre profil et vos informations personnelles sur DJR Akademi." />
 </svelte:head>
 
-<div class="min-h-screen bg-zinc-50 flex flex-col font-sans text-zinc-900">
+<div class="profile-page">
 	<PublicHeader />
 
 	{#if authState.loading}
-		<div class="flex-1 flex items-center justify-center">
-			<span class="loading loading-spinner text-amber-500 loading-lg"></span>
-		</div>
+		<main class="profile-loading" aria-label="Chajman pwofil la">
+			<Loader2 size={30} class="animate-spin" />
+			<span>N ap chaje pwofil ou...</span>
+		</main>
 	{:else if authState.user}
-		<main class="flex-1 py-10 sm:py-14">
-		<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-
-			<!-- Back button -->
-			<a
-				href="/dashboard"
-				class="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-950 transition-colors"
-			>
-				<ChevronLeft size={16} />
-				Tounen nan espas mwen
-			</a>
-
-			<!-- Success Notification -->
-			{#if saveSuccessMessage}
-				<div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm font-semibold flex items-center justify-between shadow-sm animate-fade-in">
-					<span class="flex items-center gap-2">
-						<CheckCircle2 size={18} class="text-emerald-600" />
-						{saveSuccessMessage}
-					</span>
-					<button type="button" onclick={() => (saveSuccessMessage = null)} class="text-emerald-500 hover:text-emerald-700 text-xs">Fèmen</button>
-				</div>
-			{/if}
-
-			<!-- User Header Card -->
-			<div class="bg-zinc-950 text-white rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
-				<div class="flex items-center gap-4">
-					<div class="size-16 bg-gradient-to-br from-amber-400 to-orange-500 text-black text-xl font-black rounded-2xl grid place-items-center shadow-lg shrink-0">
-						<User size={28} />
-					</div>
-					<div>
-						<div class="flex items-center gap-2">
-							<h1 class="text-2xl font-black tracking-tight">{name}</h1>
-							<span class="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider rounded-md border border-emerald-500/30">
-								Etidyan
-							</span>
-						</div>
-						<p class="text-white/50 text-xs mt-1 font-mono">{email}</p>
-					</div>
-				</div>
-
-				{#if authState.isAdmin}
-				<a
-					href="/admin"
-					class="inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white border border-white/15 rounded-xl text-xs font-bold transition-colors shrink-0"
-				>
-					<Shield size={14} class="text-amber-400" />
-					Espas Admin
+		<main class="profile-main">
+			<div class="profile-shell">
+				<a href="/dashboard" class="profile-back">
+					<ChevronLeft size={16} />
+					Tounen nan espas mwen
 				</a>
+
+				<header class="profile-heading">
+					<span>Kont mwen</span>
+					<h1>Pwofil mwen</h1>
+					<p>Verifye enfòmasyon ou epi mete yo ajou lè sa nesesè.</p>
+				</header>
+
+				{#if saveSuccessMessage}
+					<div class="profile-alert profile-alert-success" role="status" aria-live="polite">
+						<CheckCircle2 size={19} />
+						<span>{saveSuccessMessage}</span>
+						<button type="button" onclick={() => (saveSuccessMessage = null)}>Fèmen</button>
+					</div>
 				{/if}
-			</div>
 
-			<!-- Main Settings Form -->
-			<div class="bg-white rounded-2xl border border-zinc-200/80 p-6 sm:p-8 shadow-sm space-y-8">
+				<div class="profile-layout">
+					<aside class="profile-summary" aria-label="Rezime kont lan">
+						<div class="profile-avatar"><User size={30} /></div>
+						<span class="profile-role">Etidyan</span>
+						<h2>{name || 'Kont mwen'}</h2>
+						<p>{email}</p>
 
-				<div class="flex items-center gap-3 pb-4 border-b border-zinc-100">
-					<div class="size-9 bg-zinc-950 text-amber-400 rounded-xl grid place-items-center">
-						<User size={18} />
-					</div>
-					<div>
-						<h2 class="text-xl font-black tracking-tight text-zinc-950">Enfòmasyon Pèsonèl</h2>
-						<p class="text-xs text-zinc-400">Chanje non w ak nimewo WhatsApp ou</p>
-					</div>
-				</div>
+						<div class="profile-status">
+							<span><i></i> Kont aktif</span>
+							<small>Ou ka jwenn tout acha ak fòmasyon ou yo nan espas etidyan an.</small>
+						</div>
 
-				<form onsubmit={saveProfile} class="space-y-6">
+						<a href="/dashboard" class="profile-dashboard-link">Ale nan kou mwen yo</a>
 
-					<!-- Personal Info Fields -->
-					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						<div>
-							<label for="name" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Non konplè</label>
-							<div class="relative">
-								<input
-									id="name"
-									type="text"
-									bind:value={name}
-									required
-									class="w-full h-12 pl-11 pr-4 rounded-xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none"
-								/>
-								<User size={16} class="absolute left-4 top-3.5 text-zinc-400" />
+						{#if authState.isAdmin}
+							<a href="/admin" class="profile-admin-link"><Shield size={15} /> Espas administrasyon</a>
+						{/if}
+					</aside>
+
+					<section class="profile-form-panel" aria-labelledby="personal-info-title">
+						<div class="profile-form-heading">
+							<div>
+								<span>Enfòmasyon kont lan</span>
+								<h2 id="personal-info-title">Enfòmasyon pèsonèl</h2>
 							</div>
+							<p>Chan ki make obligatwa yo dwe ranpli.</p>
 						</div>
 
-						<div>
-							<label for="email" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Adrès Imèl</label>
-							<div class="relative">
-								<input
-									id="email"
-									type="email"
-									bind:value={email}
-									readonly
-									disabled
-									class="w-full h-12 pl-11 pr-4 rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-500 text-sm font-medium outline-none cursor-not-allowed"
-								/>
-								<Mail size={16} class="absolute left-4 top-3.5 text-zinc-400" />
+						<form onsubmit={saveProfile} class="profile-form">
+							<div class="profile-field">
+								<label for="name">Non konplè <strong>*</strong></label>
+								<div class="profile-input-wrap">
+									<User size={17} />
+									<input id="name" type="text" bind:value={name} required autocomplete="name" />
+								</div>
+								<small>Se non sa a k ap parèt sou kont ou.</small>
 							</div>
-							<p class="text-[10px] text-zinc-400 mt-1">Adrès imèl kont ou (li pa ka chanje la)</p>
-						</div>
 
-						<div class="sm:col-span-2 md:col-span-1">
-							<label for="whatsapp" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Nimewo WhatsApp</label>
-							<div class="relative">
-								<input
-									id="whatsapp"
-									type="tel"
-									bind:value={whatsapp}
-									placeholder="+509 XX XX XXXX"
-									class="w-full h-12 pl-11 pr-4 rounded-xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none"
-								/>
-								<Phone size={16} class="absolute left-4 top-3.5 text-zinc-400" />
+							<div class="profile-field">
+								<label for="email">Adrès imèl</label>
+								<div class="profile-input-wrap profile-input-disabled">
+									<Mail size={17} />
+									<input id="email" type="email" bind:value={email} readonly disabled />
+								</div>
+								<small>Imèl sa a konekte ak kont ou epi li pa ka chanje isit la.</small>
 							</div>
-						</div>
-					</div>
 
-					<!-- Error Notification -->
-					{#if saveErrorMessage}
-						<div class="p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm font-semibold flex items-center justify-between shadow-sm animate-fade-in">
-							<span class="flex items-center gap-2">
-								<AlertCircle size={18} class="text-red-600" />
-								{saveErrorMessage}
-							</span>
-							<button type="button" onclick={() => (saveErrorMessage = null)} class="text-red-500 hover:text-red-700 text-xs">Fèmen</button>
-						</div>
-					{/if}
+							<div class="profile-field">
+								<label for="whatsapp">Nimewo WhatsApp</label>
+								<div class="profile-input-wrap">
+									<Phone size={17} />
+									<input id="whatsapp" type="tel" bind:value={whatsapp} placeholder="+509 00 00 0000" autocomplete="tel" />
+								</div>
+								<small>Sèvi ak yon nimewo ekip la ka kontakte si ou bezwen sipò.</small>
+							</div>
 
-					<!-- Save Button -->
-					<div class="pt-6 border-t border-zinc-100 flex justify-end">
-						<button
-							type="submit"
-							disabled={saving}
-							class="inline-flex items-center gap-2 px-8 py-3.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-md disabled:opacity-50"
-						>
-							{#if saving}
-								<Loader2 size={15} class="animate-spin" />
-								Enregistre ap fèt…
-							{:else}
-								<Save size={15} />
-								Anregistre profil la
+							{#if saveErrorMessage}
+								<div class="profile-alert profile-alert-error" role="alert">
+									<AlertCircle size={19} />
+									<span>{saveErrorMessage}</span>
+									<button type="button" onclick={() => (saveErrorMessage = null)}>Fèmen</button>
+								</div>
 							{/if}
-						</button>
-					</div>
 
-				</form>
-			</div>
-
+							<div class="profile-actions">
+								<p>Verifye enfòmasyon yo anvan ou anrejistre.</p>
+								<button type="submit" disabled={saving}>
+									{#if saving}<Loader2 size={17} class="animate-spin" /> Anrejistreman...{:else}<Save size={17} /> Anrejistre chanjman yo{/if}
+								</button>
+							</div>
+						</form>
+					</section>
+				</div>
 			</div>
 		</main>
 	{/if}
-	
+
 	<PublicFooter />
 </div>
+
+<style>
+	.profile-page {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		background: #f6f2eb;
+		color: #191815;
+		font-family: ui-sans-serif, system-ui, sans-serif;
+	}
+
+	.profile-loading {
+		display: flex;
+		min-height: 520px;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		flex: 1;
+		color: #7a7267;
+		font-size: 13px;
+	}
+
+	.profile-loading :global(svg) { color: #b7791f; }
+
+	.profile-main { flex: 1; padding: 54px 0 90px; }
+
+	.profile-shell {
+		width: min(1120px, calc(100% - 48px));
+		margin: 0 auto;
+	}
+
+	.profile-back {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		color: #6f685e;
+		font-size: 12px;
+		font-weight: 750;
+		transition: color 160ms ease;
+	}
+
+	.profile-back:hover { color: #151410; }
+
+	.profile-heading { margin: 38px 0 34px; }
+
+	.profile-heading > span,
+	.profile-form-heading span {
+		display: block;
+		margin-bottom: 8px;
+		color: #a36c16;
+		font-size: 10px;
+		font-weight: 850;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+	}
+
+	.profile-heading h1 {
+		margin: 0;
+		font-family: Georgia, 'Times New Roman', serif;
+		font-size: clamp(40px, 5vw, 62px);
+		letter-spacing: -0.045em;
+		line-height: 1;
+	}
+
+	.profile-heading p {
+		margin: 13px 0 0;
+		color: #746d63;
+		font-size: 14px;
+	}
+
+	.profile-layout {
+		display: grid;
+		align-items: start;
+		grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.65fr);
+		gap: 26px;
+	}
+
+	.profile-summary {
+		padding: 32px;
+		background: #141412;
+		color: #f7f2e9;
+	}
+
+	.profile-avatar {
+		display: grid;
+		width: 66px;
+		height: 66px;
+		margin-bottom: 22px;
+		place-items: center;
+		background: #e2ad3d;
+		color: #17130d;
+	}
+
+	.profile-role {
+		display: inline-flex;
+		padding: 6px 9px;
+		border: 1px solid rgba(226, 173, 61, 0.45);
+		color: #e8be65;
+		font-size: 9px;
+		font-weight: 850;
+		letter-spacing: 0.13em;
+		text-transform: uppercase;
+	}
+
+	.profile-summary h2 {
+		margin: 17px 0 0;
+		font-family: Georgia, 'Times New Roman', serif;
+		font-size: 27px;
+		line-height: 1.15;
+	}
+
+	.profile-summary > p {
+		overflow: hidden;
+		margin: 9px 0 0;
+		color: rgba(247, 242, 233, 0.54);
+		font-size: 12px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.profile-status {
+		margin-top: 30px;
+		padding: 20px 0;
+		border-top: 1px solid rgba(255, 255, 255, 0.13);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.13);
+	}
+
+	.profile-status span {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 12px;
+		font-weight: 800;
+	}
+
+	.profile-status i {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: #53c477;
+	}
+
+	.profile-status small {
+		display: block;
+		margin-top: 9px;
+		color: rgba(247, 242, 233, 0.45);
+		font-size: 11px;
+		line-height: 1.55;
+	}
+
+	.profile-dashboard-link,
+	.profile-admin-link {
+		display: flex;
+		min-height: 46px;
+		align-items: center;
+		justify-content: center;
+		margin-top: 20px;
+		padding: 0 15px;
+		background: #e2ad3d;
+		color: #17130d;
+		font-size: 11px;
+		font-weight: 850;
+		text-align: center;
+	}
+
+	.profile-admin-link {
+		gap: 7px;
+		margin-top: 10px;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		background: transparent;
+		color: #fff;
+	}
+
+	.profile-form-panel {
+		border: 1px solid #ddd5ca;
+		background: #fff;
+	}
+
+	.profile-form-heading {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 24px;
+		padding: 28px 30px;
+		border-bottom: 1px solid #e8e2d9;
+	}
+
+	.profile-form-heading h2 {
+		margin: 0;
+		font-family: Georgia, 'Times New Roman', serif;
+		font-size: 29px;
+		letter-spacing: -0.03em;
+	}
+
+	.profile-form-heading > p {
+		max-width: 210px;
+		margin: 0;
+		color: #8a8176;
+		font-size: 10px;
+		line-height: 1.5;
+		text-align: right;
+	}
+
+	.profile-form { padding: 30px; }
+
+	.profile-field + .profile-field { margin-top: 25px; }
+
+	.profile-field label {
+		display: block;
+		margin-bottom: 9px;
+		color: #302e29;
+		font-size: 12px;
+		font-weight: 800;
+	}
+
+	.profile-field label strong { color: #ae741c; }
+
+	.profile-input-wrap {
+		display: grid;
+		min-height: 52px;
+		align-items: center;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: 12px;
+		padding: 0 15px;
+		border: 1px solid #cec6ba;
+		background: #fff;
+		color: #8b8174;
+		transition: border-color 160ms ease, box-shadow 160ms ease;
+	}
+
+	.profile-input-wrap:focus-within {
+		border-color: #a36c16;
+		box-shadow: 0 0 0 3px rgba(163, 108, 22, 0.1);
+	}
+
+	.profile-input-wrap input {
+		width: 100%;
+		height: 50px;
+		border: 0;
+		outline: 0;
+		background: transparent;
+		color: #191815;
+		font-size: 14px;
+		font-weight: 550;
+	}
+
+	.profile-input-disabled {
+		border-color: #e2ddd5;
+		background: #f2efea;
+	}
+
+	.profile-input-disabled input { color: #777067; cursor: not-allowed; }
+
+	.profile-field small {
+		display: block;
+		margin-top: 7px;
+		color: #8a8176;
+		font-size: 10px;
+		line-height: 1.5;
+	}
+
+	.profile-actions {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 24px;
+		margin-top: 32px;
+		padding-top: 24px;
+		border-top: 1px solid #e8e2d9;
+	}
+
+	.profile-actions p {
+		margin: 0;
+		color: #8a8176;
+		font-size: 10px;
+	}
+
+	.profile-actions button {
+		display: inline-flex;
+		min-height: 50px;
+		align-items: center;
+		justify-content: center;
+		gap: 9px;
+		padding: 0 22px;
+		border: 0;
+		background: #171713;
+		color: #fff;
+		font-size: 12px;
+		font-weight: 850;
+		cursor: pointer;
+		transition: background-color 160ms ease;
+	}
+
+	.profile-actions button:hover { background: #322f29; }
+	.profile-actions button:disabled { cursor: wait; opacity: 0.6; }
+
+	.profile-alert {
+		display: grid;
+		align-items: center;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		gap: 11px;
+		margin-bottom: 22px;
+		padding: 14px 16px;
+		font-size: 12px;
+		font-weight: 700;
+	}
+
+	.profile-alert button {
+		border: 0;
+		background: transparent;
+		font-size: 10px;
+		font-weight: 850;
+		cursor: pointer;
+	}
+
+	.profile-alert-success { border: 1px solid #b9dec1; background: #edf7ef; color: #276538; }
+	.profile-alert-error { margin: 24px 0 0; border: 1px solid #ebc1bb; background: #fcf0ee; color: #92392f; }
+
+	@media (max-width: 840px) {
+		.profile-layout { grid-template-columns: 1fr; }
+		.profile-summary { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 20px; }
+		.profile-avatar { grid-row: 1 / 5; margin: 0; }
+		.profile-role { width: max-content; align-self: start; }
+		.profile-summary h2 { margin-top: 10px; }
+		.profile-summary > p { margin-top: 6px; }
+		.profile-status, .profile-dashboard-link, .profile-admin-link { grid-column: 1 / -1; }
+	}
+
+	@media (max-width: 560px) {
+		.profile-main { padding: 36px 0 64px; }
+		.profile-shell { width: min(100% - 32px, 1120px); }
+		.profile-heading { margin: 30px 0 26px; }
+		.profile-heading h1 { font-size: 43px; }
+		.profile-summary { padding: 24px; }
+		.profile-avatar { width: 56px; height: 56px; }
+		.profile-form-heading { align-items: flex-start; padding: 23px 20px; flex-direction: column; }
+		.profile-form-heading > p { max-width: none; text-align: left; }
+		.profile-form { padding: 22px 20px; }
+		.profile-actions { align-items: stretch; flex-direction: column; }
+		.profile-actions button { width: 100%; }
+		.profile-alert { grid-template-columns: auto minmax(0, 1fr); }
+		.profile-alert button { grid-column: 2; justify-self: start; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.profile-input-wrap, .profile-actions button { transition: none; }
+	}
+</style>
