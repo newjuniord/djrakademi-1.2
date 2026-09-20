@@ -1,5 +1,11 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import {
+	adminServices,
+	DATABASE_ID,
+	SETTINGS_ROW_ID,
+	SETTINGS_TABLE
+} from '$lib/server/admin-appwrite';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const recentRequests = new Map<string, number>();
@@ -29,11 +35,28 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 	}
 
 	const apiKey = env.RESEND_API_KEY?.trim();
-	const to = env.CONTACT_TO_EMAIL?.trim() || 'contact@djrakademi.net';
 	const from = env.CONTACT_FROM_EMAIL?.trim() || 'contact@djrakademi.net';
 	if (!apiKey) return json({ message: 'Le service d’e-mail n’est pas configuré.' }, { status: 503 });
-	if (!EMAIL_PATTERN.test(to) || !EMAIL_PATTERN.test(from)) {
+	if (!EMAIL_PATTERN.test(from)) {
 		return json({ message: 'La configuration des adresses e-mail est invalide.' }, { status: 503 });
+	}
+
+	let to = '';
+	try {
+		const { tables } = adminServices();
+		const settings: any = await tables.getRow({
+			databaseId: DATABASE_ID,
+			tableId: SETTINGS_TABLE,
+			rowId: SETTINGS_ROW_ID
+		});
+		to = clean(settings.contact_email, 254).toLowerCase();
+	} catch (error) {
+		console.error('[Contact] Unable to load platform contact email:', error);
+		return json({ message: 'L’adresse de contact de la plateforme est indisponible.' }, { status: 503 });
+	}
+
+	if (!EMAIL_PATTERN.test(to)) {
+		return json({ message: 'L’adresse de contact de la plateforme n’est pas configurée.' }, { status: 503 });
 	}
 
 	recentRequests.set(ip, now);

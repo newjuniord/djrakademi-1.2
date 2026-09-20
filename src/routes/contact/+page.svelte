@@ -15,9 +15,6 @@
 		MessageSquareText
 	} from 'lucide-svelte';
 
-	// Internal destination email: contact@djrakademi.net
-	const TARGET_EMAIL = 'contact@djrakademi.net';
-
 	let fullName = $state('');
 	let userEmail = $state('');
 	let subject = $state('Question sur une formation');
@@ -42,7 +39,7 @@
 			const data = await response.json().catch(() => ({}));
 			if (!response.ok) throw new Error(data.message || 'Impossible d’envoyer le message.');
 			isSubmitting = false;
-			successMessage = 'Votre message a bien été envoyé ! Notre équipe vous répondra à votre adresse email sous 24h.';
+			successMessage = 'Mesaj ou a byen voye! Ekip nou an ap reponn ou nan adrès imèl ou nan mwens pase 24 èdtan.';
 			fullName = '';
 			userEmail = '';
 			message = '';

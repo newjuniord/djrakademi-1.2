@@ -19,10 +19,14 @@
 		utilisateurs: 'Utilisateurs',
 		courses: 'Cours',
 		cours: 'Cours',
-		ebooks: 'Ebooks',
+		ebooks: 'Livres numériques',
+		bundles: 'Offres groupées',
 		coaching: 'Coaching',
 		orders: 'Commandes',
 		commandes: 'Commandes',
+		support: 'Assistance client',
+		verifications: 'Journaux de vérification',
+		health: 'Santé et journaux API',
 		settings: 'Paramètres',
 		parametres: 'Paramètres'
 	};
@@ -133,4 +137,3 @@
 		</div>
 	</div>
 </header>
-

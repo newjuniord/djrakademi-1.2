@@ -277,7 +277,7 @@
 										<img
 											src={ebook.cover}
 											alt={ebook.title}
-											class="w-full h-full object-cover"
+											class="w-full h-full bg-zinc-900 object-contain"
 										/>
 									{:else}
 										<div class="w-full h-full flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-zinc-700 to-zinc-800">

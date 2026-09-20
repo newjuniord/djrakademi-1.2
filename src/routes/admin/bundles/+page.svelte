@@ -162,7 +162,7 @@
 			courses = courseData;
 			ebooks = ebookData;
 		} catch (caught) {
-			error = caught instanceof Error ? caught.message : 'Impossible de charger les bundles.';
+			error = caught instanceof Error ? caught.message : 'Impossible de charger les offres groupées.';
 		} finally {
 			loading = false;
 		}
@@ -261,7 +261,7 @@
 			return;
 		}
 		if (selected.length < 2) {
-			toast.error('Sélectionnez au moins deux produits (formations ou e-books) pour créer un bundle.');
+			toast.error('Sélectionnez au moins deux produits (formations ou livres numériques) pour créer une offre groupée.');
 			return;
 		}
 
@@ -303,11 +303,11 @@
 				body: JSON.stringify(body)
 			});
 
-			toast.success(editingId ? 'Bundle mis à jour avec succès !' : 'Nouveau bundle créé avec succès !');
+			toast.success(editingId ? 'Offre groupée mise à jour avec succès !' : 'Nouvelle offre groupée créée avec succès !');
 			drawerOpen = false;
 			await loadData();
 		} catch (caught) {
-			toast.error(caught instanceof Error ? caught.message : 'Impossible d’enregistrer le bundle.');
+			toast.error(caught instanceof Error ? caught.message : 'Impossible d’enregistrer l’offre groupée.');
 		} finally {
 			saving = false;
 		}
@@ -333,7 +333,7 @@
 				body: JSON.stringify(body)
 			});
 			bundle.published = newStatus;
-			toast.success(newStatus ? `Bundle "${bundle.title}" publié.` : `Bundle "${bundle.title}" passe en brouillon.`);
+			toast.success(newStatus ? `Offre groupée "${bundle.title}" publiée.` : `Offre groupée "${bundle.title}" passée en brouillon.`);
 		} catch (caught) {
 			toast.error(caught instanceof Error ? caught.message : 'Échec du changement de statut.');
 		} finally {
@@ -347,10 +347,10 @@
 		try {
 			await adminRequest(`/bundles/${deleteModalBundle.id}`, { method: 'DELETE' });
 			bundles = bundles.filter((b) => b.id !== deleteModalBundle!.id);
-			toast.success('Le bundle a été supprimé.');
+			toast.success('L’offre groupée a été supprimée.');
 			deleteModalBundle = null;
 		} catch (caught) {
-			toast.error(caught instanceof Error ? caught.message : 'Impossible de supprimer le bundle.');
+			toast.error(caught instanceof Error ? caught.message : 'Impossible de supprimer l’offre groupée.');
 		} finally {
 			deleting = false;
 		}
@@ -358,7 +358,7 @@
 </script>
 
 <svelte:head>
-	<title>Bundles & Offres · DJR Akademi Admin</title>
+	<title>Offres groupées · DJR Akademi Admin</title>
 </svelte:head>
 
 <div class="space-y-8 p-1">
@@ -366,10 +366,10 @@
 	<div class="bg-base-100 p-6 sm:p-8 shadow-sm rounded-none border-none flex flex-col sm:flex-row sm:items-center justify-between gap-6">
 		<div>
 			<div class="mb-1.5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-600">
-				<Layers3 size={15} /> Offres & Groupements
+				<Layers3 size={15} /> Offres et regroupements
 			</div>
 			<h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-base-content">
-				Bundles & Packs
+				Offres groupées
 			</h1>
 			<p class="text-xs text-base-content/60 mt-1">
 				Regroupez plusieurs formations et e-books avec une réduction attractive pour vos apprenants.
@@ -392,7 +392,7 @@
 				class="btn bg-black text-white hover:bg-black/90 border-none rounded-none btn-sm font-semibold text-xs gap-2 px-5"
 			>
 				<Plus size={16} />
-				Nouveau bundle
+				Nouvelle offre groupée
 			</button>
 		</div>
 	</div>
@@ -415,7 +415,7 @@
 		<!-- Card 1: Total Bundles -->
 		<div class="bg-base-100 p-6 shadow-sm rounded-none border-none flex items-center justify-between">
 			<div>
-				<span class="text-xs font-semibold text-base-content/60 block">Total Bundles</span>
+				<span class="text-xs font-semibold text-base-content/60 block">Total des offres groupées</span>
 				<span class="text-2xl sm:text-3xl font-extrabold text-base-content mt-1 block">
 					{bundles.length}
 				</span>
@@ -536,12 +536,12 @@
 		{#if loading}
 			<div class="py-20 text-center text-base-content/60 space-y-3">
 				<Loader2 size={32} class="mx-auto animate-spin text-primary" />
-				<p class="text-xs font-semibold">Chargement des bundles...</p>
+				<p class="text-xs font-semibold">Chargement des offres groupées…</p>
 			</div>
 		{:else if filteredBundles.length === 0}
 			<div class="py-20 text-center bg-base-200/30 rounded-none border border-dashed border-base-200 space-y-3">
 				<Layers3 size={36} class="mx-auto text-base-content/30" />
-				<h3 class="font-bold text-sm text-base-content">Aucun bundle trouvé</h3>
+				<h3 class="font-bold text-sm text-base-content">Aucune offre groupée trouvée</h3>
 				<p class="text-xs text-base-content/60 max-w-sm mx-auto">
 					{#if searchQuery || filterStatus !== 'all'}
 						Aucun bundle ne correspond à vos filtres de recherche.
@@ -713,7 +713,7 @@
 				<table class="table w-full rounded-none text-left border-collapse">
 					<thead>
 						<tr class="border-b border-base-200 text-xs font-semibold text-base-content/50 uppercase tracking-wider bg-base-100">
-							<th class="py-4 px-4 font-bold">Bundle</th>
+							<th class="py-4 px-4 font-bold">Offre groupée</th>
 							<th class="py-4 px-4 font-bold">Produits Inclus</th>
 							<th class="py-4 px-4 font-bold">Prix Pack</th>
 							<th class="py-4 px-4 font-bold">Réduction</th>
@@ -887,7 +887,7 @@
 				</div>
 				<div>
 					<h2 id="drawer-title" class="text-lg font-bold text-base-content">
-						{editingId ? 'Modifier le bundle' : 'Créer un nouveau bundle'}
+						{editingId ? 'Modifier l’offre groupée' : 'Créer une nouvelle offre groupée'}
 					</h2>
 					<p class="text-xs text-base-content/60">
 						{editingId ? 'Mettez à jour les informations et la composition de ce pack.' : 'Remplissez les détails et sélectionnez les formations/e-books à inclure.'}
@@ -1200,7 +1200,7 @@
 			<div class="pt-2">
 				<label class="flex items-center justify-between p-4 bg-base-200/50 border border-base-200 cursor-pointer">
 					<div>
-						<span class="block text-xs font-bold text-base-content">Publier immédiatement ce bundle</span>
+						<span class="block text-xs font-bold text-base-content">Publier immédiatement cette offre groupée</span>
 						<span class="text-[11px] text-base-content/60">
 							Rendre ce pack visible immédiatement sur la page d'accueil et dans le catalogue.
 						</span>
@@ -1236,7 +1236,7 @@
 					Enregistrement...
 				{:else}
 					<Save size={16} />
-					{editingId ? 'Enregistrer les modifications' : 'Créer le bundle'}
+					{editingId ? 'Enregistrer les modifications' : 'Créer l’offre groupée'}
 				{/if}
 			</button>
 		</div>
@@ -1257,7 +1257,7 @@
 			</div>
 
 			<p class="text-xs text-base-content/70 leading-relaxed">
-				Êtes-vous sûr de vouloir supprimer le bundle <strong class="text-base-content">"{deleteModalBundle.title}"</strong> ? Cette action est irréversible et supprimera l'offre du catalogue public.
+				Êtes-vous sûr de vouloir supprimer l’offre groupée <strong class="text-base-content">"{deleteModalBundle.title}"</strong> ? Cette action est irréversible et supprimera l’offre du catalogue public.
 			</p>
 
 			<div class="flex items-center justify-end gap-3 pt-4 border-t border-base-200">

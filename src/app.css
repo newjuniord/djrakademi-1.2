@@ -137,3 +137,18 @@ body :not(header):not(header *):not(footer):not(footer *) [class*="text-[9px]"] 
 body :not(header):not(header *):not(footer):not(footer *) [class*="text-[10px]"] { font-size: 0.875rem; }
 body :not(header):not(header *):not(footer):not(footer *) [class*="text-[11px]"] { font-size: 0.9375rem; }
 body :not(header):not(header *):not(footer):not(footer *) [class*="text-[12px]"] { font-size: 1rem; }
+
+/* Keep the administration UI 4px smaller than the enlarged public typography. */
+.admin-root { font-size: 0.75rem; }
+body .admin-root .text-xs { font-size: 0.75rem !important; }
+body .admin-root .text-sm { font-size: 0.875rem !important; }
+body .admin-root .text-base { font-size: 1rem !important; }
+body .admin-root .text-lg { font-size: 1.125rem !important; }
+body .admin-root .text-xl { font-size: 1.25rem !important; }
+body .admin-root .text-2xl { font-size: 1.5rem !important; }
+body .admin-root .text-3xl { font-size: 1.875rem !important; }
+body .admin-root .text-4xl { font-size: 2.375rem !important; }
+body .admin-root [class*="text-[9px]"] { font-size: 9px !important; }
+body .admin-root [class*="text-[10px]"] { font-size: 10px !important; }
+body .admin-root [class*="text-[11px]"] { font-size: 11px !important; }
+body .admin-root [class*="text-[12px]"] { font-size: 12px !important; }

@@ -29,7 +29,7 @@
 					type="button"
 					class="btn btn-ghost btn-xs btn-square text-white/80 hover:text-white rounded-lg -mr-1 shrink-0 cursor-pointer"
 					onclick={() => toast.remove(item.id)}
-					aria-label="Fèmen an"
+					aria-label="Fermer la notification"
 				>
 					<X size={16} />
 				</button>

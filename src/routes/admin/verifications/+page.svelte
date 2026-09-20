@@ -53,7 +53,7 @@
 			totalLogs = result.total;
 		} catch (error) {
 			if (request === requestNumber) {
-				loadError = error instanceof Error ? error.message : 'Impossible de charger les logs de vérification.';
+				loadError = error instanceof Error ? error.message : 'Impossible de charger les journaux de vérification.';
 			}
 		} finally {
 			if (request === requestNumber) loading = false;
@@ -80,7 +80,7 @@
 </script>
 
 <svelte:head>
-	<title>Logs de Verifikasyon · DJR Akademi Admin</title>
+	<title>Journaux de vérification · DJR Akademi Admin</title>
 </svelte:head>
 
 <div class="space-y-8 p-1">
@@ -93,10 +93,10 @@
 				</div>
 				<div>
 					<h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-3xl">
-						Logs de Verifikasyon
+						Journaux de vérification
 					</h1>
 					<p class="text-xs text-base-content/60 mt-0.5">
-						Istwa ak suivi tout tentativ debloke aksè kat Lemon Squeezy ak MonCash / Natcash.
+						Historique et suivi de toutes les tentatives de déblocage d’accès par carte Lemon Squeezy ou MonCash / Natcash.
 					</p>
 				</div>
 			</div>
@@ -110,10 +110,10 @@
 				class="btn btn-outline btn-sm rounded-xl font-bold gap-2"
 			>
 				<RefreshCw size={14} class={loading ? 'animate-spin' : ''} />
-				Rafrechi
+				Rafraîchir
 			</button>
 			<div class="px-4 py-2 bg-base-200/60 rounded-xl text-xs font-bold text-base-content/80 shrink-0 border border-base-200/60">
-				{totalLogs} tentativ
+				{totalLogs} tentative{totalLogs === 1 ? '' : 's'}
 			</div>
 		</div>
 	</div>
@@ -127,7 +127,7 @@
 				<input
 					type="text"
 					bind:value={searchQuery}
-					placeholder="Rechercher par imel, refferans, ID utilisateur ou message..."
+					placeholder="Rechercher par e-mail, référence, ID utilisateur ou message..."
 					class="input input-sm sm:input-md w-full pl-10 rounded-xl bg-base-200/50 border-base-300 focus:border-primary text-xs sm:text-sm font-medium"
 				/>
 			</div>
@@ -138,8 +138,8 @@
 					bind:value={filterMethod}
 					class="select select-sm sm:select-md w-full rounded-xl bg-base-200/50 border-base-300 text-xs sm:text-sm font-medium"
 				>
-					<option value="all">Tout mwayen (Kat &amp; Mobil)</option>
-					<option value="carte">Kat Lemon Squeezy</option>
+					<option value="all">Toutes les méthodes (carte et mobile)</option>
+					<option value="carte">Carte Lemon Squeezy</option>
 					<option value="mobile">MonCash / Natcash</option>
 				</select>
 			</div>
@@ -150,9 +150,9 @@
 					bind:value={filterStatus}
 					class="select select-sm sm:select-md w-full rounded-xl bg-base-200/50 border-base-300 text-xs sm:text-sm font-medium"
 				>
-					<option value="all">Tout statut (Siksè &amp; Echèk)</option>
-					<option value="success">Siksè sèlman (✓)</option>
-					<option value="failed">Echèk sèlman (✕)</option>
+					<option value="all">Tous les statuts (succès et échec)</option>
+					<option value="success">Succès uniquement (✓)</option>
+					<option value="failed">Échecs uniquement (✕)</option>
 				</select>
 			</div>
 		</div>
@@ -163,31 +163,31 @@
 		{#if loading && logs.length === 0}
 			<div class="p-16 text-center space-y-4">
 				<Loader2 size={36} class="animate-spin text-primary mx-auto" />
-				<p class="text-xs text-base-content/60 font-semibold">N ap chaje log verifikasyon yo...</p>
+				<p class="text-xs text-base-content/60 font-semibold">Chargement des journaux de vérification…</p>
 			</div>
 		{:else if loadError}
 			<div class="p-12 text-center text-error space-y-3">
 				<XCircle size={36} class="mx-auto" />
 				<p class="text-xs font-bold">{loadError}</p>
-				<button type="button" onclick={loadLogs} class="btn btn-xs btn-outline btn-error rounded-lg">Re-eseye</button>
+				<button type="button" onclick={loadLogs} class="btn btn-xs btn-outline btn-error rounded-lg">Réessayer</button>
 			</div>
 		{:else if logs.length === 0}
 			<div class="p-16 text-center text-base-content/50 space-y-3">
 				<ShieldCheck size={40} class="mx-auto opacity-30" />
-				<h3 class="font-bold text-sm text-base-content">Pa gen log verifikasyon pou kounye a</h3>
-				<p class="text-xs text-base-content/60 max-w-sm mx-auto">Chak tentativ debloke aksè pa kat oswa mobil ap parèt isit la an tan reyèl.</p>
+				<h3 class="font-bold text-sm text-base-content">Aucun journal de vérification pour le moment</h3>
+				<p class="text-xs text-base-content/60 max-w-sm mx-auto">Chaque tentative de déblocage d’accès par carte ou mobile apparaîtra ici en temps réel.</p>
 			</div>
 		{:else}
 			<div class="overflow-x-auto">
 				<table class="table table-zebra w-full text-xs">
 					<thead>
 						<tr class="bg-base-200/50 text-base-content/70 font-bold uppercase tracking-wider text-[11px]">
-							<th>Dat &amp; Lè</th>
-							<th>Itilizatè (User ID)</th>
-							<th>Vale Saisie (Email / Ref)</th>
-							<th>Mwayen</th>
+							<th>Date et heure</th>
+							<th>Utilisateur (ID)</th>
+							<th>Valeur saisie (e-mail / référence)</th>
+							<th>Méthode</th>
 							<th>Statut</th>
-							<th>Mesaj Repons</th>
+							<th>Message de réponse</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
@@ -217,11 +217,11 @@
 								<td>
 									{#if item.method === 'carte'}
 										<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold rounded-lg text-[10px] uppercase">
-											<CreditCard size={12} /> Kat (Lemon)
+											<CreditCard size={12} /> Carte (Lemon)
 										</span>
 									{:else}
 										<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold rounded-lg text-[10px] uppercase">
-											<Smartphone size={12} /> Mobil (MonCash)
+											<Smartphone size={12} /> Mobile (MonCash)
 										</span>
 									{/if}
 								</td>
@@ -229,11 +229,11 @@
 								<td>
 									{#if item.status === 'success'}
 										<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-black rounded-full text-[10px] uppercase">
-											<CheckCircle2 size={12} /> Siksè
+											<CheckCircle2 size={12} /> Succès
 										</span>
 									{:else}
 										<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-black rounded-full text-[10px] uppercase">
-											<XCircle size={12} /> Echèk
+											<XCircle size={12} /> Échec
 										</span>
 									{/if}
 								</td>
@@ -248,7 +248,7 @@
 										onclick={() => (selectedLog = item)}
 										class="btn btn-ghost btn-xs font-bold text-primary gap-1"
 									>
-										<Info size={13} /> Detay
+										<Info size={13} /> Détails
 									</button>
 								</td>
 							</tr>
@@ -260,7 +260,7 @@
 			<!-- Pagination Footer -->
 			<div class="p-4 border-t border-base-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium">
 				<div class="text-base-content/60">
-					Afichaj paj <span class="font-bold text-base-content">{currentPage}</span> sou <span class="font-bold text-base-content">{totalPages}</span> ({totalLogs} log)
+					Affichage de la page <span class="font-bold text-base-content">{currentPage}</span> sur <span class="font-bold text-base-content">{totalPages}</span> ({totalLogs} journaux)
 				</div>
 
 				<div class="flex items-center gap-2">
@@ -270,7 +270,7 @@
 						onclick={() => (currentPage -= 1)}
 						class="btn btn-outline btn-xs rounded-lg gap-1 font-bold disabled:opacity-40"
 					>
-						<ChevronLeft size={14} /> Presedan
+						<ChevronLeft size={14} /> Précédent
 					</button>
 					<button
 						type="button"
@@ -278,7 +278,7 @@
 						onclick={() => (currentPage += 1)}
 						class="btn btn-outline btn-xs rounded-lg gap-1 font-bold disabled:opacity-40"
 					>
-						Swivan <ChevronRight size={14} />
+						Suivant <ChevronRight size={14} />
 					</button>
 				</div>
 			</div>
@@ -295,7 +295,7 @@
 					<div class="size-8 bg-primary/10 text-primary rounded-lg grid place-items-center font-bold">
 						<ShieldCheck size={18} />
 					</div>
-					<h3 class="font-bold text-base text-base-content">Detay Log Verifikasyon</h3>
+					<h3 class="font-bold text-base text-base-content">Détails du journal de vérification</h3>
 				</div>
 				<button type="button" onclick={() => (selectedLog = null)} class="btn btn-circle btn-ghost btn-xs text-base-content/60">✕</button>
 			</div>
@@ -303,35 +303,35 @@
 			<div class="space-y-3 text-xs">
 				<div class="grid grid-cols-2 gap-3 p-3 bg-base-200/50 rounded-xl border border-base-300/60">
 					<div>
-						<span class="text-base-content/50 block font-medium">ID Log</span>
+						<span class="text-base-content/50 block font-medium">ID du journal</span>
 						<span class="font-mono font-bold text-base-content">{selectedLog.id}</span>
 					</div>
 					<div>
-						<span class="text-base-content/50 block font-medium">Dat &amp; Lè</span>
+						<span class="text-base-content/50 block font-medium">Date et heure</span>
 						<span class="font-bold text-base-content">{formatDate(selectedLog.createdAt)}</span>
 					</div>
 					<div>
-						<span class="text-base-content/50 block font-medium">ID Itilizatè</span>
+						<span class="text-base-content/50 block font-medium">ID utilisateur</span>
 						<span class="font-mono font-bold text-primary">{selectedLog.userId}</span>
 					</div>
 					<div>
-						<span class="text-base-content/50 block font-medium">Mwayen</span>
+						<span class="text-base-content/50 block font-medium">Méthode</span>
 						<span class="font-bold uppercase text-base-content">{selectedLog.method}</span>
 					</div>
 				</div>
 
 				<div class="p-3 bg-base-200/50 rounded-xl border border-base-300/60 space-y-1">
-					<span class="text-base-content/50 block font-medium">Vale Saisie (Email / Referans)</span>
+					<span class="text-base-content/50 block font-medium">Valeur saisie (e-mail / référence)</span>
 					<span class="font-mono font-bold text-sm text-base-content">{selectedLog.inputValue}</span>
 				</div>
 
 				<div class="p-3 bg-base-200/50 rounded-xl border border-base-300/60 space-y-1">
-					<span class="text-base-content/50 block font-medium">Statut &amp; Mesaj Repons</span>
+					<span class="text-base-content/50 block font-medium">Statut et message de réponse</span>
 					<div class="flex items-center gap-2 mb-1">
 						{#if selectedLog.status === 'success'}
-							<span class="px-2 py-0.5 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold rounded-md text-[10px]">SIKSÈ</span>
+							<span class="px-2 py-0.5 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold rounded-md text-[10px]">SUCCÈS</span>
 						{:else}
-							<span class="px-2 py-0.5 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold rounded-md text-[10px]">ECHÈK</span>
+							<span class="px-2 py-0.5 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold rounded-md text-[10px]">ÉCHEC</span>
 						{/if}
 					</div>
 					<p class="text-base-content/80 font-medium leading-relaxed break-words whitespace-pre-wrap [word-break:break-word]">{selectedLog.message}</p>
@@ -339,7 +339,7 @@
 
 				{#if selectedLog.grantedItems}
 					<div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-700 dark:text-emerald-400 space-y-1">
-						<span class="block font-bold">Produit / Cours Débloqué :</span>
+						<span class="block font-bold">Produit ou cours débloqué :</span>
 						<span class="font-mono text-xs">{selectedLog.grantedItems}</span>
 					</div>
 				{/if}
@@ -347,7 +347,7 @@
 
 			<div class="modal-action pt-2 border-t border-base-200">
 				<button type="button" onclick={() => (selectedLog = null)} class="btn btn-sm btn-neutral rounded-xl font-bold px-6">
-					Fèmen
+					Fermer
 				</button>
 			</div>
 		</div>

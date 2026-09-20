@@ -33,33 +33,33 @@
 
 	const navGroups: NavGroup[] = [
 		{
-			title: 'Vue Principale',
+			title: 'Vue principale',
 			items: [
 				{ label: "Vue d’ensemble", href: '/admin', icon: LayoutDashboard },
 				{ label: 'Utilisateurs', href: '/admin/users', icon: Users }
 			]
 		},
 		{
-			title: 'Catalogue & Services',
+			title: 'Catalogue et services',
 			items: [
 				{ label: 'Cours', href: '/admin/courses', icon: BookOpen },
-				{ label: 'Ebooks', href: '/admin/ebooks', icon: FileText },
-				{ label: 'Bundles', href: '/admin/bundles', icon: Layers3 },
+				{ label: 'Livres numériques', href: '/admin/ebooks', icon: FileText },
+				{ label: 'Offres groupées', href: '/admin/bundles', icon: Layers3 },
 				{ label: 'Coaching', href: '/admin/coaching', icon: CalendarCheck }
 			]
 		},
 		{
-			title: 'Finances & Ventes',
+			title: 'Finances et ventes',
 			items: [
 				{ label: 'Commandes', href: '/admin/orders', icon: ShoppingBag },
-				{ label: 'Sipò Support', href: '/admin/support', icon: MessageSquare }
+				{ label: 'Assistance client', href: '/admin/support', icon: MessageSquare }
 			]
 		},
 		{
-			title: 'Système & Monitoring',
+			title: 'Système et supervision',
 			items: [
-				{ label: 'Logs Verifikasyon', href: '/admin/verifications', icon: ShieldCheck },
-				{ label: 'Santé & Logs API', href: '/admin/health', icon: Activity }
+				{ label: 'Journaux de vérification', href: '/admin/verifications', icon: ShieldCheck },
+				{ label: 'Santé et journaux API', href: '/admin/health', icon: Activity }
 			]
 		}
 	];
@@ -96,7 +96,7 @@
 				</span>
 				<div class="flex items-center gap-1.5 mt-1">
 					<span class="inline-block size-1.5 rounded-full bg-primary animate-pulse"></span>
-					<span class="text-[11px] font-semibold text-base-content/60">Console Admin</span>
+					<span class="text-[11px] font-semibold text-base-content/60">Console d’administration</span>
 				</div>
 			</div>
 		</div>
@@ -170,16 +170,14 @@
 					<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75"></span>
 					<span class="relative inline-flex size-2 rounded-full bg-success"></span>
 				</span>
-				<span class="text-base-content/80 font-semibold">Système Actif</span>
+				<span class="text-base-content/80 font-semibold">Système actif</span>
 			</div>
 			<a
 				href="mailto:support@djrakademi.com"
 				class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
 			>
-				Support
+				Assistance
 			</a>
 		</div>
 	</div>
 </aside>
-
-

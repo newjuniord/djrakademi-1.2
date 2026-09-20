@@ -40,14 +40,14 @@
 </script>
 
 {#if checkingAccess}
-	<div class="grid min-h-dvh place-items-center bg-base-200">
+	<div class="admin-root grid min-h-dvh place-items-center bg-base-200">
 		<div class="space-y-3 text-center text-base-content/60">
 			<Loader2 size={32} class="mx-auto animate-spin text-primary" />
 			<p class="text-sm font-semibold">Vérification de l’accès administrateur…</p>
 		</div>
 	</div>
 {:else}
-	<div class="drawer lg:drawer-open">
+	<div class="admin-root drawer lg:drawer-open">
 		<input id="admin-drawer" class="drawer-toggle" type="checkbox" bind:checked={drawerOpen} />
 
 		<div class="drawer-content flex min-h-dvh min-w-0 flex-col bg-base-200">
