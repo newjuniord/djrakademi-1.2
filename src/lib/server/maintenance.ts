@@ -1,7 +1,13 @@
 import { dev } from '$app/environment';
 import { adminServices, DATABASE_ID, SETTINGS_ROW_ID, SETTINGS_TABLE } from '$lib/server/admin-appwrite';
 
-export const MAINTENANCE_MESSAGE = 'Aplikasyon an an antretyen kounye a. Tanpri eseye ankò pita.';
+export function getMaintenanceMessage(lang: string = 'ht'): string {
+	return lang === 'fr'
+		? 'L\'application est actuellement en maintenance. Veuillez réessayer plus tard.'
+		: 'Aplikasyon an, nan antretyen kounye a. Tanpri eseye ankò pita.';
+}
+
+export const MAINTENANCE_MESSAGE = getMaintenanceMessage('ht');
 
 export async function isPurchaseMaintenanceEnabled(): Promise<boolean> {
 	// Le mode maintenance ne s'active QUE sur la version de production (live) et JAMAIS en développement local (dev)
