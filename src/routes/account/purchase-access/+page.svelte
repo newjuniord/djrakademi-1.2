@@ -7,15 +7,57 @@
 	import { downloadOwnedEbook } from '$lib/services/ebook-access';
 	import { CheckCircle2, Loader2, AlertCircle } from 'lucide-svelte';
 
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	function getHref(path: string) {
+		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+	}
+
+	const i18n = {
+		fr: {
+			title: 'Accès sécurisé · DJR Akademi',
+			heading: 'Accès à votre achat',
+			connecting: 'Connexion sécurisée à votre compte…',
+			incompleteLink: 'Ce lien de connexion est incomplet.',
+			preparingEbook: 'Préparation de votre e-book…',
+			accessConfirmed: 'Accès confirmé. Redirection…',
+			loginSuccessEbook: 'Connexion réussie. Préparation de votre e-book…',
+			loginSuccessRedirect: 'Connexion réussie. Redirection…',
+			accessError: 'Une erreur est survenue lors de la connexion. Connectez-vous à votre compte pour accéder à votre achat.',
+			unlockError: 'Impossible de débloquer cet accès.',
+			invalidSecret: 'Secret de connexion invalide.',
+			loginBtn: 'Se connecter',
+			contactSupport: 'Contacter le support'
+		},
+		ht: {
+			title: 'Aksè ansekirite · DJR Akademi',
+			heading: 'Aksè nan achte w la',
+			connecting: 'N ap konekte w nan kont ou ansekirite…',
+			incompleteLink: 'Lyen koneksyon sa a pa konplè.',
+			preparingEbook: 'N ap prepare ebook ou an…',
+			accessConfirmed: 'Aksè konfime. Redirection…',
+			loginSuccessEbook: 'Koneksyon an reyisi. N ap prepare ebook ou an…',
+			loginSuccessRedirect: 'Koneksyon an reyisi. Redireksyon…',
+			accessError: 'Yon erè rive pandan koneksyon an. Konekte w sou kont ou pou w jwenn achte w la.',
+			unlockError: 'Nou pa ka debloke aksè sa a.',
+			invalidSecret: 'Mopas koneksyon an pa bon.',
+			loginBtn: 'Konekte',
+			contactSupport: 'Kontakte sipò a'
+		}
+	};
+
+	let t = $derived(i18n[currentLang]);
+
 	let status = $state<'loading' | 'success' | 'error'>('loading');
-	let message = $state('N ap konekte w nan kont ou ansekirite…');
+	let message = $state('');
 
 	function safeDestination(value: string | null): string {
-		if (!value || !value.startsWith('/') || value.startsWith('//')) return '/dashboard';
-		return value;
+		if (!value || !value.startsWith('/') || value.startsWith('//')) return getHref('/dashboard');
+		return currentLang === 'ht' && !value.includes('lang=ht') ? (value.includes('?') ? `${value}&lang=ht` : `${value}?lang=ht`) : value;
 	}
 
 	onMount(async () => {
+		message = i18n[currentLang].connecting;
 		const orderId = page.url.searchParams.get('orderId') || '';
 		const userId = page.url.searchParams.get('userId') || '';
 		const token = page.url.searchParams.get('token') || '';
@@ -25,7 +67,7 @@
 
 		if (!userId || (!token && !legacySecret)) {
 			status = 'error';
-			message = 'Lyen koneksyon sa a pa konplè.';
+			message = i18n[currentLang].incompleteLink;
 			return;
 		}
 
@@ -36,7 +78,7 @@
 			if (currentUser?.$id === userId) {
 				await authState.check();
 				status = 'success';
-				message = downloadEbook ? 'N ap prepare ebook ou an…' : 'Aksè konfime. Redireksyon…';
+				message = downloadEbook ? i18n[currentLang].preparingEbook : i18n[currentLang].accessConfirmed;
 				if (downloadEbook) await downloadOwnedEbook(downloadEbook).catch(() => undefined);
 				await goto(destination, { replaceState: true });
 				return;
@@ -58,28 +100,28 @@
 				});
 				const data = await res.json().catch(() => ({}));
 				if (!res.ok || !data.secret) {
-					throw new Error(data.message || 'Nou pa ka debloke aksè sa a.');
+					throw new Error(data.message || i18n[currentLang].unlockError);
 				}
 				activeSecret = data.secret;
 			}
 
-			if (!activeSecret) throw new Error('Secret de connexion invalide.');
+			if (!activeSecret) throw new Error(i18n[currentLang].invalidSecret);
 
 			await account.createSession({ userId, secret: activeSecret });
 			await authState.check();
 			status = 'success';
-			message = downloadEbook ? 'Koneksyon an reyisi. N ap prepare ebook ou an…' : 'Koneksyon an reyisi. Redireksyon…';
+			message = downloadEbook ? i18n[currentLang].loginSuccessEbook : i18n[currentLang].loginSuccessRedirect;
 			if (downloadEbook) await downloadOwnedEbook(downloadEbook).catch(() => undefined);
 			await goto(destination, { replaceState: true });
 		} catch (error: any) {
 			console.error('[Purchase access]:', error);
 			status = 'error';
-			message = error?.message || 'Yon erè rive pandan koneksyon an. Konekte w sou kont ou pou w jwenn achte w la.';
+			message = error?.message || i18n[currentLang].accessError;
 		}
 	});
 </script>
 
-<svelte:head><title>Aksè ansekirite · DJR Akademi</title><meta name="robots" content="noindex,nofollow" /></svelte:head>
+<svelte:head><title>{t.title}</title><meta name="robots" content="noindex,nofollow" /></svelte:head>
 
 <main class="grid min-h-dvh place-items-center bg-base-200 p-4">
 	<section class="card w-full max-w-md border border-base-300 bg-base-100 shadow-xl">
@@ -91,12 +133,12 @@
 			{:else}
 				<AlertCircle size={42} class="text-error" />
 			{/if}
-			<h1 class="mt-3 text-2xl font-bold">Aksè nan achte w la</h1>
+			<h1 class="mt-3 text-2xl font-bold">{t.heading}</h1>
 			<p class="text-sm text-base-content/65">{message}</p>
 			{#if status === 'error'}
 				<div class="mt-4 flex w-full flex-col gap-2">
-					<a class="btn btn-primary" href="/">Konekte</a>
-					<a class="btn btn-ghost" href="/contact">Kontakte sipò a</a>
+					<a class="btn btn-primary" href={getHref('/')}>{t.loginBtn}</a>
+					<a class="btn btn-ghost" href={getHref('/contact')}>{t.contactSupport}</a>
 				</div>
 			{/if}
 		</div>

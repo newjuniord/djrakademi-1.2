@@ -1,14 +1,85 @@
 <script lang="ts">
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
+	import { page } from '$app/state';
 	import { User, ChevronLeft, Save, Shield, CheckCircle2, Mail, Phone, Loader2, AlertCircle } from 'lucide-svelte';
 	import { authState } from '$lib/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { updateProfile } from '$lib/services/profiles';
 
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	function getHref(path: string) {
+		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+	}
+
+	const i18n = {
+		fr: {
+			pageTitle: 'Mon Profil · DJR Akademi',
+			metaDesc: 'Gérez votre profil et vos informations personnelles sur DJR Akademi.',
+			loadingProfile: 'Chargement de votre profil...',
+			backToSpace: 'Retour à mon espace',
+			myAccount: 'Mon compte',
+			myProfile: 'Mon profil',
+			profileDesc: 'Vérifiez vos informations et mettez-les à jour si nécessaire.',
+			close: 'Fermer',
+			student: 'Étudiant',
+			activeAccount: 'Compte actif',
+			accountInfoNote: 'Vous pouvez retrouver tous vos achats et formations dans l\'espace étudiant.',
+			goToCourses: 'Accéder à mes cours',
+			adminSpace: 'Espace administration',
+			accountInfoTag: 'Informations du compte',
+			personalInfoTitle: 'Informations personnelles',
+			requiredNote: 'Les champs marqués d\'une étoile (*) sont obligatoires.',
+			fullNameLabel: 'Nom complet',
+			fullNameNote: 'C\'est ce nom qui apparaîtra sur votre compte.',
+			emailLabel: 'Adresse email',
+			emailNote: 'Cet email est lié à votre compte et ne peut pas être modifié ici.',
+			whatsappLabel: 'Numéro WhatsApp',
+			whatsappPlaceholder: '+509 00 00 0000',
+			whatsappNote: 'Utilisez un numéro sur lequel l\'équipe peut vous contacter en cas de besoin.',
+			checkBeforeSave: 'Vérifiez les informations avant d\'enregistrer.',
+			saving: 'Enregistrement...',
+			saveChanges: 'Enregistrer les modifications',
+			successMsg: 'Les informations de votre compte ont été mises à jour avec succès !',
+			errorMsg: 'Impossible de mettre à jour le profil pour le moment.'
+		},
+		ht: {
+			pageTitle: 'Pwofil Mwen · DJR Akademi',
+			metaDesc: 'Jere pwofil ak enfòmasyon pèsonèl ou sou DJR Akademi.',
+			loadingProfile: 'N ap chaje pwofil ou...',
+			backToSpace: 'Tounen nan espas mwen',
+			myAccount: 'Kont mwen',
+			myProfile: 'Pwofil mwen',
+			profileDesc: 'Verifye enfòmasyon ou epi mete yo ajou lè sa nesesè.',
+			close: 'Fèmen',
+			student: 'Etidyan',
+			activeAccount: 'Kont aktif',
+			accountInfoNote: 'Ou ka jwenn tout acha ak fòmasyon ou yo nan espas etidyan an.',
+			goToCourses: 'Ale nan kou mwen yo',
+			adminSpace: 'Espas administrasyon',
+			accountInfoTag: 'Enfòmasyon kont lan',
+			personalInfoTitle: 'Enfòmasyon pèsonèl',
+			requiredNote: 'Chan ki make obligatwa yo dwe ranpli.',
+			fullNameLabel: 'Non konplè',
+			fullNameNote: 'Se non sa a k ap parèt sou kont ou.',
+			emailLabel: 'Adrès imèl',
+			emailNote: 'Imèl sa a konekte ak kont ou epi li pa ka chanje isit la.',
+			whatsappLabel: 'Nimewo WhatsApp',
+			whatsappPlaceholder: '+509 00 00 0000',
+			whatsappNote: 'Sèvi ak yon nimewo ekip la ka kontakte si ou bezwen sipò.',
+			checkBeforeSave: 'Verifye enfòmasyon yo anvan ou anrejistre.',
+			saving: 'Anrejistreman...',
+			saveChanges: 'Anrejistre chanjman yo',
+			successMsg: 'Enfòmasyon sou kont ou an mete ajou ak siksè !',
+			errorMsg: 'Nou pa ka mete ajou profil la nan kounye a.'
+		}
+	};
+	let t = $derived(i18n[currentLang]);
+
 	$effect(() => {
 		if (!authState.loading && !authState.user) {
-			goto('/');
+			goto(getHref('/'));
 		}
 	});
 
@@ -46,13 +117,13 @@
 					authState.user.name = updated.name;
 				}
 			}
-			saveSuccessMessage = 'Enfòmasyon sou kont ou an mete ajou ak siksè !';
+			saveSuccessMessage = t.successMsg;
 			setTimeout(() => {
 				saveSuccessMessage = null;
 			}, 4000);
 		} catch (e: any) {
 			console.error('Failed to update profile:', e);
-			saveErrorMessage = e.message || 'Nou pa ka mete ajou profil la nan kounye a.';
+			saveErrorMessage = e.message || t.errorMsg;
 		} finally {
 			saving = false;
 		}
@@ -60,108 +131,108 @@
 </script>
 
 <svelte:head>
-	<title>Mon Profil · DJR Akademi</title>
-	<meta name="description" content="Gérez votre profil et vos informations personnelles sur DJR Akademi." />
+	<title>{t.pageTitle}</title>
+	<meta name="description" content={t.metaDesc} />
 </svelte:head>
 
 <div class="profile-page">
 	<PublicHeader />
 
 	{#if authState.loading}
-		<main class="profile-loading" aria-label="Chajman pwofil la">
+		<main class="profile-loading" aria-label={t.loadingProfile}>
 			<Loader2 size={30} class="animate-spin" />
-			<span>N ap chaje pwofil ou...</span>
+			<span>{t.loadingProfile}</span>
 		</main>
 	{:else if authState.user}
 		<main class="profile-main">
 			<div class="profile-shell">
-				<a href="/dashboard" class="profile-back">
+				<a href={getHref('/dashboard')} class="profile-back">
 					<ChevronLeft size={16} />
-					Tounen nan espas mwen
+					{t.backToSpace}
 				</a>
 
 				<header class="profile-heading">
-					<span>Kont mwen</span>
-					<h1>Pwofil mwen</h1>
-					<p>Verifye enfòmasyon ou epi mete yo ajou lè sa nesesè.</p>
+					<span>{t.myAccount}</span>
+					<h1>{t.myProfile}</h1>
+					<p>{t.profileDesc}</p>
 				</header>
 
 				{#if saveSuccessMessage}
 					<div class="profile-alert profile-alert-success" role="status" aria-live="polite">
 						<CheckCircle2 size={19} />
 						<span>{saveSuccessMessage}</span>
-						<button type="button" onclick={() => (saveSuccessMessage = null)}>Fèmen</button>
+						<button type="button" onclick={() => (saveSuccessMessage = null)}>{t.close}</button>
 					</div>
 				{/if}
 
 				<div class="profile-layout">
-					<aside class="profile-summary" aria-label="Rezime kont lan">
+					<aside class="profile-summary" aria-label={t.myAccount}>
 						<div class="profile-avatar"><User size={30} /></div>
-						<span class="profile-role">Etidyan</span>
-						<h2>{name || 'Kont mwen'}</h2>
+						<span class="profile-role">{t.student}</span>
+						<h2>{name || t.myAccount}</h2>
 						<p>{email}</p>
 
 						<div class="profile-status">
-							<span><i></i> Kont aktif</span>
-							<small>Ou ka jwenn tout acha ak fòmasyon ou yo nan espas etidyan an.</small>
+							<span><i></i> {t.activeAccount}</span>
+							<small>{t.accountInfoNote}</small>
 						</div>
 
-						<a href="/dashboard" class="profile-dashboard-link">Ale nan kou mwen yo</a>
+						<a href={getHref('/dashboard')} class="profile-dashboard-link">{t.goToCourses}</a>
 
 						{#if authState.isAdmin}
-							<a href="/admin" class="profile-admin-link"><Shield size={15} /> Espas administrasyon</a>
+							<a href="/admin" class="profile-admin-link"><Shield size={15} /> {t.adminSpace}</a>
 						{/if}
 					</aside>
 
 					<section class="profile-form-panel" aria-labelledby="personal-info-title">
 						<div class="profile-form-heading">
 							<div>
-								<span>Enfòmasyon kont lan</span>
-								<h2 id="personal-info-title">Enfòmasyon pèsonèl</h2>
+								<span>{t.accountInfoTag}</span>
+								<h2 id="personal-info-title">{t.personalInfoTitle}</h2>
 							</div>
-							<p>Chan ki make obligatwa yo dwe ranpli.</p>
+							<p>{t.requiredNote}</p>
 						</div>
 
 						<form onsubmit={saveProfile} class="profile-form">
 							<div class="profile-field">
-								<label for="name">Non konplè <strong>*</strong></label>
+								<label for="name">{t.fullNameLabel} <strong>*</strong></label>
 								<div class="profile-input-wrap">
 									<User size={17} />
 									<input id="name" type="text" bind:value={name} required autocomplete="name" />
 								</div>
-								<small>Se non sa a k ap parèt sou kont ou.</small>
+								<small>{t.fullNameNote}</small>
 							</div>
 
 							<div class="profile-field">
-								<label for="email">Adrès imèl</label>
+								<label for="email">{t.emailLabel}</label>
 								<div class="profile-input-wrap profile-input-disabled">
 									<Mail size={17} />
 									<input id="email" type="email" bind:value={email} readonly disabled />
 								</div>
-								<small>Imèl sa a konekte ak kont ou epi li pa ka chanje isit la.</small>
+								<small>{t.emailNote}</small>
 							</div>
 
 							<div class="profile-field">
-								<label for="whatsapp">Nimewo WhatsApp</label>
+								<label for="whatsapp">{t.whatsappLabel}</label>
 								<div class="profile-input-wrap">
 									<Phone size={17} />
-									<input id="whatsapp" type="tel" bind:value={whatsapp} placeholder="+509 00 00 0000" autocomplete="tel" />
+									<input id="whatsapp" type="tel" bind:value={whatsapp} placeholder={t.whatsappPlaceholder} autocomplete="tel" />
 								</div>
-								<small>Sèvi ak yon nimewo ekip la ka kontakte si ou bezwen sipò.</small>
+								<small>{t.whatsappNote}</small>
 							</div>
 
 							{#if saveErrorMessage}
 								<div class="profile-alert profile-alert-error" role="alert">
 									<AlertCircle size={19} />
 									<span>{saveErrorMessage}</span>
-									<button type="button" onclick={() => (saveErrorMessage = null)}>Fèmen</button>
+									<button type="button" onclick={() => (saveErrorMessage = null)}>{t.close}</button>
 								</div>
 							{/if}
 
 							<div class="profile-actions">
-								<p>Verifye enfòmasyon yo anvan ou anrejistre.</p>
+								<p>{t.checkBeforeSave}</p>
 								<button type="submit" disabled={saving}>
-									{#if saving}<Loader2 size={17} class="animate-spin" /> Anrejistreman...{:else}<Save size={17} /> Anrejistre chanjman yo{/if}
+									{#if saving}<Loader2 size={17} class="animate-spin" /> {t.saving}{:else}<Save size={17} /> {t.saveChanges}{/if}
 								</button>
 							</div>
 						</form>

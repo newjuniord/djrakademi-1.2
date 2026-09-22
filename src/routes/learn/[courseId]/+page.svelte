@@ -20,10 +20,71 @@
 	} from 'lucide-svelte';
 	import { authState } from '$lib/auth.svelte';
 	import { parseVideoUrl } from '$lib/utils/video';
+	import { toast } from '$lib/toast.svelte';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	function getHref(path: string) {
+		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+	}
+
+	const i18n = {
+		fr: {
+			pageTitleLesson: 'Leçon',
+			pageTitleCourse: 'Formation',
+			loginError: 'Veuillez vous connecter pour accéder à cette formation.',
+			accessError: 'Accès refusé à cette formation.',
+			persistError: 'Impossible d’enregistrer la progression.',
+			mySpace: 'Mon espace',
+			courseLabel: 'Formation',
+			loading: 'Chargement...',
+			curriculumMobile: 'Programme',
+			curriculumTitle: 'Programme du cours',
+			lessonsDone: '{completed} sur {total} leçons complétées',
+			closeProgram: 'Fermer le programme',
+			invalidVideo: 'Aucune vidéo valide n\'est configurée pour cette leçon.',
+			textLessonNote: 'Cette leçon est un guide écrit. Consultez les notes ci-dessous.',
+			curriculumLessons: 'Programme des leçons',
+			lessonCompletedBtn: 'Leçon terminée ✓',
+			markCompletedBtn: 'Marquer comme terminée',
+			notesHeading: 'Notes et ressources de la leçon :',
+			prevLesson: 'Leçon précédente',
+			nextLesson: 'Leçon suivante',
+			modulePrefix: 'Module',
+			videoLabel: 'Vidéo',
+			textLabel: 'Texte'
+		},
+		ht: {
+			pageTitleLesson: 'Leson',
+			pageTitleCourse: 'Fòmasyon',
+			loginError: 'Tanpri konekte sou kont ou pou aksede fòmasyon sa a.',
+			accessError: 'Aksè pa otorize pou fòmasyon sa a.',
+			persistError: 'Enposib pou anrejistre pwogrè w.',
+			mySpace: 'Espas mwen',
+			courseLabel: 'Fòmasyon',
+			loading: 'Chajman...',
+			curriculumMobile: 'Pwogram',
+			curriculumTitle: 'Pwogram kou a',
+			lessonsDone: '{completed} sou {total} leson ki fini',
+			closeProgram: 'Fèmen pwogram an',
+			invalidVideo: 'Okenn lyen vidyo ki valab pa configuré pou leson sa a.',
+			textLessonNote: 'Leson sa a se yon gid ekri. Gade feyè yo anba a.',
+			curriculumLessons: 'Pwogram leson yo',
+			lessonCompletedBtn: 'Leson an fini ✓',
+			markCompletedBtn: 'Maki ke l fini',
+			notesHeading: 'Nòt ak resous leson an :',
+			prevLesson: 'Leson anvan',
+			nextLesson: 'Leson apre',
+			modulePrefix: 'Modil',
+			videoLabel: 'Videyo',
+			textLabel: 'Tèks'
+		}
+	};
+	let t = $derived(i18n[currentLang]);
 
 	$effect(() => {
 		if (!authState.loading && !authState.user) {
-			goto('/');
+			goto(getHref('/'));
 		}
 	});
 
@@ -39,18 +100,16 @@
 		}
 	});
 
-	import { toast } from '$lib/toast.svelte';
-
 	async function loadCourse(id: string) {
 		courseLoading = true;
 		try {
-			if (!authState.user) throw new Error('Veuillez vous connecter pour accéder à cette formation.');
+			if (!authState.user) throw new Error(t.loginError);
 			course = await getOwnedCourseById(id);
 			completedLessonIds = new Set(course.progress?.completedLessonIds || []);
 			activeLessonId = course.progress?.lastLessonId || course.modules.flatMap((module) => module.lessons)[0]?.id || '';
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Accès refusé à cette formation.');
-			goto(`/cours/${id}`);
+			toast.error(error instanceof Error ? error.message : t.accessError);
+			goto(getHref(`/cours/${id}`));
 		} finally {
 			courseLoading = false;
 		}
@@ -95,7 +154,7 @@
 		try {
 			await saveCourseProgress(courseId, { completedLessonIds: [...completed], lastLessonId: lastLessonId || undefined });
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Impossible d’enregistrer la progression.');
+			toast.error(error instanceof Error ? error.message : t.persistError);
 		}
 	}
 
@@ -135,7 +194,7 @@
 </script>
 
 <svelte:head>
-	<title>{activeLesson ? activeLesson.title : 'Leçon'} · {course ? course.title : 'Formation'}</title>
+	<title>{activeLesson ? activeLesson.title : t.pageTitleLesson} · {course ? course.title : t.pageTitleCourse}</title>
 </svelte:head>
 
 <div class="min-h-screen bg-zinc-950 text-white flex flex-col font-sans overflow-x-hidden">
@@ -147,20 +206,19 @@
 		<div class="flex items-center gap-2 sm:gap-4 min-w-0">
 			<button
 				type="button"
-				onclick={() => goto('/dashboard')}
+				onclick={() => goto(getHref('/dashboard'))}
 				class="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-xs font-bold rounded-lg transition-colors border border-white/10 shrink-0"
 			>
 				<ChevronLeft size={16} />
-				<span class="hidden xs:inline">Espas mwen</span>
-				<span class="xs:hidden">Espas</span>
+				<span>{t.mySpace}</span>
 			</button>
 
 			<div class="h-5 w-px bg-white/10 shrink-0"></div>
 
 			<!-- Course title on header -->
 			<div class="min-w-0">
-				<p class="text-[10px] sm:text-xs text-white/40 font-medium truncate">Fòmasyon</p>
-				<h1 class="text-xs sm:text-sm font-black text-white truncate">{course ? course.title : 'Chajman...'}</h1>
+				<p class="text-[10px] sm:text-xs text-white/40 font-medium truncate">{t.courseLabel}</p>
+				<h1 class="text-xs sm:text-sm font-black text-white truncate">{course ? course.title : t.loading}</h1>
 			</div>
 		</div>
 
@@ -184,7 +242,7 @@
 					<X size={16} />
 				{:else}
 					<List size={16} />
-					<span class="hidden sm:inline">Pwogram</span>
+					<span class="hidden sm:inline">{t.curriculumMobile}</span>
 				{/if}
 			</button>
 		</div>
@@ -235,7 +293,7 @@
 									<BookOpen size={24} class="sm:w-8 sm:h-8" />
 								</div>
 								<h3 class="text-base sm:text-xl font-black text-white">{activeLesson.title}</h3>
-								<p class="text-white/60 text-xs sm:text-sm max-w-md">Okenn lyen vidyo ki valab pa configuré pou leson sa a.</p>
+								<p class="text-white/60 text-xs sm:text-sm max-w-md">{t.invalidVideo}</p>
 							</div>
 						{/if}
 					{:else}
@@ -245,7 +303,7 @@
 								<BookOpen size={24} class="sm:w-8 sm:h-8" />
 							</div>
 							<h3 class="text-base sm:text-xl font-black text-white">{activeLesson.title}</h3>
-							<p class="text-white/60 text-xs sm:text-sm max-w-md">Leson sa a se yon gid ekri. Gade feyè yo anba a.</p>
+							<p class="text-white/60 text-xs sm:text-sm max-w-md">{t.textLessonNote}</p>
 						</div>
 					{/if}
 				</div>
@@ -259,9 +317,9 @@
 					>
 						<span class="flex items-center gap-2">
 							<List size={16} class="text-amber-400" />
-							Pwogram leson yo
+							{t.curriculumLessons}
 						</span>
-						<span class="text-amber-400 font-mono">{completedCount}/{totalCount} fini</span>
+						<span class="text-amber-400 font-mono">{completedCount}/{totalCount}</span>
 					</button>
 				</div>
 
@@ -282,10 +340,10 @@
 						>
 							{#if completedLessonIds.has(activeLesson.id)}
 								<CheckCircle2 size={16} class="text-emerald-400" />
-								<span>Leson an fini ✓</span>
+								<span>{t.lessonCompletedBtn}</span>
 							{:else}
 								<Circle size={16} class="text-white/40" />
-								<span>Maki ke l fini</span>
+								<span>{t.markCompletedBtn}</span>
 							{/if}
 						</button>
 					</div>
@@ -293,7 +351,7 @@
 					<!-- Lesson Text Content / Notes -->
 					{#if activeLesson.content}
 						<div class="p-4 sm:p-5 bg-zinc-950 rounded-xl border border-zinc-800 text-white/70 text-xs sm:text-sm leading-relaxed space-y-2.5">
-							<p class="font-bold text-white text-[11px] uppercase tracking-wider">Nòt ak resous leson an :</p>
+							<p class="font-bold text-white text-[11px] uppercase tracking-wider">{t.notesHeading}</p>
 							<p>{activeLesson.content}</p>
 						</div>
 					{/if}
@@ -307,7 +365,7 @@
 							class="inline-flex items-center justify-center gap-2 h-11 px-4 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none text-white text-xs font-bold rounded-xl transition-colors border border-white/10"
 						>
 							<ArrowLeft size={15} />
-							Leson anvan
+							{t.prevLesson}
 						</button>
 
 						<button
@@ -316,7 +374,7 @@
 							onclick={goToNextLesson}
 							class="inline-flex items-center justify-center gap-2 h-11 px-5 bg-amber-400 hover:bg-amber-300 disabled:opacity-30 disabled:pointer-events-none text-black font-black text-xs rounded-xl transition-colors shadow-lg shadow-amber-500/10"
 						>
-							Leson apre
+							{t.nextLesson}
 							<ArrowRight size={15} />
 						</button>
 					</div>
@@ -332,7 +390,7 @@
 				type="button"
 				onclick={() => (sidebarOpen = false)}
 				class="lg:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-30 transition-opacity"
-				aria-label="Fèmen pwogram an"
+				aria-label={t.closeProgram}
 			></button>
 		{/if}
 
@@ -342,8 +400,8 @@
 		>
 			<div class="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900 sticky top-0 z-10">
 				<div>
-					<h3 class="font-black text-sm text-white uppercase tracking-wider">Pwogram kou a</h3>
-					<p class="text-[11px] text-white/40 font-mono mt-0.5">{completedCount} sou {totalCount} leson ki fini</p>
+					<h3 class="font-black text-sm text-white uppercase tracking-wider">{t.curriculumTitle}</h3>
+					<p class="text-[11px] text-white/40 font-mono mt-0.5">{t.lessonsDone.replace('{completed}', String(completedCount)).replace('{total}', String(totalCount))}</p>
 				</div>
 				<button
 					type="button"
@@ -360,7 +418,7 @@
 					{#each course.modules as module, mi}
 						<div class="p-4 space-y-2.5">
 							<h4 class="text-xs font-black text-white/80 uppercase tracking-wide">
-								Modil {mi + 1} — {module.title}
+								{t.modulePrefix} {mi + 1} — {module.title}
 							</h4>
 
 							<!-- Lessons in Module -->
@@ -386,9 +444,9 @@
 										<span class="flex-1 line-clamp-1">{lesson.title}</span>
 
 										{#if lesson.type === 'video'}
-											<span class="text-[10px] text-white/40 font-mono shrink-0">Videyo</span>
+											<span class="text-[10px] text-white/40 font-mono shrink-0">{t.videoLabel}</span>
 										{:else}
-											<span class="text-[10px] text-white/40 font-mono shrink-0">Tèks</span>
+											<span class="text-[10px] text-white/40 font-mono shrink-0">{t.textLabel}</span>
 										{/if}
 									</button>
 								{/each}

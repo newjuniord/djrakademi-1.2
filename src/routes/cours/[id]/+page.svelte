@@ -9,10 +9,81 @@
 	import { formatPublicPrice } from '$lib/utils/public-price';
 	import { BookOpen, Users, ChevronLeft, Play, CheckCircle2, Clock, Lock, X, Video } from 'lucide-svelte';
 	import { parseVideoUrl } from '$lib/utils/video';
-
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
 	import { initiatePlopplopPayment, verifyLemonSqueezyPurchase } from '$lib/services/payments';
 	import { authState } from '$lib/auth.svelte';
+	import { toast } from '$lib/toast.svelte';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	const i18n = {
+		fr: {
+			metaTitle: (t: string) => `${t} · DJR Akademi`,
+			metaDesc: (d: string) => d || "Formation en ligne DJR Akademi",
+			loading: "Chargement de la formation...",
+			notFound: "Formation introuvable.",
+			backHome: "Retour à l'accueil",
+			backCourses: "Toutes les formations",
+			kicker: "Formation vidéo",
+			modulesCount: (n: number) => `${n} module${n > 1 ? 's' : ''}`,
+			lessonsCount: (n: number) => `${n} leçon${n > 1 ? 's' : ''}`,
+			watchPresentation: "Garder la présentation",
+			previewVideoTitle: "Vidéo de présentation",
+			free: "Gratuit",
+			btnFree: "Obtenir l'accès gratuit",
+			btnBuy: "Acheter cette formation",
+			btnBuyBottom: "Acheter maintenant",
+			loadingBtn: "Chargement...",
+			whatYouWillLearn: "Ce que vous allez apprendre",
+			programTitle: "Programme de la formation",
+			questions: "Des questions ?",
+			contactForm: "Formulaire de contact",
+			loginToast: "Veuillez vous connecter à votre compte pour acheter cette formation.",
+			loginFreeToast: "Veuillez vous connecter à votre compte pour débloquer cet accès gratuit.",
+			alreadyOwnedToast: "Vous avez déjà cette formation ! Redirection en cours...",
+			freeClaimToast: "Accès gratuit débloqué ! Redirection en cours...",
+			errorToast: "Une erreur est survenue lors de l'inscription.",
+			errorPayment: "Une erreur est survenue lors du paiement."
+		},
+		ht: {
+			metaTitle: (t: string) => `${t} · DJR Akademi`,
+			metaDesc: (d: string) => d || "Fòmasyon DJR Akademi",
+			loading: "N ap chaje fòmasyon an...",
+			notFound: "Fòmasyon an pa disponib.",
+			backHome: "Retounen nan akèy",
+			backCourses: "Tout fòmasyon yo",
+			kicker: "Fòmasyon videyo",
+			modulesCount: (n: number) => `${n} modil`,
+			lessonsCount: (n: number) => `${n} leson`,
+			watchPresentation: "Gade prezantasyon an",
+			previewVideoTitle: "Videyo prezantasyon",
+			free: "Gratis",
+			btnFree: "Jwenn aksè gratis",
+			btnBuy: "Achte fòmasyon sa a",
+			btnBuyBottom: "Achte kounye a",
+			loadingBtn: "Chajman...",
+			whatYouWillLearn: "Sa w pral aprann",
+			programTitle: "Pwogram kou a",
+			questions: "Kesyon ?",
+			contactForm: "Fòm kontak",
+			loginToast: "Tanpri konekte sou kont ou pou w ka achte fòmasyon sa a.",
+			loginFreeToast: "Tanpri konekte sou kont ou pou w ka jwenn aksè nan fòmasyon sa a.",
+			alreadyOwnedToast: "Ou gen fòmasyon sa a deja! N ap redirije w pou w gade l.",
+			freeClaimToast: "Aksè gratis debloke! N ap redirije w pou w gade l.",
+			errorToast: "Yon erè rive pandan enskripsyon an.",
+			errorPayment: "Yon erè rive pandan n ap trete peman an."
+		}
+	};
+
+	let t = $derived(i18n[currentLang]);
+
+	function getHref(path: string): string {
+		if (currentLang !== 'ht') return path;
+		const [pathname, search] = path.split('?');
+		const params = new URLSearchParams(search || '');
+		params.set('lang', 'ht');
+		return `${pathname}?${params.toString()}`;
+	}
 
 	const courseId = $derived(page.params.id);
 	let course = $state<Course | null>(null);
@@ -36,7 +107,7 @@
 		if (id && user && user.$id) {
 			hasCourseAccess(id).then((owned) => {
 				if (owned) {
-					goto(`/learn/${id}`, { replaceState: true });
+					goto(getHref(`/learn/${id}`), { replaceState: true });
 				}
 			}).catch(() => undefined);
 		}
@@ -52,27 +123,23 @@
 		course ? (course.modules || []).reduce((acc, m) => acc + m.lessons.length, 0) : 0
 	);
 
-	import { toast } from '$lib/toast.svelte';
-
 	async function handleBuyClick() {
 		if (!course || checkoutLoading) return;
 
-		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
-			toast.info('Tanpri konekte sou kont ou pou w ka achte fòmasyon sa a.');
+			toast.info(t.loginToast);
 			authState.openLogin(() => {
 				handleBuyClick();
 			});
 			return;
 		}
 
-		// 2. Vérifier si l'utilisateur possède déjà la formation
 		checkoutLoading = true;
 		try {
 			const existingAccess = await hasCourseAccess(course.id);
 			if (existingAccess) {
-				toast.info('Ou gen fòmasyon sa a deja! N ap redirije w pou w gade l.');
-				goto(`/learn/${course.id}`);
+				toast.info(t.alreadyOwnedToast);
+				goto(getHref(`/learn/${course.id}`));
 				return;
 			}
 
@@ -84,7 +151,7 @@
 					if (verification.ok && verification.success) {
 						const purchasedCourseId = course.id;
 						toast.success(verification.message, 5000);
-						setTimeout(() => goto(`/learn/${purchasedCourseId}`), 1800);
+						setTimeout(() => goto(getHref(`/learn/${purchasedCourseId}`)), 1800);
 						return;
 					}
 				} catch (err) {
@@ -106,7 +173,7 @@
 		try {
 			const user = authState.user;
 			if (!user || !user.$id) {
-				toast.info('Tanpri konekte sou kont ou pou w ka jwenn aksè nan fòmasyon sa a.');
+				toast.info(t.loginFreeToast);
 				authState.openLogin(() => {
 					handleFreeEnrollment();
 				});
@@ -114,11 +181,11 @@
 			}
 
 			await claimFreeCourse(course.id);
-			toast.success('Aksè gratis debloke! N ap redirije w pou w gade l.');
-			goto(`/learn/${course.id}`);
+			toast.success(t.freeClaimToast);
+			goto(getHref(`/learn/${course.id}`));
 		} catch (e) {
 			console.error('Free enrollment error:', e);
-			toast.error('Yon erè rive pandan enskripsyon an.');
+			toast.error(t.errorToast);
 		} finally {
 			checkoutLoading = false;
 		}
@@ -127,10 +194,9 @@
 	async function handleSelectPaymentMethod(method: 'moncash' | 'natcash' | 'carte' | 'plopplop_carte') {
 		if (!course || checkoutLoading) return;
 
-		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
 			showPaymentModal = false;
-			toast.info('Tanpri konekte sou kont ou pou w ka fè peman an.');
+			toast.info(t.loginToast);
 			authState.openLogin(() => {
 				handleBuyClick();
 			});
@@ -143,12 +209,11 @@
 			const userName = authState.user.name || 'Client';
 			const userEmail = authState.user.email || '';
 
-			// 2. Re-vérification si l'utilisateur possède déjà la formation
 			const existingAccess = await hasCourseAccess(course.id);
 			if (existingAccess) {
 				showPaymentModal = false;
-				toast.info('Ou gen fòmasyon sa a deja! N ap redirije w nan espas ou an.');
-				goto('/dashboard');
+				toast.info(t.alreadyOwnedToast);
+				goto(getHref('/dashboard'));
 				return;
 			}
 
@@ -168,11 +233,11 @@
 				window.location.href = redirectTarget;
 				return;
 			} else {
-				toast.error(res?.message || 'Nou pa ka lanse peman an. Tanpri eseye ankò.');
+				toast.error(res?.message || t.errorPayment);
 			}
 		} catch (e: any) {
 			console.error('Plopplop payment error:', e);
-			toast.error(e?.message || 'Yon erè rive pandan n ap trete peman an.');
+			toast.error(e?.message || t.errorPayment);
 		} finally {
 			checkoutLoading = false;
 		}
@@ -180,26 +245,26 @@
 </script>
 
 <svelte:head>
-	<title>{course ? course.title : 'Formation'} · DJR Akademi</title>
-	<meta name="description" content={course?.description ?? 'Formation DJR Akademi'} />
+	<title>{course ? t.metaTitle(course.title) : t.metaTitle('Formation')}</title>
+	<meta name="description" content={t.metaDesc(course?.description ?? '')} />
 </svelte:head>
 
 {#if loading}
 	<div class="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center gap-3">
 		<span class="loading loading-spinner text-amber-400 loading-lg"></span>
-		<p class="text-xs text-white/50 font-medium">Chargement de la formation...</p>
+		<p class="text-xs text-white/50 font-medium">{t.loading}</p>
 	</div>
 {:else if !course}
 	<div class="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
 		<div class="text-center space-y-4">
-			<p class="text-zinc-400 text-sm">Formation introuvable.</p>
+			<p class="text-zinc-400 text-sm">{t.notFound}</p>
 			<button
 				type="button"
-				onclick={() => goto('/')}
+				onclick={() => goto(getHref('/'))}
 				class="inline-flex items-center gap-2 px-6 py-3 bg-white text-black text-sm font-bold hover:bg-zinc-100 transition-colors"
 			>
 				<ChevronLeft size={16} />
-				Retour à l'accueil
+				{t.backHome}
 			</button>
 		</div>
 	</div>
@@ -231,7 +296,7 @@
 						{:else}
 							<div class="w-full h-full bg-zinc-900 flex flex-col items-center justify-center text-white/40 gap-3">
 								<Video size={48} />
-								<span class="text-xs font-bold uppercase tracking-wider">Vidéo de présentation</span>
+								<span class="text-xs font-bold uppercase tracking-wider">{t.previewVideoTitle}</span>
 							</div>
 						{/if}
 
@@ -243,7 +308,7 @@
 									<Play size={26} class="fill-black ml-1" />
 								</div>
 								<span class="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-bold border border-white/20">
-									Gade prezantasyon an
+									{t.watchPresentation}
 								</span>
 							</div>
 						{/if}
@@ -256,11 +321,11 @@
 				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<button
 						type="button"
-						onclick={() => goto('/#courses')}
+						onclick={() => goto(getHref('/#courses'))}
 						class="inline-flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors mb-8 font-medium"
 					>
 						<ChevronLeft size={14} />
-						Tout fòmasyon yo
+						{t.backCourses}
 					</button>
 
 					<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -270,7 +335,7 @@
 								<div class="size-7 bg-amber-400 text-black grid place-items-center rounded-md">
 									<BookOpen size={14} />
 								</div>
-								<span class="text-xs font-bold text-white/40 uppercase tracking-widest">Fòmasyon videyo</span>
+								<span class="text-xs font-bold text-white/40 uppercase tracking-widest">{t.kicker}</span>
 							</div>
 
 							<h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight">
@@ -285,11 +350,11 @@
 							<div class="flex flex-wrap items-center gap-5 py-4 border-y border-white/10">
 								<div class="flex items-center gap-1.5 text-sm text-white/50">
 									<Play size={15} class="text-white/30" />
-									<span class="font-semibold text-white">{course.modules.length}</span> modil
+									<span class="font-semibold text-white">{t.modulesCount(course.modules.length)}</span>
 								</div>
 								<div class="flex items-center gap-1.5 text-sm text-white/50">
 									<Clock size={15} class="text-white/30" />
-									<span class="font-semibold text-white">{totalLessons}</span> leson
+									<span class="font-semibold text-white">{t.lessonsCount(totalLessons)}</span>
 								</div>
 								{#if videoSource}
 									<button
@@ -298,12 +363,12 @@
 										class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 text-xs font-bold rounded-full border border-amber-400/30 transition-colors cursor-pointer"
 									>
 										<Play size={13} class="fill-amber-300" />
-										Gade videyo prezantasyon
+										{t.watchPresentation}
 									</button>
 								{/if}
 							</div>
 
-							<!-- Mobile Only: Cover image or Video Player (Placed BEFORE Price & CTA on smartphone) -->
+							<!-- Mobile Only: Cover image or Video Player -->
 							<div class="relative w-full my-6 lg:hidden">
 								{@render mediaCard()}
 							</div>
@@ -312,7 +377,7 @@
 							<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
 								<div>
 									{#if course.isFree || course.price === 0}
-										<span class="text-4xl font-black text-emerald-400">Gratis</span>
+										<span class="text-4xl font-black text-emerald-400">{t.free}</span>
 									{:else}
 										<span class="text-4xl font-black text-white">{formatPublicPrice(course.price, course.priceUsd)}</span>
 									{/if}
@@ -324,17 +389,17 @@
 									class="inline-flex items-center justify-center gap-2 h-14 px-10 bg-amber-400 hover:bg-amber-300 text-black font-black text-sm transition-colors shadow-xl shadow-amber-500/20 cursor-pointer disabled:opacity-50"
 								>
 									{#if checkoutLoading}
-										<span>Chajman...</span>
+										<span>{t.loadingBtn}</span>
 									{:else if course.isFree || course.price === 0}
-										Jwenn aksè gratis
+										{t.btnFree}
 									{:else}
-										Achte fòmasyon sa a
+										{t.btnBuy}
 									{/if}
 								</button>
 							</div>
 						</div>
 
-						<!-- Desktop Only: Cover image or Video Player (Right column on PC) -->
+						<!-- Desktop Only: Cover image or Video Player -->
 						<div class="relative w-full hidden lg:block">
 							{@render mediaCard()}
 						</div>
@@ -345,7 +410,7 @@
 			<!-- What you'll learn -->
 			<section class="py-14 bg-white border-b border-zinc-100">
 				<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-					<h2 class="text-xl font-black text-zinc-950 mb-6 tracking-tight">Sa w pral aprann</h2>
+					<h2 class="text-xl font-black text-zinc-950 mb-6 tracking-tight">{t.whatYouWillLearn}</h2>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						{#each course.modules as mod}
 							{#each mod.lessons as lesson}
@@ -362,7 +427,7 @@
 			<!-- Programme / Modules -->
 			<section class="py-14 bg-zinc-50">
 				<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-					<h2 class="text-xl font-black text-zinc-950 mb-6 tracking-tight">Pwogram kou a</h2>
+					<h2 class="text-xl font-black text-zinc-950 mb-6 tracking-tight">{t.programTitle}</h2>
 					<div class="space-y-4">
 						{#each course.modules as mod, mi}
 							<div class="bg-white rounded-2xl border border-zinc-100 overflow-hidden shadow-sm">
@@ -372,7 +437,7 @@
 										{mi + 1}
 									</span>
 									<h3 class="font-black text-sm text-zinc-950">{mod.title}</h3>
-									<span class="ml-auto text-xs text-zinc-400 font-medium">{mod.lessons.length} leson</span>
+									<span class="ml-auto text-xs text-zinc-400 font-medium">{t.lessonsCount(mod.lessons.length)}</span>
 								</div>
 								<!-- Lessons -->
 								<div class="divide-y divide-zinc-50">
@@ -401,7 +466,7 @@
 					<p class="text-white/50 text-sm leading-relaxed">{course.description}</p>
 					<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
 						{#if course.isFree || course.price === 0}
-							<span class="text-3xl font-black text-emerald-400">Gratis</span>
+							<span class="text-3xl font-black text-emerald-400">{t.free}</span>
 						{:else}
 							<span class="text-3xl font-black">{formatPublicPrice(course.price, course.priceUsd)}</span>
 						{/if}
@@ -411,11 +476,11 @@
 							onclick={handleBuyClick}
 							class="inline-flex items-center gap-2 px-8 py-3.5 bg-amber-400 hover:bg-amber-300 text-black font-black text-sm transition-colors cursor-pointer disabled:opacity-50"
 						>
-							{course.isFree || course.price === 0 ? 'Jwenn aksè gratis' : 'Achte kounye a'}
+							{course.isFree || course.price === 0 ? t.btnFree : t.btnBuyBottom}
 						</button>
 					</div>
 					<p class="text-white/30 text-xs">
-						Kesyon ? <a href="/contact" class="underline hover:text-white/60 transition-colors">Fòm kontak</a>
+						{t.questions} <a href={getHref('/contact')} class="underline hover:text-white/60 transition-colors">{t.contactForm}</a>
 					</p>
 				</div>
 			</section>
@@ -445,7 +510,7 @@
 				<div class="flex items-center justify-end sm:justify-between p-3 sm:p-5 border-b border-zinc-800 bg-zinc-900">
 					<div class="hidden sm:flex items-center gap-2 min-w-0">
 						<Video size={18} class="text-amber-400 shrink-0" />
-						<h3 class="text-sm font-bold text-white truncate">Vidéo de présentation — {course.title}</h3>
+						<h3 class="text-sm font-bold text-white truncate">{t.previewVideoTitle} — {course.title}</h3>
 					</div>
 					<button
 						type="button"

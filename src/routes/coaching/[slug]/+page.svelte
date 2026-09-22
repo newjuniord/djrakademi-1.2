@@ -19,6 +19,99 @@
 	import { initiatePlopplopPayment } from '$lib/services/payments';
 	import { toast } from '$lib/toast.svelte';
 
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	const i18n = {
+		fr: {
+			metaTitle: (t: string) => `${t} · Consultation DJR Akademi`,
+			metaDesc: (d: string) => d || "Séance de consultation individuelle sur-mesure",
+			securityBadge: "Réservation 100% sécurisée",
+			loading: "Chargement de votre séance de consultation...",
+			notFoundTitle: "Service non disponible",
+			notFoundDesc: "Ce service de consultation n'existe pas ou est désactivé.",
+			backHome: "Retour à l'accueil",
+			backTrainings: "Toutes les offres",
+			badgeSession: "Séance Individuelle 1-à-1",
+			durationLabel: "Durée de la séance",
+			minutes: (m: number) => `${m} minutes`,
+			priceLabel: "Prix de la séance",
+			free: "Gratuit",
+			includedTitle: "Inclus dans votre réservation :",
+			inc1: "Confirmation et détails accessibles dans votre espace",
+			inc2: "Ajout à votre calendrier en un clic",
+			inc3: "Horaire ajusté selon votre ville",
+			step1Title: "1. Choisissez une date et une heure",
+			timezoneAdjustedFor: (city: string) => `Horaire ajusté pour : ${city}`,
+			noSlotsAvailable: "Aucun créneau disponible pour le moment.",
+			noSlotsDesc: "De nouveaux créneaux seront bientôt ajoutés.",
+			selectDateLabel: (n: number) => `Choisissez une date (${n} jour${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}) :`,
+			selectSlotLabel: (date: string) => `Créneaux disponibles pour le ${date} :`,
+			step2Title: "2. Vos informations",
+			step2Subtitle: "La réservation sera directement liée à votre compte.",
+			notLoggedIn: "Vous n'êtes pas encore connecté ?",
+			notLoggedInSub: "Connectez-vous pour lier automatiquement votre réservation.",
+			btnLoginNow: "Se connecter maintenant",
+			fullNameLabel: "Nom complet",
+			emailLabel: "Adresse e-mail",
+			whatsappLabel: "Numéro WhatsApp",
+			btnSubmit: "Continuer vers le paiement",
+			btnSubmitFree: "Confirmer la réservation gratuite",
+			btnSubmitRetry: "Reprendre le paiement",
+			loadingSubmit: "Création de la réservation...",
+			selectSlotError: "Veuillez choisir un créneau disponible.",
+			loginToast: "Veuillez vous connecter à votre compte pour réserver cette séance."
+		},
+		ht: {
+			metaTitle: (t: string) => `${t} · DJR Akademi`,
+			metaDesc: (d: string) => d || "Sesyon konsiltasyon endividyèl",
+			securityBadge: "Rezèvasyon 100% Ansekirite",
+			loading: "Sesyon konsiltasyon ou a ap chaje...",
+			notFoundTitle: "Sèvis sa a pa disponib",
+			notFoundDesc: "Sèvis konsiltasyon sa a pa egziste oswa li desaktive.",
+			backHome: "Tounen nan akèy",
+			backTrainings: "Tounen nan fòmasyon yo",
+			badgeSession: "Sesyon Endividyèl 1-ak-1",
+			durationLabel: "Tan sesyon an",
+			minutes: (m: number) => `${m} minit`,
+			priceLabel: "Pri sesyon an",
+			free: "Gratis",
+			includedTitle: "Enkli nan rezèvasyon ou :",
+			inc1: "Konfimasyon ak detay yo disponib nan espas ou",
+			inc2: "Ajoute nan kalandriye ou an yon sèl klik",
+			inc3: "Lè ajiste selon lavil ou",
+			step1Title: "1. Chwazi yon dat ak lè",
+			timezoneAdjustedFor: (city: string) => `Lè ki ajiste pou : ${city}`,
+			noSlotsAvailable: "Pa gen dat ki disponib pou kounye a.",
+			noSlotsDesc: "N ap ajoute lòt dat ki disponib yo talè konsa.",
+			selectDateLabel: (n: number) => `Chwazi yon dat (${n} jou disponib) :`,
+			selectSlotLabel: (date: string) => `Lè ki disponib pou ${date} :`,
+			step2Title: "2. Enfòmasyon ou yo",
+			step2Subtitle: "Konfimasyon an ap lyen ak kont ou.",
+			notLoggedIn: "Ou poko konekte sou kont ou?",
+			notLoggedInSub: "Konekte pou rezèvasyon an ka lyen ak kont ou otomatikman.",
+			btnLoginNow: "Konekte kounye a",
+			fullNameLabel: "Non konplè",
+			emailLabel: "Adrès Imèl",
+			whatsappLabel: "Nimewo WhatsApp",
+			btnSubmit: "Kontinye nan peman an",
+			btnSubmitFree: "Konfime rezèvasyon gratis la",
+			btnSubmitRetry: "Repann peman an",
+			loadingSubmit: "Rezèvasyon an ap kreye...",
+			selectSlotError: "Chwazi yon kreno ki disponib.",
+			loginToast: "Tanpri konekte sou kont ou pou w ka rezève sesyon konsiltasyon sa a."
+		}
+	};
+
+	let t = $derived(i18n[currentLang]);
+
+	function getHref(path: string): string {
+		if (currentLang !== 'ht') return path;
+		const [pathname, search] = path.split('?');
+		const params = new URLSearchParams(search || '');
+		params.set('lang', 'ht');
+		return `${pathname}?${params.toString()}`;
+	}
+
 	const slug = $derived(page.params.slug);
 
 	let service = $state<CoachingService | null>(null);
@@ -117,14 +210,14 @@
 	async function continueBooking(event: SubmitEvent) {
 		event.preventDefault();
 		if (await showMaintenanceIfEnabled()) return;
-		if (!service || !selected) { error = "Choisissez un créneau disponible."; return; }
+		if (!service || !selected) { error = t.selectSlotError; return; }
 		if (liveBookingId) { showCoachingPaymentModal = true; return; }
 		const customer: BookingCustomerInput = { name, email, whatsapp, timezone };
 		error = validateBookingInput(customer) ?? "";
 		if (error) return;
 		if (!authState.user) {
-			error = "Tanpri konekte sou kont ou pou w ka rezève sesyon coaching sa a.";
-			toast.info("Tanpri konekte sou kont ou pou w ka kontinye.");
+			error = t.loginToast;
+			toast.info(t.loginToast);
 			authState.openLogin(() => {
 				error = "";
 			});
@@ -136,12 +229,12 @@
 			const created = await startBooking(service.id, selected.startAt, selected.endAt, customer);
 			liveBookingId = created.bookingId;
 			if (created.status === "confirmed") {
-				await goto(`/booking/${created.bookingId}/success`);
+				await goto(getHref(`/booking/${created.bookingId}/success`));
 			} else {
 				showCoachingPaymentModal = true;
 			}
 		} catch (caught) {
-			error = caught instanceof Error ? caught.message : "Impossible de créer la réservation.";
+			error = caught instanceof Error ? caught.message : t.selectSlotError;
 		} finally {
 			loading = false;
 		}
@@ -169,12 +262,12 @@
 			});
 			const redirectTarget = result?.url || result?.redirectUrl;
 			if (!result?.success || !redirectTarget) {
-				throw new Error(result?.message || "Nou pa ka lanse peman an. Tanpri eseye ankò.");
+				throw new Error(result?.message || "Erè nan lanse peman an.");
 			}
 			window.location.href = redirectTarget;
 			return;
 		} catch (caught) {
-			error = caught instanceof Error ? caught.message : "Yon erè rive pandan n ap trete peman pou sèvis sa a.";
+			error = caught instanceof Error ? caught.message : "Yon erè rive pandan peman an.";
 			toast.error(error);
 			showCoachingPaymentModal = false;
 		} finally {
@@ -184,21 +277,21 @@
 </script>
 
 <svelte:head>
-	<title>{service ? service.title : 'Coaching'} · DJR Akademi</title>
-	<meta name="description" content={service?.description ?? 'Séance de coaching individuel sur-mesure'} />
+	<title>{service ? t.metaTitle(service.title) : t.metaTitle('Coaching')}</title>
+	<meta name="description" content={t.metaDesc(service?.description ?? '')} />
 </svelte:head>
 
 <div class="min-h-dvh bg-base-200/50 flex flex-col">
 	<!-- Header Navbar -->
 	<header class="border-b border-base-300/80 bg-base-100/90 backdrop-blur-md sticky top-0 z-40">
 		<div class="mx-auto flex min-h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-			<a class="flex items-center gap-2.5 font-black text-lg tracking-tight text-base-content" href="/">
+			<a class="flex items-center gap-2.5 font-black text-lg tracking-tight text-base-content" href={getHref('/')}>
 				<img src="/logo.png" alt="DJR Akademi" class="h-9 w-auto object-contain" />
 				<span class="hidden min-[430px]:inline-block">DJR Akademi</span>
 			</a>
 			<div class="flex items-center gap-1.5 text-xs font-bold text-base-content/60 bg-base-200 px-3 py-1.5 rounded-full border border-base-300/60">
 				<ShieldCheck size={14} class="text-emerald-500" />
-				<span>Rezèvasyon 100% Ansekirite</span>
+				<span>{t.securityBadge}</span>
 			</div>
 		</div>
 	</header>
@@ -206,20 +299,20 @@
 	{#if fetching}
 		<div class="my-auto py-24 text-center text-base-content/50 space-y-4">
 			<Loader2 size={40} class="mx-auto animate-spin text-primary" />
-			<p class="text-sm font-bold tracking-tight">Sesyon coaching ou a ap chaje...</p>
+			<p class="text-sm font-bold tracking-tight">{t.loading}</p>
 		</div>
 	{:else if !service}
 		<div class="my-auto mx-auto max-w-md px-4 py-20 text-center space-y-5">
 			<div class="size-16 bg-base-300/50 rounded-full grid place-items-center mx-auto text-base-content/40">
 				<Globe2 size={28} />
 			</div>
-			<h1 class="text-2xl font-black text-base-content tracking-tight">Sèvis sa a pa disponib</h1>
+			<h1 class="text-2xl font-black text-base-content tracking-tight">{t.notFoundTitle}</h1>
 			<p class="text-xs text-base-content/60 leading-relaxed font-medium">
-				Sèvis coaching sa a pa egziste oswa li desaktive.
+				{t.notFoundDesc}
 			</p>
-			<a class="btn btn-primary btn-sm rounded-xl px-6 font-bold" href="/">
+			<a class="btn btn-primary btn-sm rounded-xl px-6 font-bold" href={getHref('/')}>
 				<ArrowLeft size={14} />
-				Tounen nan akèy
+				{t.backHome}
 			</a>
 		</div>
 	{:else}
@@ -229,15 +322,15 @@
 				<div class="card-body p-6 sm:p-8 space-y-6">
 					<a
 						class="btn btn-ghost btn-xs rounded-none gap-1 font-semibold text-xs text-base-content/60 hover:text-base-content self-start inline-flex items-center -ml-2"
-						href="/"
+						href={getHref('/')}
 					>
 						<ArrowLeft size={14} />
-						Tounen nan fòmasyon yo
+						{t.backTrainings}
 					</a>
 
 					<div>
 						<span class="badge badge-primary font-bold text-[10px] uppercase tracking-wider mb-2">
-							Sesyon Endividyèl 1-ak-1
+							{t.badgeSession}
 						</span>
 						<h1 class="text-2xl sm:text-3xl font-black text-base-content tracking-tight leading-tight">
 							{service.title}
@@ -252,17 +345,17 @@
 					<!-- Key Details Grid -->
 					<div class="grid grid-cols-2 gap-4">
 						<div class="p-3.5 rounded-xl bg-base-200/40 border border-base-300/60">
-							<dt class="text-[11px] font-bold uppercase tracking-wider text-base-content/50">Tan sesyon an</dt>
+							<dt class="text-[11px] font-bold uppercase tracking-wider text-base-content/50">{t.durationLabel}</dt>
 							<dd class="mt-1 flex items-center gap-1.5 text-sm font-extrabold text-base-content">
 								<Clock size={16} class="text-primary" />
-								<span>{service.durationMinutes} minit</span>
+								<span>{t.minutes(service.durationMinutes)}</span>
 							</dd>
 						</div>
 
 						<div class="p-3.5 rounded-xl bg-base-200/40 border border-base-300/60">
-							<dt class="text-[11px] font-bold uppercase tracking-wider text-base-content/50">Prix sesyon an</dt>
+							<dt class="text-[11px] font-bold uppercase tracking-wider text-base-content/50">{t.priceLabel}</dt>
 							<dd class="mt-1 text-sm font-extrabold text-primary">
-								{service.isFree ? 'Gratis' : formatPublicPrice(service.price, service.priceUsd)}
+								{service.isFree ? t.free : formatPublicPrice(service.price, service.priceUsd)}
 							</dd>
 						</div>
 					</div>
@@ -271,20 +364,20 @@
 					<div class="rounded-2xl bg-primary/5 p-4 border border-primary/10 space-y-2.5">
 						<p class="text-xs font-bold text-primary flex items-center gap-1.5">
 							<ShieldCheck size={16} />
-							<span>Enkli nan rezèvasyon ou :</span>
+							<span>{t.includedTitle}</span>
 						</p>
 						<ul class="text-xs text-base-content/70 space-y-1.5 font-medium pl-1">
 							<li class="flex items-center gap-2">
 								<Check size={14} class="text-emerald-500 shrink-0" />
-								<span>Konfimasyon ak detay yo disponib nan espas ou</span>
+								<span>{t.inc1}</span>
 							</li>
 							<li class="flex items-center gap-2">
 								<Check size={14} class="text-emerald-500 shrink-0" />
-								<span>Ajoute nan kalandriye ou an yon sèl klik</span>
+								<span>{t.inc2}</span>
 							</li>
 							<li class="flex items-center gap-2">
 								<Check size={14} class="text-emerald-500 shrink-0" />
-								<span>Lè ajiste selon lavil ou</span>
+								<span>{t.inc3}</span>
 							</li>
 						</ul>
 					</div>
@@ -298,10 +391,10 @@
 						<div class="space-y-4">
 							<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-base-200/80">
 								<div>
-									<h2 class="text-lg font-black text-base-content tracking-tight">1. Chwazi yon dat ak lè</h2>
+									<h2 class="text-lg font-black text-base-content tracking-tight">{t.step1Title}</h2>
 									<p class="mt-0.5 text-xs text-base-content/60 font-medium flex items-center gap-1">
 										<Globe2 size={13} class="text-primary" />
-										<span>Lè ki ajiste pou : <strong>{getTimezoneCity(timezone)}</strong></span>
+										<span>{t.timezoneAdjustedFor(getTimezoneCity(timezone))}</span>
 									</p>
 								</div>
 							</div>
@@ -311,15 +404,15 @@
 
 							{#if slots.length === 0}
 								<div class="rounded-2xl border border-dashed border-base-300/80 p-8 text-center text-base-content/50 space-y-2 bg-base-200/30">
-									<p class="text-xs font-bold text-base-content/70">Pa gen dat ki disponib pou kounye a.</p>
-									<p class="text-[11px] text-base-content/50">N ap ajoute lòt dat ki disponib yo talè konsa.</p>
+									<p class="text-xs font-bold text-base-content/70">{t.noSlotsAvailable}</p>
+									<p class="text-[11px] text-base-content/50">{t.noSlotsDesc}</p>
 								</div>
 							{:else}
 								<!-- 1. DATE PICKER DROPDOWN -->
 								<div class="form-control gap-2.5">
 									<label for="date-select" class="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 flex items-center gap-1.5 mb-0.5">
 										<CalendarDays size={15} class="text-primary" />
-										<span>Chwazi yon dat ({groupedSlots.length} jou disponib) :</span>
+										<span>{t.selectDateLabel(groupedSlots.length)}</span>
 									</label>
 									<div class="relative">
 										<select
@@ -329,7 +422,7 @@
 										>
 											{#each groupedSlots as group}
 												<option value={group.dateKey}>
-													📅 {group.formattedDate} ({group.slots.length} lè disponib)
+													📅 {group.formattedDate} ({group.slots.length} {currentLang === 'ht' ? 'lè disponib' : 'créneaux disponibles'})
 												</option>
 											{/each}
 										</select>
@@ -341,7 +434,7 @@
 									<div class="space-y-3 pt-2">
 										<p class="text-xs font-bold text-base-content/80 flex items-center gap-1.5">
 											<Clock size={14} class="text-primary" />
-											Lè ki disponib pou <strong class="text-base-content capitalize font-extrabold">{currentDayGroup.formattedDate}</strong> :
+											{t.selectSlotLabel(currentDayGroup.formattedDate)}
 										</p>
 										<div class="grid gap-2.5 grid-cols-2 sm:grid-cols-3">
 											{#each currentDayGroup.slots as slot}
@@ -379,8 +472,8 @@
 						<!-- STEP 2: VOS INFORMATIONS -->
 						<form class="space-y-5" onsubmit={continueBooking}>
 							<div>
-								<h2 class="text-lg font-black text-base-content tracking-tight">2. Enfòmasyon ou yo</h2>
-								<p class="mt-0.5 text-xs text-base-content/60 font-medium">Konfimasyon an ap lyen ak kont ou.</p>
+								<h2 class="text-lg font-black text-base-content tracking-tight">{t.step2Title}</h2>
+								<p class="mt-0.5 text-xs text-base-content/60 font-medium">{t.step2Subtitle}</p>
 							</div>
 
 							{#if !authState.user}
@@ -388,9 +481,9 @@
 									<div class="space-y-0.5">
 										<p class="text-xs font-bold text-zinc-950 flex items-center gap-1.5">
 											<LogIn size={14} class="text-amber-600" />
-											<span>Ou poko konekte sou kont ou?</span>
+											<span>{t.notLoggedIn}</span>
 										</p>
-										<p class="text-[11px] text-zinc-500">Konekte pou rezèvasyon an ka lyen ak kont ou otomatikman.</p>
+										<p class="text-[11px] text-zinc-500">{t.notLoggedInSub}</p>
 									</div>
 									<button
 										type="button"
@@ -398,7 +491,7 @@
 										class="px-3.5 py-1.5 bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold text-xs rounded-xl transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
 									>
 										<LogIn size={13} class="text-amber-400" />
-										<span>Konekte kounye a</span>
+										<span>{t.btnLoginNow}</span>
 									</button>
 								</div>
 							{/if}
@@ -411,7 +504,7 @@
 
 							<div class="form-control gap-1.5">
 								<label for="booking-name" class="label-text font-bold text-[11px] uppercase tracking-wider text-base-content/70">
-									Non konplè <span class="text-error">*</span>
+									{t.fullNameLabel} <span class="text-error">*</span>
 								</label>
 								<input
 									id="booking-name"
@@ -425,7 +518,7 @@
 
 							<div class="form-control gap-1.5">
 								<label for="booking-email" class="label-text font-bold text-[11px] uppercase tracking-wider text-base-content/70">
-									Adrès Imèl <span class="text-error">*</span>
+									{t.emailLabel} <span class="text-error">*</span>
 								</label>
 								<input
 									id="booking-email"
@@ -440,7 +533,7 @@
 
 							<div class="form-control gap-1.5">
 								<label for="booking-whatsapp" class="label-text font-bold text-[11px] uppercase tracking-wider text-base-content/70">
-									Nimewo WhatsApp <span class="text-error">*</span>
+									{t.whatsappLabel} <span class="text-error">*</span>
 								</label>
 								<PhoneInput bind:value={whatsapp} required showLabel={false} />
 							</div>
@@ -452,10 +545,10 @@
 							>
 								{#if loading}
 									<Loader2 size={18} class="animate-spin" />
-									<span>Rezèvasyon an ap kreye...</span>
+									<span>{t.loadingSubmit}</span>
 								{:else}
 									<CalendarDays size={18} />
-									<span>{service.isFree ? 'Konfime rezèvasyon gratis la' : liveBookingId ? 'Repann peman an' : 'Kontinye nan peman an'}</span>
+									<span>{service.isFree ? t.btnSubmitFree : liveBookingId ? t.btnSubmitRetry : t.btnSubmit}</span>
 								{/if}
 							</button>
 						</form>

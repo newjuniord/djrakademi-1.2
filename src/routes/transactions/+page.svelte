@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
+	import { page } from '$app/state';
 	import {
 		Receipt,
 		ChevronLeft,
@@ -28,6 +29,116 @@
 	import { goto } from '$app/navigation';
 	import { getUserOrders, type Order } from '$lib/services/orders';
 
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	function getHref(path: string) {
+		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+	}
+
+	const i18n = {
+		fr: {
+			pageTitle: 'Mes Transactions · DJR Akademi',
+			metaDesc: 'Historique complet de vos commandes, reçus et factures de paiement sur DJR Akademi.',
+			loadingMsg: 'Chargement de vos transactions...',
+			backToSpace: 'Retour à mon espace',
+			title: 'Mes Transactions',
+			subtitle: 'Historique de vos commandes, factures et reçus de paiement.',
+			verifyTitle: 'Vous avez un paiement qui ne s\'affiche pas ou un accès bloqué ?',
+			verifySub: 'Utilisez la page de vérification pour chercher et débloquer votre commande immédiatement.',
+			verifyBtn: 'Vérifier mon paiement',
+			searchPlaceholder: 'Rechercher par produit ou ID de transaction...',
+			filterAll: 'Tous',
+			filterPaid: 'Payé',
+			filterPending: 'En attente',
+			historyTitle: 'Historique détaillé des paiements',
+			currencyNote: 'Devises officielles : HTG / USD',
+			emptyTitle: 'Aucune transaction trouvée',
+			emptySubSearch: 'Aucun résultat ne correspond à votre recherche.',
+			emptySubDefault: 'Vous n\'avez effectué aucun achat pour le moment. Explorez nos formations et ebooks !',
+			exploreCatalog: 'Explorer le catalogue',
+			statusPaid: 'Payé',
+			statusPending: 'En attente',
+			statusFailed: 'Échoué',
+			productTypeLabel: 'Type :',
+			providerLabel: 'Mode :',
+			copyToast: 'Réf ID copié dans le presse-papier !',
+			pdfReceipt: 'Reçu PDF',
+			watchBtn: 'Suivre',
+			ebookBtn: 'Ebook',
+			sessionBtn: 'Session',
+			receiptModalTitle: 'Reçu Officiel de Paiement',
+			brandSub: 'Plateforme d\'apprentissage et de suivi',
+			billedTo: 'Facturé à',
+			paymentMethod: 'Mode de paiement',
+			statusPaidTag: 'Statut : Payé ✓',
+			productDescHeader: 'Description du produit',
+			typeHeader: 'Type',
+			amountHeader: 'Montant',
+			subtotal: 'Sous-total :',
+			fees: 'Frais de traitement :',
+			totalAmount: 'Montant Total :',
+			receiptThankYou: 'Merci pour votre confiance en DJR Akademi !',
+			receiptElectronicNote: 'Ce reçu électronique constitue une preuve d\'achat officielle.',
+			close: 'Fermer',
+			printSavePdf: 'Imprimer / Sauvegarder en PDF',
+			courseType: 'Formation vidéo',
+			ebookType: 'Ebook PDF',
+			coachingType: 'Session Coaching 1:1',
+			digitalType: 'Produit digital'
+		},
+		ht: {
+			pageTitle: 'Tranzaksyon Mwen Yo · DJR Akademi',
+			metaDesc: 'Istwa konplè kòmand, resi ak faktir peman ou yo sou DJR Akademi.',
+			loadingMsg: 'N ap chaje tranzaksyon ou yo...',
+			backToSpace: 'Tounen nan espas mwen',
+			title: 'Tranzaksyon Mwen Yo',
+			subtitle: 'Istwa kòmand, faktir ak resi peman ou yo.',
+			verifyTitle: 'Ou gen yon peman ki pa parèt oswa aksè ki pa debloke ?',
+			verifySub: 'Sèvi ak paj verifikasyon an pou chèche epi debloke kòmand ou a imedyatman.',
+			verifyBtn: 'Verifye peman m lan',
+			searchPlaceholder: 'Chèche pa pwodui oswa ID tranzaksyon...',
+			filterAll: 'Tout',
+			filterPaid: 'Peye',
+			filterPending: 'Enatant',
+			historyTitle: 'Istwa detaye peman yo',
+			currencyNote: 'Lajan ofisyèl : HTG / USD',
+			emptyTitle: 'Pa gen okenn tranzaksyon ki jwenn',
+			emptySubSearch: 'Pa gen okenn rezilta ki koresponn ak chèch ou an.',
+			emptySubDefault: 'Ou poko fè okenn achte pou kounye a. Eksplore fòmasyon ak ebook nou yo pou kòmanse !',
+			exploreCatalog: 'Eksplore katalòg la',
+			statusPaid: 'Peye',
+			statusPending: 'Enatant',
+			statusFailed: 'Echwe',
+			productTypeLabel: 'Fòm :',
+			providerLabel: 'Fason :',
+			copyToast: 'Réf ID kopye nan presse-papier !',
+			pdfReceipt: 'Resi PDF',
+			watchBtn: 'Swiv',
+			ebookBtn: 'Ebook',
+			sessionBtn: 'Sesyon',
+			receiptModalTitle: 'Resi Ofisyèl Peman',
+			brandSub: 'Platfòm aprantisaj ak swivi',
+			billedTo: 'Faktire bay',
+			paymentMethod: 'Mwayen peman',
+			statusPaidTag: 'Sitiyasyon : Peye ✓',
+			productDescHeader: 'Deskripsyon pwodui a',
+			typeHeader: 'Kalite',
+			amountHeader: 'Montan',
+			subtotal: 'Sous-total :',
+			fees: 'Frais tretman :',
+			totalAmount: 'Montan Total :',
+			receiptThankYou: 'Mèsi pou konfyans ou nan DJR Akademi !',
+			receiptElectronicNote: 'Resi elektwonik sa a se yon prèv achte ofisyèl.',
+			close: 'Fèmen',
+			printSavePdf: 'Enprime / Sove an PDF',
+			courseType: 'Fòmasyon videyo',
+			ebookType: 'Ebook PDF',
+			coachingType: 'Sesyon Coaching 1:1',
+			digitalType: 'Pwodui dijital'
+		}
+	};
+	let t = $derived(i18n[currentLang]);
+
 	let loading = $state(true);
 	let orders = $state<Order[]>([]);
 	let searchQuery = $state('');
@@ -41,7 +152,7 @@
 		try {
 			await navigator.clipboard.writeText(orderId);
 			copiedOrderId = orderId;
-			toast.success('Réf ID kopye nan presse-papier !');
+			toast.success(t.copyToast);
 			setTimeout(() => {
 				if (copiedOrderId === orderId) copiedOrderId = null;
 			}, 2000);
@@ -52,7 +163,7 @@
 
 	$effect(() => {
 		if (!authState.loading && !authState.user) {
-			goto('/');
+			goto(getHref('/'));
 		}
 	});
 
@@ -108,7 +219,7 @@
 
 	function formatDate(isoString: string): string {
 		try {
-			return new Date(isoString).toLocaleDateString('fr-FR', {
+			return new Date(isoString).toLocaleDateString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR', {
 				day: 'numeric',
 				month: 'long',
 				year: 'numeric',
@@ -127,26 +238,26 @@
 			case 'natcash':
 				return 'Natcash';
 			case 'card':
-				return 'Carte Bancaire';
+				return currentLang === 'ht' ? 'Kat bankè' : 'Carte Bancaire';
 			case 'free':
-				return 'Gratuit';
+				return currentLang === 'ht' ? 'Gratis' : 'Gratuit';
 			case 'admin':
-				return 'Accès Manuel';
+				return currentLang === 'ht' ? 'Aksè Manwèl' : 'Accès Manuel';
 			default:
-				return provider || 'Paiement';
+				return provider || (currentLang === 'ht' ? 'Peman' : 'Paiement');
 		}
 	}
 
 	function getProductTypeLabel(type: string): string {
 		switch (type) {
 			case 'course':
-				return 'Formation vidéo';
+				return t.courseType;
 			case 'ebook':
-				return 'Ebook PDF';
+				return t.ebookType;
 			case 'coaching':
-				return 'Session Coaching 1:1';
+				return t.coachingType;
 			default:
-				return 'Produit digital';
+				return t.digitalType;
 		}
 	}
 
@@ -167,8 +278,8 @@
 </script>
 
 <svelte:head>
-	<title>Mes Transactions · DJR Akademi</title>
-	<meta name="description" content="Historique complet de vos commandes, reçus et factures de paiement sur DJR Akademi." />
+	<title>{t.pageTitle}</title>
+	<meta name="description" content={t.metaDesc} />
 </svelte:head>
 
 <div class="min-h-screen bg-zinc-50 flex flex-col font-sans text-zinc-900">
@@ -178,7 +289,7 @@
 		<div class="flex-1 flex items-center justify-center py-20">
 			<div class="text-center space-y-3">
 				<span class="loading loading-spinner text-amber-500 loading-lg"></span>
-				<p class="text-xs font-semibold text-zinc-500">Chargement de vos transactions...</p>
+				<p class="text-xs font-semibold text-zinc-500">{t.loadingMsg}</p>
 			</div>
 		</div>
 	{:else if authState.user}
@@ -187,11 +298,11 @@
 
 				<!-- Back navigation button -->
 				<a
-					href="/dashboard"
+					href={getHref('/dashboard')}
 					class="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-950 transition-colors"
 				>
 					<ChevronLeft size={16} />
-					Tounen nan espas mwen
+					{t.backToSpace}
 				</a>
 
 				<!-- Page Header Banner -->
@@ -201,9 +312,9 @@
 							<Receipt size={26} />
 						</div>
 						<div class="space-y-1">
-							<h1 class="text-2xl sm:text-3xl font-black tracking-tight">Tranzaksyon Mwen Yo</h1>
+							<h1 class="text-2xl sm:text-3xl font-black tracking-tight">{t.title}</h1>
 							<p class="text-white/60 text-xs font-medium">
-								Istwa kòmand, faktir ak resi peman ou yo.
+								{t.subtitle}
 							</p>
 						</div>
 					</div>
@@ -216,15 +327,15 @@
 							<ShieldCheck size={18} />
 						</div>
 						<div>
-							<p class="font-bold text-zinc-900 text-sm">Ou gen yon peman ki pa parèt oswa aksè ki pa debloke ?</p>
-							<p class="text-zinc-500 text-xs">Sèvi ak paj verifikasyon an pou chèche epi debloke kòmand ou a imedyatman.</p>
+							<p class="font-bold text-zinc-900 text-sm">{t.verifyTitle}</p>
+							<p class="text-zinc-500 text-xs">{t.verifySub}</p>
 						</div>
 					</div>
 					<a
-						href="/verify"
+						href={getHref('/verify')}
 						class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shrink-0 shadow-sm"
 					>
-						<span>Verifye peman m lan</span>
+						<span>{t.verifyBtn}</span>
 						<ArrowRight size={14} class="text-amber-400" />
 					</a>
 				</div>
@@ -236,7 +347,7 @@
 						<Search size={18} class="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
 						<input
 							type="text"
-							placeholder="Chèche pa pwodui oswa ID tranzaksyon..."
+							placeholder={t.searchPlaceholder}
 							bind:value={searchQuery}
 							class="w-full pl-11 pr-4 py-3 bg-white border border-zinc-200/80 rounded-2xl text-xs font-medium focus:outline-none focus:border-zinc-950 shadow-2xs transition-colors"
 						/>
@@ -249,21 +360,21 @@
 							class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap {statusFilter === 'all' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'}"
 							onclick={() => (statusFilter = 'all')}
 						>
-							Tout ({orders.length})
+							{t.filterAll} ({orders.length})
 						</button>
 						<button
 							type="button"
 							class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap {statusFilter === 'paid' ? 'bg-white text-emerald-700 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'}"
 							onclick={() => (statusFilter = 'paid')}
 						>
-							Peye ({orders.filter(o => o.status === 'paid').length})
+							{t.filterPaid} ({orders.filter(o => o.status === 'paid').length})
 						</button>
 						<button
 							type="button"
 							class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap {statusFilter === 'pending' ? 'bg-white text-amber-700 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'}"
 							onclick={() => (statusFilter = 'pending')}
 						>
-							Enatant ({orders.filter(o => o.status === 'pending').length})
+							{t.filterPending} ({orders.filter(o => o.status === 'pending').length})
 						</button>
 					</div>
 				</div>
@@ -273,9 +384,9 @@
 					<div class="flex items-center justify-between pb-4 border-b border-zinc-100">
 						<h2 class="text-base font-black text-zinc-950 flex items-center gap-2">
 							<CreditCard size={18} class="text-amber-500" />
-							Istwa detaye peman yo
+							{t.historyTitle}
 						</h2>
-						<span class="text-xs text-zinc-400 font-mono">Lajan ofisyèl : HTG / USD</span>
+						<span class="text-xs text-zinc-400 font-mono">{t.currencyNote}</span>
 					</div>
 
 					{#if filteredOrders.length === 0}
@@ -285,21 +396,21 @@
 								<ShoppingBag size={28} />
 							</div>
 							<div class="space-y-1">
-								<h3 class="font-black text-base text-zinc-950">Pa gen okenn tranzaksyon ki jwenn</h3>
+								<h3 class="font-black text-base text-zinc-950">{t.emptyTitle}</h3>
 								<p class="text-xs text-zinc-500">
 									{#if searchQuery || statusFilter !== 'all'}
-										Pa gen okenn rezilta ki koresponn ak chèch ou an.
+										{t.emptySubSearch}
 									{:else}
-										Ou poko fè okenn achte pou kounye a. Eksplore fòmasyon ak ebook nou yo pou kòmanse !
+										{t.emptySubDefault}
 									{/if}
 								</p>
 							</div>
 							<a
-								href="/catalogue"
+								href={getHref('/catalogue')}
 								class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-zinc-950 text-white font-bold text-xs hover:bg-zinc-800 transition-colors shadow-sm"
 							>
 								<Sparkles size={14} class="text-amber-400" />
-								Eksplore katalòg la
+								{t.exploreCatalog}
 							</a>
 						</div>
 					{:else}
@@ -319,23 +430,23 @@
 
 												{#if order.status === 'paid'}
 													<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase rounded-md inline-flex items-center gap-1">
-														<CheckCircle2 size={10} /> Peye
+														<CheckCircle2 size={10} /> {t.statusPaid}
 													</span>
 												{:else if order.status === 'pending'}
 													<span class="px-2.5 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-extrabold uppercase rounded-md inline-flex items-center gap-1">
-														<Clock size={10} /> Enatant
+														<Clock size={10} /> {t.statusPending}
 													</span>
 												{:else}
 													<span class="px-2.5 py-0.5 bg-red-100 text-red-800 text-[10px] font-extrabold uppercase rounded-md inline-flex items-center gap-1">
-														<AlertCircle size={10} /> Echwe
+														<AlertCircle size={10} /> {t.statusFailed}
 													</span>
 												{/if}
 											</div>
 
 											<p class="text-xs text-zinc-500 font-medium flex flex-wrap items-center gap-2">
-												<span>Fòm : <strong class="text-zinc-700">{getProductTypeLabel(order.productType)}</strong></span>
+												<span>{t.productTypeLabel} <strong class="text-zinc-700">{getProductTypeLabel(order.productType)}</strong></span>
 												<span>·</span>
-												<span>Fason : <strong class="text-zinc-700">{getProviderLabel(order.paymentProvider)}</strong></span>
+												<span>{t.providerLabel} <strong class="text-zinc-700">{getProviderLabel(order.paymentProvider)}</strong></span>
 											</p>
 
 											<p class="text-[11px] text-zinc-400 font-mono flex items-center gap-1.5">
@@ -360,7 +471,7 @@
 									<div class="flex flex-col sm:items-end justify-between sm:justify-center gap-2.5 pt-3 sm:pt-0 border-t sm:border-t-0 border-zinc-100 shrink-0">
 										<div class="text-left sm:text-right">
 											<span class="block text-base sm:text-lg font-black text-zinc-950 font-mono">
-												{order.amount.toLocaleString('fr-FR')} {order.currency}
+												{order.amount.toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR')} {order.currency}
 											</span>
 										</div>
 
@@ -372,31 +483,31 @@
 													class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] rounded-xl transition-colors"
 												>
 													<FileText size={12} />
-													<span>Resi PDF</span>
+													<span>{t.pdfReceipt}</span>
 												</button>
 
 												{#if order.productType === 'course'}
 													<a
-														href="/learn/{order.productId}"
+														href={getHref(`/learn/${order.productId}`)}
 														class="inline-flex items-center gap-1 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-[11px] rounded-xl transition-colors"
 													>
-														<span>Swiv</span>
+														<span>{t.watchBtn}</span>
 														<ArrowRight size={12} />
 													</a>
 												{:else if order.productType === 'ebook'}
 													<a
-														href="/ebooks/{order.productId}"
+														href={getHref(`/ebooks/${order.productId}`)}
 														class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-black font-bold text-[11px] rounded-xl transition-colors"
 													>
-														<span>Ebook</span>
+														<span>{t.ebookBtn}</span>
 														<Download size={12} />
 													</a>
 												{:else}
 													<a
-														href="/profile"
+														href={getHref('/profile')}
 														class="inline-flex items-center gap-1 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-[11px] rounded-xl transition-colors"
 													>
-														<span>Sesyon</span>
+														<span>{t.sessionBtn}</span>
 														<ExternalLink size={12} />
 													</a>
 												{/if}
@@ -424,7 +535,7 @@
 			<div class="p-6 bg-zinc-950 text-white flex items-center justify-between print:hidden">
 				<div class="flex items-center gap-2">
 					<Receipt size={20} class="text-amber-400" />
-					<h3 class="font-black text-base">Resi Ofisyèl Peman</h3>
+					<h3 class="font-black text-base">{t.receiptModalTitle}</h3>
 				</div>
 				<button
 					type="button"
@@ -441,7 +552,7 @@
 				<div class="flex items-start justify-between border-b border-zinc-200 pb-6">
 					<div>
 						<h2 class="text-2xl font-black tracking-tight text-zinc-950">DJR AKADEMI</h2>
-						<p class="text-xs text-zinc-500 mt-0.5">Platfòm aprantisaj ak swivi</p>
+						<p class="text-xs text-zinc-500 mt-0.5">{t.brandSub}</p>
 						<p class="text-[11px] text-zinc-400 font-mono mt-1">contact@djrakademi.net · Haïti</p>
 					</div>
 					<div class="text-right">
@@ -457,15 +568,15 @@
 				<!-- Customer & Transaction Info -->
 				<div class="grid grid-cols-2 gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-200/80 text-xs">
 					<div class="space-y-1">
-						<span class="text-[10px] font-bold uppercase text-zinc-400 block">Faktire bay</span>
+						<span class="text-[10px] font-bold uppercase text-zinc-400 block">{t.billedTo}</span>
 						<p class="font-bold text-zinc-950">{selectedOrderForInvoice.customerName}</p>
 						<p class="text-zinc-500 font-mono text-[11px]">{selectedOrderForInvoice.customerEmail}</p>
 					</div>
 					<div class="space-y-1 text-right">
-						<span class="text-[10px] font-bold uppercase text-zinc-400 block">Mwayen peman</span>
+						<span class="text-[10px] font-bold uppercase text-zinc-400 block">{t.paymentMethod}</span>
 						<p class="font-bold text-zinc-950">{getProviderLabel(selectedOrderForInvoice.paymentProvider)}</p>
 						<p class="text-emerald-700 font-bold uppercase text-[11px]">
-							{selectedOrderForInvoice.status === 'paid' ? 'Sitiyasyon : Peye ✓' : `Sitiyasyon : ${selectedOrderForInvoice.status}`}
+							{selectedOrderForInvoice.status === 'paid' ? t.statusPaidTag : `Sitiyasyon : ${selectedOrderForInvoice.status}`}
 						</p>
 					</div>
 				</div>
@@ -475,9 +586,9 @@
 					<table class="w-full text-xs text-left">
 						<thead class="bg-zinc-100 text-zinc-500 font-bold uppercase text-[10px]">
 							<tr>
-								<th class="p-3.5">Deskripsyon pwodui a</th>
-								<th class="p-3.5 text-center">Kalite</th>
-								<th class="p-3.5 text-right">Montan</th>
+								<th class="p-3.5">{t.productDescHeader}</th>
+								<th class="p-3.5 text-center">{t.typeHeader}</th>
+								<th class="p-3.5 text-right">{t.amountHeader}</th>
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-zinc-100 font-medium">
@@ -485,7 +596,7 @@
 								<td class="p-3.5 font-bold text-zinc-950">{selectedOrderForInvoice.productTitle}</td>
 								<td class="p-3.5 text-center text-zinc-500">{getProductTypeLabel(selectedOrderForInvoice.productType)}</td>
 								<td class="p-3.5 text-right font-mono font-bold text-zinc-950">
-									{selectedOrderForInvoice.amount.toLocaleString('fr-FR')} {selectedOrderForInvoice.currency}
+									{selectedOrderForInvoice.amount.toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR')} {selectedOrderForInvoice.currency}
 								</td>
 							</tr>
 						</tbody>
@@ -496,19 +607,19 @@
 				<div class="flex justify-end pt-2">
 					<div class="w-64 space-y-2 text-right">
 						<div class="flex justify-between text-xs text-zinc-500">
-							<span>Sous-total :</span>
+							<span>{t.subtotal}</span>
 							<span class="font-mono font-bold text-zinc-950">
-								{selectedOrderForInvoice.amount.toLocaleString('fr-FR')} {selectedOrderForInvoice.currency}
+								{selectedOrderForInvoice.amount.toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR')} {selectedOrderForInvoice.currency}
 							</span>
 						</div>
 						<div class="flex justify-between text-xs text-zinc-500">
-							<span>Frais tretman :</span>
+							<span>{t.fees}</span>
 							<span class="font-mono font-bold text-emerald-600">0 {selectedOrderForInvoice.currency}</span>
 						</div>
 						<div class="flex justify-between text-base font-black text-zinc-950 pt-2 border-t border-zinc-200">
-							<span>Montan Total :</span>
+							<span>{t.totalAmount}</span>
 							<span class="font-mono text-amber-600">
-								{selectedOrderForInvoice.amount.toLocaleString('fr-FR')} {selectedOrderForInvoice.currency}
+								{selectedOrderForInvoice.amount.toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR')} {selectedOrderForInvoice.currency}
 							</span>
 						</div>
 					</div>
@@ -516,8 +627,8 @@
 
 				<!-- Footer Receipt Note -->
 				<div class="pt-6 border-t border-zinc-200 text-center text-[10px] text-zinc-400 space-y-1">
-					<p class="font-bold">Mèsi pou konfyans ou nan DJR Akademi !</p>
-					<p>Resi elektwonik sa a se yon prèv achte ofisyèl.</p>
+					<p class="font-bold">{t.receiptThankYou}</p>
+					<p>{t.receiptElectronicNote}</p>
 				</div>
 			</div>
 
@@ -528,7 +639,7 @@
 					onclick={closeInvoiceModal}
 					class="px-4 py-2 text-xs font-bold text-zinc-600 hover:text-zinc-950 transition-colors"
 				>
-					Fèmen
+					{t.close}
 				</button>
 				<button
 					type="button"
@@ -536,7 +647,7 @@
 					class="px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl flex items-center gap-2 transition-colors shadow-sm"
 				>
 					<Printer size={14} />
-					<span>Enprime / Sove an PDF</span>
+					<span>{t.printSavePdf}</span>
 				</button>
 			</div>
 		</div>

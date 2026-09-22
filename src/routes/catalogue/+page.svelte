@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import BundleCard from '$lib/components/BundleCard.svelte';
@@ -15,13 +16,96 @@
 		FileText,
 		CalendarCheck,
 		Search,
-		Play,
 		Download,
-		Users,
 		ArrowRight,
 		ChevronDown,
 		ChevronUp,
 	} from 'lucide-svelte';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	const i18n = {
+		fr: {
+			metaTitle: "Catalogue complet · DJR Akademi",
+			metaDesc: "Explorez toutes nos formations vidéo, nos livres électroniques PDF et nos consultations individuelles sur DJR Akademi.",
+			emptyTitle: (q: string) => `Aucun résultat pour « ${q} »`,
+			emptyDesc: "Essayez un autre mot-clé pour trouver ce que vous cherchez.",
+			emptyReset: "Effacer la recherche",
+			
+			sec01Kicker: "01 · Apprenez en vidéo",
+			sec01Title: "Formations vidéo",
+			sec01Desc: "Des programmes structurés à suivre à votre propre rythme.",
+			sec01Type: "Vidéo",
+			sec01Action: "Voir la formation",
+			sec01More: (n: number) => `Voir ${n} autre${n > 1 ? 's' : ''} formation${n > 1 ? 's' : ''}`,
+			
+			sec02Kicker: "02 · Lisez et appliquez",
+			sec02Title: "Livres électroniques & Guides PDF",
+			sec02Desc: "Des ressources pratiques à conserver et consulter à tout moment.",
+			sec02Type: "PDF",
+			sec02Action: "Lire le livre",
+			sec02More: (n: number) => `Voir ${n} autre${n > 1 ? 's' : ''} livre${n > 1 ? 's' : ''} électronique${n > 1 ? 's' : ''}`,
+			
+			sec03Kicker: "03 · Plus de valeur",
+			sec03Title: "Offres groupées",
+			sec03Desc: "Plusieurs ressources réunies dans une seule offre à tarif préférentiel.",
+			sec03Link: "Toutes les offres",
+			
+			sec04Kicker: "04 · Accompagnement",
+			sec04Title: "Consultations individuelles",
+			sec04Desc: "Un espace personnel pour obtenir des conseils et des réponses claires.",
+			sec04Action: "Réserver une consultation",
+			sec04More: (n: number) => `Voir ${n} autre${n > 1 ? 's' : ''} consultation${n > 1 ? 's' : ''}`,
+
+			freeLabel: "Gratuit",
+			showLess: "Voir moins"
+		},
+		ht: {
+			metaTitle: "Katalòg konplè · DJR Akademi",
+			metaDesc: "Eksplore tout fòmasyon videyo, liv dijital ak sèvis konsiltasyon endividyèl nou yo sou DJR Akademi.",
+			emptyTitle: (q: string) => `Pa gen rezilta pou “${q}”`,
+			emptyDesc: "Eseye yon lòt mo pou jwenn sa w ap chèche a.",
+			emptyReset: "Efase rechèch la",
+			
+			sec01Kicker: "01 · Aprann ak videyo",
+			sec01Title: "Fòmasyon videyo",
+			sec01Desc: "Pwogram byen estriktire ou ka suiv nan ritm pa w.",
+			sec01Type: "Videyo",
+			sec01Action: "Gade kou a",
+			sec01More: (n: number) => `Gade ${n} lòt fòmasyon`,
+			
+			sec02Kicker: "02 · Li epi aplike",
+			sec02Title: "Liv dijital ak gid PDF",
+			sec02Desc: "Resous pratik pou w konsève epi konsilte nenpòt ki lè.",
+			sec02Type: "PDF",
+			sec02Action: "Li gid la",
+			sec02More: (n: number) => `Gade ${n} lòt liv dijital`,
+			
+			sec03Kicker: "03 · Plis valè",
+			sec03Title: "Pakèt resous",
+			sec03Desc: "Plizyè resous ansanm nan yon sèl acha.",
+			sec03Link: "Tout pakèt yo",
+			
+			sec04Kicker: "04 · Akonpayman",
+			sec04Title: "Konsiltasyon endividyèl",
+			sec04Desc: "Yon espas pèsonèl pou jwenn direksyon ak repons klè.",
+			sec04Action: "Rezève yon konsiltasyon",
+			sec04More: (n: number) => `Gade ${n} lòt sèvis`,
+
+			freeLabel: "Gratis",
+			showLess: "Gade mwens"
+		}
+	};
+
+	let t = $derived(i18n[currentLang]);
+
+	function getHref(path: string): string {
+		if (currentLang !== 'ht') return path;
+		const [pathname, search] = path.split('?');
+		const params = new URLSearchParams(search || '');
+		params.set('lang', 'ht');
+		return `${pathname}?${params.toString()}`;
+	}
 
 	let searchQuery = $state('');
 
@@ -80,54 +164,27 @@
 	const displayedEbooks = $derived(filteredEbooks.slice(0, ebooksLimit));
 	const displayedCoaching = $derived(filteredCoaching.slice(0, coachingLimit));
 
-
 	const totalFiltered = $derived(
 		filteredCourses.length + filteredEbooks.length + filteredBundles.length + filteredCoaching.length
 	);
 </script>
 
 <svelte:head>
-	<title>Catalogue complet · DJR Akademi</title>
-	<meta
-		name="description"
-		content="Explorez toutes nos formations vidéo, nos ebooks PDF et nos offres de coaching individuel sur DJR Akademi."
-	/>
+	<title>{t.metaTitle}</title>
+	<meta name="description" content={t.metaDesc} />
 </svelte:head>
 
 <div class="catalogue-page">
 	<PublicHeader />
 
 	<main class="catalogue-main">
-		<section class="catalogue-hero" aria-labelledby="catalogue-title">
-			<div class="catalogue-shell catalogue-hero-inner">
-				<div class="catalogue-intro">
-					<span class="catalogue-eyebrow">DJR Akademi · Katalòg</span>
-					<h1 id="catalogue-title">Chwazi resous ki ka fè w avanse.</h1>
-					<p>Fòmasyon videyo, gid PDF, bundles ak coaching—tout òganize pou w jwenn sa w bezwen fasil.</p>
-				</div>
-
-				<label class="catalogue-search" for="catalogue-search">
-					<Search size={20} aria-hidden="true" />
-					<input id="catalogue-search" type="search" bind:value={searchQuery} placeholder="Chèche yon fòmasyon, ebook oswa sèvis..." />
-					<span>{totalFiltered} rezilta</span>
-				</label>
-
-				<nav class="catalogue-nav" aria-label="Kategori katalòg">
-					<a href="#sec-courses">Fòmasyon <span>{filteredCourses.length}</span></a>
-					<a href="#sec-ebooks">Ebooks <span>{filteredEbooks.length}</span></a>
-					<a href="#sec-bundles">Bundles <span>{filteredBundles.length}</span></a>
-					<a href="#sec-coaching">Coaching <span>{filteredCoaching.length}</span></a>
-				</nav>
-			</div>
-		</section>
-
 		<div class="catalogue-shell catalogue-content">
 			{#if totalFiltered === 0}
 				<div class="catalogue-empty">
 					<span><Search size={26} /></span>
-					<h2>Pa gen rezilta pou “{searchQuery}”</h2>
-					<p>Eseye yon lòt mo pou jwenn sa w ap chèche a.</p>
-					<button type="button" onclick={() => (searchQuery = '')}>Efase rechèch la</button>
+					<h2>{t.emptyTitle(searchQuery)}</h2>
+					<p>{t.emptyDesc}</p>
+					<button type="button" onclick={() => (searchQuery = '')}>{t.emptyReset}</button>
 				</div>
 			{/if}
 
@@ -135,23 +192,22 @@
 				<section id="sec-courses" class="catalogue-section">
 					<div class="section-heading">
 						<div class="section-heading-copy">
-							<span class="section-icon"><BookOpen size={17} /></span>
-							<div><span>01 · Aprann ak videyo</span><h2>Fòmasyon videyo</h2><p>Pwogram byen estriktire ou ka suiv nan ritm pa w.</p></div>
+							<div><span>{t.sec01Kicker}</span><h2>{t.sec01Title}</h2><p>{t.sec01Desc}</p></div>
 						</div>
 						<span class="section-count">{displayedCourses.length} / {filteredCourses.length}</span>
 					</div>
 
 					<div class="catalogue-grid course-grid">
 						{#each displayedCourses as course (course.id)}
-							<a href="/cours/{course.id}" class="catalogue-card course-card">
+							<a href={getHref(`/cours/${course.id}`)} class="catalogue-card course-card">
 								<div class="card-media course-media">
 									{#if course.cover}<img src={course.cover} alt={course.title} loading="lazy" />{:else}<div class="media-placeholder"><BookOpen size={30} /></div>{/if}
-									<span class="media-type">Videyo</span>
+									<span class="media-type">{t.sec01Type}</span>
 								</div>
 								<div class="card-body">
 									<h3>{course.title}</h3>
 									<p>{course.description}</p>
-									<div class="card-footer"><strong>{course.isFree || course.price === 0 ? 'Gratis' : formatPublicPrice(course.price, course.priceUsd)}</strong><span>Gade kou a <ArrowRight size={14} /></span></div>
+									<div class="card-footer"><strong>{course.isFree || course.price === 0 ? t.freeLabel : formatPublicPrice(course.price, course.priceUsd)}</strong><span>{t.sec01Action} <ArrowRight size={14} /></span></div>
 								</div>
 							</a>
 						{/each}
@@ -160,7 +216,7 @@
 					{#if filteredCourses.length > 10}
 						<div class="section-more">
 							<button type="button" onclick={() => (coursesLimit = coursesLimit === 10 ? filteredCourses.length : 10)}>
-								{coursesLimit === 10 ? `Gade ${filteredCourses.length - 10} lòt fòmasyon` : 'Gade mwens'}
+								{coursesLimit === 10 ? t.sec01More(filteredCourses.length - 10) : t.showLess}
 								{#if coursesLimit === 10}<ChevronDown size={16} />{:else}<ChevronUp size={16} />{/if}
 							</button>
 						</div>
@@ -172,29 +228,28 @@
 				<section id="sec-ebooks" class="catalogue-section">
 					<div class="section-heading">
 						<div class="section-heading-copy">
-							<span class="section-icon"><FileText size={17} /></span>
-							<div><span>02 · Li epi aplike</span><h2>Ebook ak gid PDF</h2><p>Resous pratik pou w konsève epi konsilte nenpòt ki lè.</p></div>
+							<div><span>{t.sec02Kicker}</span><h2>{t.sec02Title}</h2><p>{t.sec02Desc}</p></div>
 						</div>
 						<span class="section-count">{displayedEbooks.length} / {filteredEbooks.length}</span>
 					</div>
 
 					<div class="catalogue-grid ebook-grid">
 						{#each displayedEbooks as ebook (ebook.id)}
-							<a href="/ebooks/{ebook.id}" class="catalogue-card ebook-card">
+							<a href={getHref(`/ebooks/${ebook.id}`)} class="catalogue-card ebook-card">
 								<div class="card-media ebook-media">
 									{#if ebook.cover}<img src={ebook.cover} alt={ebook.title} loading="lazy" />{:else}<div class="media-placeholder"><FileText size={30} /></div>{/if}
-									<span class="media-type">PDF</span>
+									<span class="media-type">{t.sec02Type}</span>
 								</div>
 								<div class="card-body">
 									<h3>{ebook.title}</h3>
-									<div class="card-footer"><strong>{ebook.isFree || ebook.price === 0 ? 'Gratis' : formatPublicPrice(ebook.price, ebook.priceUsd)}</strong><span>Li gid la <ArrowRight size={14} /></span></div>
+									<div class="card-footer"><strong>{ebook.isFree || ebook.price === 0 ? t.freeLabel : formatPublicPrice(ebook.price, ebook.priceUsd)}</strong><span>{t.sec02Action} <ArrowRight size={14} /></span></div>
 								</div>
 							</a>
 						{/each}
 					</div>
 
 					{#if filteredEbooks.length > 10}
-						<div class="section-more"><button type="button" onclick={() => (ebooksLimit = ebooksLimit === 10 ? filteredEbooks.length : 10)}>{ebooksLimit === 10 ? `Gade ${filteredEbooks.length - 10} lòt ebook` : 'Gade mwens'}{#if ebooksLimit === 10}<ChevronDown size={16} />{:else}<ChevronUp size={16} />{/if}</button></div>
+						<div class="section-more"><button type="button" onclick={() => (ebooksLimit = ebooksLimit === 10 ? filteredEbooks.length : 10)}>{ebooksLimit === 10 ? t.sec02More(filteredEbooks.length - 10) : t.showLess}{#if ebooksLimit === 10}<ChevronDown size={16} />{:else}<ChevronUp size={16} />{/if}</button></div>
 					{/if}
 				</section>
 			{/if}
@@ -202,8 +257,8 @@
 			{#if filteredBundles.length > 0}
 				<section id="sec-bundles" class="catalogue-section">
 					<div class="section-heading">
-						<div class="section-heading-copy"><span class="section-icon"><Download size={17} /></span><div><span>03 · Plis valè</span><h2>Bundles espesyal</h2><p>Plizyè resous ansanm nan yon sèl acha.</p></div></div>
-						<a href="/bundles" class="section-link">Tout bundles yo <ArrowRight size={15} /></a>
+						<div class="section-heading-copy"><div><span>{t.sec03Kicker}</span><h2>{t.sec03Title}</h2><p>{t.sec03Desc}</p></div></div>
+						<a href={getHref('/bundles')} class="section-link">{t.sec03Link} <ArrowRight size={15} /></a>
 					</div>
 					<div class="catalogue-grid bundle-grid">{#each filteredBundles as bundle (bundle.id)}<BundleCard {bundle} />{/each}</div>
 				</section>
@@ -212,22 +267,22 @@
 			{#if filteredCoaching.length > 0}
 				<section id="sec-coaching" class="catalogue-section">
 					<div class="section-heading">
-						<div class="section-heading-copy"><span class="section-icon"><CalendarCheck size={17} /></span><div><span>04 · Akonpayman</span><h2>Coaching 1:1</h2><p>Yon espas pèsonèl pou jwenn direksyon ak repons klè.</p></div></div>
+						<div class="section-heading-copy"><div><span>{t.sec04Kicker}</span><h2>{t.sec04Title}</h2><p>{t.sec04Desc}</p></div></div>
 						<span class="section-count">{displayedCoaching.length} / {filteredCoaching.length}</span>
 					</div>
 
 					<div class="catalogue-grid coaching-grid">
 						{#each displayedCoaching as coaching (coaching.id)}
-							<a href="/coaching/{coaching.slug}" class="coaching-card">
+							<a href={getHref(`/coaching/${coaching.slug}`)} class="coaching-card">
 								<div class="coaching-card-top"><span><CalendarCheck size={20} /></span><small>{coaching.durationMinutes} min</small></div>
 								<h3>{coaching.title}</h3><p>{coaching.description}</p>
-								<div class="coaching-card-footer"><strong>{coaching.isFree ? 'Gratis' : formatPublicPrice(coaching.price, coaching.priceUsd)}</strong><span><ArrowRight size={17} /></span></div>
+								<div class="coaching-card-footer"><strong>{coaching.isFree ? t.freeLabel : formatPublicPrice(coaching.price, coaching.priceUsd)}</strong><span><ArrowRight size={17} /></span></div>
 							</a>
 						{/each}
 					</div>
 
 					{#if filteredCoaching.length > 10}
-						<div class="section-more"><button type="button" onclick={() => (coachingLimit = coachingLimit === 10 ? filteredCoaching.length : 10)}>{coachingLimit === 10 ? `Gade ${filteredCoaching.length - 10} lòt sèvis` : 'Gade mwens'}{#if coachingLimit === 10}<ChevronDown size={16} />{:else}<ChevronUp size={16} />{/if}</button></div>
+						<div class="section-more"><button type="button" onclick={() => (coachingLimit = coachingLimit === 10 ? filteredCoaching.length : 10)}>{coachingLimit === 10 ? t.sec04More(filteredCoaching.length - 10) : t.showLess}{#if coachingLimit === 10}<ChevronDown size={16} />{:else}<ChevronUp size={16} />{/if}</button></div>
 					{/if}
 				</section>
 			{/if}
@@ -255,127 +310,7 @@
 		margin: 0 auto;
 	}
 
-	.catalogue-hero {
-		position: relative;
-		overflow: hidden;
-		border-top: 1px solid rgba(255, 255, 255, 0.08);
-		background:
-			radial-gradient(circle at 78% 18%, rgba(226, 169, 54, 0.16), transparent 30%),
-			#11110f;
-		color: #f8f4ed;
-	}
 
-	.catalogue-hero-inner { padding-top: 76px; }
-
-	.catalogue-intro { max-width: 760px; }
-
-	.catalogue-eyebrow {
-		display: block;
-		margin-bottom: 14px;
-		color: #e1ac3b;
-		font-size: 12px;
-		font-weight: 800;
-		letter-spacing: 0.18em;
-		text-transform: uppercase;
-	}
-
-	.catalogue-intro h1 {
-		margin: 0;
-		font-family: Georgia, 'Times New Roman', serif;
-		font-size: clamp(44px, 6vw, 76px);
-		font-weight: 700;
-		letter-spacing: -0.048em;
-		line-height: 0.98;
-	}
-
-	.catalogue-intro p {
-		max-width: 650px;
-		margin: 22px 0 0;
-		color: rgba(248, 244, 237, 0.62);
-		font-size: 16px;
-		line-height: 1.65;
-	}
-
-	.catalogue-search {
-		display: grid;
-		min-height: 62px;
-		align-items: center;
-		grid-template-columns: auto minmax(0, 1fr) auto;
-		gap: 14px;
-		max-width: 820px;
-		margin-top: 38px;
-		padding: 0 20px;
-		border: 1px solid rgba(255, 255, 255, 0.2);
-		background: rgba(0, 0, 0, 0.28);
-		color: rgba(255, 255, 255, 0.58);
-		transition: border-color 180ms ease, background-color 180ms ease;
-	}
-
-	.catalogue-search:focus-within {
-		border-color: #e1ac3b;
-		background: rgba(0, 0, 0, 0.42);
-	}
-
-	.catalogue-search input {
-		width: 100%;
-		border: 0;
-		outline: 0;
-		background: transparent;
-		color: #fff;
-		font-size: 15px;
-	}
-
-	.catalogue-search input::placeholder { color: rgba(255, 255, 255, 0.4); }
-
-	.catalogue-search > span {
-		padding-left: 16px;
-		border-left: 1px solid rgba(255, 255, 255, 0.16);
-		color: #e8c36e;
-		font-size: 12px;
-		font-weight: 800;
-		white-space: nowrap;
-	}
-
-	.catalogue-nav {
-		display: flex;
-		gap: 2px;
-		margin-top: 58px;
-		overflow-x: auto;
-		scrollbar-width: none;
-	}
-
-	.catalogue-nav::-webkit-scrollbar { display: none; }
-
-	.catalogue-nav a {
-		display: inline-flex;
-		min-height: 54px;
-		align-items: center;
-		gap: 10px;
-		padding: 0 22px;
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		border-bottom: 0;
-		color: rgba(255, 255, 255, 0.7);
-		font-size: 13px;
-		font-weight: 750;
-		white-space: nowrap;
-		transition: color 180ms ease, background-color 180ms ease;
-	}
-
-	.catalogue-nav a:hover {
-		background: rgba(255, 255, 255, 0.07);
-		color: #fff;
-	}
-
-	.catalogue-nav a span {
-		display: grid;
-		min-width: 24px;
-		height: 24px;
-		place-items: center;
-		border-radius: 999px;
-		background: rgba(225, 172, 59, 0.14);
-		color: #e8c36e;
-		font-size: 10px;
-	}
 
 	.catalogue-content { padding: 86px 0 100px; }
 
@@ -403,15 +338,7 @@
 		gap: 16px;
 	}
 
-	.section-icon {
-		display: grid;
-		width: 42px;
-		height: 42px;
-		flex: 0 0 auto;
-		place-items: center;
-		background: #171713;
-		color: #e2ad3c;
-	}
+
 
 	.section-heading-copy > div > span {
 		display: block;
@@ -697,19 +624,11 @@
 
 	@media (max-width: 700px) {
 		.catalogue-shell { width: min(100% - 32px, 1280px); }
-		.catalogue-hero-inner { padding-top: 54px; }
-		.catalogue-intro h1 { font-size: clamp(42px, 13vw, 58px); }
-		.catalogue-intro p { font-size: 14px; }
-		.catalogue-search { grid-template-columns: auto minmax(0, 1fr); margin-top: 30px; padding: 0 16px; }
-		.catalogue-search > span { display: none; }
-		.catalogue-nav { margin-top: 42px; margin-right: -16px; }
-		.catalogue-nav a { min-height: 50px; padding: 0 17px; }
 		.catalogue-content { padding: 62px 0 76px; }
 		.catalogue-section + .catalogue-section { margin-top: 66px; padding-top: 66px; }
 		.section-heading { align-items: flex-start; }
 		.section-count { display: none; }
 		.section-heading-copy { gap: 12px; }
-		.section-icon { width: 38px; height: 38px; }
 		.section-heading h2 { font-size: 30px; }
 		.course-grid, .bundle-grid, .coaching-grid { grid-template-columns: 1fr; }
 		.ebook-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }

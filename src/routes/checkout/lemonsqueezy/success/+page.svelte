@@ -35,6 +35,109 @@
 		paidAt?: string;
 	}
 
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	function getHref(path: string) {
+		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+	}
+
+	const i18n = {
+		fr: {
+			title: 'Confirmation Paiment Carte · DJR Akademi',
+			verifyingTitle: 'Vérification du paiement par carte (Lemon Squeezy)…',
+			verifyingDesc: 'Nous vérifions la confirmation de la transaction par carte.',
+			missingOrderIdMsg: 'Aucun numéro de commande trouvé dans le lien.',
+			missingBadge: 'Lien incomplet',
+			missingHeading: 'Aucun numéro de commande trouvé',
+			missingDesc: 'Cette page requiert un code de transaction pour afficher votre reçu. Si vous avez effectué un achat par carte, veuillez vérifier le lien dans votre e-mail de confirmation ou consulter vos transactions.',
+			viewTransactionsBtn: 'Consulter mes transactions',
+			goToDashboardBtn: 'Aller sur mon Espace',
+			verifyingBadge: 'Vérification Paiement Carte',
+			orderLabel: 'Commande #',
+			reverifyBtn: 'Re-vérifier mon accès maintenant',
+			reverifyingBtn: 'Re-vérification en cours…',
+			paidAlreadyQ: 'Paiement déjà débité ?',
+			paidAlreadyDesc: 'Si votre transaction est confirmée sur votre carte mais toujours indisponible, contactez notre support.',
+			contactSupportBtn: 'Support Client (Contact)',
+			cardConfirmedBadge: 'Paiement par Carte Confirmé (Lemon Squeezy)',
+			thanksOrderTitle: 'Merci pour votre commande !',
+			unlockedDesc: 'Votre transaction est confirmée dans le système. Votre accès est débloqué dans votre compte.',
+			typeCourse: 'Formation en ligne',
+			typeEbook: 'E-book PDF',
+			typeBundle: 'Bundle',
+			typeCoaching: 'Session Coaching',
+			customerLabel: 'Client :',
+			amountPaidLabel: 'Montant payé (USD)',
+			receiptDetailsTitle: 'Détails du reçu',
+			paymentStatusLabel: 'Statut du paiement',
+			paidStatusText: 'Payé ✓',
+			paymentMethodLabel: 'Moyen de paiement',
+			paymentMethodText: 'Lemon Squeezy (Carte)',
+			txDateLabel: 'Date de transaction',
+			currencyLabel: 'Devise',
+			followCourseNow: 'Suivre le cours maintenant',
+			followDownloadEbook: 'Consulter & Télécharger l\'E-book',
+			viewResourcesNow: 'Voir mes ressources',
+			viewBookingDetails: 'Voir les détails du rendez-vous',
+			viewAllTransactions: 'Voir toutes mes transactions',
+			printReceiptBtn: 'Imprimer le reçu',
+			cardQuestion: 'Une question concernant votre paiement par carte ?',
+			whatsappSupport: 'Support WhatsApp Coaching',
+			contactPageLink: 'Page Contact',
+			defaultErrorText: 'Le paiement par carte est toujours en cours de traitement. Si vous avez déjà payé, cliquez sur le bouton ci-dessous pour re-vérifier votre accès.',
+			verifyErrorText: 'Impossible de vérifier la transaction Lemon Squeezy.',
+			networkErrorText: 'Erreur réseau lors de la vérification du paiement Lemon Squeezy.'
+		},
+		ht: {
+			title: 'Konfimasyon Peman Kat · DJR Akademi',
+			verifyingTitle: 'N ap verifye peman pa kat la (Lemon Squeezy)…',
+			verifyingDesc: 'N ap verifye si w gen kou/ebook la deja oswa si tranzaksyon kat la konfime ak siksè.',
+			missingOrderIdMsg: 'Okenn nimewo kòmand pa jwenn nan lyen an.',
+			missingBadge: 'Lyen enkonplè',
+			missingHeading: 'Okenn nimewo kòmand pa jwenn',
+			missingDesc: 'Paj sa a mande yon kòd tranzaksyon pou l ka afiche resi w la. Si w te fè yon achte ak kat, tanpri verifye lyen ki nan imèl konfimasyon w la oswa konsilte istwa tranzaksyon w yo.',
+			viewTransactionsBtn: 'Konsilte tranzaksyon m yo',
+			goToDashboardBtn: 'Ale nan Espas mwen',
+			verifyingBadge: 'Verifikasyon Peman Kat',
+			orderLabel: 'Kòmand #',
+			reverifyBtn: 'Re-verifye aksè mwen an kounye a',
+			reverifyingBtn: 'N ap re-verifye...',
+			paidAlreadyQ: 'Peman an te debouse deja ?',
+			paidAlreadyDesc: 'Si tranzaksyon ou an konfime sou kat ou men li toujou endisponib, kontakte sipò nou an.',
+			contactSupportBtn: 'Sipò Kliyan (Contact)',
+			cardConfirmedBadge: 'Peman pa Kat Konfime (Lemon Squeezy)',
+			thanksOrderTitle: 'Mèsi pou kòmand ou an !',
+			unlockedDesc: 'Tranzaksyon ou an konfime nan sistèm nan. Aksè ou a debloke nèt nan kont ou.',
+			typeCourse: 'Fòmasyon sou entènèt',
+			typeEbook: 'E-book PDF',
+			typeBundle: 'Bundle',
+			typeCoaching: 'Sesyon Coaching',
+			customerLabel: 'Kliyan :',
+			amountPaidLabel: 'Montan peye (USD)',
+			receiptDetailsTitle: 'Detay resi an',
+			paymentStatusLabel: 'Sitiyasyon peman an',
+			paidStatusText: 'Peye ✓',
+			paymentMethodLabel: 'Mwayen peman',
+			paymentMethodText: 'Lemon Squeezy (Kat)',
+			txDateLabel: 'Dat tranzaksyon an',
+			currencyLabel: 'Deviz',
+			followCourseNow: 'Swiv kou a kounye a',
+			followDownloadEbook: 'Swiv & Telechaje E-book la',
+			viewResourcesNow: 'Gade resous mwen yo',
+			viewBookingDetails: 'Gade detay rendez-vous an',
+			viewAllTransactions: 'Gade tout tranzaksyon m yo',
+			printReceiptBtn: 'Enprime resi an',
+			cardQuestion: 'Ou gen yon kesyon sou peman pa kat ou an ?',
+			whatsappSupport: 'Sipò WhatsApp Coaching',
+			contactPageLink: 'Paj Kontakte n',
+			defaultErrorText: 'Peman pa kat la ap trete toujou oswa li pa t ka konfime. Si w te peye deja, klike sou bouton anba a pou n re-verifye aksè w la.',
+			verifyErrorText: 'Nou pa t ka verifye tranzaksyon Lemon Squeezy an.',
+			networkErrorText: 'Erè rezo lè n t ap verifye peman Lemon Squeezy an.'
+		}
+	};
+
+	let t = $derived(i18n[currentLang]);
+
 	let orderId = $state<string | null>(null);
 	let order = $state<LemonOrder | null>(null);
 	let loading = $state(true);
@@ -49,7 +152,7 @@
 			page.url.searchParams.get('id');
 
 		if (!orderId) {
-			error = 'Okenn nimewo kòmand pa jwenn nan lyen an.';
+			error = i18n[currentLang].missingOrderIdMsg;
 			loading = false;
 			return;
 		}
@@ -74,13 +177,13 @@
 			if (res.ok && data?.order) {
 				order = data.order;
 				if (data.order.status !== 'paid') {
-					error = 'Peman pa kat la ap trete toujou oswa li pa t ka konfime. Si w te peye deja, klike sou bouton anba a pou n re-verifye aksè w la.';
+					error = i18n[currentLang].defaultErrorText;
 				}
 			} else {
-				error = data?.message || 'Nou pa t ka verifye tranzaksyon Lemon Squeezy an.';
+				error = data?.message || i18n[currentLang].verifyErrorText;
 			}
 		} catch {
-			error = 'Erè rezo lè n t ap verifye peman Lemon Squeezy an.';
+			error = i18n[currentLang].networkErrorText;
 		} finally {
 			loading = false;
 			verifying = false;
@@ -93,7 +196,7 @@
 </script>
 
 <svelte:head>
-	<title>Konfimasyon Peman Kat · DJR Akademi</title>
+	<title>{t.title}</title>
 </svelte:head>
 
 <div class="min-h-[85vh] bg-base-200/50 py-12 px-4 sm:px-6 lg:px-8 grid place-items-center">
@@ -106,9 +209,9 @@
 					<Loader2 size={44} class="animate-spin text-amber-500 relative z-10" />
 				</div>
 				<div class="space-y-2">
-					<h1 class="text-xl sm:text-2xl font-bold text-base-content">N ap verifye peman pa kat la (Lemon Squeezy)…</h1>
+					<h1 class="text-xl sm:text-2xl font-bold text-base-content">{t.verifyingTitle}</h1>
 					<p class="text-xs sm:text-sm text-base-content/60 max-w-md mx-auto">
-						N ap verifye si w gen kou/ebook la deja oswa si tranzaksyon kat la konfime ak siksè.
+						{t.verifyingDesc}
 					</p>
 				</div>
 			</div>
@@ -124,22 +227,22 @@
 
 				<div class="space-y-2">
 					<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
-						Lyen enkonplè
+						{t.missingBadge}
 					</div>
-					<h1 class="text-2xl sm:text-3xl font-extrabold text-base-content tracking-tight">Okenn nimewo kòmand pa jwenn</h1>
+					<h1 class="text-2xl sm:text-3xl font-extrabold text-base-content tracking-tight">{t.missingHeading}</h1>
 					<p class="text-sm text-base-content/65 max-w-md mx-auto leading-relaxed">
-						Paj sa a mande yon kòd tranzaksyon pou l ka afiche resi w la. Si w te fè yon achte ak kat, tanpri verifye lyen ki nan imèl konfimasyon w la oswa konsilte istwa tranzaksyon w yo.
+						{t.missingDesc}
 					</p>
 				</div>
 
 				<div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-					<a href="/transactions" class="btn bg-amber-500 hover:bg-amber-600 text-black border-none btn-md rounded-xl font-bold px-6 gap-2 w-full sm:w-auto shadow-md">
+					<a href={getHref('/transactions')} class="btn bg-amber-500 hover:bg-amber-600 text-black border-none btn-md rounded-xl font-bold px-6 gap-2 w-full sm:w-auto shadow-md">
 						<Receipt size={18} />
-						Konsilte tranzaksyon m yo
+						{t.viewTransactionsBtn}
 					</a>
-					<a href="/dashboard" class="btn btn-outline btn-md rounded-xl font-bold px-6 gap-2 w-full sm:w-auto">
+					<a href={getHref('/dashboard')} class="btn btn-outline btn-md rounded-xl font-bold px-6 gap-2 w-full sm:w-auto">
 						<LayoutDashboard size={18} />
-						Ale nan Espas mwen
+						{t.goToDashboardBtn}
 					</a>
 				</div>
 			</div>
@@ -157,9 +260,9 @@
 
 				<div class="space-y-2">
 					<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
-						<RefreshCw size={12} class={verifying ? "animate-spin" : ""} /> Verifikasyon Peman Kat
+						<RefreshCw size={12} class={verifying ? "animate-spin" : ""} /> {t.verifyingBadge}
 					</div>
-					<h1 class="text-2xl sm:text-3xl font-extrabold text-base-content tracking-tight">Kòmand #<span class="font-mono">{orderId}</span></h1>
+					<h1 class="text-2xl sm:text-3xl font-extrabold text-base-content tracking-tight">{t.orderLabel}<span class="font-mono">{orderId}</span></h1>
 					<p class="text-sm text-base-content/70 max-w-md mx-auto leading-relaxed">
 						{error}
 					</p>
@@ -173,24 +276,24 @@
 						onclick={verifyLemonSqueezyOrder}
 					>
 						<RefreshCw size={18} class={verifying ? "animate-spin" : ""} />
-						{verifying ? 'N ap re-verifye...' : 'Re-verifye aksè mwen an kounye a'}
+						{verifying ? t.reverifyingBtn : t.reverifyBtn}
 					</button>
-					<a href="/dashboard" class="btn btn-outline btn-md rounded-xl font-bold px-6 gap-2 w-full sm:w-auto">
+					<a href={getHref('/dashboard')} class="btn btn-outline btn-md rounded-xl font-bold px-6 gap-2 w-full sm:w-auto">
 						<LayoutDashboard size={18} />
-						Ale nan Espas mwen
+						{t.goToDashboardBtn}
 					</a>
 				</div>
 
 				<div class="p-4 rounded-2xl bg-base-200/50 border border-base-300/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-left">
 					<div class="space-y-0.5">
-						<span class="font-bold text-base-content block">Peman an te debouse deja ?</span>
-						<span class="text-base-content/60">Si tranzaksyon ou an konfime sou kat ou men li toujou endisponib, kontakte sipò nou an.</span>
+						<span class="font-bold text-base-content block">{t.paidAlreadyQ}</span>
+						<span class="text-base-content/60">{t.paidAlreadyDesc}</span>
 					</div>
 					<a
-						href="/contact"
+						href={getHref('/contact')}
 						class="btn btn-outline btn-xs sm:btn-sm border-base-300 font-bold rounded-xl shrink-0 gap-1.5"
 					>
-						Sipò Kliyan (Contact)
+						{t.contactSupportBtn}
 					</a>
 				</div>
 			</div>
@@ -209,11 +312,11 @@
 
 					<div class="space-y-1">
 						<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
-							<ShieldCheck size={14} /> Peman pa Kat Konfime (Lemon Squeezy)
+							<ShieldCheck size={14} /> {t.cardConfirmedBadge}
 						</div>
-						<h1 class="text-2xl sm:text-4xl font-black tracking-tight">Mèsi pou kòmand ou an !</h1>
+						<h1 class="text-2xl sm:text-4xl font-black tracking-tight">{t.thanksOrderTitle}</h1>
 						<p class="text-xs sm:text-sm text-zinc-300 max-w-md mx-auto">
-							Tranzaksyon ou an konfime nan sistèm nan. Aksè ou a debloke nèt nan kont ou.
+							{t.unlockedDesc}
 						</p>
 					</div>
 				</div>
@@ -234,15 +337,15 @@
 							</div>
 							<div>
 								<span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
-									{order.productType === 'course' ? 'Fòmasyon sou entènèt' : order.productType === 'ebook' ? 'E-book PDF' : order.productType === 'bundle' ? 'Bundle' : 'Sesyon Coaching'}
+									{order.productType === 'course' ? t.typeCourse : order.productType === 'ebook' ? t.typeEbook : order.productType === 'bundle' ? t.typeBundle : t.typeCoaching}
 								</span>
 								<h2 class="text-base sm:text-lg font-bold text-base-content mt-1 line-clamp-1">{order.productTitle}</h2>
-								<p class="text-xs text-base-content/50">Kliyan : {order.customerName}</p>
+								<p class="text-xs text-base-content/50">{t.customerLabel} {order.customerName}</p>
 							</div>
 						</div>
 
 						<div class="text-right sm:border-l sm:border-base-300 sm:pl-5 shrink-0">
-							<span class="text-xs text-base-content/50 block">Montan peye (USD)</span>
+							<span class="text-xs text-base-content/50 block">{t.amountPaidLabel}</span>
 							<span class="text-xl font-extrabold text-base-content">{order.amount} USD</span>
 						</div>
 					</div>
@@ -251,24 +354,24 @@
 					<div class="rounded-2xl border border-base-300/70 p-5 space-y-3 bg-base-100 text-xs">
 						<div class="flex items-center justify-between border-b border-base-200 pb-3">
 							<span class="font-bold text-base-content/70 flex items-center gap-1.5">
-								<Receipt size={15} class="text-amber-500" /> Detay resi an
+								<Receipt size={15} class="text-amber-500" /> {t.receiptDetailsTitle}
 							</span>
 							<span class="font-mono text-base-content/50"># {order.id.slice(0, 12)}</span>
 						</div>
 
 						<div class="grid grid-cols-2 gap-3 pt-1 text-xs">
 							<div>
-								<span class="text-base-content/50 block">Sitiyasyon peman an</span>
-								<span class="font-bold text-emerald-600 dark:text-emerald-400 capitalize">Peye ✓</span>
+								<span class="text-base-content/50 block">{t.paymentStatusLabel}</span>
+								<span class="font-bold text-emerald-600 dark:text-emerald-400 capitalize">{t.paidStatusText}</span>
 							</div>
 							<div>
-								<span class="text-base-content/50 block">Mwayen peman</span>
-								<span class="font-bold text-base-content uppercase">Lemon Squeezy (Kat)</span>
+								<span class="text-base-content/50 block">{t.paymentMethodLabel}</span>
+								<span class="font-bold text-base-content uppercase">{t.paymentMethodText}</span>
 							</div>
 							<div>
-								<span class="text-base-content/50 block">Dat tranzaksyon an</span>
+								<span class="text-base-content/50 block">{t.txDateLabel}</span>
 								<span class="font-medium text-base-content">
-									{new Date(order.paidAt || order.createdAt).toLocaleDateString('fr-FR', {
+									{new Date(order.paidAt || order.createdAt).toLocaleDateString(currentLang === 'fr' ? 'fr-FR' : 'ht-HT', {
 										day: 'numeric',
 										month: 'long',
 										year: 'numeric',
@@ -278,7 +381,7 @@
 								</span>
 							</div>
 							<div>
-								<span class="text-base-content/50 block">Deviz</span>
+								<span class="text-base-content/50 block">{t.currencyLabel}</span>
 								<span class="font-mono font-bold text-base-content">USD</span>
 							</div>
 						</div>
@@ -288,38 +391,38 @@
 					<div class="space-y-3 pt-2 print:hidden">
 						{#if order.productType === 'course'}
 							<a
-								href={`/learn/${order.productId}`}
+								href={getHref(`/learn/${order.productId}`)}
 								class="btn bg-zinc-950 hover:bg-zinc-800 text-white w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2"
 							>
-								<span>Swiv kou a kounye a</span>
+								<span>{t.followCourseNow}</span>
 								<ArrowRight size={18} />
 							</a>
 						{:else if order.productType === 'ebook'}
 							<a
-								href={`/ebooks/${order.productId}`}
+								href={getHref(`/ebooks/${order.productId}`)}
 								class="btn bg-amber-500 hover:bg-amber-600 text-black w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2"
 							>
-								<span>Swiv &amp; Telechaje E-book la</span>
+								<span>{t.followDownloadEbook}</span>
 								<ArrowRight size={18} />
 							</a>
 						{:else if order.productType === 'bundle'}
-							<a href="/dashboard" class="btn btn-primary w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2">Gade resous mwen yo <ArrowRight size={18} /></a>
+							<a href={getHref('/dashboard')} class="btn btn-primary w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2">{t.viewResourcesNow} <ArrowRight size={18} /></a>
 						{:else}
 							<a
-								href={`/booking/${order.productId}/success`}
+								href={getHref(`/booking/${order.productId}/success`)}
 								class="btn bg-zinc-950 hover:bg-zinc-800 text-white w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2"
 							>
-								<span>Gade detay rendez-vous an</span>
+								<span>{t.viewBookingDetails}</span>
 								<ArrowRight size={18} />
 							</a>
 						{/if}
 
 						<div class="flex flex-col sm:flex-row items-center gap-3">
 							<a
-								href="/transactions"
+								href={getHref('/transactions')}
 								class="btn btn-outline min-h-10 flex-1 w-full rounded-xl text-xs font-semibold gap-1.5"
 							>
-								<Receipt size={15} /> Gade tout tranzaksyon m yo
+								<Receipt size={15} /> {t.viewAllTransactions}
 							</a>
 
 							<button
@@ -327,14 +430,14 @@
 								onclick={printReceipt}
 								class="btn btn-ghost min-h-10 rounded-xl text-xs font-semibold gap-1.5 border border-base-300"
 							>
-								<Printer size={15} /> Enprime resi an
+								<Printer size={15} /> {t.printReceiptBtn}
 							</button>
 						</div>
 					</div>
 
 					<!-- Assistance Footer -->
 					<div class="text-center pt-4 border-t border-base-200 text-xs text-base-content/60 print:hidden flex items-center justify-between">
-						<span>Ou gen yon kesyon sou peman pa kat ou an ?</span>
+						<span>{t.cardQuestion}</span>
 						{#if order.productType === 'coaching'}
 							<a
 								href="https://wa.me/50937001234?text=Bonjou,%20mwen%20gen%20yon%20kesyon%20sou%20rez%C3%A8vasyon%20coaching%20mwen%20an"
@@ -342,14 +445,14 @@
 								rel="noreferrer"
 								class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"
 							>
-								<MessageSquare size={14} /> Sipò WhatsApp Coaching
+								<MessageSquare size={14} /> {t.whatsappSupport}
 							</a>
 						{:else}
 							<a
-								href="/contact"
+								href={getHref('/contact')}
 								class="text-primary font-bold hover:underline inline-flex items-center gap-1"
 							>
-								Paj Kontakte n
+								{t.contactPageLink}
 							</a>
 						{/if}
 					</div>

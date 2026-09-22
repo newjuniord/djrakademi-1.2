@@ -2,6 +2,7 @@
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import type { Course, Ebook } from '$lib/types/admin';
+	import { page } from '$app/state';
 	import {
 		BookOpen,
 		FileText,
@@ -28,23 +29,125 @@
 	import { downloadOwnedEbook } from '$lib/services/ebook-access';
 	import { whatsappLink } from '$lib/coaching/validation';
 
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	function getHref(path: string) {
+		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+	}
+
+	const i18n = {
+		fr: {
+			pageTitle: 'Mon Espace Apprenant · DJR Akademi',
+			metaDesc: 'Espace client DJR Akademi — Accédez à vos formations, ebooks et sessions de coaching.',
+			defaultUser: 'Étudiant',
+			recently: 'Récemment',
+			memberActive: 'Membre Actif',
+			memberSince: 'Membre depuis',
+			myCoursesQuick: 'Formations suivies',
+			myEbooksQuick: 'Ebooks possédés',
+			myCoachingQuick: 'Sessions de coaching',
+			closeBtn: 'Fermer',
+			coursesTitle: 'Mes Formations',
+			coursesSub: 'Accédez à votre espace d\'apprentissage vidéo en ligne',
+			coursesAccess: 'Accès illimité 24/7',
+			noCoursesTitle: 'Aucune formation débloquée',
+			noCoursesSub: 'Vous n\'avez débloqué aucune formation. Découvrez notre catalogue pour commencer l\'apprentissage.',
+			exploreCatalog: 'Explorer le catalogue',
+			completed: 'complété',
+			doneBadge: 'Terminé ✓',
+			progress: 'Progrès',
+			lessons: 'leçons',
+			defaultLesson: 'Bienvenue dans ce cours',
+			continueCourse: 'Continuer la formation',
+			reviewCourse: 'Revoir la formation',
+			ebooksTitle: 'Mes Ebooks PDF',
+			ebooksSub: 'Vos guides pratiques téléchargeables à tout moment',
+			unlimitedDownload: 'Téléchargement illimité',
+			noEbooksTitle: 'Aucun ebook disponible',
+			noEbooksSub: 'Vous n\'avez aucun ebook PDF. Découvrez nos guides pratiques dans le catalogue.',
+			exploreEbooks: 'Découvrir les ebooks',
+			preparingDownload: 'Préparation…',
+			downloadPdf: 'Télécharger (PDF)',
+			downloadStarted: 'Téléchargement de "{title}" démarré.',
+			downloadError: 'Téléchargement impossible.',
+			coachingTitle: 'Mes Sessions de Coaching',
+			coachingSub: 'Vos rendez-vous de suivi individuel avec le coach',
+			bookAnother: 'Réserver une autre session',
+			noCoachingTitle: 'Aucune session réservée',
+			noCoachingSub: 'Vous n\'avez aucun rendez-vous de coaching actuellement.',
+			bookSession: 'Réserver une session',
+			confirmed: 'Confirmé',
+			pending: 'En attente',
+			whatsappCoach: 'WhatsApp Coach :',
+			contactCoach: 'Contacter le coach',
+			whatsappMsg: 'Bonjour, j\'ai une question concernant ma réservation de coaching ({title}).'
+		},
+		ht: {
+			pageTitle: 'Espas Etidyan Mwen · DJR Akademi',
+			metaDesc: 'Espas kliyan DJR Akademi — Aksede ak fòmasyon, ebook ak sesyon coaching ou yo.',
+			defaultUser: 'Etidyan',
+			recently: 'Nouvèlman',
+			memberActive: 'Manm Aktif',
+			memberSince: 'Manm depi',
+			myCoursesQuick: 'Fòmasyon w ap swiv',
+			myEbooksQuick: 'Ebook ou genyen',
+			myCoachingQuick: 'Sesyon coaching',
+			closeBtn: 'Fèmen',
+			coursesTitle: 'Fòmasyon Mwen Yo',
+			coursesSub: 'Aksede ak espas aprantisaj videyo ou a sou entènèt',
+			coursesAccess: 'Aksè san limit 24/7',
+			noCoursesTitle: 'Pa gen fòmasyon ki debloke',
+			noCoursesSub: 'Ou poko debloke okenn fòmasyon. Dekouvri katalòg nou an pou kòmanse aprann.',
+			exploreCatalog: 'Eksplore katalòg la',
+			completed: 'fini',
+			doneBadge: 'Fini ✓',
+			progress: 'Pwogrè',
+			lessons: 'leson',
+			defaultLesson: 'Byenveni nan fòmasyon sa a',
+			continueCourse: 'Kontinye fòmasyon an',
+			reviewCourse: 'Revwa fòmasyon an',
+			ebooksTitle: 'Ebook PDF Mwen Yo',
+			ebooksSub: 'Feyè ak gid pratik ou yo ou ka telechaje nenpòt ki lè',
+			unlimitedDownload: 'Telechajman san limit',
+			noEbooksTitle: 'Pa gen ebook ki disponib',
+			noEbooksSub: 'Ou poko gen ebook PDF. Dekouvri gid pratik nou yo nan katalòg la.',
+			exploreEbooks: 'Dekouvri ebook yo',
+			preparingDownload: 'Preparasyon…',
+			downloadPdf: 'Telechaje (PDF)',
+			downloadStarted: 'Telechajman nan "{title}" kòmanse.',
+			downloadError: 'Telechajman pa posib.',
+			coachingTitle: 'Sesyon Coaching Mwen Yo',
+			coachingSub: 'Rendez-vous swivi endividyèl ou yo ak pwofesè a',
+			bookAnother: 'Rezeve yon lòt sesyon',
+			noCoachingTitle: 'Pa gen sesyon coaching ki rezeve',
+			noCoachingSub: 'Ou pa gen okenn rendez-vous coaching kounye a.',
+			bookSession: 'Rezeve yon sesyon',
+			confirmed: 'Konfime',
+			pending: 'Enatant',
+			whatsappCoach: 'WhatsApp Coach :',
+			contactCoach: 'Kontakte coach la',
+			whatsappMsg: 'Bonjou, mwen gen yon kesyon konsènan rezèvasyon coaching mwen an ({title}).'
+		}
+	};
+	let t = $derived(i18n[currentLang]);
+
 	$effect(() => {
 		if (!authState.loading && !authState.user) {
-			goto('/');
+			goto(getHref('/'));
 		}
 	});
 
 	// Real customer data from Appwrite profile and authState
 	const user = $derived({
-		name: authState.profile?.name || authState.user?.name || 'Étudiant',
+		name: authState.profile?.name || authState.user?.name || t.defaultUser,
 		email: authState.user?.email || 'email@example.com',
 		whatsapp: authState.profile?.whatsapp || '',
 		avatar: (authState.profile?.name || authState.user?.name)
 			? (authState.profile?.name || authState.user?.name || '').substring(0, 2).toUpperCase()
 			: 'ED',
 		memberSince: authState.profile?.createdAt
-			? new Date(authState.profile.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
-			: 'Récemment'
+			? new Date(authState.profile.createdAt).toLocaleDateString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+			: t.recently
 	});
 
 	// Dynamic arrays for user's purchased items
@@ -74,7 +177,7 @@
 					progressPercent: lessons.length ? Math.round((completedLessons / lessons.length) * 100) : 0,
 					completedLessons,
 					totalLessons: lessons.length,
-					lastLessonTitle: lessons.find((lesson) => lesson.id === progress.lastLessonId)?.title || "Bienvenue dans ce cours"
+					lastLessonTitle: lessons.find((lesson) => lesson.id === progress.lastLessonId)?.title || t.defaultLesson
 				};
 			});
 			myCourses = (await Promise.all(coursePromises)).filter(Boolean);
@@ -98,22 +201,22 @@
 		downloadSuccessMessage = null;
 		try {
 			await downloadOwnedEbook(ebook.id);
-			downloadSuccessMessage = `Téléchargement de "${ebook.title}" démarré.`;
+			downloadSuccessMessage = t.downloadStarted.replace('{title}', ebook.title);
 		} catch (caught) {
-			downloadSuccessMessage = caught instanceof Error ? caught.message : 'Téléchargement impossible.';
+			downloadSuccessMessage = caught instanceof Error ? caught.message : t.downloadError;
 		} finally {
 			downloadingEbookId = null;
 		}
 	}
 
 	function formatBookingDate(iso: string) {
-		return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
+		return new Date(iso).toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR', { dateStyle: 'long', timeStyle: 'short' });
 	}
 </script>
 
 <svelte:head>
-	<title>Mon Espace Apprenant · DJR Akademi</title>
-	<meta name="description" content="Espace client DJR Akademi — Accédez à vos formations, ebooks et sessions de coaching." />
+	<title>{t.pageTitle}</title>
+	<meta name="description" content={t.metaDesc} />
 </svelte:head>
 
 <div class="min-h-screen bg-zinc-50 flex flex-col font-sans text-zinc-900">
@@ -140,10 +243,10 @@
 							<div class="dashboard-name-line flex items-center gap-2">
 								<h1 class="dashboard-user-name text-2xl sm:text-3xl font-black tracking-tight">{user.name}</h1>
 								<span class="dashboard-member-status px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider rounded-md border border-emerald-500/30">
-									Manm Aktif
+									{t.memberActive}
 								</span>
 							</div>
-							<p class="dashboard-user-meta text-white/50 text-xs mt-1 font-mono">{user.email} · Manm depi {user.memberSince}</p>
+							<p class="dashboard-user-meta text-white/50 text-xs mt-1 font-mono">{user.email} · {t.memberSince} {user.memberSince}</p>
 						</div>
 					</div>
 
@@ -160,7 +263,7 @@
 						</div>
 						<div>
 							<span class="text-xl font-black text-white">{myCourses.length}</span>
-							<span class="block text-xs text-white/40 font-medium">Fòmasyon w ap swiv</span>
+							<span class="block text-xs text-white/40 font-medium">{t.myCoursesQuick}</span>
 						</div>
 					</a>
 
@@ -173,7 +276,7 @@
 						</div>
 						<div>
 							<span class="text-xl font-black text-white">{myEbooks.length}</span>
-							<span class="block text-xs text-white/40 font-medium">Ebook ou genyen</span>
+							<span class="block text-xs text-white/40 font-medium">{t.myEbooksQuick}</span>
 						</div>
 					</a>
 
@@ -186,7 +289,7 @@
 						</div>
 						<div>
 							<span class="text-xl font-black text-white">{myBookings.length}</span>
-							<span class="block text-xs text-white/40 font-medium">Sesyon coaching</span>
+							<span class="block text-xs text-white/40 font-medium">{t.myCoachingQuick}</span>
 						</div>
 					</a>
 				</div>
@@ -204,7 +307,7 @@
 							<CheckCircle2 size={18} class="text-emerald-600" />
 							{downloadSuccessMessage}
 						</span>
-						<button type="button" onclick={() => (downloadSuccessMessage = null)} class="text-emerald-500 hover:text-emerald-700 text-xs">Fèmen</button>
+						<button type="button" onclick={() => (downloadSuccessMessage = null)} class="text-emerald-500 hover:text-emerald-700 text-xs">{t.closeBtn}</button>
 					</div>
 				{/if}
 
@@ -216,11 +319,11 @@
 								<BookOpen size={18} />
 							</div>
 							<div>
-								<h2 class="text-2xl font-black tracking-tight text-zinc-950">Fòmasyon Mwen Yo ({myCourses.length})</h2>
-								<p class="text-xs text-zinc-400 mt-0.5">Aksede ak espas aprantisaj videyo ou a sou entènèt</p>
+								<h2 class="text-2xl font-black tracking-tight text-zinc-950">{t.coursesTitle} ({myCourses.length})</h2>
+								<p class="text-xs text-zinc-400 mt-0.5">{t.coursesSub}</p>
 							</div>
 						</div>
-						<span class="text-xs text-zinc-400 font-medium hidden sm:inline-block">Aksè san limit 24/7</span>
+						<span class="text-xs text-zinc-400 font-medium hidden sm:inline-block">{t.coursesAccess}</span>
 					</div>
 
 					{#if myCourses.length === 0}
@@ -228,17 +331,17 @@
 							<div class="size-12 bg-amber-400/10 text-amber-500 rounded-2xl grid place-items-center mx-auto">
 								<BookOpen size={24} />
 							</div>
-							<h3 class="font-black text-base text-zinc-950">Pa gen fòmasyon ki debloke</h3>
-							<p class="text-xs text-zinc-400 max-w-md mx-auto">Ou poko debloke okenn fòmasyon. Dekouvri katalòg nou an pou kòmanse aprann.</p>
-							<a href="/catalogue" class="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm mt-2">
-								Eksplore katalòg la <ArrowRight size={14} />
+							<h3 class="font-black text-base text-zinc-950">{t.noCoursesTitle}</h3>
+							<p class="text-xs text-zinc-400 max-w-md mx-auto">{t.noCoursesSub}</p>
+							<a href={getHref('/catalogue')} class="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm mt-2">
+								{t.exploreCatalog} <ArrowRight size={14} />
 							</a>
 						</div>
 					{:else}
 						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 							{#each myCourses as item (item.course.id)}
 								<div class="bg-white rounded-2xl border border-zinc-200/80 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
-									<a href="/learn/{item.course.id}" class="relative aspect-video bg-zinc-100 overflow-hidden group block">
+									<a href={getHref(`/learn/${item.course.id}`)} class="relative aspect-video bg-zinc-100 overflow-hidden group block">
 										{#if item.course.cover}
 											<img src={item.course.cover} alt={item.course.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
 										{:else}
@@ -254,11 +357,11 @@
 										</div>
 										<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between">
 											<span class="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-zinc-950 text-[11px] font-black rounded-full shadow">
-												{item.progressPercent}% fini
+												{item.progressPercent}% {t.completed}
 											</span>
 											{#if item.progressPercent === 100}
 												<span class="px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow">
-													Fini ✓
+													{t.doneBadge}
 												</span>
 											{/if}
 										</div>
@@ -266,7 +369,7 @@
 
 									<div class="p-5 flex flex-col flex-1 gap-4">
 										<div>
-											<a href="/learn/{item.course.id}" class="hover:text-amber-600 transition-colors">
+											<a href={getHref(`/learn/${item.course.id}`)} class="hover:text-amber-600 transition-colors">
 												<h3 class="font-black text-base text-zinc-950 leading-snug line-clamp-1">{item.course.title}</h3>
 											</a>
 											<p class="text-xs text-zinc-400 mt-1 line-clamp-2">{item.course.description}</p>
@@ -274,8 +377,8 @@
 
 										<div class="space-y-1.5">
 											<div class="flex justify-between text-xs text-zinc-500 font-medium">
-												<span>Pwogrè</span>
-												<span class="font-bold text-zinc-950">{item.completedLessons} / {item.totalLessons} leson</span>
+												<span>{t.progress}</span>
+												<span class="font-bold text-zinc-950">{item.completedLessons} / {item.totalLessons} {t.lessons}</span>
 											</div>
 											<div class="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
 												<div
@@ -286,11 +389,11 @@
 										</div>
 
 										<a
-											href="/learn/{item.course.id}"
+											href={getHref(`/learn/${item.course.id}`)}
 											class="mt-auto inline-flex items-center justify-center gap-2 h-11 px-5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm"
 										>
 											<Play size={14} class="fill-white" />
-											{item.progressPercent === 100 ? 'Revwa fòmasyon an' : 'Kontinye fòmasyon an'}
+											{item.progressPercent === 100 ? t.reviewCourse : t.continueCourse}
 										</a>
 									</div>
 								</div>
@@ -307,11 +410,11 @@
 								<FileText size={18} />
 							</div>
 							<div>
-								<h2 class="text-2xl font-black tracking-tight text-zinc-950">Ebook PDF Mwen Yo ({myEbooks.length})</h2>
-								<p class="text-xs text-zinc-400 mt-0.5">Feyè ak gid pratik ou yo ou ka telechaje nenpòt ki lè</p>
+								<h2 class="text-2xl font-black tracking-tight text-zinc-950">{t.ebooksTitle} ({myEbooks.length})</h2>
+								<p class="text-xs text-zinc-400 mt-0.5">{t.ebooksSub}</p>
 							</div>
 						</div>
-						<span class="text-xs text-zinc-400 font-medium hidden sm:inline-block">Telechajman san limit</span>
+						<span class="text-xs text-zinc-400 font-medium hidden sm:inline-block">{t.unlimitedDownload}</span>
 					</div>
 
 					{#if myEbooks.length === 0}
@@ -319,10 +422,10 @@
 							<div class="size-12 bg-emerald-400/10 text-emerald-500 rounded-2xl grid place-items-center mx-auto">
 								<FileText size={24} />
 							</div>
-							<h3 class="font-black text-base text-zinc-950">Pa gen ebook ki disponib</h3>
-							<p class="text-xs text-zinc-400 max-w-md mx-auto">Ou poko gen ebook PDF. Dekouvri gid pratik nou yo nan katalòg la.</p>
-							<a href="/catalogue" class="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm mt-2">
-								Dekouvri ebook yo <ArrowRight size={14} />
+							<h3 class="font-black text-base text-zinc-950">{t.noEbooksTitle}</h3>
+							<p class="text-xs text-zinc-400 max-w-md mx-auto">{t.noEbooksSub}</p>
+							<a href={getHref('/catalogue')} class="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm mt-2">
+								{t.exploreEbooks} <ArrowRight size={14} />
 							</a>
 						</div>
 					{:else}
@@ -354,7 +457,7 @@
 											class="mt-auto inline-flex items-center justify-center gap-2 h-10 px-4 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm"
 										>
 											<Download size={14} class={downloadingEbookId === ebook.id ? 'animate-bounce' : ''} />
-											{downloadingEbookId === ebook.id ? 'Preparasyon…' : 'Telechaje (PDF)'}
+											{downloadingEbookId === ebook.id ? t.preparingDownload : t.downloadPdf}
 										</button>
 									</div>
 								</div>
@@ -371,12 +474,12 @@
 								<CalendarCheck size={18} />
 							</div>
 							<div>
-								<h2 class="text-2xl font-black tracking-tight text-zinc-950">Sesyon Coaching Mwen Yo ({myBookings.length})</h2>
-								<p class="text-xs text-zinc-400 mt-0.5">Rendez-vous swivi endividyèl ou yo ak pwofesè a</p>
+								<h2 class="text-2xl font-black tracking-tight text-zinc-950">{t.coachingTitle} ({myBookings.length})</h2>
+								<p class="text-xs text-zinc-400 mt-0.5">{t.coachingSub}</p>
 							</div>
 						</div>
-						<a href="/#coaching" class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
-							Rezeve yon lòt sesyon <ArrowRight size={12} />
+						<a href={getHref('/#coaching')} class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
+							{t.bookAnother} <ArrowRight size={12} />
 						</a>
 					</div>
 
@@ -385,10 +488,10 @@
 							<div class="size-12 bg-orange-400/10 text-orange-500 rounded-2xl grid place-items-center mx-auto">
 								<CalendarCheck size={24} />
 							</div>
-							<h3 class="font-black text-base text-zinc-950">Pa gen sesyon coaching ki rezeve</h3>
-							<p class="text-xs text-zinc-400 max-w-md mx-auto">Ou pa gen okenn rendez-vous coaching kounye a.</p>
-							<a href="/#coaching" class="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm mt-2">
-								Rezeve yon sesyon <ArrowRight size={14} />
+							<h3 class="font-black text-base text-zinc-950">{t.noCoachingTitle}</h3>
+							<p class="text-xs text-zinc-400 max-w-md mx-auto">{t.noCoachingSub}</p>
+							<a href={getHref('/#coaching')} class="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm mt-2">
+								{t.bookSession} <ArrowRight size={14} />
 							</a>
 						</div>
 					{:else}
@@ -403,7 +506,7 @@
 											<div class="flex items-center gap-2">
 												<h3 class="font-black text-base text-zinc-950">{booking.serviceTitle}</h3>
 												<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase rounded-full">
-													{booking.status === 'confirmed' ? 'Konfime' : 'Enatant'}
+													{booking.status === 'confirmed' ? t.confirmed : t.pending}
 												</span>
 												<span class="text-[10px] text-zinc-400 font-mono border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 rounded-md">ID: {booking.id}</span>
 											</div>
@@ -414,7 +517,7 @@
 											{#if booking.coachWhatsapp}
 												<p class="text-xs font-bold text-emerald-700 flex items-center gap-1.5 pt-0.5">
 													<MessageCircle size={13} class="text-emerald-600 shrink-0" />
-													<span>WhatsApp Coach : {booking.coachWhatsapp}</span>
+													<span>{t.whatsappCoach} {booking.coachWhatsapp}</span>
 												</p>
 											{/if}
 										</div>
@@ -422,13 +525,13 @@
 
 									<div class="flex items-center gap-3 shrink-0">
 										<a
-											href={whatsappLink(booking.coachWhatsapp || '+50937000000', `Bonjou, mwen gen yon kesyon konsènan rezèvasyon coaching mwen an (${booking.serviceTitle}).`)}
+											href={whatsappLink(booking.coachWhatsapp || '+50937000000', t.whatsappMsg.replace('{title}', booking.serviceTitle))}
 											target="_blank"
 											rel="noreferrer"
 											class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-colors shadow-sm"
 										>
 											<MessageCircle size={14} />
-											<span>Kontakte coach la ({booking.coachWhatsapp || '+50937000000'})</span>
+											<span>{t.contactCoach} ({booking.coachWhatsapp || '+50937000000'})</span>
 										</a>
 									</div>
 								</div>

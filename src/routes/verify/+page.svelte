@@ -17,8 +17,89 @@
 		Sparkles
 	} from 'lucide-svelte';
 
+	import { page } from '$app/state';
 	import { authState } from '$lib/auth.svelte';
 	import { verifyLemonSqueezyEmail, verifyPlopplopReference } from '$lib/services/payments';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	function getHref(path: string) {
+		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+	}
+
+	const i18n = {
+		fr: {
+			pageTitle: 'Vérification de Paiement & Déblocage d\'Accès · DJR Akademi',
+			metaDesc: 'Page officielle pour vérifier vos paiements par carte bancaire (Lemon Squeezy), MonCash et Natcash afin de débloquer votre accès immédiatement.',
+			backHome: 'Retour à l\'accueil',
+			title: 'Vérification de Paiement & Déblocage d\'Accès',
+			subtitle: 'Vérifiez votre transaction par carte bancaire ou paiement mobile sans attendre.',
+			supportBadge: 'Support & Vérification Directe',
+			supportHeading: 'Si vous avez déjà payé sur l\'ancien site et n\'avez pas reçu l\'accès, entrez votre email.',
+			supportDesc: 'Si vous avez payé par carte bancaire sur Lemon Squeezy ou via MonCash / Natcash et que votre accès n\'est pas activé automatiquement, nous le vérifierons immédiatement.',
+			chooseMethod: 'Choisissez votre mode de paiement :',
+			cardMethod: 'Carte bancaire (Lemon Squeezy)',
+			mobileMethod: 'MonCash / Natcash',
+			cardEmailLabel: 'Email utilisé lors de votre paiement sur Lemon Squeezy *',
+			cardEmailPlaceholder: 'ex: email-paiement@gmail.com',
+			cardEmailNote: 'Saisissez l\'email utilisé lors du paiement. L\'accès sera débloqué uniquement sur votre compte actuel (',
+			connectToSee: 'connectez-vous pour voir votre email',
+			otpPlaceholder: 'Code OTP',
+			mobileRefLabel: 'Numéro de référence de transaction MonCash / Natcash *',
+			mobileRefPlaceholder: 'ex: 6a94b44a001655dbf38d',
+			mobileRefNote: 'Entrez le numéro de référence présent sur votre message de confirmation MonCash / Natcash.',
+			verifying: 'Vérification du paiement en cours...',
+			verifyBtn: 'Vérifier et débloquer mon accès',
+			successTitle: 'Succès !',
+			accessDashboard: 'Accéder à mon espace étudiant',
+			loginError: 'Vous devez être connecté à votre compte pour vérifier un paiement.',
+			emailRequiredError: 'Veuillez saisir une adresse email valide.',
+			otpSent: 'Code envoyé à votre adresse email.',
+			cardSuccess: 'Votre paiement par carte a été vérifié avec succès ! Redirection en cours...',
+			cardSuccessToast: 'Accès débloqué avec succès ! Redirection en cours...',
+			cardError: 'Erreur lors de la vérification.',
+			refRequiredError: 'Veuillez saisir le numéro de référence de la transaction.',
+			mobileSuccess: 'Paiement vérifié avec succès ! Redirection en cours...',
+			mobileSuccessToast: 'Accès débloqué avec succès ! Redirection en cours...',
+			genericError: 'Une erreur est survenue pendant la vérification. Veuillez nous contacter directement.'
+		},
+		ht: {
+			pageTitle: 'Verifikasyon Peman & Debloke Aksè · DJR Akademi',
+			metaDesc: 'Paj ofisyèl pou verifye peman kat bancaire (Lemon Squeezy), MonCash ak Natcash pou debloke aksè nan fòmasyon ak ebook ou yo imedyatman.',
+			backHome: 'Tounen nan paj akèy',
+			title: 'Verifikasyon Peman & Debloke Aksè',
+			subtitle: 'Verifye tranzaksyon ou pa kat bancaire oswa mobil san ou pa bezwen tann.',
+			supportBadge: 'Sipò & Verifikasyon Directe',
+			supportHeading: 'Si ou te peye deja sou lòt sit la epi ou pa jwenn kou an, mete imèl ou.',
+			supportDesc: 'Si w te peye pa kat bancaire sou Lemon Squeezy oubyen via MonCash / Natcash epi aksè a pa aktive otomatikman, n ap verifye li pou w imedyatman.',
+			chooseMethod: 'Chwazi fason w te peye an :',
+			cardMethod: 'Kat bancaire (Lemon Squeezy)',
+			mobileMethod: 'MonCash / Natcash',
+			cardEmailLabel: 'Imel ou te itilize pou w peye sou Lemon Squeezy an *',
+			cardEmailPlaceholder: 'ex: imel-peman-ou@gmail.com',
+			cardEmailNote: 'Mete imel ou te antre lè w t ap peye an. Aksè a ap debloke sou kont ou an sèlman (',
+			connectToSee: 'konekte pou wè imel ou',
+			otpPlaceholder: 'Kòd OTP',
+			mobileRefLabel: 'Nimewo referans tranzaksyon MonCash / Natcash an *',
+			mobileRefPlaceholder: 'ex: 6a94b44a001655dbf38d',
+			mobileRefNote: 'Antre nimewo referans ki sou mesaj konfimasyon MonCash / Natcash ou an pou n ka debloke kont ou.',
+			verifying: 'N ap verifye peman an...',
+			verifyBtn: 'Verifye ak debloke aksè mwen',
+			successTitle: 'Siksè !',
+			accessDashboard: 'Aksede nan espas etidyan mwen',
+			loginError: 'Ou dwe konekte sou kont ou pou w ka verifye yon peman.',
+			emailRequiredError: 'Tanpri antre yon adres imel ki valab.',
+			otpSent: 'Nou voye kòd la sou imel ou.',
+			cardSuccess: 'Peman pa kat ou a verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...',
+			cardSuccessToast: 'Aksè debloke ak siksè ! Redirèksyon en kous...',
+			cardError: 'Erè nan verifikasyon an.',
+			refRequiredError: 'Tanpri antre nimewo referans tranzaksyon an.',
+			mobileSuccess: 'Peman verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...',
+			mobileSuccessToast: 'Aksè debloke ak siksè ! Redirèksyon en kous...',
+			genericError: 'Yon erè rive pandan verifikasyon an. Tanpri kontakte nou dirèkteman.'
+		}
+	};
+	let t = $derived(i18n[currentLang]);
 
 	// Verification Form State
 	let supportMethod = $state<'carte' | 'mobile'>('carte');
@@ -42,7 +123,7 @@
 		supportErrorMessage = null;
 
 		if (!authState.user) {
-			toast.error('Ou dwe konekte sou kont ou pou w ka verifye yon peman.');
+			toast.error(t.loginError);
 			return;
 		}
 
@@ -52,28 +133,28 @@
 			if (supportMethod === 'carte') {
 				const email = supportEmail.trim();
 				if (!email || !email.includes('@')) {
-					toast.error('Tanpri antre yon adres imel ki valab.');
+					toast.error(t.emailRequiredError);
 					supportLoading = false;
 					return;
 				}
 
 				const resData = await verifyLemonSqueezyEmail(email, otpChallenge ? "confirm_otp" : "request_otp", otpChallenge || undefined, otpChallenge ? otpCode.trim() : undefined);
 
-				if (resData.otpRequired && resData.challenge) { otpChallenge = resData.challenge; supportSuccessMessage = resData.message; toast.success("Nou voye kòd la sou imel ou."); } else if (resData.ok && resData.success) {
-					const targetUrl = resData.courseId ? `/learn/${resData.courseId}` : '/dashboard';
-					supportSuccessMessage = 'Peman pa kat ou a verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...';
-					toast.success('Aksè debloke ak siksè ! Redirèksyon en kous...');
+				if (resData.otpRequired && resData.challenge) { otpChallenge = resData.challenge; supportSuccessMessage = resData.message; toast.success(t.otpSent); } else if (resData.ok && resData.success) {
+					const targetUrl = resData.courseId ? getHref(`/learn/${resData.courseId}`) : getHref('/dashboard');
+					supportSuccessMessage = t.cardSuccess;
+					toast.success(t.cardSuccessToast);
 					setTimeout(() => {
 						goto(targetUrl);
 					}, 1000);
 				} else {
-					supportErrorMessage = resData.message || `Nou pa jwenn okenn peman konfime sou Lemon Squeezy pou imel "${email}".`;
-					toast.error('Erè nan verifikasyon an.');
+					supportErrorMessage = resData.message || t.cardError;
+					toast.error(t.cardError);
 				}
 			} else {
 				const ref = supportReference.trim();
 				if (!ref) {
-					toast.error('Tanpri antre nimewo referans tranzaksyon an.');
+					toast.error(t.refRequiredError);
 					supportLoading = false;
 					return;
 				}
@@ -81,21 +162,21 @@
 				const resData = await verifyPlopplopReference(ref);
 
 				if (resData.ok && resData.success) {
-					const targetUrl = resData.courseId ? `/learn/${resData.courseId}` : '/dashboard';
-					supportSuccessMessage = 'Peman verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...';
-					toast.success('Aksè debloke ak siksè ! Redirèksyon en kous...');
+					const targetUrl = resData.courseId ? getHref(`/learn/${resData.courseId}`) : getHref('/dashboard');
+					supportSuccessMessage = t.mobileSuccess;
+					toast.success(t.mobileSuccessToast);
 					setTimeout(() => {
 						goto(targetUrl);
 					}, 1000);
 				} else {
-					supportErrorMessage = resData.message || `Nou pa jwenn okenn peman valide pou referans "${ref}".`;
-					toast.error('Erè nan verifikasyon an.');
+					supportErrorMessage = resData.message || t.cardError;
+					toast.error(t.cardError);
 				}
 			}
 		} catch (error) {
 			console.error('Verify error:', error);
-			supportErrorMessage = 'Yon erè rive pandan verifikasyon an. Tanpri kontakte nou dirèkteman.';
-			toast.error('Erè nan verifikasyon an.');
+			supportErrorMessage = t.genericError;
+			toast.error(t.cardError);
 		} finally {
 			supportLoading = false;
 		}
@@ -103,10 +184,10 @@
 </script>
 
 <svelte:head>
-	<title>Verifikasyon Peman & Debloke Aksè · DJR Akademi</title>
+	<title>{t.pageTitle}</title>
 	<meta
 		name="description"
-		content="Paj ofisyèl pou verifye peman kat bancaire (Lemon Squeezy), MonCash ak Natcash pou debloke aksè nan fòmasyon ak ebook ou yo imedyatman."
+		content={t.metaDesc}
 	/>
 </svelte:head>
 
@@ -123,11 +204,11 @@
 
 			<div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
 				<a
-					href="/"
+					href={getHref('/')}
 					class="inline-flex items-center gap-2 text-xs font-bold text-white/50 hover:text-white transition-colors"
 				>
 					<ArrowLeft size={16} />
-					Tounen nan paj akèy
+					{t.backHome}
 				</a>
 
 				<div class="flex items-center gap-3">
@@ -135,9 +216,9 @@
 						<ShieldCheck size={22} />
 					</div>
 					<div>
-						<h1 class="text-2xl sm:text-4xl font-black tracking-tight">Verifikasyon Peman & Debloke Aksè</h1>
+						<h1 class="text-2xl sm:text-4xl font-black tracking-tight">{t.title}</h1>
 						<p class="text-white/60 text-xs sm:text-sm font-medium mt-1">
-							Verifye tranzaksyon ou pa kat bancaire oswa mobil san ou pa bezwen tann.
+							{t.subtitle}
 						</p>
 					</div>
 				</div>
@@ -151,19 +232,19 @@
 						<div class="space-y-3">
 							<div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-400/10 border border-amber-400/20 rounded-full text-amber-400 text-xs font-bold uppercase tracking-wider">
 								<HelpCircle size={14} />
-								Sipò & Verifikasyon Directe
+								{t.supportBadge}
 							</div>
 							<h2 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-								Si ou te peye deja sou lòt sit la epi ou pa jwenn kou an, mete imèl ou.
+								{t.supportHeading}
 							</h2>
 							<p class="text-white/60 text-sm leading-relaxed max-w-xl">
-								Si w te peye pa kat bancaire sou Lemon Squeezy oubyen via MonCash / Natcash epi aksè a pa aktive otomatikman, n ap verifye li pou w imedyatman.
+								{t.supportDesc}
 							</p>
 						</div>
 
 						<!-- Payment Method Tabs -->
 						<div class="space-y-3">
-							<span class="text-xs font-bold text-white/50 uppercase tracking-widest block">Chwazi fason w te peye an :</span>
+							<span class="text-xs font-bold text-white/50 uppercase tracking-widest block">{t.chooseMethod}</span>
 							<div class="grid grid-cols-2 gap-2 p-1.5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
 								<button
 									type="button"
@@ -171,7 +252,7 @@
 									class="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-xs transition-all duration-200 cursor-pointer {supportMethod === 'carte' ? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20' : 'text-white/70 hover:text-white hover:bg-white/5'}"
 								>
 									<CreditCard size={16} />
-									<span>Kat bancaire (Lemon Squeezy)</span>
+									<span>{t.cardMethod}</span>
 								</button>
 								<button
 									type="button"
@@ -179,7 +260,7 @@
 									class="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-xs transition-all duration-200 cursor-pointer {supportMethod === 'mobile' ? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20' : 'text-white/70 hover:text-white hover:bg-white/5'}"
 								>
 									<Smartphone size={16} />
-									<span>MonCash / Natcash</span>
+									<span>{t.mobileMethod}</span>
 								</button>
 							</div>
 						</div>
@@ -190,37 +271,37 @@
 								<!-- Lemon Squeezy Card Email Input -->
 								<div class="space-y-2">
 									<label for="verify-card-email" class="block text-xs font-bold text-white/90">
-										Imel ou te itilize pou w peye sou Lemon Squeezy an *
+										{t.cardEmailLabel}
 									</label>
 									<div class="relative">
 										<input
 											id="verify-card-email"
 											type="email"
 											required
-											placeholder="ex: imel-peman-ou@gmail.com"
+											placeholder={t.cardEmailPlaceholder}
 											bind:value={supportEmail}
 											class="w-full h-12 px-4 bg-zinc-900/90 border border-white/15 focus:border-amber-400 rounded-xl text-sm font-medium text-white placeholder-white/30 outline-none transition-colors"
                                         />
                                 </div>
-                                <p class="text-[11px] text-white/50 leading-relaxed">Mete imel ou te antre lè w t ap peye an. Aksè a ap debloke sou kont ou an sèlman (<span class="text-amber-400 font-bold">{authState.user?.email || "konekte pou wè imel ou"}</span>).</p>
-                                {#if otpChallenge}<input id="verify-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required bind:value={otpCode} placeholder="Kòd OTP" class="w-full h-12 px-4 bg-zinc-900/90 border border-white/15 focus:border-amber-400 rounded-xl text-sm text-white" />{/if}
+                                <p class="text-[11px] text-white/50 leading-relaxed">{t.cardEmailNote}<span class="text-amber-400 font-bold">{authState.user?.email || t.connectToSee}</span>).</p>
+                                {#if otpChallenge}<input id="verify-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required bind:value={otpCode} placeholder={t.otpPlaceholder} class="w-full h-12 px-4 bg-zinc-900/90 border border-white/15 focus:border-amber-400 rounded-xl text-sm text-white" />{/if}
                             </div>
 							{:else}
 								<!-- MonCash / Natcash Input -->
 								<div class="space-y-2">
 									<label for="verify-ref" class="block text-xs font-bold text-white/90">
-										Nimewo referans tranzaksyon MonCash / Natcash an *
+										{t.mobileRefLabel}
 									</label>
 									<input
 										id="verify-ref"
 										type="text"
 										required
-										placeholder="ex: 6a94b44a001655dbf38d"
+										placeholder={t.mobileRefPlaceholder}
 										bind:value={supportReference}
 										class="w-full h-12 px-4 bg-zinc-900/90 border border-white/15 focus:border-amber-400 rounded-xl text-sm font-medium text-white placeholder-white/30 outline-none transition-colors"
 									/>
 									<p class="text-[11px] text-white/40">
-										Antre nimewo referans ki sou mesaj konfimasyon MonCash / Natcash ou an pou n ka debloke kont ou.
+										{t.mobileRefNote}
 									</p>
 								</div>
 							{/if}
@@ -233,10 +314,10 @@
 							>
 								{#if supportLoading}
 									<Loader2 size={16} class="animate-spin" />
-									<span>N ap verifye peman an...</span>
+									<span>{t.verifying}</span>
 								{:else}
 									<Send size={15} />
-									<span>Verifye ak debloke aksè mwen</span>
+									<span>{t.verifyBtn}</span>
 								{/if}
 							</button>
 						</form>
@@ -247,17 +328,17 @@
 								<div class="flex items-start gap-3">
 									<CheckCircle2 size={20} class="shrink-0 mt-0.5 text-emerald-400" />
 									<div class="space-y-1">
-										<p class="font-bold text-sm text-white">Siksè !</p>
+										<p class="font-bold text-sm text-white">{t.successTitle}</p>
 										<p>{supportSuccessMessage}</p>
 									</div>
 								</div>
 								<div class="pt-2 border-t border-emerald-500/20 flex items-center justify-end">
 									<a
-										href="/dashboard"
+										href={getHref('/dashboard')}
 										class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-black font-bold text-xs rounded-xl hover:bg-emerald-400 transition-colors shadow-sm"
 									>
 										<Sparkles size={14} />
-										<span>Aksede nan espas etidyan mwen</span>
+										<span>{t.accessDashboard}</span>
 									</a>
 								</div>
 							</div>

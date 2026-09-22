@@ -1,6 +1,7 @@
 <script lang="ts">
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
+	import { page } from '$app/state';
 	import {
 		Mail,
 		User,
@@ -14,6 +15,96 @@
 		BookOpen,
 		MessageSquareText
 	} from 'lucide-svelte';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	function getHref(path: string) {
+		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+	}
+
+	const i18n = {
+		fr: {
+			pageTitle: 'Nous contacter · DJR Akademi',
+			metaDesc: 'Contactez l\'équipe de DJR Akademi pour toute question sur nos formations, nos ebooks PDF ou nos coachings.',
+			backHome: 'Retour à l\'accueil',
+			successBannerTitle: 'Message envoyé avec succès !',
+			successDefaultMessage: 'Votre message a bien été envoyé ! Notre équipe vous répondra à votre adresse email en moins de 24 heures.',
+			close: 'Fermer',
+			supportBadge: 'Service Support Client',
+			heroTitle: 'Vous avez une question ? Contactez-nous',
+			heroDesc: 'Notre équipe est là pour vous aider dans votre apprentissage, répondre à vos questions sur notre contenu ou résoudre tout problème technique.',
+			fastResponseTitle: 'Réponse rapide garantie',
+			fastResponseDesc: 'Nous répondons à votre message en moins de 24h',
+			personalizedSupportTitle: 'Support personnalisé',
+			personalizedSupportDesc: 'Une personne dédiée pour vous aider à chaque demande',
+			faqTitle: 'Foire aux questions',
+			faqAccessTitle: 'Accès formation :',
+			faqAccessDesc: 'Disponible directement après confirmation du paiement.',
+			faqEbookTitle: 'Ebook PDF :',
+			faqEbookDesc: 'Téléchargement direct en haute qualité.',
+			faqPaymentTitle: 'Moyens de paiement :',
+			faqPaymentDesc: 'MonCash, Natcash et cartes internationales sont acceptés.',
+			formTitle: 'Envoyez-nous un message',
+			formSubtitle: 'Remplissez ce formulaire et nous répondrons à votre demande',
+			fullNameLabel: 'Votre nom complet *',
+			fullNamePlaceholder: 'Ex: Jean Pierre',
+			emailLabel: 'Votre adresse email *',
+			emailPlaceholder: 'jean.pierre@example.com',
+			subjectLabel: 'Sujet de votre message *',
+			subjOption1: 'Question sur une formation vidéo',
+			subjOption2: 'Acheter ou télécharger un Ebook PDF',
+			subjOption3: 'Session de Coaching 1:1',
+			subjOption4: 'Support technique / Accès au compte',
+			subjOption5: 'Autre demande',
+			messageLabel: 'Votre message *',
+			messagePlaceholder: 'Écrivez votre demande avec tous les détails...',
+			privacyNote: '* Vos informations restent confidentielles.',
+			sending: 'Envoi en cours...',
+			sendBtn: 'Envoyer le message',
+			sendError: 'Impossible d\'envoyer le message.'
+		},
+		ht: {
+			pageTitle: 'Kontakte nou · DJR Akademi',
+			metaDesc: 'Kontakte ekip DJR Akademi an pou nenpòt kesyon sou fòmasyon nou yo, ebook PDF nou yo oswa coaching nou yo.',
+			backHome: 'Tounen nan akèy',
+			successBannerTitle: 'Mesaj la voye ak siksè !',
+			successDefaultMessage: 'Mesaj ou a byen voye! Ekip nou an ap reponn ou nan adrès imèl ou nan mwens pase 24 èdtan.',
+			close: 'Fèmen',
+			supportBadge: 'Sèvis Sipò Kliyan',
+			heroTitle: 'Ou gen yon kesyon ? Kontakte nou',
+			heroDesc: 'Ekip nou an la pou ede w nan aprantisaj ou, reponn kesyon w sou kontni nou yo oswa rezoud nenpòt pwoblèm teknik.',
+			fastResponseTitle: 'Repons rapid garanti',
+			fastResponseDesc: 'N ap reponn mesaj ou an mwens ke 24h',
+			personalizedSupportTitle: 'Sipò pèsonalize',
+			personalizedSupportDesc: 'Yon moun pou ede w nan chak demand',
+			faqTitle: 'Kesyon moun poze souvan',
+			faqAccessTitle: 'Aksè fòmasyon :',
+			faqAccessDesc: 'Disponib dirèkteman apre peman an konfime.',
+			faqEbookTitle: 'Ebook PDF :',
+			faqEbookDesc: 'Telechajman dirèk nan bon kalite.',
+			faqPaymentTitle: 'Mwayen peman :',
+			faqPaymentDesc: 'MonCash, Natcash ak kat entènasyonal yo aksepte.',
+			formTitle: 'Voye yon mesaj pou nou',
+			formSubtitle: 'Ranpli fòm sa a n ap reponn demand ou an',
+			fullNameLabel: 'Non konplè ou *',
+			fullNamePlaceholder: 'Ex: Jean Pierre',
+			emailLabel: 'Adrès Imèl ou *',
+			emailPlaceholder: 'jean.pierre@example.com',
+			subjectLabel: 'Sijè mesaj ou a *',
+			subjOption1: 'Kesyon sou yon fòmasyon videyo',
+			subjOption2: 'Achte oswa telechaje yon Ebook PDF',
+			subjOption3: 'Sesyon Coaching 1:1',
+			subjOption4: 'Sipò teknik / Aksè nan kont',
+			subjOption5: 'Lòt demand',
+			messageLabel: 'Mesaj ou a *',
+			messagePlaceholder: 'Ekri sa w bezwen an ak tout detay...',
+			privacyNote: '* Enfòmasyon ou yo rete ansekirite.',
+			sending: 'Voye ap fèt...',
+			sendBtn: 'Voye mesaj la',
+			sendError: 'Mesaj la pa ka voye.'
+		}
+	};
+	let t = $derived(i18n[currentLang]);
 
 	let fullName = $state('');
 	let userEmail = $state('');
@@ -37,14 +128,14 @@
 				body: JSON.stringify({ name: fullName, email: userEmail, subject, message })
 			});
 			const data = await response.json().catch(() => ({}));
-			if (!response.ok) throw new Error(data.message || 'Impossible d’envoyer le message.');
+			if (!response.ok) throw new Error(data.message || t.sendError);
 			isSubmitting = false;
-			successMessage = 'Mesaj ou a byen voye! Ekip nou an ap reponn ou nan adrès imèl ou nan mwens pase 24 èdtan.';
+			successMessage = t.successDefaultMessage;
 			fullName = '';
 			userEmail = '';
 			message = '';
 		} catch (error) {
-			errorMessage = error instanceof Error ? error.message : 'Impossible d’envoyer le message.';
+			errorMessage = error instanceof Error ? error.message : t.sendError;
 		} finally {
 			isSubmitting = false;
 		}
@@ -52,10 +143,10 @@
 </script>
 
 <svelte:head>
-	<title>Nous contacter · DJR Akademi</title>
+	<title>{t.pageTitle}</title>
 	<meta
 		name="description"
-		content="Contactez l'équipe de DJR Akademi pour toute question sur nos formations, nos ebooks PDF ou nos coachings."
+		content={t.metaDesc}
 	/>
 </svelte:head>
 
@@ -68,11 +159,11 @@
 			<!-- Back button -->
 			<div>
 				<a
-					href="/"
+					href={getHref('/')}
 					class="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-950 transition-colors"
 				>
 					<ChevronLeft size={16} />
-					Tounen nan akèy
+					{t.backHome}
 				</a>
 			</div>
 
@@ -84,7 +175,7 @@
 							<CheckCircle2 size={22} />
 						</div>
 						<div>
-							<h3 class="font-black text-base text-white">Mesaj la voye ak siksè !</h3>
+							<h3 class="font-black text-base text-white">{t.successBannerTitle}</h3>
 							<p class="text-xs text-emerald-200/80 mt-1 leading-relaxed">{successMessage}</p>
 						</div>
 					</div>
@@ -93,7 +184,7 @@
 						onclick={() => (successMessage = null)}
 						class="text-xs font-bold text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg bg-white/10"
 					>
-						Fèmen
+						{t.close}
 					</button>
 				</div>
 			{/if}
@@ -115,15 +206,15 @@
 
 						<div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/10 rounded-full text-xs font-bold text-amber-400 border border-white/10">
 							<Sparkles size={14} />
-							Sèvis Sipò Kliyan
+							{t.supportBadge}
 						</div>
 
 						<h1 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
-							Ou gen yon kesyon ? Kontakte nou
+							{t.heroTitle}
 						</h1>
 
 						<p class="text-white/60 text-sm leading-relaxed">
-							Ekip nou an la pou ede w nan aprantisaj ou, reponn kesyon w sou kontni nou yo oswa rezoud nenpòt pwoblèm teknik.
+							{t.heroDesc}
 						</p>
 
 						<div class="pt-4 border-t border-white/10 space-y-4">
@@ -132,8 +223,8 @@
 									<Clock size={18} />
 								</div>
 								<div>
-									<p class="text-xs font-bold text-white">Repons rapid garanti</p>
-									<p class="text-[11px] text-white/50">N ap reponn mesaj ou an mwens ke 24h</p>
+									<p class="text-xs font-bold text-white">{t.fastResponseTitle}</p>
+									<p class="text-[11px] text-white/50">{t.fastResponseDesc}</p>
 								</div>
 							</div>
 
@@ -142,8 +233,8 @@
 									<ShieldCheck size={18} />
 								</div>
 								<div>
-									<p class="text-xs font-bold text-white">Sipò pèsonalize</p>
-									<p class="text-[11px] text-white/50">Yon moun pou ede w nan chak demand</p>
+									<p class="text-xs font-bold text-white">{t.personalizedSupportTitle}</p>
+									<p class="text-[11px] text-white/50">{t.personalizedSupportDesc}</p>
 								</div>
 							</div>
 						</div>
@@ -155,21 +246,21 @@
 							<div class="size-8 bg-zinc-100 text-zinc-950 rounded-xl grid place-items-center">
 								<HelpCircle size={18} />
 							</div>
-							<h3 class="font-black text-sm text-zinc-950">Kesyon moun poze souvan</h3>
+							<h3 class="font-black text-sm text-zinc-950">{t.faqTitle}</h3>
 						</div>
 
 						<ul class="space-y-3 text-xs text-zinc-600">
 							<li class="flex items-start gap-2">
 								<span class="text-amber-500 font-black">·</span>
-								<span><strong>Aksè fòmasyon :</strong> Disponib dirèkteman apre peman an konfime.</span>
+								<span><strong>{t.faqAccessTitle}</strong> {t.faqAccessDesc}</span>
 							</li>
 							<li class="flex items-start gap-2">
 								<span class="text-amber-500 font-black">·</span>
-								<span><strong>Ebook PDF :</strong> Telechajman dirèk nan bon kalite.</span>
+								<span><strong>{t.faqEbookTitle}</strong> {t.faqEbookDesc}</span>
 							</li>
 							<li class="flex items-start gap-2">
 								<span class="text-amber-500 font-black">·</span>
-								<span><strong>Mwayen peman :</strong> MonCash, Natcash ak kat entènasyonal yo aksepte.</span>
+								<span><strong>{t.faqPaymentTitle}</strong> {t.faqPaymentDesc}</span>
 							</li>
 						</ul>
 					</div>
@@ -186,8 +277,8 @@
 									<MessageSquareText size={20} />
 								</div>
 								<div>
-									<h2 class="text-xl font-black text-zinc-950">Voye yon mesaj pou nou</h2>
-									<p class="text-xs text-zinc-400">Rempli fòm sa a n ap reponn demand ou an</p>
+									<h2 class="text-xl font-black text-zinc-950">{t.formTitle}</h2>
+									<p class="text-xs text-zinc-400">{t.formSubtitle}</p>
 								</div>
 							</div>
 							<span class="text-xs font-bold text-zinc-400 uppercase tracking-wider hidden sm:inline-block">
@@ -201,14 +292,14 @@
 								<!-- Full Name -->
 								<div>
 									<label for="full-name" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-										Non konplè ou *
+										{t.fullNameLabel}
 									</label>
 									<div class="relative">
 										<input
 											id="full-name"
 											type="text"
 											bind:value={fullName}
-											placeholder="Ex: Jean Pierre"
+											placeholder={t.fullNamePlaceholder}
 											required
 											class="w-full h-12 pl-11 pr-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
 										/>
@@ -219,14 +310,14 @@
 								<!-- Email Address -->
 								<div>
 									<label for="user-email" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-										Adrès Imèl ou *
+										{t.emailLabel}
 									</label>
 									<div class="relative">
 										<input
 											id="user-email"
 											type="email"
 											bind:value={userEmail}
-											placeholder="jean.pierre@example.com"
+											placeholder={t.emailPlaceholder}
 											required
 											class="w-full h-12 pl-11 pr-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
 										/>
@@ -238,31 +329,31 @@
 							<!-- Subject Dropdown -->
 							<div>
 								<label for="subject" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-									Sijè mesaj ou a *
+									{t.subjectLabel}
 								</label>
 								<select
 									id="subject"
 									bind:value={subject}
 									class="w-full h-12 px-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all bg-white"
 								>
-									<option value="Question sur une formation">Kesyon sou yon fòmasyon videyo</option>
-									<option value="Question sur un ebook">Achte oswa telechaje yon Ebook PDF</option>
-									<option value="Coaching individuel">Sesyon Coaching 1:1</option>
-									<option value="Support technique">Sipò teknik / Aksè nan kont</option>
-									<option value="Autre demande">Lòt demand</option>
+									<option value="Question sur une formation">{t.subjOption1}</option>
+									<option value="Question sur un ebook">{t.subjOption2}</option>
+									<option value="Coaching individuel">{t.subjOption3}</option>
+									<option value="Support technique">{t.subjOption4}</option>
+									<option value="Autre demande">{t.subjOption5}</option>
 								</select>
 							</div>
 
 							<!-- Message Textarea -->
 							<div>
 								<label for="message" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-									Mesaj ou a *
+									{t.messageLabel}
 								</label>
 								<textarea
 									id="message"
 									bind:value={message}
 									rows="5"
-									placeholder="Ekri sa w bezwen an ak tout detay..."
+									placeholder={t.messagePlaceholder}
 									required
 									class="w-full p-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all resize-none"
 								></textarea>
@@ -271,7 +362,7 @@
 							<!-- Submit Button -->
 							<div class="pt-4 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-4">
 								<span class="text-xs text-zinc-400">
-									* Enfòmasyon ou yo rete ansekirite.
+									{t.privacyNote}
 								</span>
 
 								<button
@@ -280,7 +371,7 @@
 									class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-2xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 cursor-pointer"
 								>
 									<Send size={15} />
-									{isSubmitting ? 'Voye ap fèt...' : 'Voye mesaj la'}
+									{isSubmitting ? t.sending : t.sendBtn}
 								</button>
 							</div>
 

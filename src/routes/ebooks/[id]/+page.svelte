@@ -8,11 +8,102 @@
 	import type { Ebook } from '$lib/types/admin';
 	import { formatPublicPrice } from '$lib/utils/public-price';
 	import { FileText, ChevronLeft, Download, CheckCircle2, ShoppingBag, Loader2 } from 'lucide-svelte';
-
 	import PaymentMethodModal from '$lib/components/PaymentMethodModal.svelte';
 	import { initiatePlopplopPayment, verifyLemonSqueezyPurchase } from '$lib/services/payments';
 	import { claimFreeEbook, ownsEbook } from '$lib/services/ebook-access';
 	import { authState } from '$lib/auth.svelte';
+	import { toast } from '$lib/toast.svelte';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	const i18n = {
+		fr: {
+			metaTitle: (t: string) => `${t} · DJR Akademi`,
+			metaDesc: (d: string) => d || "Livre électronique DJR Akademi",
+			loading: "Chargement du livre électronique...",
+			notFound: "Livre électronique introuvable.",
+			backHome: "Retour à l'accueil",
+			backEbooks: "Tous les livres électroniques",
+			kicker: "Livre électronique PDF",
+			salesCount: (n: number) => `${n} vente${n > 1 ? 's' : ''}`,
+			formatPdf: "Format PDF",
+			free: "Gratuit",
+			btnFree: "Télécharger gratuitement",
+			btnBuy: "Acheter ce livre électronique",
+			btnBuyBottom: "Acheter maintenant",
+			loadingBtn: "Chargement...",
+			aboutTitle: "À propos de ce livre électronique",
+			aboutDescSuffix: "Ce guide est conçu pour une mise en pratique immédiate : chaque section vous donne des outils, des exemples et des étapes concrètes.",
+			features: [
+				"Accès immédiat après paiement",
+				"Format PDF téléchargeable",
+				"Contenu clair et pratique",
+				"Support par e-mail inclus"
+			],
+			featGrid: [
+				{ icon: '📄', title: 'Format PDF', desc: 'Compatible ordinateur, tablette et téléphone' },
+				{ icon: '⚡', title: 'Accès immédiat', desc: 'Téléchargement dès la confirmation du paiement' },
+				{ icon: '🎯', title: 'Contenu pratique', desc: 'Exercices et cas pratiques inclus' },
+				{ icon: '🔄', title: 'Mises à jour gratuites', desc: 'Nouvelles versions incluses à vie' }
+			],
+			questions: "Des questions ?",
+			contactForm: "Formulaire de contact",
+			loginToast: "Veuillez vous connecter à votre compte pour acheter ce livre électronique.",
+			loginFreeToast: "Veuillez vous connecter à votre compte pour télécharger ce livre électronique.",
+			alreadyOwnedToast: "Vous possédez déjà ce livre électronique ! Redirection en cours...",
+			freeClaimToast: "Livre électronique débloqué ! Vous pouvez le télécharger.",
+			errorClaimToast: "Impossible de débloquer ce livre électronique.",
+			errorPayment: "Une erreur est survenue lors du paiement."
+		},
+		ht: {
+			metaTitle: (t: string) => `${t} · DJR Akademi`,
+			metaDesc: (d: string) => d || "Liv dijital DJR Akademi",
+			loading: "N ap chaje liv dijital la...",
+			notFound: "Liv dijital la pa disponib.",
+			backHome: "Retounen nan akèy",
+			backEbooks: "Tout liv dijital yo",
+			kicker: "Gid PDF",
+			salesCount: (n: number) => `${n} vant`,
+			formatPdf: "Fòma PDF",
+			free: "Gratis",
+			btnFree: "Telechaje gratis",
+			btnBuy: "Achte ebook sa a",
+			btnBuyBottom: "Achte kounye a",
+			loadingBtn: "Chajman...",
+			aboutTitle: "Konsènan ebook sa a",
+			aboutDescSuffix: "Gid sa a fèt pou w ka aplike l dirèkteman: chak seksyon ba w zouti, egzanp ak etap konkrè pou w avanse byen vit.",
+			features: [
+				"Aksè imedyat apre peman",
+				"Fòma PDF ou ka telechaje",
+				"Kontni klè epi pratik",
+				"Sipò pa imèl enkli"
+			],
+			featGrid: [
+				{ icon: '📄', title: 'Fòma PDF', desc: 'Konpatib ak ordinatè, tablèt ak telefòn' },
+				{ icon: '⚡', title: 'Aksè imedyat', desc: 'Telechajman osito peman an konfime' },
+				{ icon: '🎯', title: 'Kontni pratik', desc: 'Eksèsis ak ka pratik enkli' },
+				{ icon: '🔄', title: 'Mizajou gratis', desc: 'Nouvèl vèsyon enkli pou tout tan' }
+			],
+			questions: "Kesyon ?",
+			contactForm: "Fòm kontak",
+			loginToast: "Tanpri konekte sou kont ou pou w ka achte ebook sa a.",
+			loginFreeToast: "Tanpri konekte sou kont ou pou w ka telechaje ebook sa a.",
+			alreadyOwnedToast: "Ou gen ebook sa a deja! N ap redirije w nan espas ou an.",
+			freeClaimToast: "Ebook debloke! Ou ka telechaje l kounye a.",
+			errorClaimToast: "Nou pa ka debloke ebook sa a.",
+			errorPayment: "Yon erè rive pandan n ap trete peman an."
+		}
+	};
+
+	let t = $derived(i18n[currentLang]);
+
+	function getHref(path: string): string {
+		if (currentLang !== 'ht') return path;
+		const [pathname, search] = path.split('?');
+		const params = new URLSearchParams(search || '');
+		params.set('lang', 'ht');
+		return `${pathname}?${params.toString()}`;
+	}
 
 	let ebook = $state<Ebook | null>(null);
 	let loading = $state(true);
@@ -32,27 +123,23 @@
 		}
 	});
 
-	import { toast } from '$lib/toast.svelte';
-
 	async function handleBuyClick() {
 		if (!ebook || checkoutLoading) return;
 
-		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
-			toast.info('Tanpri konekte sou kont ou pou w ka achte ebook sa a.');
+			toast.info(t.loginToast);
 			authState.openLogin(() => {
 				handleBuyClick();
 			});
 			return;
 		}
 
-		// 2. Vérifier si l'utilisateur possède déjà cet ebook
 		checkoutLoading = true;
 		try {
 			const existingAccess = await ownsEbook(ebook.id);
 			if (existingAccess) {
-				toast.info('Ou gen ebook sa a deja! N ap redirije w nan espas ou an.');
-				goto('/dashboard');
+				toast.info(t.alreadyOwnedToast);
+				goto(getHref('/dashboard'));
 				return;
 			}
 
@@ -63,7 +150,7 @@
 					const verification = await verifyLemonSqueezyPurchase(authState.user.email, 'ebook', ebook.id);
 					if (verification.ok && verification.success) {
 						toast.success(verification.message, 5000);
-						setTimeout(() => goto('/dashboard#sec-ebooks'), 1800);
+						setTimeout(() => goto(getHref('/dashboard#sec-ebooks')), 1800);
 						return;
 					}
 				} catch (err) {
@@ -82,7 +169,7 @@
 	async function handleFreeEnrollment() {
 		if (!ebook) return;
 		if (!authState.user) {
-			toast.info('Tanpri konekte sou kont ou pou w ka telechaje ebook sa a.');
+			toast.info(t.loginFreeToast);
 			authState.openLogin(() => {
 				handleFreeEnrollment();
 			});
@@ -91,10 +178,10 @@
 		checkoutLoading = true;
 		try {
 			await claimFreeEbook(ebook.id);
-			toast.success('Ebook debloke! Ou ka telechaje l kounye a.');
-			await goto('/dashboard#sec-ebooks');
+			toast.success(t.freeClaimToast);
+			await goto(getHref('/dashboard#sec-ebooks'));
 		} catch (caught) {
-			toast.error(caught instanceof Error ? caught.message : 'Nou pa ka debloke ebook sa a.');
+			toast.error(caught instanceof Error ? caught.message : t.errorClaimToast);
 		} finally {
 			checkoutLoading = false;
 		}
@@ -103,10 +190,9 @@
 	async function handleSelectPaymentMethod(method: 'moncash' | 'natcash' | 'carte' | 'plopplop_carte') {
 		if (!ebook || checkoutLoading) return;
 
-		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
 			showPaymentModal = false;
-			toast.info('Tanpri konekte sou kont ou pou w ka fè peman an.');
+			toast.info(t.loginToast);
 			authState.openLogin(() => {
 				handleBuyClick();
 			});
@@ -119,12 +205,11 @@
 			const userName = authState.user.name || 'Client';
 			const userEmail = authState.user.email || '';
 
-			// 2. Re-vérification si l'utilisateur possède déjà cet ebook
 			const existingAccess = await ownsEbook(ebook.id);
 			if (existingAccess) {
 				showPaymentModal = false;
-				toast.info('Ou gen ebook sa a deja! N ap redirije w nan espas ou an.');
-				goto('/dashboard');
+				toast.info(t.alreadyOwnedToast);
+				goto(getHref('/dashboard'));
 				return;
 			}
 
@@ -144,11 +229,11 @@
 				window.location.href = redirectTarget;
 				return;
 			} else {
-				toast.error(res?.message || 'Nou pa ka lanse peman an. Tanpri eseye ankò.');
+				toast.error(res?.message || t.errorPayment);
 			}
 		} catch (e: any) {
 			console.error('Plopplop ebook payment error:', e);
-			toast.error(e?.message || 'Yon erè rive pandan n ap trete peman an.');
+			toast.error(e?.message || t.errorPayment);
 		} finally {
 			checkoutLoading = false;
 		}
@@ -156,28 +241,28 @@
 </script>
 
 <svelte:head>
-	<title>{ebook ? ebook.title : 'Ebook'} · DJR Akademi</title>
-	<meta name="description" content={ebook?.description ?? 'Ebook DJR Akademi'} />
+	<title>{ebook ? t.metaTitle(ebook.title) : t.metaTitle('Ebook')}</title>
+	<meta name="description" content={t.metaDesc(ebook?.description ?? '')} />
 </svelte:head>
 
 {#if loading}
 	<div class="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
 		<div class="text-center space-y-4">
 			<Loader2 size={32} class="mx-auto animate-spin text-amber-400" />
-			<p class="text-zinc-400 text-sm">Chargement de l'ebook...</p>
+			<p class="text-zinc-400 text-sm">{t.loading}</p>
 		</div>
 	</div>
 {:else if !ebook}
 	<div class="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
 		<div class="text-center space-y-4">
-			<p class="text-zinc-400 text-sm">Ebook introuvable.</p>
+			<p class="text-zinc-400 text-sm">{t.notFound}</p>
 			<button
 				type="button"
-				onclick={() => goto('/')}
+				onclick={() => goto(getHref('/'))}
 				class="inline-flex items-center gap-2 px-6 py-3 bg-white text-black text-sm font-bold hover:bg-zinc-100 transition-colors"
 			>
 				<ChevronLeft size={16} />
-				Retour à l'accueil
+				{t.backHome}
 			</button>
 		</div>
 	</div>
@@ -192,11 +277,11 @@
 				<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 					<button
 						type="button"
-						onclick={() => goto('/#ebooks')}
+						onclick={() => goto(getHref('/#ebooks'))}
 						class="inline-flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors mb-8 font-medium"
 					>
 						<ChevronLeft size={14} />
-						Tout ebook yo
+						{t.backEbooks}
 					</button>
 
 					<div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -207,7 +292,7 @@
 								<div class="size-7 bg-amber-400 text-black grid place-items-center rounded-md">
 									<FileText size={14} />
 								</div>
-								<span class="text-xs font-bold text-white/40 uppercase tracking-widest">Gid PDF</span>
+								<span class="text-xs font-bold text-white/40 uppercase tracking-widest">{t.kicker}</span>
 							</div>
 
 							<h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight">
@@ -220,7 +305,7 @@
 
 							<!-- What's included -->
 							<div class="space-y-2">
-								{#each ['Aksè imedyat apre peman', 'Fòma PDF ou ka telechaje', 'Kontni klè epi pratik', 'Sipò pa imèl enkli'] as feature}
+								{#each t.features as feature}
 									<div class="flex items-center gap-2.5 text-sm text-white/60">
 										<CheckCircle2 size={15} class="text-emerald-400 shrink-0" />
 										{feature}
@@ -232,11 +317,11 @@
 							<div class="flex items-center gap-5 py-4 border-y border-white/10">
 								<div class="flex items-center gap-1.5 text-sm text-white/50">
 									<ShoppingBag size={15} class="text-white/30" />
-									<span class="font-semibold text-white">{ebook.salesCount}</span> vant
+									<span class="font-semibold text-white">{t.salesCount(ebook.salesCount)}</span>
 								</div>
 								<div class="flex items-center gap-1.5 text-sm text-white/50">
 									<Download size={15} class="text-white/30" />
-									Fòma PDF
+									{t.formatPdf}
 								</div>
 							</div>
 
@@ -244,7 +329,7 @@
 							<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
 								<div>
 									{#if ebook.isFree || ebook.price === 0}
-										<span class="text-4xl font-black text-emerald-400">Gratis</span>
+										<span class="text-4xl font-black text-emerald-400">{t.free}</span>
 									{:else}
 										<span class="text-4xl font-black text-white">{formatPublicPrice(ebook.price, ebook.priceUsd)}</span>
 									{/if}
@@ -257,11 +342,11 @@
 								>
 									<Download size={17} />
 									{#if checkoutLoading}
-										<span>Chajman...</span>
+										<span>{t.loadingBtn}</span>
 									{:else if ebook.isFree || ebook.price === 0}
-										Telechaje gratis
+										{t.btnFree}
 									{:else}
-										Achte ebook sa a
+										{t.btnBuy}
 									{/if}
 								</button>
 							</div>
@@ -301,20 +386,15 @@
 			<section class="py-14 bg-white border-b border-zinc-100">
 				<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 					<div>
-						<h2 class="text-xl font-black text-zinc-950 mb-4 tracking-tight">Konsènan ebook sa a</h2>
+						<h2 class="text-xl font-black text-zinc-950 mb-4 tracking-tight">{t.aboutTitle}</h2>
 						<p class="text-zinc-500 text-sm leading-relaxed">
-							{ebook.description} Gid sa a fèt pou w ka aplike l dirèkteman: chak seksyon ba w zouti, egzanp ak etap konkrè pou w avanse byen vit.
+							{ebook.description} {t.aboutDescSuffix}
 						</p>
 					</div>
 
 					<!-- Feature grid -->
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						{#each [
-							{ icon: '📄', title: 'Fòma PDF', desc: 'Konpatib ak ordinatè, tablèt ak telefòn' },
-							{ icon: '⚡', title: 'Aksè imedyat', desc: 'Telechajman osito peman an konfime' },
-							{ icon: '🎯', title: 'Kontni pratik', desc: 'Eksèsis ak ka pratik enkli' },
-							{ icon: '🔄', title: 'Mizajou gratis', desc: 'Nouvèl vèsyon enkli pou tout tan' }
-						] as feat}
+						{#each t.featGrid as feat}
 							<div class="flex items-start gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
 								<span class="text-2xl shrink-0">{feat.icon}</span>
 								<div>
@@ -334,7 +414,7 @@
 					<p class="text-white/50 text-sm leading-relaxed">{ebook.description}</p>
 					<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
 						{#if ebook.isFree || ebook.price === 0}
-							<span class="text-3xl font-black text-emerald-400">Gratis</span>
+							<span class="text-3xl font-black text-emerald-400">{t.free}</span>
 						{:else}
 							<span class="text-3xl font-black">{formatPublicPrice(ebook.price, ebook.priceUsd)}</span>
 						{/if}
@@ -345,11 +425,11 @@
 							class="inline-flex items-center gap-2 px-8 py-3.5 bg-amber-400 hover:bg-amber-300 text-black font-black text-sm transition-colors cursor-pointer disabled:opacity-50"
 						>
 							<Download size={15} />
-							{ebook.isFree || ebook.price === 0 ? 'Telechaje gratis' : 'Achte kounye a'}
+							{ebook.isFree || ebook.price === 0 ? t.btnFree : t.btnBuyBottom}
 						</button>
 					</div>
 					<p class="text-white/30 text-xs">
-						Kesyon ? <a href="/contact" class="underline hover:text-white/60 transition-colors">Fòm kontak</a>
+						{t.questions} <a href={getHref('/contact')} class="underline hover:text-white/60 transition-colors">{t.contactForm}</a>
 					</p>
 				</div>
 			</section>

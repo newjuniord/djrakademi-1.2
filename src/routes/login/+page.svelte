@@ -9,7 +9,57 @@
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import { Lock, Mail, User as UserIcon, ArrowRight, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-svelte';
 
-	let redirectTarget = $derived(page.url.searchParams.get('redirect') || '/dashboard');
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	const i18n = {
+		fr: {
+			pageTitleLogin: 'Connexion · DJR Akademi',
+			pageTitleSignup: 'Créer un compte · DJR Akademi',
+			metaDesc: 'Connectez-vous à votre compte DJR Akademi pour accéder à vos formations.',
+			headingLogin: 'Se connecter à votre compte',
+			headingSignup: 'Créer votre compte DJR Akademi',
+			subLogin: 'Entrez votre email et mot de passe pour continuer.',
+			subSignup: 'Remplissez vos informations pour commencer.',
+			tabLogin: 'Connexion',
+			tabSignup: 'Inscription',
+			fullNameLabel: 'Nom complet',
+			fullNamePlaceholder: 'Jean Pierre',
+			emailLabel: 'Adresse Email',
+			emailPlaceholder: 'vous@exemple.com',
+			passwordLabel: 'Mot de passe',
+			passwordPlaceholder: '••••••••',
+			hidePassword: 'Masquer le mot de passe',
+			showPassword: 'Afficher le mot de passe',
+			loadingText: 'Veuillez patienter…',
+			submitLogin: 'Se connecter maintenant',
+			submitSignup: 'Créer mon compte'
+		},
+		ht: {
+			pageTitleLogin: 'Konekte · DJR Akademi',
+			pageTitleSignup: 'Kreye yon kont · DJR Akademi',
+			metaDesc: 'Konekte sou kont DJR Akademi ou an pou w jwenn aksè nan fòmasyon w yo.',
+			headingLogin: 'Konekte sou kont ou',
+			headingSignup: 'Kreye kont DJR Akademi ou',
+			subLogin: 'Antre imel ak modpas ou pou w kontinye.',
+			subSignup: 'Ranpli enfòmasyon w yo pou w kòmanse.',
+			tabLogin: 'Koneksyon',
+			tabSignup: 'Enskripsyon',
+			fullNameLabel: 'Non konplè',
+			fullNamePlaceholder: 'Jan Batis',
+			emailLabel: 'Adrès Imèl',
+			emailPlaceholder: 'ou@egzanp.com',
+			passwordLabel: 'Modpas',
+			passwordPlaceholder: '••••••••',
+			hidePassword: 'Kache modpas la',
+			showPassword: 'Montre modpas la',
+			loadingText: 'Tanpri mezon…',
+			submitLogin: 'Konekte kounye a',
+			submitSignup: 'Kreye kont mwen'
+		}
+	};
+	let t = $derived(i18n[currentLang]);
+
+	let redirectTarget = $derived(page.url.searchParams.get('redirect') || (currentLang === 'ht' ? '/dashboard?lang=ht' : '/dashboard'));
 
 	let mode = $state<'login' | 'signup'>('login');
 	let name = $state('');
@@ -67,8 +117,8 @@
 </script>
 
 <svelte:head>
-	<title>{mode === 'login' ? 'Konekte' : 'Kreye yon kont'} · DJR Akademi</title>
-	<meta name="description" content="Konekte sou kont DJR Akademi ou an pou w jwenn aksè nan fòmasyon w yo." />
+	<title>{mode === 'login' ? t.pageTitleLogin : t.pageTitleSignup}</title>
+	<meta name="description" content={t.metaDesc} />
 </svelte:head>
 
 <div class="min-h-screen bg-zinc-50 flex flex-col font-sans text-zinc-900">
@@ -82,10 +132,10 @@
 					<Lock size={22} />
 				</div>
 				<h1 class="text-2xl font-black tracking-tight text-zinc-950">
-					{mode === 'login' ? 'Konekte sou kont ou' : 'Kreye kont DJR Akademi ou'}
+					{mode === 'login' ? t.headingLogin : t.headingSignup}
 				</h1>
 				<p class="text-xs text-zinc-500 font-medium">
-					{mode === 'login' ? 'Antre imel ak modpas ou pou w kontinye.' : 'Ranpli enfòmasyon w yo pou w kòmanse.'}
+					{mode === 'login' ? t.subLogin : t.subSignup}
 				</p>
 			</div>
 
@@ -96,14 +146,14 @@
 					onclick={() => { mode = 'login'; errorMessage = null; showPassword = false; }}
 					class="flex-1 py-2 rounded-lg text-xs font-extrabold transition-all text-center {mode === 'login' ? 'bg-white text-zinc-950 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'}"
 				>
-					Koneksyon
+					{t.tabLogin}
 				</button>
 				<button
 					type="button"
 					onclick={() => { mode = 'signup'; errorMessage = null; showPassword = false; }}
 					class="flex-1 py-2 rounded-lg text-xs font-extrabold transition-all text-center {mode === 'signup' ? 'bg-white text-zinc-950 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'}"
 				>
-					Enskripsyon
+					{t.tabSignup}
 				</button>
 			</div>
 
@@ -117,14 +167,14 @@
 			<form onsubmit={handleSubmit} class="space-y-4">
 				{#if mode === 'signup'}
 					<div>
-						<label for="name" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Non konplè</label>
+						<label for="name" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">{t.fullNameLabel}</label>
 						<div class="relative">
 							<input
 								id="name"
 								type="text"
 								bind:value={name}
 								required
-								placeholder="Jan Batis"
+								placeholder={t.fullNamePlaceholder}
 								class="w-full h-11 pl-10 pr-4 rounded-xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
 							/>
 							<UserIcon size={16} class="absolute left-3.5 top-3 text-zinc-400" />
@@ -133,14 +183,14 @@
 				{/if}
 
 				<div>
-					<label for="email" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Adrès Imèl</label>
+					<label for="email" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">{t.emailLabel}</label>
 					<div class="relative">
 						<input
 							id="email"
 							type="email"
 							bind:value={email}
 							required
-							placeholder="ou@egzanp.com"
+							placeholder={t.emailPlaceholder}
 							class="w-full h-11 pl-10 pr-4 rounded-xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
 						/>
 						<Mail size={16} class="absolute left-3.5 top-3 text-zinc-400" />
@@ -148,7 +198,7 @@
 				</div>
 
 				<div>
-					<label for="password" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Modpas</label>
+					<label for="password" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">{t.passwordLabel}</label>
 					<div class="relative">
 						<input
 							id="password"
@@ -156,7 +206,7 @@
 							bind:value={password}
 							required
 							minlength={8}
-							placeholder="••••••••"
+							placeholder={t.passwordPlaceholder}
 							class="w-full h-11 pl-10 pr-11 rounded-xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
 						/>
 						<Lock size={16} class="absolute left-3.5 top-3 text-zinc-400" />
@@ -165,7 +215,7 @@
 							onclick={() => (showPassword = !showPassword)}
 							disabled={loading}
 							class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-400 hover:text-zinc-700 focus:outline-none transition-colors disabled:opacity-50"
-							aria-label={showPassword ? 'Kache modpas la' : 'Montre modpas la'}
+							aria-label={showPassword ? t.hidePassword : t.showPassword}
 							aria-pressed={showPassword}
 						>
 							{#if showPassword}
@@ -184,9 +234,9 @@
 				>
 					{#if loading}
 						<Loader2 size={16} class="animate-spin" />
-						Tanpri mezon…
+						{t.loadingText}
 					{:else}
-						{mode === 'login' ? 'Konekte kounye a' : 'Kreye kont mwen'}
+						{mode === 'login' ? t.submitLogin : t.submitSignup}
 						<ArrowRight size={15} />
 					{/if}
 				</button>
