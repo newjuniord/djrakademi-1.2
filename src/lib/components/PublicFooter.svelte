@@ -1,12 +1,66 @@
 <script lang="ts">
 	import { ArrowUpRight, ShieldCheck } from 'lucide-svelte';
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 
 	const DEFAULT_SITE_NAME = 'DJR AKADEMI';
 	const DEFAULT_LOGO_URL = '/logo.png';
 
 	let siteName = $state(DEFAULT_SITE_NAME);
 	let logoUrl = $state(DEFAULT_LOGO_URL);
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	const footerI18n = {
+		fr: {
+			tagline: "Apprenez des compétences numériques pratiques, progressez en toute confiance et créez de nouvelles opportunités.",
+			needHelp: "Besoin d'aide ?",
+			contactTeam: "Contacter l'équipe",
+			kicker: "Apprendre · Progresser · Réussir",
+			statement: "Des connaissances pratiques pour passer à l'action.",
+			exploreGroup: "Explorer",
+			home: "Accueil",
+			catalogue: "Catalogue",
+			bundles: "Offres groupées",
+			about: "À propos",
+			supportGroup: "Support",
+			verifyPayment: "Vérifier un paiement",
+			contact: "Contact",
+			terms: "Conditions d'utilisation",
+			copyright: (year: number, name: string) => `© ${year} ${name}. Tous droits réservés.`,
+			securePayment: "Paiement sécurisé",
+			location: "Port-au-Prince, Haïti"
+		},
+		ht: {
+			tagline: "Aprann konpetans dijital ki itil, avanse ak plis konfyans epi bati nouvo opòtinite.",
+			needHelp: "Ou bezwen asistans?",
+			contactTeam: "Pale avèk ekip la",
+			kicker: "Aprann · Avanse · Reyisi",
+			statement: "Konesans ki ede w pase nan aksyon.",
+			exploreGroup: "Eksplore",
+			home: "Akèy",
+			catalogue: "Katalòg",
+			bundles: "Pakèt resous",
+			about: "Konsènan nou",
+			supportGroup: "Sipò",
+			verifyPayment: "Verifye peman",
+			contact: "Kontak",
+			terms: "Kondisyon sèvis",
+			copyright: (year: number, name: string) => `© ${year} ${name}. Tout dwa rezève.`,
+			securePayment: "Peman sekirize",
+			location: "Pòtoprens, Ayiti"
+		}
+	};
+
+	let t = $derived(footerI18n[currentLang]);
+
+	function getHref(path: string): string {
+		if (currentLang !== 'ht') return path;
+		const [pathname, search] = path.split('?');
+		const params = new URLSearchParams(search || '');
+		params.set('lang', 'ht');
+		return `${pathname}?${params.toString()}`;
+	}
 
 	onMount(async () => {
 		try {
@@ -28,47 +82,47 @@
 	<div class="footer-shell">
 		<div class="footer-lead">
 			<div class="footer-brand">
-				<a href="/" class="footer-logo" aria-label={siteName + ' — Akèy'}>
+				<a href={getHref('/')} class="footer-logo" aria-label={siteName + (currentLang === 'ht' ? ' — Akèy' : ' — Accueil')}>
 					<img src={logoUrl} alt={siteName} />
 					<span>{siteName}</span>
 				</a>
-				<p>Aprann konpetans dijital ki itil, avanse ak plis konfyans epi bati nouvo opòtinite.</p>
+				<p>{t.tagline}</p>
 			</div>
 
 			<div class="footer-contact">
-				<span>Ou bezwen asistans?</span>
-				<a href="/contact">Pale avèk ekip la <ArrowUpRight size={18} /></a>
+				<span>{t.needHelp}</span>
+				<a href={getHref('/contact')}>{t.contactTeam} <ArrowUpRight size={18} /></a>
 			</div>
 		</div>
 
 		<div class="footer-directory">
 			<div class="footer-statement">
-				<span class="footer-kicker">Aprann · Avanse · Reyisi</span>
-				<h2>Konesans ki ede w pase nan aksyon.</h2>
+				<span class="footer-kicker">{t.kicker}</span>
+				<h2>{t.statement}</h2>
 			</div>
 
-			<nav class="footer-column" aria-label="Eksplore">
-				<h3>Eksplore</h3>
-				<a href="/">Akèy</a>
-				<a href="/catalogue">Katalòg</a>
-				<a href="/bundles">Bundles</a>
-				<a href="/about">Konsènan nou</a>
+			<nav class="footer-column" aria-label={t.exploreGroup}>
+				<h3>{t.exploreGroup}</h3>
+				<a href={getHref('/')}>{t.home}</a>
+				<a href={getHref('/catalogue')}>{t.catalogue}</a>
+				<a href={getHref('/bundles')}>{t.bundles}</a>
+				<a href={getHref('/about')}>{t.about}</a>
 			</nav>
 
-			<nav class="footer-column" aria-label="Sipò">
-				<h3>Sipò</h3>
-				<a href="/verify">Verifye peman</a>
-				<a href="/contact">Kontak</a>
-				<a href="/terms">Kondisyon sèvis</a>
+			<nav class="footer-column" aria-label={t.supportGroup}>
+				<h3>{t.supportGroup}</h3>
+				<a href={getHref('/verify')}>{t.verifyPayment}</a>
+				<a href={getHref('/contact')}>{t.contact}</a>
+				<a href={getHref('/terms')}>{t.terms}</a>
 			</nav>
 		</div>
 
 		<div class="footer-bottom">
-			<p>© 2026 {siteName}. Tout dwa rezève.</p>
+			<p>{t.copyright(2026, siteName)}</p>
 			<div class="footer-trust">
-				<span><ShieldCheck size={14} /> Peman sekirize</span>
+				<span><ShieldCheck size={14} /> {t.securePayment}</span>
 				<span>MonCash · Natcash</span>
-				<span>Pòtoprens, Ayiti</span>
+				<span>{t.location}</span>
 			</div>
 		</div>
 	</div>

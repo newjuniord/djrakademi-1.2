@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import BundleCard from '$lib/components/BundleCard.svelte';
@@ -29,11 +30,161 @@
 		HelpCircle,
 		Send,
 		Loader2,
-		AlertCircle
+		AlertCircle,
+		Clock
 	} from 'lucide-svelte';
 
 	import { authState } from '$lib/auth.svelte';
 	import { verifyLemonSqueezyEmail, verifyPlopplopReference } from '$lib/services/payments';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	const i18n = {
+		fr: {
+			metaTitle: "DJR Akademi · Formations, Livres électroniques & Consultations en ligne",
+			metaDesc: "Accédez à nos formations vidéo, livres électroniques et consultations individuelles. Développez vos compétences dès aujourd'hui avec DJR Akademi.",
+			badge: "Plateforme de formation en ligne",
+			heroTitle1: "Apprendre.",
+			heroTitle2: "Progresser.",
+			heroTitle3: "Réussir.",
+			heroIntro1: "Maîtrisez l'intelligence artificielle pour propulser votre carrière et vos revenus.",
+			heroIntro2: "DJR Akademi s'adresse à tous ceux qui souhaitent prendre une longueur d'avance à l'ère de l'intelligence artificielle.",
+			ctaCourses: "Découvrir les formations",
+			ctaCoaching: "Réserver une consultation",
+			ratingText: "Évaluation 4.9 sur 5, plus de 600 étudiants",
+			ratingScore: "4.9/5",
+			ratingCount: "600+ étudiants",
+			statCourses: "Formation",
+			statEbooks: "Livres électroniques",
+			statStudents: "Étudiants",
+			benefitOnline: "100% en ligne",
+			benefitAccess: "Accès rapide",
+			
+			coursesKicker: "Formations",
+			coursesTitle: "Apprenez à votre rythme",
+			coursesDesc: "Des formations complètes et structurées pour maîtriser de nouvelles compétences.",
+			coursesCount: (n: number) => `${n} disponible${n > 1 ? 's' : ''}`,
+			freeLabel: "Gratuit",
+			
+			ebooksKicker: "Bibliothèque DJR",
+			ebooksTitle: "Tout commence par une bonne lecture.",
+			ebooksDesc: "Des livres numériques à lire et appliquer pour évoluer à votre propre rythme.",
+			ebooksCount: (n: number) => `${n} livre${n > 1 ? 's' : ''} électronique${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}`,
+			ebookFormat: "LIVRE ÉLECTRONIQUE",
+			ebookRead: "Lire le livre",
+
+			bundlesKicker: "Offres groupées",
+			bundlesTitle: "Packs Formation + Livres électroniques",
+			bundlesDesc: "Un pack complet regroupant des ressources complémentaires à un tarif préférentiel.",
+			bundlesLink: "Voir tous les packs",
+
+			coachingKicker: "Consultation",
+			coachingTitle: "Consultations individuelles",
+			coachingDesc: "Un accompagnement sur mesure pour aller plus loin.",
+			coachingCount: (n: number) => `${n} consultation${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}`,
+			coachingCTA: "Réserver une consultation",
+			coachingDuration: (m: number) => `${m} min`,
+
+			supportKicker: "Support & Problèmes d'accès",
+			supportTitle: "Vous avez payé mais n'avez pas reçu votre accès ?",
+			supportDesc: "Si vous avez déjà effectué un paiement et n'avez pas accès à votre contenu, saisissez votre e-mail ou votre référence ci-dessous pour vérifier votre accès immédiatement.",
+			supportTabLabel: "Sélectionnez votre mode de paiement :",
+			supportTabCard: "Carte bancaire",
+			supportTabMobile: "MonCash / Natcash",
+			supportCardLabel: "E-mail de votre compte (identique à celui utilisé lors de l'achat sur Lemon Squeezy) *",
+			supportCardHelp: "Pour votre sécurité, utilisez l'e-mail de votre compte :",
+			supportRefLabel: "Numéro de référence de la transaction MonCash / Natcash *",
+			supportRefHelp: "Saisissez la référence figurant sur votre message de confirmation MonCash / Natcash.",
+			supportBtnLoading: "Vérification en cours...",
+			supportBtnSubmit: "Vérifier et débloquer mon accès",
+			supportNeedLogin: "Vous devez être connecté à votre compte pour vérifier un paiement.",
+			supportInvalidEmail: "Veuillez saisir une adresse e-mail valide.",
+			supportCardSuccess: "Votre paiement par carte a été vérifié avec succès ! Redirection en cours...",
+			supportCardError: (email: string) => `Aucun paiement confirmé trouvé sur Lemon Squeezy pour l'e-mail "${email}".`,
+			supportInvalidRef: "Veuillez saisir le numéro de référence de la transaction.",
+			supportRefSuccess: "Paiement vérifié avec succès ! Redirection en cours...",
+			supportRefError: (ref: string) => `Aucun paiement valide trouvé pour la référence "${ref}".`,
+			supportErrorGeneral: "Une erreur est survenue lors de la vérification. Veuillez nous contacter directement.",
+			
+			testimonialsKicker: "Témoignages",
+			t1Quote: "Je suis vraiment satisfait de la formation. J'ai appris beaucoup de choses que je ne savais pas auparavant.",
+			t1Role: "Étudiant DJR Akademi",
+			t1Verified: "Étudiant vérifié"
+		},
+		ht: {
+			metaTitle: "DJR Akademi · Fòmasyon, Liv dijital ak Konsiltasyon sou entènèt",
+			metaDesc: "Jwenn aksè ak fòmasyon videyo nou yo, liv dijital ak konsiltasyon endividyèl. Devlope konpetans ou jodi a ak DJR Akademi.",
+			badge: "Platfòm fòmasyon sou entènèt",
+			heroTitle1: "Aprann.",
+			heroTitle2: "Avanse.",
+			heroTitle3: "Reyisi.",
+			heroIntro1: "Aprann sèvi ak entelijans atifisyèl pou w ka amelyore konpetans ou ak revni w.",
+			heroIntro2: "DJR Akademi kreye pou tout moun ki pa vle rete dèyè nan epòk entelijans atifisyèl la.",
+			ctaCourses: "Gade fòmasyon yo",
+			ctaCoaching: "Rezève yon konsiltasyon",
+			ratingText: "Evalyasyon 4.9 sou 5, plis pase 600 etidyan",
+			ratingScore: "4.9/5",
+			ratingCount: "600+ etidyan",
+			statCourses: "Fòmasyon",
+			statEbooks: "Liv dijital",
+			statStudents: "Etidyan",
+			benefitOnline: "100% sou entènèt",
+			benefitAccess: "Aksè rapid",
+
+			coursesKicker: "Fòmasyon",
+			coursesTitle: "Aprann nan ritm pa w",
+			coursesDesc: "Fòmasyon konplè epi byen òganize pou w ka mèt sou nouvo konpetans.",
+			coursesCount: (n: number) => `${n} disponib`,
+			freeLabel: "Gratis",
+
+			ebooksKicker: "Bibliyotèk DJR",
+			ebooksTitle: "Tout kòmanse ak yon bon lekti.",
+			ebooksDesc: "Liv dijital pratik pou w li, aplike epi grandi nan ritm pa w.",
+			ebooksCount: (n: number) => `${n} liv dijital disponib`,
+			ebookFormat: "LIV DIJITAL",
+			ebookRead: "Li liv la",
+
+			bundlesKicker: "Pakèt resous",
+			bundlesTitle: "Pakèt fòmasyon + liv dijital",
+			bundlesDesc: "Yon sèl pak pou jwenn resous ki mache ansanm, ak yon pri espesyal.",
+			bundlesLink: "Gade tout pakèt yo",
+
+			coachingKicker: "Konsiltasyon",
+			coachingTitle: "Konsiltasyon endividyèl",
+			coachingDesc: "Yon swivi sou mezire pou w ale pi lwen.",
+			coachingCount: (n: number) => `${n} konsiltasyon disponib`,
+			coachingCTA: "Rezève yon konsiltasyon",
+			coachingDuration: (m: number) => `${m} min`,
+
+			supportKicker: "Sipò & Pwoblèm aksè",
+			supportTitle: "Ou peye epi w pa jwenn aksè?",
+			supportDesc: "Si ou te peye deja epi ou pa jwenn fòmasyon an, antre imèl ou oswa referans tranzaksyon w lan anba a pou n verifye aksè w la imedyatman.",
+			supportTabLabel: "Chwazi kijan w te peye:",
+			supportTabCard: "Kat bankè",
+			supportTabMobile: "MonCash / Natcash",
+			supportCardLabel: "Imèl kont ou an (menm ak sa w te itilize pandan achte a sou Lemon Squeezy) *",
+			supportCardHelp: "Pou sekirite w, itilize imèl kont ou an:",
+			supportRefLabel: "Nimewo referans tranzaksyon MonCash / Natcash an *",
+			supportRefHelp: "Antre nimewo referans ki sou mesaj konfimasyon MonCash / Natcash ou an.",
+			supportBtnLoading: "N ap verifye...",
+			supportBtnSubmit: "Verifye ak debloke aksè mwen",
+			supportNeedLogin: "Ou dwe konekte sou kont ou pou w ka verifye yon peman.",
+			supportInvalidEmail: "Tanpri antre yon adrès imèl ki valab.",
+			supportCardSuccess: "Peman pa kat ou an verifye ak siksè! N ap redirije w pou w kòmanse fòmasyon an...",
+			supportCardError: (email: string) => `Nou pa jwenn okenn peman konfime sou Lemon Squeezy pou imèl "${email}".`,
+			supportInvalidRef: "Tanpri antre nimewo referans tranzaksyon an.",
+			supportRefSuccess: "Peman verifye ak siksè! N ap redirije w pou w kòmanse fòmasyon an...",
+			supportRefError: (ref: string) => `Nou pa jwenn okenn peman valide pou referans "${ref}".`,
+			supportErrorGeneral: "Yon erè rive pandan verifikasyon an. Tanpri kontakte nou dirèkteman.",
+
+			testimonialsKicker: "Temwayaj",
+			t1Quote: "Mwen vrèman satisfè ak fòmasyon an. Mwen aprann anpil bagay mwen pa t konnen anvan.",
+			t1Role: "Etidyan DJR Akademi",
+			t1Verified: "Etidyan verifye"
+		}
+	};
+
+	let t = $derived(i18n[currentLang]);
 
 	let publishedCourses = $state<Course[]>([]);
 	let publishedEbooks = $state<Ebook[]>([]);
@@ -66,7 +217,7 @@
 		supportErrorMessage = null;
 
 		if (!authState.user) {
-			toast.error('Ou dwe konekte sou kont ou pou w ka verifye yon peman.');
+			toast.error(t.supportNeedLogin);
 			return;
 		}
 
@@ -76,7 +227,7 @@
 			if (supportMethod === 'carte') {
 				const email = supportEmail.trim();
 				if (!email || !email.includes('@')) {
-					toast.error('Tanpri antre yon adres imel ki valab.');
+					toast.error(t.supportInvalidEmail);
 					supportLoading = false;
 					return;
 				}
@@ -85,19 +236,19 @@
 
 				if (resData.ok && resData.success) {
 					const targetUrl = resData.courseId ? `/learn/${resData.courseId}` : '/dashboard';
-					supportSuccessMessage = 'Peman pa kat ou a verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...';
-					toast.success('Aksè debloke ak siksè ! Redirèksyon en kous...');
+					supportSuccessMessage = t.supportCardSuccess;
+					toast.success(t.supportCardSuccess);
 					setTimeout(() => {
 						goto(targetUrl);
 					}, 1000);
 				} else {
-					supportErrorMessage = resData.message || `Nou pa jwenn okenn peman konfime sou Lemon Squeezy pou imel "${email}".`;
-					toast.error('Erè nan verifikasyon an.');
+					supportErrorMessage = resData.message || t.supportCardError(email);
+					toast.error(supportErrorMessage || t.supportErrorGeneral);
 				}
 			} else {
 				const ref = supportReference.trim();
 				if (!ref) {
-					toast.error('Tanpri antre nimewo referans tranzaksyon an.');
+					toast.error(t.supportInvalidRef);
 					supportLoading = false;
 					return;
 				}
@@ -106,20 +257,20 @@
 
 				if (resData.ok && resData.success) {
 					const targetUrl = resData.courseId ? `/learn/${resData.courseId}` : '/dashboard';
-					supportSuccessMessage = 'Peman verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...';
-					toast.success('Aksè debloke ak siksè ! Redirèksyon en kous...');
+					supportSuccessMessage = t.supportRefSuccess;
+					toast.success(t.supportRefSuccess);
 					setTimeout(() => {
 						goto(targetUrl);
 					}, 1000);
 				} else {
-					supportErrorMessage = resData.message || `Nou pa jwenn okenn peman valide pou referans "${ref}".`;
-					toast.error('Erè nan verifikasyon an.');
+					supportErrorMessage = resData.message || t.supportRefError(ref);
+					toast.error(supportErrorMessage || t.supportErrorGeneral);
 				}
 			}
 		} catch (error) {
 			console.error('Support error:', error);
-			supportErrorMessage = 'Yon erè rive pandan verifikasyon an. Tanpri kontakte nou dirèkteman.';
-			toast.error('Erè nan verifikasyon an.');
+			supportErrorMessage = t.supportErrorGeneral;
+			toast.error(t.supportErrorGeneral);
 		} finally {
 			supportLoading = false;
 		}
@@ -127,11 +278,8 @@
 </script>
 
 <svelte:head>
-	<title>DJR Akademi · Formations, Ebooks & Coaching en ligne</title>
-	<meta
-		name="description"
-		content="Accédez à nos formations vidéo, ebooks PDF et séances de coaching individuel. Développez vos compétences dès aujourd'hui avec DJR Akademi."
-	/>
+	<title>{t.metaTitle}</title>
+	<meta name="description" content={t.metaDesc} />
 </svelte:head>
 
 <div class="min-h-screen bg-white flex flex-col font-sans text-zinc-900">
@@ -143,51 +291,47 @@
 		<section class="home-hero" aria-labelledby="home-hero-title">
 			<div class="hero-inner">
 				<div class="hero-copy">
-					<div class="hero-badge"><span aria-hidden="true"></span>Platfòm fòmasyon sou entènèt</div>
-
 					<h1 id="home-hero-title" class="hero-title">
-						<span>Aprann.</span>
-						<span class="hero-title-accent">Avanse.</span>
-						<span>Reyisi.</span>
+						<span>{t.heroTitle1}</span>
+						<span class="hero-title-accent">{t.heroTitle2}</span>
+						<span>{t.heroTitle3}</span>
 					</h1>
 
 					<div class="hero-intro">
-						<p>Aprann sèvi ak entelijans atifisyèl pou w ka sispann razè.</p>
-						<p>DJR Akademi se pou Ayisyen ki pa vle rete dèyè nan epòk entelijans atifisyèl la.</p>
+						<p>{t.heroIntro1}</p>
+						<p>{t.heroIntro2}</p>
 					</div>
 
 					<div class="hero-actions">
 						<a href="#courses" class="hero-primary">
 							<Play size={16} fill="currentColor" />
-							Gade fòmasyon yo
+							{t.ctaCourses}
 						</a>
-						<a href="#coaching" class="hero-secondary">Rezève yon coaching</a>
+						<a href="#coaching" class="hero-secondary">{t.ctaCoaching}</a>
 					</div>
 
-					<div class="hero-rating" aria-label="Evalyasyon 4.9 sou 5, plis pase 600 etidyan">
+					<div class="hero-rating" aria-label={t.ratingText}>
 						<div class="hero-stars" aria-hidden="true">
 							{#each [1, 2, 3, 4, 5] as star}
 								<Star size={19} fill="currentColor" />
 							{/each}
 						</div>
-						<strong>4.9/5</strong>
+						<strong>{t.ratingScore}</strong>
 						<span class="rating-divider" aria-hidden="true"></span>
-						<span>600+ etidyan</span>
+						<span>{t.ratingCount}</span>
 					</div>
 				</div>
 
 
 				<div class="hero-stats">
 					<div class="stats-numbers">
-						<div class="stat"><strong>1</strong><span>Fòmasyon</span></div>
-						<div class="stat"><strong>2</strong><span>Ebook PDF</span></div>
-						<div class="stat"><strong>600+</strong><span>Etidyan</span></div>
-						<div class="stat"><strong>4.9<small>/5</small></strong><span>Evalyasyon</span></div>
+						<div class="stat"><strong>1</strong><span>{t.statCourses}</span></div>
+						<div class="stat"><strong>2</strong><span>{t.statEbooks}</span></div>
+						<div class="stat"><strong>600+</strong><span>{t.statStudents}</span></div>
 					</div>
 					<div class="stats-benefits">
-						<span>100% sou entènèt</span>
-						<span>Aksè imedyat</span>
-						<span>Sipò dirèk</span>
+						<span>{t.benefitOnline}</span>
+						<span>{t.benefitAccess}</span>
 					</div>
 				</div>
 			</div>
@@ -203,11 +347,11 @@
 			<div class="courses-shell">
 				<div class="courses-heading">
 					<div>
-						<span class="courses-kicker">Fòmasyon</span>
-						<h2>Pwogram videyo</h2>
-						<p>Fòmasyon konplè epi byen ranje pou w ka mèt sou nouvèl konpetans.</p>
+						<span class="courses-kicker">{t.coursesKicker}</span>
+						<h2>{t.coursesTitle}</h2>
+						<p>{t.coursesDesc}</p>
 					</div>
-					<span class="courses-count">{publishedCourses.length} disponib</span>
+					<span class="courses-count">{t.coursesCount(publishedCourses.length)}</span>
 				</div>
 
 				<div class="courses-grid">
@@ -229,7 +373,7 @@
 									<h3><span>{String(index + 1).padStart(2, '0')}.</span> {course.title}</h3>
 									<p>
 										{#if course.isFree || course.price === 0}
-											Gratis
+											{t.freeLabel}
 										{:else}
 											{formatPublicPrice(course.price, course.priceUsd)}
 										{/if}
@@ -251,11 +395,11 @@
 			<div class="ebooks-shell">
 				<div class="ebooks-heading">
 					<div>
-						<span class="ebooks-kicker"><FileText size={14} /> Bibliyotèk DJR</span>
-						<h2 id="ebooks-title">Gid ki mete konesans nan men w.</h2>
-						<p>Resous pratik pou w li, aplike epi grandi nan ritm pa w.</p>
+						<span class="ebooks-kicker"><FileText size={14} /> {t.ebooksKicker}</span>
+						<h2 id="ebooks-title">{t.ebooksTitle}</h2>
+						<p>{t.ebooksDesc}</p>
 					</div>
-					<span class="ebooks-count">{publishedEbooks.length} gid disponib</span>
+					<span class="ebooks-count">{t.ebooksCount(publishedEbooks.length)}</span>
 				</div>
 
 				<div class="ebooks-grid">
@@ -268,14 +412,14 @@
 									<div class="ebook-placeholder"><FileText size={34} /><span>PDF</span></div>
 								{/if}
 								<div class="ebook-showcase-overlay"></div>
-								<span class="ebook-format">PDF · GID</span>
+								<span class="ebook-format">{t.ebookFormat}</span>
 								<span class="ebook-number">{String(index + 1).padStart(2, '0')}</span>
-								<span class="ebook-view">Li gid la <ArrowRight size={14} /></span>
+								<span class="ebook-view">{t.ebookRead} <ArrowRight size={14} /></span>
 							</div>
 							<div class="ebook-showcase-meta">
 								<div>
 									<h3>{ebook.title}</h3>
-									<p>{ebook.isFree || ebook.price === 0 ? 'Gratis' : formatPublicPrice(ebook.price, ebook.priceUsd)}</p>
+									<p>{ebook.isFree || ebook.price === 0 ? t.freeLabel : formatPublicPrice(ebook.price, ebook.priceUsd)}</p>
 								</div>
 								<span class="ebook-arrow"><ArrowRight size={18} /></span>
 							</div>
@@ -288,7 +432,14 @@
 		{#if publishedBundles.length > 0}
 			<section class="border-y border-zinc-200 bg-amber-50/50 py-16 sm:py-20" aria-labelledby="home-bundles-title">
 				<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-					<div class="mb-8 flex flex-wrap items-end justify-between gap-5"><div><span class="text-xs font-black uppercase tracking-widest text-amber-700">Plis ansanm</span><h2 id="home-bundles-title" class="mt-2 text-3xl font-black tracking-tight text-zinc-950">Bundles fòmasyon + e-books</h2><p class="mt-2 max-w-2xl text-sm text-zinc-600">Yon sèl pak pou jwenn resous ki mache ansanm, ak yon pri espesyal.</p></div><a href="/bundles" class="inline-flex items-center gap-2 text-sm font-black text-zinc-950 hover:text-amber-700">Gade tout bundles yo <ArrowRight size={17} /></a></div>
+					<div class="mb-8 flex flex-wrap items-end justify-between gap-5">
+						<div>
+							<span class="text-xs font-black uppercase tracking-widest text-amber-700">{t.bundlesKicker}</span>
+							<h2 id="home-bundles-title" class="mt-2 text-3xl font-black tracking-tight text-zinc-950">{t.bundlesTitle}</h2>
+							<p class="mt-2 max-w-2xl text-sm text-zinc-600">{t.bundlesDesc}</p>
+						</div>
+						<a href="/bundles" class="inline-flex items-center gap-2 text-sm font-black text-zinc-950 hover:text-amber-700">{t.bundlesLink} <ArrowRight size={17} /></a>
+					</div>
 					<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{#each publishedBundles.slice(0, 3) as bundle (bundle.id)}<BundleCard {bundle} />{/each}</div>
 				</div>
 			</section>
@@ -307,17 +458,17 @@
 							<div class="size-8 bg-zinc-950 text-white grid place-items-center rounded-lg">
 								<CalendarCheck size={16} />
 							</div>
-							<span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Coaching</span>
+							<span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t.coachingKicker}</span>
 						</div>
 						<h2 class="text-3xl sm:text-4xl font-black text-zinc-950 tracking-tight">
-							Sesyon endividyèl
+							{t.coachingTitle}
 						</h2>
 						<p class="text-zinc-500 text-sm mt-2 max-w-lg">
-							Yon swivi pèsonalize dirèkteman ak pwofesè a pou w ale pi lwen.
+							{t.coachingDesc}
 						</p>
 					</div>
 					<span class="self-start sm:self-auto px-3.5 py-1.5 bg-zinc-100 text-zinc-600 text-xs font-bold rounded-full">
-						{activeCoaching.length} sèvis aktif
+						{t.coachingCount(activeCoaching.length)}
 					</span>
 				</div>
 
@@ -326,43 +477,52 @@
 					{#each activeCoaching as coaching (coaching.id)}
 						<a
 							href="/coaching/{coaching.slug}"
-							class="group text-left flex flex-col p-8 bg-zinc-50 rounded-2xl border border-zinc-200/80 hover:border-zinc-300 hover:bg-white hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-zinc-950"
+							class="group relative text-left flex flex-col p-7 sm:p-8 bg-gradient-to-b from-white via-white to-zinc-50/70 rounded-3xl border border-zinc-200/90 shadow-xs hover:shadow-2xl hover:border-amber-400/70 hover:-translate-y-1.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-zinc-950 overflow-hidden"
 						>
-							<!-- Icon -->
-							<div class="size-12 bg-zinc-950 text-amber-400 rounded-xl grid place-items-center mb-6 shadow-sm group-hover:scale-105 transition-transform">
-								<CalendarCheck size={22} />
+							<!-- Background Ambient Glow -->
+							<div class="absolute -right-12 -top-12 size-40 bg-amber-400/10 rounded-full blur-2xl group-hover:bg-amber-400/25 transition-all duration-500 pointer-events-none"></div>
+
+							<!-- Top Accent Gradient Line -->
+							<div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+							<!-- Header Row (Icon + Duration Badge) -->
+							<div class="flex items-center justify-between gap-4 mb-6 relative z-10">
+								<div class="size-13 rounded-2xl bg-zinc-950 text-amber-400 grid place-items-center shadow-md shadow-zinc-950/10 group-hover:bg-amber-400 group-hover:text-zinc-950 group-hover:scale-105 transition-all duration-300">
+									<CalendarCheck size={24} />
+								</div>
+								<span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-950 text-xs font-bold transition-colors">
+									<Clock size={13} class="text-amber-700" />
+									{t.coachingDuration(coaching.durationMinutes)}
+								</span>
 							</div>
 
-							<!-- Title -->
-							<h3 class="font-black text-lg text-zinc-950 group-hover:text-amber-600 transition-colors leading-snug mb-2">
-								{coaching.title}
-							</h3>
+							<!-- Content -->
+							<div class="relative z-10 flex-1 flex flex-col">
+								<h3 class="font-black text-xl text-zinc-950 group-hover:text-amber-700 transition-colors leading-tight mb-2.5">
+									{coaching.title}
+								</h3>
 
-							<p class="text-zinc-500 text-xs leading-relaxed line-clamp-3 flex-1">
-								{coaching.description}
-							</p>
+								<p class="text-zinc-500 text-sm leading-relaxed line-clamp-3 flex-1 mb-6">
+									{coaching.description}
+								</p>
+							</div>
 
-							<!-- Duration & Price -->
-							<div class="mt-6 pt-5 border-t border-zinc-200/60 flex items-center justify-between">
-								<span class="text-xs text-zinc-500 font-medium flex items-center gap-1.5">
-									<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-									{coaching.durationMinutes} min
-								</span>
-								<div class="text-right">
+							<!-- Price Row -->
+							<div class="relative z-10 pt-4 border-t border-zinc-100 mb-5 flex items-center justify-between">
+								<span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Tarif / Pri</span>
+								<div>
 									{#if coaching.isFree || coaching.price === 0}
-										<span class="font-black text-lg text-emerald-600">Gratis</span>
+										<span class="font-black text-lg text-emerald-600">{t.freeLabel}</span>
 									{:else}
-										<div>
-											<span class="font-black text-xl text-zinc-950">{formatPublicPrice(coaching.price, coaching.priceUsd)}</span>
-										</div>
+										<span class="font-black text-2xl text-zinc-950 tracking-tight">{formatPublicPrice(coaching.price, coaching.priceUsd)}</span>
 									{/if}
 								</div>
 							</div>
 
-							<!-- CTA Arrow -->
-							<div class="mt-4 flex items-center gap-2 text-xs font-bold text-zinc-950 group-hover:gap-3 transition-all">
-								<span>Rezeve yon sesyon</span>
-								<ArrowRight size={14} />
+							<!-- Primary CTA Button Bar -->
+							<div class="relative z-10 w-full h-11 rounded-2xl bg-zinc-950 group-hover:bg-amber-400 text-white group-hover:text-zinc-950 font-bold text-xs flex items-center justify-center gap-2 transition-all duration-300 shadow-sm group-hover:shadow-md">
+								<span>{t.coachingCTA}</span>
+								<ArrowRight size={15} class="group-hover:translate-x-1 transition-transform duration-200" />
 							</div>
 						</a>
 					{/each}
@@ -386,19 +546,19 @@
 						<div class="space-y-3">
 							<div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-400/10 border border-amber-400/20 rounded-full text-amber-400 text-xs font-bold uppercase tracking-wider">
 								<HelpCircle size={14} />
-								Sipò & Pwoblèm aksè
+								{t.supportKicker}
 							</div>
 							<h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
-								Ou peye epi w pa jwenn aksè ?
+								{t.supportTitle}
 							</h2>
 							<p class="text-white/60 text-sm leading-relaxed max-w-xl">
-								Si ou te peye deja sou lòt sit la epi ou pa jwenn kou an, mete imèl ou anba a epi n ap verifye tranzaksyon w lan imedyatman.
+								{t.supportDesc}
 							</p>
 						</div>
 
 						<!-- Payment Method Selector Tabs -->
 						<div class="space-y-3">
-							<span class="text-xs font-bold text-white/50 uppercase tracking-widest block">Chwazi kijan w te peye :</span>
+							<span class="text-xs font-bold text-white/50 uppercase tracking-widest block">{t.supportTabLabel}</span>
 							<div class="grid grid-cols-2 gap-2 p-1.5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
 								<button
 									type="button"
@@ -406,7 +566,7 @@
 									class="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-xs transition-all duration-200 cursor-pointer {supportMethod === 'carte' ? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20' : 'text-white/70 hover:text-white hover:bg-white/5'}"
 								>
 									<CreditCard size={16} />
-									<span>Kat bancaire</span>
+									<span>{t.supportTabCard}</span>
 								</button>
 								<button
 									type="button"
@@ -414,7 +574,7 @@
 									class="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-xs transition-all duration-200 cursor-pointer {supportMethod === 'mobile' ? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20' : 'text-white/70 hover:text-white hover:bg-white/5'}"
 								>
 									<Smartphone size={16} />
-									<span>MonCash / Natcash</span>
+									<span>{t.supportTabMobile}</span>
 								</button>
 							</div>
 						</div>
@@ -425,7 +585,7 @@
 								<!-- Lemon Squeezy Card Email Input -->
 								<div class="space-y-2">
 									<label for="support-card-email" class="block text-xs font-bold text-white/90">
-										Imel kont ou a (menm ak sa ou te itilize sou Lemon Squeezy) *
+										{t.supportCardLabel}
 									</label>
 									<div class="relative">
 										<input
@@ -438,14 +598,14 @@
 										/>
 									</div>
 									<p class="text-[11px] text-white/40">
-										Pou sekirite, itilize imel kont ou a : {authState.user?.email || "konekte pou wè imel ou"}.
+										{t.supportCardHelp} {authState.user?.email || ""}.
 									</p>
 								</div>
 							{:else}
 								<!-- MonCash / Natcash Reference Input -->
 								<div class="space-y-2">
 									<label for="support-ref" class="block text-xs font-bold text-white/90">
-										Nimewo referans tranzaksyon MonCash / Natcash an *
+										{t.supportRefLabel}
 									</label>
 									<input
 										id="support-ref"
@@ -456,7 +616,7 @@
 										class="w-full h-12 px-4 bg-zinc-900/90 border border-white/15 focus:border-amber-400 rounded-xl text-sm font-medium text-white placeholder-white/30 outline-none transition-colors"
 									/>
 									<p class="text-[11px] text-white/40">
-										Antre nimewo referans ki sou mesaj konfimasyon MonCash / Natcash ou an.
+										{t.supportRefHelp}
 									</p>
 								</div>
 							{/if}
@@ -469,10 +629,10 @@
 							>
 								{#if supportLoading}
 									<Loader2 size={16} class="animate-spin" />
-									<span>N ap verifye...</span>
+									<span>{t.supportBtnLoading}</span>
 								{:else}
 									<Send size={15} />
-									<span>Verifye ak debloke aksè mwen</span>
+									<span>{t.supportBtnSubmit}</span>
 								{/if}
 							</button>
 						</form>
@@ -498,36 +658,69 @@
 		<section class="testimonials-section" aria-labelledby="testimonials-title">
 			<div class="testimonials-shell">
 				<div class="testimonials-heading">
-					<div>
-						<span>Temwayaj</span>
-						<h2 id="testimonials-title">Eksperyans ki pale poukont yo.</h2>
-						<p>De etidyan pataje kijan fòmasyon DJR Akademi ede yo pase soti nan aprann rive nan aksyon.</p>
-					</div>
-					<div class="testimonials-score" aria-label="Evalyasyon mwayèn 4.9 sou 5">
-						<strong>4.9</strong>
-						<div><span aria-hidden="true">★★★★★</span><small>600+ evalyasyon</small></div>
+					<h2 id="testimonials-title">{t.testimonialsKicker}</h2>
+					<div class="testimonials-score-wrapper" aria-label={t.ratingText}>
+						<!-- Overlapping Avatars Stack -->
+						<div class="flex items-center -space-x-3">
+							<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Etidyan" class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
+							<img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" alt="Etidyan" class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
+							<img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" alt="Etidyan" class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
+							<img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" alt="Etidyan" class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
+							<div class="size-10 rounded-full bg-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center ring-2 ring-[#f7f1e8] shadow-xs">
+								+600
+							</div>
+						</div>
+
+						<!-- Rating Score & Stars -->
+						<div class="flex flex-col items-center sm:items-start text-center sm:text-left">
+							<div class="flex items-center gap-1 text-amber-500">
+								<span class="font-black text-zinc-950 text-base mr-1">4.9</span>
+								{#each [1, 2, 3, 4, 5] as _}
+									<Star size={15} fill="currentColor" />
+								{/each}
+							</div>
+						</div>
 					</div>
 				</div>
 
-				<div class="testimonials-grid">
-					<article class="testimonial-card">
-						<div class="testimonial-card-top"><span class="testimonial-stars" aria-label="5 sou 5">★★★★★</span><span class="testimonial-index">01</span></div>
-						<blockquote>Fòmasyon yo klè, byen òganize epi fasil pou suiv. Mwen te kapab aplike sa mwen aprann yo nan travay mwen depi premye semèn nan.</blockquote>
-						<footer class="testimonial-author">
-							<span class="testimonial-avatar">MJ</span>
-							<div class="testimonial-identity"><strong>Mikaëlle Joseph</strong><span>Etidyan DJR Akademi</span></div>
-							<span class="testimonial-verified"><CheckCircle2 size={14} /> Etidyan verifye</span>
-						</footer>
-					</article>
+				<div class="max-w-2xl mx-auto">
+					<article class="relative p-7 sm:p-9 bg-white rounded-3xl border border-zinc-200/90 shadow-xl shadow-zinc-950/5 hover:shadow-2xl hover:border-amber-400/50 transition-all duration-300 overflow-hidden group">
+						<!-- Top Gold Accent Line -->
+						<div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-300"></div>
 
-					<article class="testimonial-card">
-						<div class="testimonial-card-top"><span class="testimonial-stars" aria-label="5 sou 5">★★★★★</span><span class="testimonial-index">02</span></div>
-						<blockquote>Eksplikasyon yo ale dwat nan pwen an. Platfòm nan ede m konprann zouti entelijans atifisyèl yo epi sèvi avè yo ak plis konfyans chak jou.</blockquote>
-						<footer class="testimonial-author">
-							<span class="testimonial-avatar">DP</span>
-							<div class="testimonial-identity"><strong>David Pierre</strong><span>Etidyan DJR Akademi</span></div>
-							<span class="testimonial-verified"><CheckCircle2 size={14} /> Etidyan verifye</span>
-						</footer>
+						<!-- Decorative Watermark Quote Icon -->
+						<div class="absolute top-4 right-6 text-amber-400/15 font-serif text-8xl leading-none pointer-events-none select-none group-hover:text-amber-400/25 transition-colors">
+							“
+						</div>
+
+						<div class="relative z-10 flex flex-col gap-6">
+							<!-- Header of Card: Stars & Verified Badge -->
+							<div class="flex items-center justify-between gap-4">
+								<div class="flex items-center gap-1 text-amber-400">
+									{#each [1, 2, 3, 4, 5] as _}
+										<Star size={18} fill="currentColor" />
+									{/each}
+								</div>
+								<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200/60">
+									<CheckCircle2 size={14} class="text-emerald-600" />
+									{t.t1Verified}
+								</span>
+							</div>
+
+							<!-- Quote Text -->
+							<blockquote class="text-zinc-800 text-lg sm:text-xl font-medium leading-relaxed italic">
+								"{t.t1Quote}"
+							</blockquote>
+
+							<!-- Author Footer -->
+							<div class="flex items-center gap-4 pt-4 border-t border-zinc-100">
+								<img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" alt="Patrick J." class="size-12 rounded-full object-cover ring-2 ring-amber-400/40 shadow-sm" />
+								<div>
+									<h4 class="font-bold text-zinc-950 text-base">Patrick J.</h4>
+									<p class="text-xs font-medium text-zinc-500">{t.t1Role}</p>
+								</div>
+							</div>
+						</div>
 					</article>
 				</div>
 			</div>
@@ -605,52 +798,7 @@
 		color: #f1bd3b !important;
 	}
 
-	:global(.home-header header button[aria-label='Èd ak Asistans']) {
-		display: none;
-	}
 
-	:global(.home-header header button[aria-label='Kreye yon kont']),
-	:global(.home-header header button[aria-label='Konekte']),
-	:global(.home-header header button[aria-label='Ouvri meni espas mwen']) {
-		height: 48px;
-		gap: 10px;
-		padding: 0 22px;
-		border: 0;
-		border-radius: 0;
-		font-size: 15px !important;
-		font-weight: 600;
-		box-shadow: none;
-	}
-
-	:global(.home-header header button[aria-label='Kreye yon kont']),
-	:global(.home-header header button[aria-label='Ouvri meni espas mwen']) {
-		background: rgba(2, 2, 2, 0.92) !important;
-		color: #fff !important;
-	}
-
-	:global(.home-header header button[aria-label='Konekte']) {
-		background: #f0b92f !important;
-		color: #090806 !important;
-	}
-
-	:global(.home-header header button[aria-label='Kreye yon kont']::before),
-	:global(.home-header header button[aria-label='Konekte']::before) {
-		width: 17px;
-		height: 17px;
-		content: '';
-		background: currentColor;
-		-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z'/%3E%3C/svg%3E") center / contain no-repeat;
-		mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z'/%3E%3C/svg%3E") center / contain no-repeat;
-	}
-
-	:global(.home-header header button[aria-label='Konekte'] span) {
-		font-size: 0;
-	}
-
-	:global(.home-header header button[aria-label='Konekte'] span::after) {
-		content: 'Konekte';
-		font-size: 15px;
-	}
 
 	.home-hero {
 		position: relative;
@@ -680,25 +828,7 @@
 		max-width: 100%;
 	}
 
-	.hero-badge {
-		display: inline-flex;
-		height: 35px;
-		align-items: center;
-		gap: 11px;
-		padding: 0 15px;
-		border: 1px solid rgba(221, 164, 18, 0.47);
-		background: rgba(4, 4, 3, 0.34);
-		color: rgba(255, 255, 255, 0.86);
-		font-size: 14px;
-		font-weight: 500;
-		letter-spacing: 0.01em;
-	}
 
-	.hero-badge span {
-		width: 6px;
-		height: 6px;
-		background: #25e2b3;
-	}
 
 	.hero-title {
 		margin: 32px 0 0;
@@ -849,12 +979,7 @@
 		line-height: 1;
 	}
 
-	.stat strong small {
-		margin-left: 3px;
-		font-family: ui-sans-serif, system-ui, sans-serif;
-		font-size: 13px;
-		font-weight: 500;
-	}
+
 
 	.stat span {
 		margin-top: 8px;
@@ -988,22 +1113,9 @@
 			display: none !important;
 		}
 
-		:global(.home-header header button[aria-label='Kreye yon kont']),
-		:global(.home-header header button[aria-label='Konekte']) {
-			width: 43px;
-			height: 43px;
-			justify-content: center;
-			padding: 0;
-		}
 
-		:global(.home-header header button[aria-label='Kreye yon kont'] span),
-		:global(.home-header header button[aria-label='Konekte'] span) {
-			display: none;
-		}
 
-		.hero-badge {
-			font-size: 12px;
-		}
+
 
 		.hero-title {
 			font-size: clamp(57px, 18.5vw, 72px);
@@ -1443,285 +1555,26 @@
 
 	.testimonials-heading {
 		display: flex;
-		align-items: flex-end;
-		justify-content: space-between;
-		gap: 40px;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		gap: 16px;
 		margin-bottom: 46px;
-	}
-
-	.testimonials-heading > div:first-child {
-		max-width: 700px;
-	}
-
-	.testimonials-heading > div:first-child > span {
-		display: block;
-		margin-bottom: 10px;
-		color: #a36c16;
-		font-size: 12px;
-		font-weight: 800;
-		letter-spacing: 0.17em;
-		text-transform: uppercase;
 	}
 
 	.testimonials-heading h2 {
 		color: #171713;
-	}
-
-	.testimonials-heading p {
-		max-width: 620px;
-		margin: 15px 0 0;
-		color: #70685f;
-		font-size: 16px;
-		line-height: 1.65;
-	}
-
-	.testimonials-score {
-		display: flex;
-		min-width: 215px;
-		align-items: center;
-		gap: 17px;
-		padding: 17px 20px;
-		border: 1px solid #ddd1c1;
-		border-radius: 16px;
-		background: rgba(255, 255, 255, 0.7);
-	}
-
-	.testimonials-score > strong {
-		color: #171713;
-		font-family: Georgia, 'Times New Roman', serif;
-		font-size: 40px;
-		line-height: 1;
-	}
-
-	.testimonials-score > div {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.testimonials-score div span {
-		color: #d99a20;
-		font-size: 14px;
-		letter-spacing: 0.08em;
-	}
-
-	.testimonials-score small {
-		margin-top: 5px;
-		color: #756e65;
-		font-size: 11px;
-		font-weight: 700;
-		white-space: nowrap;
-	}
-
-	.testimonials-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 24px;
-	}
-
-	.testimonial-card {
-		position: relative;
-		display: flex;
-		min-height: 340px;
-		overflow: hidden;
-		padding: 36px;
-		border: 1px solid #ded8cf;
-		border-radius: 20px;
-		background: rgba(255, 255, 255, 0.92);
-		box-shadow: 0 16px 44px rgba(58, 43, 26, 0.055);
-		flex-direction: column;
-		transition: border-color 350ms ease, transform 350ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 350ms ease;
-	}
-
-	.testimonial-card::after {
-		position: absolute;
-		top: 12px;
-		right: 28px;
-		content: '“';
-		color: rgba(224, 164, 43, 0.12);
-		font-family: Georgia, 'Times New Roman', serif;
-		font-size: 130px;
-		line-height: 1;
-		pointer-events: none;
-	}
-
-	.testimonial-card:hover {
-		border-color: rgba(188, 133, 26, 0.48);
-		box-shadow: 0 24px 58px rgba(58, 43, 26, 0.1);
-		transform: translateY(-4px);
-	}
-
-	.testimonial-card-top {
-		position: relative;
-		z-index: 1;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.testimonial-stars {
-		color: #d99a20;
-		font-size: 15px;
-		letter-spacing: 0.1em;
-	}
-
-	.testimonial-index {
-		color: #a79d90;
-		font-size: 12px;
-		font-weight: 800;
-		letter-spacing: 0.12em;
-	}
-
-	.testimonial-card blockquote {
-		position: relative;
-		z-index: 1;
-		max-width: 570px;
-		margin: 31px 0 38px;
-		color: #27251f;
-		font-family: Georgia, 'Times New Roman', serif;
-		font-size: clamp(20px, 1.65vw, 25px);
-		line-height: 1.55;
-	}
-
-	.testimonial-author {
-		position: relative;
-		z-index: 1;
-		display: flex;
-		align-items: center;
-		gap: 14px;
-		margin-top: auto;
-		padding-top: 22px;
-		border-top: 1px solid #ebe4da;
-	}
-
-	.testimonial-avatar {
-		display: grid;
-		width: 48px;
-		height: 48px;
-		flex: 0 0 48px;
-		place-items: center;
-		border-radius: 50%;
-		background: #182044;
-		color: #fff;
-		font-size: 12px;
-		font-weight: 850;
-		letter-spacing: 0.05em;
-	}
-
-	.testimonial-identity {
-		display: flex;
-		min-width: 0;
-		flex-direction: column;
-	}
-
-	.testimonial-author strong {
-		color: #1d1c18;
-		font-size: 15px;
-		font-weight: 800;
-	}
-
-	.testimonial-identity > span {
-		margin-top: 4px;
-		color: #81796f;
-		font-size: 12px;
-	}
-
-	.testimonial-verified {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		margin-left: auto;
-		padding: 7px 10px;
-		border-radius: 999px;
-		background: #edf6ec;
-		color: #39723c;
-		font-size: 11px;
-		font-weight: 800;
-		white-space: nowrap;
+		font-size: clamp(32px, 4vw, 44px);
+		font-weight: 900;
+		letter-spacing: -0.02em;
+		text-align: center;
+		margin: 0;
 	}
 
 	@media (max-width: 760px) {
-		.ebooks-showcase {
-			padding: 62px 0;
-		}
-
-		.ebooks-shell {
-			width: min(100% - 32px, 1320px);
-		}
-
-		.ebooks-heading {
-			align-items: flex-start;
-			flex-direction: column;
-		}
-
-		.ebooks-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.ebook-showcase-card {
-			padding: 12px;
-		}
-
-		.ebook-showcase-visual {
-			aspect-ratio: 1 / 1.05;
-		}
-
-		.ebook-view {
-			opacity: 1;
-			transform: none;
-		}
-
-		.courses-showcase,
-		.testimonials-section {
-			padding: 62px 0;
-		}
-
-		.courses-shell,
-		.testimonials-shell {
-			width: min(100% - 32px, 1320px);
-		}
-
-		.courses-heading,
-		.testimonials-heading {
-			align-items: flex-start;
-			flex-direction: column;
-		}
-
-		.courses-grid,
-		.testimonials-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.course-showcase-card {
-			padding: 18px 18px 17px;
-			border-radius: 18px;
-		}
-
-		.course-showcase-visual {
-			aspect-ratio: 1.25 / 1;
-			border-radius: 14px;
-		}
-
 		.course-showcase-meta {
 			padding-top: 18px;
-		}
-		.testimonials-score {
-			width: 100%;
-			justify-content: center;
-		}
-
-		.testimonial-author {
-			align-items: flex-start;
-			flex-wrap: wrap;
-		}
-
-		.testimonial-verified {
-			margin-left: 62px;
-		}
-
-
-		.testimonial-card {
-			min-height: 270px;
-			padding: 28px;
 		}
 	}
 </style>

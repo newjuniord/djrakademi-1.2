@@ -14,7 +14,8 @@
 		MessageCircle,
 		ChevronLeft,
 		ShoppingBag,
-		ArrowRight
+		ArrowRight,
+		HelpCircle
 	} from 'lucide-svelte';
 	import {
 		fetchUserSupportStatus,
@@ -162,6 +163,11 @@
 		return 'bg-zinc-100 text-zinc-600';
 	}
 
+	import { page } from '$app/state';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+	let buttonText = $derived(currentLang === 'ht' ? 'Asistans' : 'Assistance');
+
 	// Quota indicator color
 	const quotaColor = $derived(
 		statusData
@@ -173,6 +179,22 @@
 			: ''
 	);
 </script>
+
+<!-- ─── Floating Support Button (Bottom Right) ────────────────────────── -->
+{#if !open}
+	<button
+		type="button"
+		onclick={toggleWidget}
+		class="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2.5 px-4.5 py-3 rounded-full bg-zinc-950 text-white font-bold text-sm shadow-2xl border border-zinc-700/80 hover:bg-amber-400 hover:text-zinc-950 hover:border-amber-300 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer group"
+		aria-label={buttonText}
+	>
+		<div class="size-7 rounded-full bg-amber-400 text-zinc-950 grid place-items-center font-black group-hover:bg-zinc-950 group-hover:text-amber-400 transition-colors">
+			<HelpCircle size={17} />
+		</div>
+		<span>{buttonText}</span>
+	</button>
+{/if}
+
 
 <!-- ─── Modal ──────────────────────────────────────────────── -->
 {#if open}
