@@ -64,6 +64,78 @@
 	});
 
 	import { toast } from '$lib/toast.svelte';
+	import { page } from '$app/state';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
+	const drawerI18n = {
+		fr: {
+			loginToast: 'Veuillez vous connecter à votre compte pour continuer.',
+			alreadyOwnedToast: 'Vous possédez déjà ce programme ! Redirection en cours...',
+			freeAccessToast: 'Veuillez vous connecter à votre compte pour débloquer cet accès gratuit.',
+			unlockedSuccess: 'Accès débloqué avec succès !',
+			unlockedError: 'Une erreur est survenue lors de l\'activation de votre accès.',
+			paymentLoginToast: 'Veuillez vous connecter à votre compte pour effectuer le paiement.',
+			paymentError: 'Impossible de lancer le paiement. Veuillez réessayer.',
+			paymentProcessError: 'Une erreur est survenue lors du traitement du paiement.',
+			badgeCourse: 'Formation',
+			badgeEbook: 'Ebook PDF',
+			badgeCoaching: 'Coaching 1:1',
+			programPriceLabel: 'Prix du programme',
+			freeLabel: 'Gratuit',
+			programOutline: 'Programme de la formation',
+			modulesCount: (count: number) => `(${count} modules)`,
+			lessonsSummary: (count: number) => `${count} leçons vidéo et fiches récapitulatives`,
+			fileDetails: 'Détails du fichier',
+			formatLabel: 'Format :',
+			formatValue: 'PDF Haute Qualité',
+			fileLabel: 'Fichier :',
+			downloadLabel: 'Téléchargement :',
+			downloadValue: 'Accès immédiat après achat',
+			chooseDateTitle: 'Choisissez votre date',
+			chooseDateSub: 'Les dates disponibles apparaîtront sur la page de réservation.',
+			unlockedBanner: 'Accès débloqué avec succès !',
+			redirectingBanner: 'Redirection vers votre espace étudiant...',
+			processingBtn: 'Traitement en cours...',
+			getFreeAccessBtn: 'Obtenir l\'accès gratuit',
+			payAmountBtn: (amount: string) => `Payer ${amount} HTG (Choisir le moyen)`,
+			secureNotice: 'Paiement sécurisé · Support client sur WhatsApp'
+		},
+		ht: {
+			loginToast: 'Tanpri konekte sou kont ou pou w ka kontinye.',
+			alreadyOwnedToast: 'Ou gen pwogram sa a deja! N ap redirije w nan espas ou an.',
+			freeAccessToast: 'Tanpri konekte sou kont ou pou w ka jwenn aksè nan pwogram sa a.',
+			unlockedSuccess: 'Aksè debloke ak siksè!',
+			unlockedError: 'Yon erè rive pandan n ap ba w aksè nan pwogram nan.',
+			paymentLoginToast: 'Tanpri konekte sou kont ou pou w ka fè peman an.',
+			paymentError: 'Nou pa ka lanse peman an. Tanpri eseye ankò.',
+			paymentProcessError: 'Yon erè rive pandan n ap trete peman an.',
+			badgeCourse: 'Fòmasyon',
+			badgeEbook: 'Ebook PDF',
+			badgeCoaching: 'Coaching 1:1',
+			programPriceLabel: 'Prix pwogram an',
+			freeLabel: 'Gratis',
+			programOutline: 'Pwogram fòmasyon an',
+			modulesCount: (count: number) => `(${count} modil)`,
+			lessonsSummary: (count: number) => `${count} leson videyo ak feyè rezime`,
+			fileDetails: 'Detay fichye a',
+			formatLabel: 'Fòma :',
+			formatValue: 'PDF Kvalite Gwo',
+			fileLabel: 'Fichye :',
+			downloadLabel: 'Telechajman :',
+			downloadValue: 'Aksè imedyat apre achte',
+			chooseDateTitle: 'Chwazi dat ou a',
+			chooseDateSub: 'Dat ki disponib yo ap parèt sou paj rezèvasyon an.',
+			unlockedBanner: 'Aksè debloke ak siksè !',
+			redirectingBanner: 'Redirèksyon nan espas etidyan ou...',
+			processingBtn: 'Tretman an ap fèt...',
+			getFreeAccessBtn: 'Jwenn aksè gratis',
+			payAmountBtn: (amount: string) => `Peye ${amount} HTG (Chwazi fason)`,
+			secureNotice: 'Peman ansekirite · Sipò kliyan sou WhatsApp'
+		}
+	};
+
+	let dt = $derived(drawerI18n[currentLang]);
 
 	async function showMaintenanceIfEnabled(): Promise<boolean> {
 		try {
@@ -86,7 +158,7 @@
 		// 1. Vérifier si l'utilisateur est connecté
 		if (!authState.user || !authState.user.$id) {
 			checkoutLoading = false;
-			toast.info('Tanpri konekte sou kont ou pou w ka kontinye.');
+			toast.info(dt.loginToast);
 			authState.openLogin(() => {
 				handleStartCheckout();
 			});
@@ -106,7 +178,7 @@
 			try {
 				const existingAccess = type === 'ebook' ? await ownsEbook(item.id) : await hasCourseAccess(item.id);
 				if (existingAccess) {
-					toast.info('Ou gen pwogram sa a deja! N ap redirije w nan espas ou an.');
+					toast.info(dt.alreadyOwnedToast);
 					onClose();
 					goto('/dashboard');
 					return;
@@ -144,7 +216,7 @@
 		if (!item) return;
 
 		if (!authState.user || !authState.user.$id) {
-			toast.info('Tanpri konekte sou kont ou pou w ka jwenn aksè nan pwogram sa a.');
+			toast.info(dt.freeAccessToast);
 			authState.openLogin(() => {
 				processFreeEnrollment();
 			});
@@ -160,7 +232,7 @@
 			}
 
 			checkoutSuccess = true;
-			toast.success('Aksè debloke ak siksè!');
+			toast.success(dt.unlockedSuccess);
 			setTimeout(() => {
 				checkoutSuccess = false;
 				onClose();
@@ -168,7 +240,7 @@
 			}, 1500);
 		} catch (e) {
 			console.error('Free enrollment error:', e);
-			toast.error('Yon erè rive pandan n ap ba w aksè nan pwogram nan.');
+			toast.error(dt.unlockedError);
 		} finally {
 			checkoutLoading = false;
 		}
@@ -184,7 +256,7 @@
 		// 1. Connexion requise
 		if (!authState.user || !authState.user.$id) {
 			showPaymentModal = false;
-			toast.info('Tanpri konekte sou kont ou pou w ka fè peman an.');
+			toast.info(dt.paymentLoginToast);
 			authState.openLogin(() => {
 				handleStartCheckout();
 			});
@@ -202,7 +274,7 @@
 				const existingAccess = type === 'ebook' ? await ownsEbook(item.id) : await hasCourseAccess(item.id);
 				if (existingAccess) {
 					showPaymentModal = false;
-					toast.info('Ou gen pwogram sa a deja! N ap redirije w nan espas ou an.');
+					toast.info(dt.alreadyOwnedToast);
 					onClose();
 					goto('/dashboard');
 					return;
@@ -225,11 +297,11 @@
 				window.location.href = redirectTarget;
 				return;
 			} else {
-				toast.error(res?.message || 'Nou pa ka lanse peman an. Tanpri eseye ankò.');
+				toast.error(res?.message || dt.paymentError);
 			}
 		} catch (e: any) {
 			console.error('Plopplop payment initiation error:', e);
-			toast.error(e?.message || 'Yon erè rive pandan n ap trete peman an.');
+			toast.error(e?.message || dt.paymentProcessError);
 		} finally {
 			checkoutLoading = false;
 		}

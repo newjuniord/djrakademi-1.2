@@ -37,8 +37,36 @@
 	// Tab: 'new' ou 'history'
 	let activeTab = $state<'new' | 'history'>('new');
 
+	import { page } from '$app/state';
+
 	// Étapes wizard 1 par 1
 	let currentStep = $state<1 | 2 | 3>(1);
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+	let buttonText = $derived(currentLang === 'ht' ? 'Asistans' : 'Assistance');
+
+	const widgetI18n = {
+		fr: {
+			loginToast: 'Veuillez vous connecter à votre compte pour utiliser le service d\'assistance.',
+			errSelectPreset: 'Veuillez choisir un message d\'assistance.',
+			errInvalidWhatsapp: 'Veuillez saisir un numéro WhatsApp valide.',
+			errQuotaLimit: 'Vous avez atteint la limite de 3 messages d\'assistance pour aujourd\'hui.',
+			successSend: 'Votre message d\'assistance a été envoyé avec succès !',
+			errSendFailed: 'Impossible d\'envoyer le message. Veuillez réessayer.',
+			errGeneric: 'Une erreur est survenue lors de l\'envoi.'
+		},
+		ht: {
+			loginToast: 'Tanpri konekte sou kont ou pou w ka sèvi ak asistans sipò an.',
+			errSelectPreset: 'Tanpri chwazi yon mesaj sipò.',
+			errInvalidWhatsapp: 'Tanpri mete yon nimewo WhatsApp valid.',
+			errQuotaLimit: 'Ou rive nan limit 3 mesaj sipò pou jodi a.',
+			successSend: 'Mesaj sipò w la voye ak siksè!',
+			errSendFailed: 'Nou pa ka voye mesaj la. Tanpri re-eseye.',
+			errGeneric: 'Yon erè rive pandan envoi an.'
+		}
+	};
+
+	let wt = $derived(widgetI18n[currentLang]);
 
 	async function loadStatus() {
 		if (!authState.user) { statusData = null; return; }
@@ -72,7 +100,7 @@
 
 	function toggleWidget() {
 		if (!authState.user) {
-			toast.info('Tanpri konekte sou kont ou pou w ka sèvi ak asistans sipò an.');
+			toast.info(wt.loginToast);
 			authState.openLogin(() => { open = true; loadStatus(); });
 			return;
 		}
@@ -99,13 +127,13 @@
 	}
 
 	async function handleSubmit() {
-		if (!selectedPresetId) { toast.error('Tanpri chwazi yon mesaj sipò.'); return; }
+		if (!selectedPresetId) { toast.error(wt.errSelectPreset); return; }
 		if (requiresWhatsapp && (!whatsappNumber || whatsappNumber.trim().length < 8)) {
-			toast.error('Tanpri mete yon nimewo WhatsApp valid.');
+			toast.error(wt.errInvalidWhatsapp);
 			return;
 		}
 		if (statusData && statusData.dailyQuota.remaining <= 0) {
-			toast.error('Ou rive nan limit 3 mesaj sipò pou jodi a.');
+			toast.error(wt.errQuotaLimit);
 			return;
 		}
 
@@ -117,15 +145,15 @@
 				whatsapp: whatsappNumber.trim() || undefined
 			});
 			if (res.success && res.message) {
-				toast.success('Mesaj sipò w la voye ak siksè!');
+				toast.success(wt.successSend);
 				resetForm();
 				activeTab = 'history';
 				await loadStatus();
 			} else {
-				toast.error(res.error || 'Nou pa ka voye mesaj la. Tanpri re-eseye.');
+				toast.error(res.error || wt.errSendFailed);
 			}
 		} catch (err: any) {
-			toast.error(err.message || 'Yon erè rive pandan envoi an.');
+			toast.error(err.message || wt.errGeneric);
 		} finally {
 			submitting = false;
 		}
@@ -162,11 +190,6 @@
 		if (status === 'failed') return 'bg-red-100 text-red-700';
 		return 'bg-zinc-100 text-zinc-600';
 	}
-
-	import { page } from '$app/state';
-
-	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
-	let buttonText = $derived(currentLang === 'ht' ? 'Asistans' : 'Assistance');
 
 	// Quota indicator color
 	const quotaColor = $derived(
