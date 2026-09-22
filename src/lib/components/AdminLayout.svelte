@@ -30,12 +30,18 @@
 		}
 	});
 
+	import { page } from '$app/state';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+
 	onMount(() => {
 		checkAccess();
-		document.documentElement.lang = 'fr';
-		return () => {
-			document.documentElement.lang = 'ht';
-		};
+	});
+
+	$effect(() => {
+		if (typeof document !== 'undefined') {
+			document.documentElement.lang = currentLang;
+		}
 	});
 </script>
 
@@ -43,7 +49,7 @@
 	<div class="admin-root grid min-h-dvh place-items-center bg-base-200">
 		<div class="space-y-3 text-center text-base-content/60">
 			<Loader2 size={32} class="mx-auto animate-spin text-primary" />
-			<p class="text-sm font-semibold">Vérification de l’accès administrateur…</p>
+			<p class="text-sm font-semibold">{currentLang === 'ht' ? 'Verifikasyon aksè admin an…' : 'Vérification de l’accès administrateur…'}</p>
 		</div>
 	</div>
 {:else}
