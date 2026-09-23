@@ -67,7 +67,7 @@
 			freeLabel: "Gratuit",
 			
 			ebooksKicker: "Bibliothèque DJR",
-			ebooksTitle: "Tout commence par une bonne lecture.",
+			ebooksTitle: "Livres numériques pratiques à lire et appliquer.",
 			ebooksDesc: "Des livres numériques à lire et appliquer pour évoluer à votre propre rythme.",
 			ebooksCount: (n: number) => `${n} livre${n > 1 ? 's' : ''} électronique${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}`,
 			ebookFormat: "LIVRE ÉLECTRONIQUE",
@@ -138,7 +138,7 @@
 			freeLabel: "Gratis",
 
 			ebooksKicker: "Bibliyotèk DJR",
-			ebooksTitle: "Tout kòmanse ak yon bon lekti.",
+			ebooksTitle: "Liv dijital pratik pou w li, pou aplike.",
 			ebooksDesc: "Liv dijital pratik pou w li, aplike epi grandi nan ritm pa w.",
 			ebooksCount: (n: number) => `${n} liv dijital disponib`,
 			ebookFormat: "LIV DIJITAL",
@@ -395,7 +395,6 @@
 				<div class="ebooks-heading">
 					<div>
 						<h2 id="ebooks-title">{t.ebooksTitle}</h2>
-						<p>{t.ebooksDesc}</p>
 					</div>
 					<span class="ebooks-count">{t.ebooksCount(publishedEbooks.length)}</span>
 				</div>
