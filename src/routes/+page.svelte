@@ -762,6 +762,14 @@
 		box-shadow: none !important;
 	}
 
+	:global(.home-header .header-menu-btn) {
+		color: #ffffff !important;
+	}
+
+	:global(.home-header .header-menu-btn:hover) {
+		color: #f1bd3b !important;
+	}
+
 	:global(.home-header header > div) {
 		height: 104px;
 		max-width: 1440px;
