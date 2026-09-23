@@ -251,11 +251,11 @@
 		<button
 			type="button"
 			onclick={() => (drawerOpen = true)}
-			class="grid size-11 shrink-0 place-items-center rounded-xl border border-zinc-200/80 bg-zinc-950 text-amber-400 shadow-sm transition-all active:scale-95 header-menu-btn min-[821px]:hidden cursor-pointer"
+			class="p-2 text-zinc-900 hover:text-amber-600 active:scale-95 transition-colors header-menu-btn min-[821px]:hidden cursor-pointer focus:outline-none"
 			aria-label={ht.mainMenu}
 			aria-expanded={drawerOpen}
 		>
-			<Menu size={22} />
+			<Menu size={26} />
 		</button>
 
 		<!-- Desktop actions -->
