@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		Menu,
 		Megaphone,
 		X
 	} from 'lucide-svelte';
@@ -240,25 +241,25 @@
 			</span>
 		</a>
 
-		<nav class="hidden items-center gap-6 text-[18px] font-bold text-zinc-600 lg:flex" aria-label="Catalogue public">
+		<nav class="hidden items-center gap-6 text-[18px] font-bold text-zinc-600 header-desktop-nav min-[821px]:flex" aria-label="Catalogue public">
 			<a href={getHref('/')} class="transition-colors hover:text-zinc-950">{ht.home}</a>
 			<a href={getHref('/catalogue')} class="transition-colors hover:text-zinc-950">{ht.catalogue}</a>
 			<a href={getHref('/bundles')} class="transition-colors hover:text-amber-700">{ht.bundles}</a>
 		</nav>
 
-		<!-- Mobile menu button without icon -->
+		<!-- Mobile menu button -->
 		<button
 			type="button"
 			onclick={() => (drawerOpen = true)}
-			class="inline-flex h-11 shrink-0 items-center rounded-xl border border-zinc-200/80 bg-zinc-950 px-3.5 text-sm font-bold text-amber-400 shadow-sm transition-all active:scale-95 sm:hidden cursor-pointer"
+			class="grid size-11 shrink-0 place-items-center rounded-xl border border-zinc-200/80 bg-zinc-950 text-amber-400 shadow-sm transition-all active:scale-95 header-menu-btn min-[821px]:hidden cursor-pointer"
 			aria-label={ht.mainMenu}
 			aria-expanded={drawerOpen}
 		>
-			<span>{ht.mobileMenu}</span>
+			<Menu size={22} />
 		</button>
 
 		<!-- Desktop actions -->
-		<div class="hidden shrink-0 items-center gap-2.5 sm:flex">
+		<div class="hidden shrink-0 items-center gap-2.5 header-desktop-actions min-[821px]:flex">
 			<!-- Custom Language Dropdown -->
 			<div class="relative" use:clickOutside>
 				<button
@@ -424,7 +425,7 @@
 		</div>
 
 		<nav class="flex-1 px-4 py-5" aria-label={ht.mainMenu}>
-			<div class="sm:hidden">
+			<div class="header-drawer-nav min-[821px]:hidden">
 				<p class="mb-2 px-3 text-xs font-bold text-zinc-500">{ht.navSection}</p>
 				<div class="divide-y divide-zinc-100 border-y border-zinc-100">
 					<a href={getHref('/')} onclick={closeDrawer} class="flex min-h-14 items-center px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">{ht.home}</a>
@@ -493,6 +494,32 @@
 {/if}
 
 <AuthModal bind:isOpen={authModalOpen} onLogin={login} initialView={authModalInitialView} />
+
+<style>
+	@media (max-width: 820px) {
+		:global(.header-desktop-nav) {
+			display: none !important;
+		}
+		:global(.header-menu-btn) {
+			display: inline-flex !important;
+		}
+		:global(.header-drawer-nav) {
+			display: block !important;
+		}
+	}
+
+	@media (min-width: 821px) {
+		:global(.header-desktop-nav) {
+			display: flex !important;
+		}
+		:global(.header-menu-btn) {
+			display: none !important;
+		}
+		:global(.header-drawer-nav) {
+			display: none !important;
+		}
+	}
+</style>
 
 
 

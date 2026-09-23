@@ -1353,13 +1353,6 @@
 		line-height: 1.05;
 	}
 
-	.ebooks-heading p {
-		margin: 14px 0 0;
-		color: rgba(247, 242, 233, 0.58);
-		font-size: 16px;
-		line-height: 1.65;
-	}
-
 	.ebooks-count {
 		flex: 0 0 auto;
 		padding: 10px 16px;
@@ -1547,9 +1540,73 @@
 		margin: 0;
 	}
 
-	@media (max-width: 760px) {
+	@media (max-width: 900px) {
+		.ebooks-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 20px;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.courses-showcase {
+			padding: 48px 0 56px;
+		}
+
+		.courses-shell,
+		.ebooks-shell {
+			width: calc(100% - 32px);
+		}
+
+		.courses-heading,
+		.ebooks-heading {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 14px;
+			margin-bottom: 28px;
+		}
+
+		.courses-heading h2,
+		.ebooks-heading h2 {
+			font-size: clamp(26px, 6.5vw, 36px);
+		}
+
+		.courses-count,
+		.ebooks-count {
+			align-self: flex-start;
+		}
+
+		.courses-grid {
+			grid-template-columns: 1fr;
+			gap: 20px;
+		}
+
+		.course-showcase-card {
+			padding: 20px 20px 18px;
+			border-radius: 18px;
+		}
+
 		.course-showcase-meta {
-			padding-top: 18px;
+			padding-top: 16px;
+			min-height: auto;
+		}
+
+		.ebooks-showcase {
+			padding: 48px 0 56px;
+		}
+	}
+
+	@media (max-width: 540px) {
+		.ebooks-grid {
+			grid-template-columns: 1fr;
+			gap: 16px;
+		}
+
+		.ebook-showcase-card {
+			padding: 12px;
+		}
+
+		.ebook-showcase-meta {
+			padding: 14px 2px 2px;
 		}
 	}
 </style>
