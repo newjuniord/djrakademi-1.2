@@ -61,7 +61,7 @@
 			benefitAccess: "Accès rapide",
 			
 			coursesKicker: "Formations",
-			coursesTitle: "Apprenez à votre rythme",
+			coursesTitle: "Formations",
 			coursesDesc: "Des formations complètes et structurées pour maîtriser de nouvelles compétences.",
 			coursesCount: (n: number) => `${n} disponible${n > 1 ? 's' : ''}`,
 			freeLabel: "Gratuit",
@@ -132,7 +132,7 @@
 			benefitAccess: "Aksè rapid",
 
 			coursesKicker: "Fòmasyon",
-			coursesTitle: "Aprann nan ritm pa w",
+			coursesTitle: "Fòmasyon yo",
 			coursesDesc: "Fòmasyon konplè epi byen òganize pou w ka mèt sou nouvo konpetans.",
 			coursesCount: (n: number) => `${n} disponib`,
 			freeLabel: "Gratis",
@@ -347,7 +347,6 @@
 			<div class="courses-shell">
 				<div class="courses-heading">
 					<div>
-						<span class="courses-kicker">{t.coursesKicker}</span>
 						<h2>{t.coursesTitle}</h2>
 						<p>{t.coursesDesc}</p>
 					</div>
@@ -395,7 +394,6 @@
 			<div class="ebooks-shell">
 				<div class="ebooks-heading">
 					<div>
-						<span class="ebooks-kicker"><FileText size={14} /> {t.ebooksKicker}</span>
 						<h2 id="ebooks-title">{t.ebooksTitle}</h2>
 						<p>{t.ebooksDesc}</p>
 					</div>
@@ -1169,16 +1167,6 @@
 		margin-bottom: 42px;
 	}
 
-	.courses-kicker {
-		display: block;
-		margin-bottom: 10px;
-		color: #a36c16;
-		font-size: 12px;
-		font-weight: 800;
-		letter-spacing: 0.17em;
-		text-transform: uppercase;
-	}
-
 	.courses-heading h2,
 	.testimonials-heading h2 {
 		margin: 0;
@@ -1354,18 +1342,6 @@
 		justify-content: space-between;
 		gap: 32px;
 		margin-bottom: 42px;
-	}
-
-	.ebooks-kicker {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		margin-bottom: 12px;
-		color: #e4ad38;
-		font-size: 12px;
-		font-weight: 800;
-		letter-spacing: 0.17em;
-		text-transform: uppercase;
 	}
 
 	.ebooks-heading h2 {
