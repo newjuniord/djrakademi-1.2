@@ -194,10 +194,6 @@
 				<div class="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/5 lg:bg-gradient-to-tr lg:from-black lg:via-black/35 lg:to-transparent"></div>
 
 				<div class="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8 lg:p-10">
-					<div class="mb-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/25 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] backdrop-blur-md">
-						<Sparkles size={14} class="text-amber-300" />
-						{t.visualKicker}
-					</div>
 					<h2 class="max-w-lg text-3xl font-black leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">
 						{t.visualTitle}
 					</h2>
