@@ -5,7 +5,6 @@
 	import { account, ID } from '$lib/appwrite';
 	import { getOrCreateProfile, updateProfile } from '$lib/services/profiles';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
-	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import {
 		ArrowRight,
 		AlertCircle,
@@ -200,11 +199,6 @@
 					<p class="mt-3 max-w-md text-sm font-medium leading-relaxed text-white/75 sm:text-base">
 						{t.visualSub}
 					</p>
-					<div class="mt-6 hidden space-y-3 text-sm font-semibold text-white/90 sm:block">
-						<div class="flex items-center gap-3"><span class="grid size-6 place-items-center rounded-full bg-amber-400 text-zinc-950"><Check size={14} strokeWidth={3} /></span>{t.benefitOne}</div>
-						<div class="flex items-center gap-3"><span class="grid size-6 place-items-center rounded-full bg-amber-400 text-zinc-950"><Check size={14} strokeWidth={3} /></span>{t.benefitTwo}</div>
-						<div class="flex items-center gap-3"><span class="grid size-6 place-items-center rounded-full bg-amber-400 text-zinc-950"><Check size={14} strokeWidth={3} /></span>{t.benefitThree}</div>
-					</div>
 				</div>
 			</div>
 
@@ -359,6 +353,4 @@
 			</div>
 		</section>
 	</main>
-
-	<PublicFooter />
 </div>
