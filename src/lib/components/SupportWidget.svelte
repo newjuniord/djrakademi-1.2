@@ -204,7 +204,7 @@
 </script>
 
 <!-- ─── Floating Support Button (Bottom Right) ────────────────────────── -->
-{#if !open}
+{#if authState.user && !open}
 	<button
 		type="button"
 		onclick={toggleWidget}
