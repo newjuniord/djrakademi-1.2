@@ -236,7 +236,7 @@
 		<!-- Brand Logo Image & Name -->
 		<a href={getHref('/')} class="flex min-w-0 items-center gap-3 group">
 			<img src={logoUrl} alt={siteName} class="h-10 w-auto shrink-0 object-contain sm:h-11" />
-			<span class="hidden truncate font-black text-[22px] tracking-tight text-zinc-950 uppercase transition-colors group-hover:text-amber-500 min-[430px]:inline-block sm:text-[24px]">
+			<span class="hidden truncate font-black text-[19px] tracking-tight text-zinc-950 uppercase transition-colors group-hover:text-amber-500 min-[430px]:inline-block sm:text-[21px]">
 				{siteName}
 			</span>
 		</a>

@@ -787,7 +787,7 @@
 	:global(.home-header header > div > a:first-child > span) {
 		color: #f5f1eb !important;
 		font-family: Georgia, 'Times New Roman', serif;
-		font-size: 21px !important;
+		font-size: 18px !important;
 		font-weight: 700;
 		letter-spacing: 0.01em;
 	}
