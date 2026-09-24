@@ -1,6 +1,5 @@
 <script lang="ts">
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
-	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import { page } from '$app/state';
 	import { User, ChevronLeft, Save, Shield, CheckCircle2, Mail, Phone, Loader2, AlertCircle } from 'lucide-svelte';
 	import { authState } from '$lib/auth.svelte';
@@ -241,8 +240,6 @@
 			</div>
 		</main>
 	{/if}
-
-	<PublicFooter />
 </div>
 
 <style>
