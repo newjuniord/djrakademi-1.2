@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
-	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import { page } from '$app/state';
 	import {
 		Receipt,
@@ -523,8 +522,6 @@
 			</div>
 		</main>
 	{/if}
-
-	<PublicFooter />
 </div>
 
 <!-- Invoice / Receipt Modal -->
