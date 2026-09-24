@@ -1,6 +1,5 @@
 <script lang="ts">
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
-	import PublicFooter from '$lib/components/PublicFooter.svelte';
 	import type { Course, Ebook } from '$lib/types/admin';
 	import { page } from '$app/state';
 	import {
@@ -480,7 +479,6 @@
 
 		</main>
 	{/if}
-	<PublicFooter />
 </div>
 
 

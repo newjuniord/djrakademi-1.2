@@ -75,15 +75,6 @@
 <div class="flex min-h-screen flex-col bg-zinc-50 text-zinc-950">
 	<PublicHeader />
 	<main class="flex-1">
-		<section class="relative overflow-hidden bg-zinc-950 px-4 py-16 text-white sm:py-24">
-			<div class="pointer-events-none absolute -right-24 -top-32 size-96 rounded-full bg-amber-500/10 blur-3xl"></div>
-			<div class="relative mx-auto max-w-7xl">
-				<a href={getHref('/catalogue')} class="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-white"><ArrowLeft size={16} /> {t.backToCatalogue}</a>
-				<div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-amber-400"><Layers3 size={14} /> {t.badge}</div>
-				<h1 class="max-w-3xl text-4xl font-black tracking-tight sm:text-6xl">{t.heroTitle}</h1>
-				<p class="mt-5 max-w-2xl text-base leading-relaxed text-zinc-300 sm:text-lg">{t.heroDesc}</p>
-			</div>
-		</section>
 		<section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
 			{#if loading}
 				<div class="py-20 text-center text-zinc-500">{t.loading}</div>
