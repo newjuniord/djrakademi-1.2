@@ -229,72 +229,7 @@
 	{:else if authState.user}
 		<main class="flex-1 py-8 sm:py-12">
 
-		<!-- Welcome Banner -->
-		<section class="dashboard-hero bg-zinc-950 text-white py-12 sm:py-16">
-			<div class="dashboard-hero-inner max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="dashboard-user-row flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
 
-					<!-- User Info -->
-					<div class="dashboard-user flex items-center gap-4">
-						<div class="dashboard-avatar size-16 bg-gradient-to-br from-amber-400 to-orange-500 text-black text-xl font-black rounded-2xl grid place-items-center shadow-xl shrink-0">
-							{user.avatar}
-						</div>
-						<div>
-							<div class="dashboard-name-line flex items-center gap-2">
-								<h1 class="dashboard-user-name text-2xl sm:text-3xl font-black tracking-tight">{user.name}</h1>
-								<span class="dashboard-member-status px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider rounded-md border border-emerald-500/30">
-									{t.memberActive}
-								</span>
-							</div>
-							<p class="dashboard-user-meta text-white/50 text-xs mt-1 font-mono">{user.email} · {t.memberSince} {user.memberSince}</p>
-						</div>
-					</div>
-
-				</div>
-
-				<!-- Stats Overview Bar / Quick Jump Links -->
-				<div class="dashboard-quick-links grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-white/10">
-					<a
-						href="#sec-courses"
-						class="dashboard-quick-link flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 transition-colors text-left"
-					>
-						<div class="dashboard-quick-icon size-10 bg-amber-400/20 text-amber-400 rounded-lg grid place-items-center shrink-0">
-							<BookOpen size={20} />
-						</div>
-						<div>
-							<span class="text-xl font-black text-white">{myCourses.length}</span>
-							<span class="block text-xs text-white/40 font-medium">{t.myCoursesQuick}</span>
-						</div>
-					</a>
-
-					<a
-						href="#sec-ebooks"
-						class="dashboard-quick-link flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 transition-colors text-left"
-					>
-						<div class="dashboard-quick-icon size-10 bg-emerald-400/20 text-emerald-400 rounded-lg grid place-items-center shrink-0">
-							<FileText size={20} />
-						</div>
-						<div>
-							<span class="text-xl font-black text-white">{myEbooks.length}</span>
-							<span class="block text-xs text-white/40 font-medium">{t.myEbooksQuick}</span>
-						</div>
-					</a>
-
-					<a
-						href="#sec-coaching"
-						class="dashboard-quick-link flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 transition-colors text-left"
-					>
-						<div class="dashboard-quick-icon size-10 bg-orange-400/20 text-orange-400 rounded-lg grid place-items-center shrink-0">
-							<CalendarCheck size={20} />
-						</div>
-						<div>
-							<span class="text-xl font-black text-white">{myBookings.length}</span>
-							<span class="block text-xs text-white/40 font-medium">{t.myCoachingQuick}</span>
-						</div>
-					</a>
-				</div>
-			</div>
-		</section>
 
 		<!-- Main Dashboard Content -->
 		<div class="py-12 space-y-16">
