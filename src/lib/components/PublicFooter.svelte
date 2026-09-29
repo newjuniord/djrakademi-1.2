@@ -121,7 +121,7 @@
 			<p>{t.copyright(2026, siteName)}</p>
 			<div class="footer-trust">
 				<span><ShieldCheck size={14} /> {t.securePayment}</span>
-				<span>MonCash · Natcash</span>
+				<span>MonCash · NatCash</span>
 				<span>{t.location}</span>
 			</div>
 		</div>

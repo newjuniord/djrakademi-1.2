@@ -27,26 +27,30 @@
 	import { getAccountLibrary, type LibraryBooking } from '$lib/services/library';
 	import { downloadOwnedEbook } from '$lib/services/ebook-access';
 	import { whatsappLink } from '$lib/coaching/validation';
+	import { formatDateTimeInTimezone } from '$lib/coaching/timezone';
 
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
 		fr: {
-			pageTitle: 'Mon Espace Apprenant · DJR Akademi',
+			pageTitle: 'Mon espace de formation · DJR Akademi',
 			metaDesc: 'Espace client DJR Akademi — Accédez à vos formations, ebooks et sessions de coaching.',
 			defaultUser: 'Étudiant',
 			recently: 'Récemment',
-			memberActive: 'Membre Actif',
+			memberActive: 'Membre actif',
 			memberSince: 'Membre depuis',
 			myCoursesQuick: 'Formations suivies',
-			myEbooksQuick: 'Ebooks possédés',
+			myEbooksQuick: 'Livres électroniques possédés',
 			myCoachingQuick: 'Sessions de coaching',
 			closeBtn: 'Fermer',
-			coursesTitle: 'Mes Formations',
+			coursesTitle: 'Mes formations',
 			coursesSub: 'Accédez à votre espace d\'apprentissage vidéo en ligne',
 			coursesAccess: 'Accès illimité 24/7',
 			noCoursesTitle: 'Aucune formation débloquée',
@@ -59,18 +63,18 @@
 			defaultLesson: 'Bienvenue dans ce cours',
 			continueCourse: 'Continuer la formation',
 			reviewCourse: 'Revoir la formation',
-			ebooksTitle: 'Mes Ebooks PDF',
+			ebooksTitle: 'Mes livres électroniques PDF',
 			ebooksSub: 'Vos guides pratiques téléchargeables à tout moment',
 			unlimitedDownload: 'Téléchargement illimité',
-			noEbooksTitle: 'Aucun ebook disponible',
-			noEbooksSub: 'Vous n\'avez aucun ebook PDF. Découvrez nos guides pratiques dans le catalogue.',
-			exploreEbooks: 'Découvrir les ebooks',
+			noEbooksTitle: 'Aucun livre électronique disponible',
+			noEbooksSub: 'Vous n\'avez aucun livre électronique PDF. Découvrez nos guides pratiques dans le catalogue.',
+			exploreEbooks: 'Découvrir les livres électroniques',
 			preparingDownload: 'Préparation…',
 			downloadPdf: 'Télécharger (PDF)',
 			downloadStarted: 'Téléchargement de "{title}" démarré.',
 			downloadError: 'Téléchargement impossible.',
-			coachingTitle: 'Mes Sessions de Coaching',
-			coachingSub: 'Vos rendez-vous de suivi individuel avec le coach',
+			coachingTitle: 'Mes séances de coaching',
+			coachingSub: 'Vos rendez-vous individuels avec le coach',
 			bookAnother: 'Réserver une autre session',
 			noCoachingTitle: 'Aucune session réservée',
 			noCoachingSub: 'Vous n\'avez aucun rendez-vous de coaching actuellement.',
@@ -82,18 +86,18 @@
 			whatsappMsg: 'Bonjour, j\'ai une question concernant ma réservation de coaching ({title}).'
 		},
 		ht: {
-			pageTitle: 'Espas Etidyan Mwen · DJR Akademi',
-			metaDesc: 'Espas kliyan DJR Akademi — Aksede ak fòmasyon, ebook ak sesyon coaching ou yo.',
+			pageTitle: 'Espas fòmasyon mwen · DJR Akademi',
+			metaDesc: 'Espas kliyan DJR Akademi — jwenn aksè nan fòmasyon, liv dijital ak sesyon konsiltasyon ou yo.',
 			defaultUser: 'Etidyan',
-			recently: 'Nouvèlman',
-			memberActive: 'Manm Aktif',
+			recently: 'Dènyèman',
+			memberActive: 'Manm aktif',
 			memberSince: 'Manm depi',
 			myCoursesQuick: 'Fòmasyon w ap swiv',
-			myEbooksQuick: 'Ebook ou genyen',
-			myCoachingQuick: 'Sesyon coaching',
+			myEbooksQuick: 'Liv dijital ou genyen',
+			myCoachingQuick: 'Sesyon konsiltasyon',
 			closeBtn: 'Fèmen',
-			coursesTitle: 'Fòmasyon Mwen Yo',
-			coursesSub: 'Aksede ak espas aprantisaj videyo ou a sou entènèt',
+			coursesTitle: 'Fòmasyon mwen yo',
+			coursesSub: 'Gade fòmasyon videyo ou yo sou entènèt',
 			coursesAccess: 'Aksè san limit 24/7',
 			noCoursesTitle: 'Pa gen fòmasyon ki debloke',
 			noCoursesSub: 'Ou poko debloke okenn fòmasyon. Dekouvri katalòg nou an pou kòmanse aprann.',
@@ -105,27 +109,27 @@
 			defaultLesson: 'Byenveni nan fòmasyon sa a',
 			continueCourse: 'Kontinye fòmasyon an',
 			reviewCourse: 'Revwa fòmasyon an',
-			ebooksTitle: 'Ebook PDF Mwen Yo',
-			ebooksSub: 'Feyè ak gid pratik ou yo ou ka telechaje nenpòt ki lè',
+			ebooksTitle: 'Liv dijital PDF mwen yo',
+			ebooksSub: 'Gid pratik ou ka telechaje nenpòt lè',
 			unlimitedDownload: 'Telechajman san limit',
-			noEbooksTitle: 'Pa gen ebook ki disponib',
-			noEbooksSub: 'Ou poko gen ebook PDF. Dekouvri gid pratik nou yo nan katalòg la.',
-			exploreEbooks: 'Dekouvri ebook yo',
-			preparingDownload: 'Preparasyon…',
+			noEbooksTitle: 'Pa gen liv dijital ki disponib',
+			noEbooksSub: 'Ou poko gen liv dijital PDF. Dekouvri gid pratik nou yo nan katalòg la.',
+			exploreEbooks: 'Dekouvri liv dijital yo',
+			preparingDownload: 'N ap prepare telechajman an…',
 			downloadPdf: 'Telechaje (PDF)',
-			downloadStarted: 'Telechajman nan "{title}" kòmanse.',
+			downloadStarted: 'Telechajman "{title}" a kòmanse.',
 			downloadError: 'Telechajman pa posib.',
-			coachingTitle: 'Sesyon Coaching Mwen Yo',
-			coachingSub: 'Rendez-vous swivi endividyèl ou yo ak pwofesè a',
-			bookAnother: 'Rezeve yon lòt sesyon',
-			noCoachingTitle: 'Pa gen sesyon coaching ki rezeve',
-			noCoachingSub: 'Ou pa gen okenn rendez-vous coaching kounye a.',
-			bookSession: 'Rezeve yon sesyon',
+			coachingTitle: 'Sesyon konsiltasyon mwen yo',
+			coachingSub: 'Randevou endividyèl ou yo ak konseye a',
+			bookAnother: 'Rezève yon lòt sesyon',
+			noCoachingTitle: 'Pa gen sesyon ki rezève',
+			noCoachingSub: 'Ou pa gen okenn sesyon konsiltasyon kounye a.',
+			bookSession: 'Rezève yon sesyon',
 			confirmed: 'Konfime',
-			pending: 'Enatant',
-			whatsappCoach: 'WhatsApp Coach :',
-			contactCoach: 'Kontakte coach la',
-			whatsappMsg: 'Bonjou, mwen gen yon kesyon konsènan rezèvasyon coaching mwen an ({title}).'
+			pending: 'Ap tann',
+			whatsappCoach: 'WhatsApp konseye a:',
+			contactCoach: 'Kontakte konseye a',
+			whatsappMsg: 'Bonjou, mwen gen yon kesyon sou rezèvasyon konsiltasyon mwen an ({title}).'
 		}
 	};
 	let t = $derived(i18n[currentLang]);
@@ -145,7 +149,7 @@
 			? (authState.profile?.name || authState.user?.name || '').substring(0, 2).toUpperCase()
 			: 'ED',
 		memberSince: authState.profile?.createdAt
-			? new Date(authState.profile.createdAt).toLocaleDateString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+			? formatDateTimeInTimezone(authState.profile.createdAt, Intl.DateTimeFormat().resolvedOptions().timeZone, currentLang).date
 			: t.recently
 	});
 
@@ -202,14 +206,16 @@
 			await downloadOwnedEbook(ebook.id);
 			downloadSuccessMessage = t.downloadStarted.replace('{title}', ebook.title);
 		} catch (caught) {
-			downloadSuccessMessage = caught instanceof Error ? caught.message : t.downloadError;
+			console.error('Ebook download error:', caught);
+			downloadSuccessMessage = t.downloadError;
 		} finally {
 			downloadingEbookId = null;
 		}
 	}
 
 	function formatBookingDate(iso: string) {
-		return new Date(iso).toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR', { dateStyle: 'long', timeStyle: 'short' });
+		const formatted = formatDateTimeInTimezone(iso, Intl.DateTimeFormat().resolvedOptions().timeZone, currentLang);
+		return `${formatted.date} · ${formatted.time}`;
 	}
 </script>
 

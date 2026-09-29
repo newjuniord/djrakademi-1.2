@@ -84,16 +84,29 @@ export function getTimezoneCity(timezone: string): string {
 	return TIMEZONE_OPTIONS.find((option) => option.value === timezone)?.city ?? timezone.split('/').at(-1)?.replaceAll('_', ' ') ?? timezone;
 }
 
-export function formatDateTimeInTimezone(iso: string, timezone: string): { date: string; time: string } {
+export function formatDateTimeInTimezone(iso: string, timezone: string, language: 'fr' | 'ht' = 'fr'): { date: string; time: string } {
 	const date = new Date(iso);
+	const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
+		timeZone: timezone,
+		weekday: language === 'ht' ? 'long' : 'short',
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric'
+	});
+	const weekdays: Record<string, string> = {
+		dimanche: 'dimanch', lundi: 'lendi', mardi: 'madi', mercredi: 'mèkredi',
+		jeudi: 'jedi', vendredi: 'vandredi', samedi: 'samdi'
+	};
+	const months: Record<string, string> = {
+		janvier: 'janvye', février: 'fevriye', mars: 'mas', avril: 'avril',
+		mai: 'me', juin: 'jen', juillet: 'jiyè', août: 'out', septembre: 'septanm',
+		octobre: 'oktòb', novembre: 'novanm', décembre: 'desanm'
+	};
+	const parts = Object.fromEntries(dateFormatter.formatToParts(date).map((part) => [part.type, part.value]));
 	return {
-		date: new Intl.DateTimeFormat('fr-FR', {
-			timeZone: timezone,
-			weekday: 'short',
-			day: 'numeric',
-			month: 'long',
-			year: 'numeric'
-		}).format(date),
+		date: language === 'ht'
+			? `${weekdays[parts.weekday] || parts.weekday} ${parts.day} ${months[parts.month] || parts.month} ${parts.year}`
+			: dateFormatter.format(date),
 		time: new Intl.DateTimeFormat('fr-FR', {
 			timeZone: timezone,
 			hour: '2-digit',

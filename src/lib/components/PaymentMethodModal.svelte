@@ -1,7 +1,45 @@
 <script lang="ts">
 	import { X, CreditCard, Smartphone, Check, Loader2, Globe, MapPin } from 'lucide-svelte';
 	import { dev } from '$app/environment';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+	const i18n = {
+		fr: {
+			title: 'Choisissez votre moyen de paiement',
+			free: 'Gratuit',
+			close: 'Fermer la fenêtre de paiement',
+			localMethods: 'Haïti 🇭🇹 (moyens de paiement locaux)',
+			moncashDesc: 'Paiement mobile rapide avec Digicel MonCash',
+			localCard: 'Carte HTG (locale)',
+			testLocalCard: 'Tester le paiement par carte HTG en local',
+			testCard: 'Tester la carte HTG',
+			natcashDesc: 'Paiement mobile avec Natcom NatCash',
+			international: 'International 🌐 (carte bancaire)',
+			card: 'Carte Visa / Mastercard',
+			cardDesc: 'Visa, Mastercard et autres cartes bancaires avec Lemon Squeezy',
+			preparing: 'Préparation du paiement...',
+			continue: (method: string) => `Continuer vers le paiement (${method})`
+		},
+		ht: {
+			title: 'Chwazi fason pou w peye',
+			free: 'Gratis',
+			close: 'Fèmen fenèt peman an',
+			localMethods: 'Ayiti 🇭🇹 (mwayen peman lokal)',
+			moncashDesc: 'Peman mobil rapid ak Digicel MonCash',
+			localCard: 'Kat HTG (lokal)',
+			testLocalCard: 'Teste peman ak kat HTG an lokal',
+			testCard: 'Teste kat HTG a',
+			natcashDesc: 'Peman mobil ak Natcom NatCash',
+			international: 'Entènasyonal 🌐 (kat labank)',
+			card: 'Kat Visa / Mastercard',
+			cardDesc: 'Visa, Mastercard ak lòt kat labank avèk Lemon Squeezy',
+			preparing: 'N ap prepare peman an...',
+			continue: (method: string) => `Kontinye pou w peye (${method})`
+		}
+	};
+	let t = $derived(i18n[currentLang]);
 
 	let {
 		open = false,
@@ -84,10 +122,10 @@
 			<div class="p-6 border-b border-zinc-100 flex items-center justify-between gap-4 bg-white">
 				<div>
 					<h3 id="payment-modal-title" class="text-lg font-black text-zinc-950 tracking-tight">
-						Chwazi fason pou w peye
+						{t.title}
 					</h3>
 					<p class="text-xs text-zinc-500 mt-0.5 line-clamp-2 max-w-full font-medium leading-normal">
-						{productTitle} · <span class="font-bold text-zinc-900">{isFree ? 'Gratis' : `${amount.toLocaleString('fr-FR')} HTG${amountUsd && amountUsd > 0 ? ` ($${amountUsd} USD)` : ''}`}</span>
+						{productTitle} · <span class="font-bold text-zinc-900">{isFree ? t.free : `${amount.toLocaleString('fr-FR')} HTG${amountUsd && amountUsd > 0 ? ` ($${amountUsd} USD)` : ''}`}</span>
 					</p>
 				</div>
 
@@ -96,7 +134,7 @@
 					onclick={onClose}
 					disabled={isLoading}
 					class="size-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-900 grid place-items-center transition-colors shrink-0 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-					aria-label="Fèmen an"
+					aria-label={t.close}
 				>
 					<X size={16} />
 				</button>
@@ -108,7 +146,7 @@
 				<div class="space-y-2.5 {localMethodsEnabled ? '' : 'opacity-50'}">
 					<div class="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
 						<MapPin size={13} class="text-red-500" />
-						<span>Ayiti 🇭🇹 (Metòd Lokal)</span>
+						<span>{t.localMethods}</span>
 					</div>
 
 					<!-- Option MonCash -->
@@ -130,7 +168,7 @@
 										<span class="font-bold text-sm text-zinc-950">MonCash</span>
 										<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-extrabold">MonCash</span>
 									</div>
-									<p class="text-xs text-zinc-500">Peman mobil rapid ak Digicel MonCash</p>
+									<p class="text-xs text-zinc-500">{t.moncashDesc}</p>
 								</div>
 							</div>
 
@@ -145,17 +183,17 @@
 							<div class="p-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-2 text-xs">
 								<div class="flex items-center gap-1.5 text-amber-900 font-bold text-[11px]">
 									<span class="px-1.5 py-0.5 rounded bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider">DEV TEST</span>
-									<span>Kat HTG (Local)</span>
+									<span>{t.localCard}</span>
 								</div>
 								<button
 									type="button"
 									disabled={isLoading}
 									onclick={() => onSelectMethod('plopplop_carte')}
 									class="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-[11px] shadow-xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
-									title="Tester le paiement Carte HTG en local"
+									title={t.testLocalCard}
 								>
 									<CreditCard size={12} />
-									<span>Test Kat HTG</span>
+									<span>{t.testCard}</span>
 								</button>
 							</div>
 						{/if}
@@ -179,7 +217,7 @@
 									<span class="font-bold text-sm text-zinc-950">NatCash</span>
 									<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-extrabold">Natcom</span>
 								</div>
-								<p class="text-xs text-zinc-500">Peman ak pòtfèy mobil Natcom NatCash</p>
+								<p class="text-xs text-zinc-500">{t.natcashDesc}</p>
 							</div>
 						</div>
 
@@ -196,7 +234,7 @@
 				<div class="space-y-2.5 pt-2 border-t border-zinc-100">
 					<div class="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
 						<Globe size={13} class="text-blue-500" />
-						<span>Entènasyonal 🌐 (Kat Bankè)</span>
+						<span>{t.international}</span>
 					</div>
 
 					<!-- Option Carte Bancaire -->
@@ -214,10 +252,10 @@
 							</div>
 							<div>
 								<div class="flex items-center gap-2">
-									<span class="font-bold text-sm text-zinc-950">Kat Visa / Mastercard</span>
-									<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold">Entènasyonal</span>
+									<span class="font-bold text-sm text-zinc-950">{t.card}</span>
+									<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold">{currentLang === 'ht' ? 'Entènasyonal' : 'International'}</span>
 								</div>
-								<p class="text-xs text-zinc-500">Visa, MasterCard ak lòt kat bankè ak Lemon Squeezy</p>
+								<p class="text-xs text-zinc-500">{t.cardDesc}</p>
 							</div>
 						</div>
 
@@ -241,10 +279,10 @@
 				>
 					{#if isLoading}
 						<Loader2 size={18} class="animate-spin text-white shrink-0" />
-						<span class="text-white animate-pulse">Peman an ap prepare...</span>
+						<span class="text-white animate-pulse">{t.preparing}</span>
 					{:else}
 						<CreditCard size={18} class="text-white shrink-0" />
-						<span class="text-white">Kontinye pou w peye ({selectedMethod.toUpperCase()})</span>
+						<span class="text-white">{t.continue(selectedMethod.toUpperCase())}</span>
 					{/if}
 				</button>
 			</div>

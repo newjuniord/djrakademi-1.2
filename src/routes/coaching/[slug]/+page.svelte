@@ -59,46 +59,76 @@
 			btnSubmitRetry: "Reprendre le paiement",
 			loadingSubmit: "Création de la réservation...",
 			selectSlotError: "Veuillez choisir un créneau disponible.",
-			loginToast: "Veuillez vous connecter à votre compte pour réserver cette séance."
+			loginToast: "Veuillez vous connecter à votre compte pour réserver cette séance.",
+			bookingError: "Impossible de créer la réservation. Veuillez réessayer.",
+			paymentError: "Impossible de lancer le paiement. Veuillez réessayer.",
+			namePlaceholder: "Ex. : Jean-Marc Baptiste",
+			emailPlaceholder: "votre.email@exemple.com",
+			benefitsKicker: "POURQUOI PARTICIPER ?",
+			benefitsTitle: "DÉVELOPPEZ VOTRE ASSURANCE À L'ORAL",
+			benefitsIntro: "Apprenez à communiquer avec clarté et assurance grâce à des conseils pratiques que vous pourrez appliquer au quotidien.",
+			benefits: [
+				{ title: "COMMUNICATION CLAIRE", description: "Exprimez vos idées avec précision pour que votre message soit compris et retenu." },
+				{ title: "AUTORITÉ NATURELLE", description: "Prenez la parole avec assurance et inspirez le respect sans forcer votre voix." },
+				{ title: "CONNEXION ÉMOTIONNELLE", description: "Créez un lien sincère avec votre public et gagnez sa confiance." },
+				{ title: "INFLUENCE ET IMPACT", description: "Présentez vos idées avec conviction pour mobiliser votre équipe ou votre public." },
+				{ title: "GESTION DU STRESS", description: "Apprenez à rester calme et clair, quelle que soit la taille de votre public." },
+				{ title: "IMAGE PROFESSIONNELLE", description: "Construisez une réputation qui reflète vos compétences et vos valeurs." }
+			]
 		},
 		ht: {
 			metaTitle: (t: string) => `${t} · DJR Akademi`,
 			metaDesc: (d: string) => d || "Sesyon konsiltasyon endividyèl",
-			securityBadge: "Rezèvasyon 100% Ansekirite",
+			securityBadge: "Rezèvasyon an sekirite",
 			loading: "Sesyon konsiltasyon ou a ap chaje...",
 			notFoundTitle: "Sèvis sa a pa disponib",
 			notFoundDesc: "Sèvis konsiltasyon sa a pa egziste oswa li desaktive.",
 			backHome: "Tounen nan akèy",
-			backTrainings: "Tounen nan fòmasyon yo",
-			badgeSession: "Sesyon Endividyèl 1-ak-1",
+			backTrainings: "Gade tout òf yo",
+			badgeSession: "Sesyon endividyèl youn ak youn",
 			durationLabel: "Tan sesyon an",
 			minutes: (m: number) => `${m} minit`,
 			priceLabel: "Pri sesyon an",
 			free: "Gratis",
-			includedTitle: "Enkli nan rezèvasyon ou :",
+			includedTitle: "Sa rezèvasyon w lan gen ladan l:",
 			inc1: "Konfimasyon ak detay yo disponib nan espas ou",
-			inc2: "Ajoute nan kalandriye ou an yon sèl klik",
-			inc3: "Lè ajiste selon lavil ou",
+			inc2: "Ajoute sesyon an nan kalandriye w ak yon sèl klik",
+			inc3: "Lè sesyon an ajiste selon vil ou",
 			step1Title: "1. Chwazi yon dat ak lè",
-			timezoneAdjustedFor: (city: string) => `Lè ki ajiste pou : ${city}`,
+			timezoneAdjustedFor: (city: string) => `Lè ki ajiste pou ${city}`,
 			noSlotsAvailable: "Pa gen dat ki disponib pou kounye a.",
 			noSlotsDesc: "N ap ajoute lòt dat ki disponib yo talè konsa.",
-			selectDateLabel: (n: number) => `Chwazi yon dat (${n} jou disponib) :`,
-			selectSlotLabel: (date: string) => `Lè ki disponib pou ${date} :`,
+			selectDateLabel: (n: number) => `Chwazi yon dat (${n} jou disponib):`,
+			selectSlotLabel: (date: string) => `Lè ki disponib pou ${date}:`,
 			step2Title: "2. Enfòmasyon ou yo",
-			step2Subtitle: "Konfimasyon an ap lyen ak kont ou.",
+			step2Subtitle: "Rezèvasyon an ap konekte dirèkteman ak kont ou.",
 			notLoggedIn: "Ou poko konekte sou kont ou?",
-			notLoggedInSub: "Konekte pou rezèvasyon an ka lyen ak kont ou otomatikman.",
+			notLoggedInSub: "Konekte pou rezèvasyon an ka parèt otomatikman nan kont ou.",
 			btnLoginNow: "Konekte kounye a",
 			fullNameLabel: "Non konplè",
-			emailLabel: "Adrès Imèl",
+			emailLabel: "Adrès imèl",
 			whatsappLabel: "Nimewo WhatsApp",
 			btnSubmit: "Kontinye nan peman an",
 			btnSubmitFree: "Konfime rezèvasyon gratis la",
-			btnSubmitRetry: "Repann peman an",
+			btnSubmitRetry: "Reprann peman an",
 			loadingSubmit: "Rezèvasyon an ap kreye...",
-			selectSlotError: "Chwazi yon kreno ki disponib.",
-			loginToast: "Tanpri konekte sou kont ou pou w ka rezève sesyon konsiltasyon sa a."
+			selectSlotError: "Tanpri chwazi yon lè ki disponib.",
+			loginToast: "Tanpri konekte sou kont ou pou w ka rezève sesyon konsiltasyon sa a.",
+			bookingError: "Nou pa ka kreye rezèvasyon an. Tanpri eseye ankò.",
+			paymentError: "Nou pa ka lanse peman an. Tanpri eseye ankò.",
+			namePlaceholder: "Egzanp: Jean-Marc Baptiste",
+			emailPlaceholder: "imel@egzanp.com",
+			benefitsKicker: "POUKISA W DWE PATISIPE?",
+			benefitsTitle: "PALE AK PLIS ASIRANS",
+			benefitsIntro: "Aprann kominike klèman ak plis asirans gras ak konsèy pratik ou ka aplike chak jou.",
+			benefits: [
+				{ title: "KOMINIKASYON KLÈ", description: "Eksprime lide w yo ak presizyon pou moun konprann mesaj ou epi sonje l." },
+				{ title: "OTORITE NATIRÈL", description: "Pran lapawòl ak asirans epi fè moun respekte w san w pa fòse vwa w." },
+				{ title: "KONEKSYON EMOSYONÈL", description: "Kreye yon lyen sensè ak moun k ap koute w yo epi genyen konfyans yo." },
+				{ title: "ENFLIYANS AK ENPAK", description: "Prezante lide w yo ak konviksyon pou mobilize ekip ou oswa odyans ou." },
+				{ title: "JERE ESTRÈS", description: "Aprann rete kalm epi pale klè, kèlkeswa kantite moun k ap koute w." },
+				{ title: "IMAJ PWOFESYONÈL", description: "Bati yon repitasyon ki montre konpetans ou ak valè w yo." }
+			]
 		}
 	};
 
@@ -106,10 +136,9 @@
 
 	function getHref(path: string): string {
 		if (currentLang !== 'ht') return path;
-		const [pathname, search] = path.split('?');
-		const params = new URLSearchParams(search || '');
-		params.set('lang', 'ht');
-		return `${pathname}?${params.toString()}`;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const slug = $derived(page.params.slug);
@@ -147,7 +176,7 @@
 	let groupedSlots = $derived.by(() => {
 		const groupsMap = new Map<string, { formattedDate: string; shortDate: string; slots: CoachingSlot[] }>();
 		for (const slot of slots) {
-			const { date: formattedDate } = formatDateTimeInTimezone(slot.startAt, timezone);
+			const { date: formattedDate } = formatDateTimeInTimezone(slot.startAt, timezone, currentLang);
 			const key = formattedDate;
 			if (!groupsMap.has(key)) {
 				const parts = formattedDate.split(' ');
@@ -213,7 +242,7 @@
 		if (!service || !selected) { error = t.selectSlotError; return; }
 		if (liveBookingId) { showCoachingPaymentModal = true; return; }
 		const customer: BookingCustomerInput = { name, email, whatsapp, timezone };
-		error = validateBookingInput(customer) ?? "";
+		error = validateBookingInput(customer, currentLang) ?? "";
 		if (error) return;
 		if (!authState.user) {
 			error = t.loginToast;
@@ -234,7 +263,8 @@
 				showCoachingPaymentModal = true;
 			}
 		} catch (caught) {
-			error = caught instanceof Error ? caught.message : t.selectSlotError;
+			console.error('Booking creation error:', caught);
+			error = t.bookingError;
 		} finally {
 			loading = false;
 		}
@@ -262,12 +292,13 @@
 			});
 			const redirectTarget = result?.url || result?.redirectUrl;
 			if (!result?.success || !redirectTarget) {
-				throw new Error(result?.message || "Erè nan lanse peman an.");
+				throw new Error(result?.message || t.paymentError);
 			}
 			window.location.href = redirectTarget;
 			return;
 		} catch (caught) {
-			error = caught instanceof Error ? caught.message : "Yon erè rive pandan peman an.";
+			console.error('Coaching payment error:', caught);
+			error = t.paymentError;
 			toast.error(error);
 			showCoachingPaymentModal = false;
 		} finally {
@@ -400,7 +431,7 @@
 							</div>
 
 							<!-- Timezone Selector Dropdown -->
-							<TimezoneSelector bind:value={timezone} bind:open={timezoneOpen} />
+						<TimezoneSelector bind:value={timezone} bind:open={timezoneOpen} />
 
 							{#if slots.length === 0}
 								<div class="rounded-2xl border border-dashed border-base-300/80 p-8 text-center text-base-content/50 space-y-2 bg-base-200/30">
@@ -438,7 +469,7 @@
 										</p>
 										<div class="grid gap-2.5 grid-cols-2 sm:grid-cols-3">
 											{#each currentDayGroup.slots as slot}
-												{@const local = formatDateTimeInTimezone(slot.startAt, timezone)}
+												{@const local = formatDateTimeInTimezone(slot.startAt, timezone, currentLang)}
 												{@const isSelected = selected?.id === slot.id}
 												<button
 													type="button"
@@ -512,7 +543,7 @@
 									required
 									autocomplete="name"
 									bind:value={name}
-									placeholder="Ex: Jean-Marc Baptiste"
+									placeholder={t.namePlaceholder}
 								/>
 							</div>
 
@@ -527,7 +558,7 @@
 									required
 									autocomplete="email"
 									bind:value={email}
-									placeholder="votre.email@exemple.com"
+									placeholder={t.emailPlaceholder}
 								/>
 							</div>
 
@@ -563,13 +594,13 @@
 				<!-- Section Header -->
 				<div class="text-center space-y-3 max-w-3xl mx-auto">
 					<span class="text-amber-500 font-extrabold text-xs uppercase tracking-widest block">
-						POUKISA W DWE PATISIPE?
+						{t.benefitsKicker}
 					</span>
 					<h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white uppercase leading-tight">
-						DEVLOPE OTORITE W AK PARÒL OU
+						{t.benefitsTitle}
 					</h2>
 					<p class="text-xs sm:text-sm text-zinc-400 font-medium leading-relaxed max-w-2xl mx-auto">
-						Aprann metriz kominikasyon ki se zouti prensipal tout gwo lidè. Metòd sa a fèt pou bay rezilta rapid ak pratik nan lavi pwofesyonèl ou.
+						{t.benefitsIntro}
 					</p>
 				</div>
 
@@ -582,10 +613,10 @@
 							<Radio size={20} />
 						</div>
 						<h3 class="font-black text-sm text-white uppercase tracking-wider mb-2.5">
-							KOMINIKASYON KLÈ
+							{t.benefits[0].title}
 						</h3>
 						<p class="text-xs text-zinc-400 leading-relaxed font-medium">
-							Aprann fòmile lide w yo avèk presizyon pou pèsonn pa mal konprann vizyon w. Chak mo ap gen enpak li.
+							{t.benefits[0].description}
 						</p>
 					</div>
 
@@ -595,10 +626,10 @@
 							<Shield size={20} />
 						</div>
 						<h3 class="font-black text-sm text-white uppercase tracking-wider mb-2.5">
-							OTORITE NATIRÈL
+							{t.benefits[1].title}
 						</h3>
 						<p class="text-xs text-zinc-400 leading-relaxed font-medium">
-							Pran lapawòl ak yon asirans ki fè tout moun anvi tande sa w gen pou di a. Enpoze respè san fòse.
+							{t.benefits[1].description}
 						</p>
 					</div>
 
@@ -608,10 +639,10 @@
 							<Heart size={20} />
 						</div>
 						<h3 class="font-black text-sm text-white uppercase tracking-wider mb-2.5">
-							KONEKSYON EMOSYONÈL
+							{t.benefits[2].title}
 						</h3>
 						<p class="text-xs text-zinc-400 leading-relaxed font-medium">
-							Touche kè moun w ap pale yo, kreye senpati epi bati konfyans rapidman avèk odyans ou.
+							{t.benefits[2].description}
 						</p>
 					</div>
 
@@ -621,10 +652,10 @@
 							<TrendingUp size={20} />
 						</div>
 						<h3 class="font-black text-sm text-white uppercase tracking-wider mb-2.5">
-							ENFLIYANS AK ENPAK
+							{t.benefits[3].title}
 						</h3>
 						<p class="text-xs text-zinc-400 leading-relaxed font-medium">
-							Konvenk odyans ou, dirije ekip ou ak enspire foul moun natirèlman.
+							{t.benefits[3].description}
 						</p>
 					</div>
 
@@ -634,10 +665,10 @@
 							<Zap size={20} />
 						</div>
 						<h3 class="font-black text-sm text-white uppercase tracking-wider mb-2.5">
-							METRIZ ESTRÈS
+							{t.benefits[4].title}
 						</h3>
 						<p class="text-xs text-zinc-400 leading-relaxed font-medium">
-							Jere lakrentif ak trak pou w rete poze epi klè, kèlkeswa gwosè odyans ou ap afwonte a.
+							{t.benefits[4].description}
 						</p>
 					</div>
 
@@ -647,10 +678,10 @@
 							<Star size={20} />
 						</div>
 						<h3 class="font-black text-sm text-white uppercase tracking-wider mb-2.5">
-							PERSONAL BRANDING
+							{t.benefits[5].title}
 						</h3>
 						<p class="text-xs text-zinc-400 leading-relaxed font-medium">
-							Bati yon repitasyon solid ki reflete konpetans ou kòm yon vrè lidè ak vizyonè.
+							{t.benefits[5].description}
 						</p>
 					</div>
 

@@ -18,34 +18,38 @@
 	} from 'lucide-svelte';
 	import { confirmPlopplopPayment } from '$lib/services/payments';
 	import type { Order } from '$lib/services/orders';
+	import { formatDateTimeInTimezone } from '$lib/coaching/timezone';
 
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
 		fr: {
-			title: 'Confirmation de Commande · DJR Akademi',
+			title: 'Confirmation de commande · DJR Akademi',
 			verifyingTitle: 'Vérification du paiement…',
 			verifyingDesc: 'Nous confirmons votre transaction avec le système de paiement. Veuillez ne pas fermer cette page.',
 			missingOrderId: 'Aucun numéro de commande spécifié dans l\'URL.',
 			paymentPending: 'Le paiement est toujours en attente de confirmation.',
 			networkError: 'Erreur réseau lors de la vérification du paiement.',
 			errorTitle: 'Impossible de vérifier la commande',
-			goToDashboard: 'Aller sur mon Espace (Dashboard)',
+			goToDashboard: 'Aller à mon espace',
 			retryBtn: 'Réessayer la vérification',
 			contactSupport: 'Contacter le support',
-			paymentConfirmed: 'Paiement Confimé',
+			paymentConfirmed: 'Paiement confirmé',
 			thanksOrder: 'Merci pour votre commande !',
 			txConfirmed: 'Votre transaction a été confirmée avec succès.',
 			emailSentSuccess: 'Un e-mail d\'accès a été envoyé à',
 			emailSentFail: 'Votre achat est disponible dans votre compte; l\'e-mail n\'a pas pu être envoyé pour le moment.',
 			typeCourse: 'Formation en ligne',
-			typeEbook: 'E-book PDF',
-			typeBundle: 'Bundle',
-			typeCoaching: 'Session Coaching',
+			typeEbook: 'Livre électronique PDF',
+			typeBundle: 'Offre groupée',
+			typeCoaching: 'Séance de coaching',
 			customerLabel: 'Client :',
 			amountPaidLabel: 'Montant payé',
 			receiptTitle: 'Détails du reçu',
@@ -54,15 +58,16 @@
 			providerLabel: 'Moyen de paiement',
 			dateLabel: 'Date de transaction',
 			paymentIdLabel: 'ID Paiement',
-			accessCourseNow: 'Accéder à la formation maintenant',
-			viewDownloadEbook: 'Voir & Télécharger l\'E-book',
+			accessCourseNow: 'Accéder à la formation',
+			viewDownloadEbook: 'Voir et télécharger le livre électronique',
 			viewMyResources: 'Voir mes ressources',
-			viewBookingDetails: 'Voir les détails du rendez-vous',
+			viewBookings: 'Voir mes réservations',
 			viewTransactions: 'Voir toutes mes transactions',
 			printReceipt: 'Imprimer le reçu',
 			questionOrder: 'Une question concernant votre commande ?',
-			supportWhatsapp: 'Support WhatsApp Coaching',
-			contactPage: 'Page Contact'
+			supportWhatsapp: 'Assistance WhatsApp',
+			contactPage: 'Nous contacter',
+			whatsappMessage: 'Bonjour, j’ai une question concernant ma réservation de coaching.'
 		},
 		ht: {
 			title: 'Konfimasyon Kòmand · DJR Akademi',
@@ -72,35 +77,36 @@
 			paymentPending: 'Peman an ap trete toujou oswa li pa t ka konfime.',
 			networkError: 'Erè rezo lè n t ap verifye peman an.',
 			errorTitle: 'Nou pa ka verifye kòmand lan',
-			goToDashboard: 'Ale nan Espas mwen (Dashboard)',
+			goToDashboard: 'Ale nan espas mwen',
 			retryBtn: 'Eseye verifye ankò',
 			contactSupport: 'Kontakte sipò a',
-			paymentConfirmed: 'Peman Konfime',
-			thanksOrder: 'Mèsi pou kòmand ou an !',
+			paymentConfirmed: 'Peman an konfime',
+			thanksOrder: 'Mèsi pou kòmand ou an!',
 			txConfirmed: 'Tranzaksyon ou an konfime avèk siksè.',
 			emailSentSuccess: 'Yon imèl aksè voye bay',
-			emailSentFail: 'Achte w la disponib nan kont ou; imèl la pa t ka voye pou kounye a.',
+			emailSentFail: 'Acha w la disponib nan kont ou; imèl la pa t ka voye pou kounye a.',
 			typeCourse: 'Fòmasyon sou entènèt',
-			typeEbook: 'E-book PDF',
-			typeBundle: 'Bundle',
-			typeCoaching: 'Sesyon Coaching',
-			customerLabel: 'Kliyan :',
+			typeEbook: 'Liv dijital PDF',
+			typeBundle: 'Pakèt resous',
+			typeCoaching: 'Sesyon konsiltasyon',
+			customerLabel: 'Kliyan:',
 			amountPaidLabel: 'Montan peye',
-			receiptTitle: 'Detay resi an',
+			receiptTitle: 'Detay resi a',
 			statusLabel: 'Sitiyasyon peman an',
-			statusValid: 'Valab',
+			statusValid: 'Konfime',
 			providerLabel: 'Mwayen peman',
 			dateLabel: 'Dat tranzaksyon an',
-			paymentIdLabel: 'ID Peman',
+			paymentIdLabel: 'Nimewo peman',
 			accessCourseNow: 'Jwenn aksè nan fòmasyon an kounye a',
-			viewDownloadEbook: 'Gade & Telechaje E-book la',
+			viewDownloadEbook: 'Gade epi telechaje liv dijital la',
 			viewMyResources: 'Gade resous mwen yo',
-			viewBookingDetails: 'Gade detay rendez-vous an',
+			viewBookings: 'Gade rezèvasyon mwen yo',
 			viewTransactions: 'Gade tout tranzaksyon m yo',
-			printReceipt: 'Enprime resi an',
-			questionOrder: 'Ou gen yon kesyon sou kòmand ou an ?',
-			supportWhatsapp: 'Sipò WhatsApp Coaching',
-			contactPage: 'Paj Kontakte n'
+			printReceipt: 'Enprime resi a',
+			questionOrder: 'Ou gen yon kesyon sou kòmand ou an?',
+			supportWhatsapp: 'Asistans WhatsApp',
+			contactPage: 'Kontakte nou',
+			whatsappMessage: 'Bonjou, mwen gen yon kesyon sou rezèvasyon konsiltasyon mwen an.'
 		}
 	};
 
@@ -111,6 +117,9 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let emailSent = $state<boolean | null>(null);
+	let receiptDate = $derived(order
+		? formatDateTimeInTimezone(order.paidAt || order.createdAt, Intl.DateTimeFormat().resolvedOptions().timeZone, currentLang)
+		: null);
 
 	onMount(async () => {
 		orderId =
@@ -138,7 +147,7 @@
 				order = data.order;
 				emailSent = data.emailSent ?? null;
 			} else {
-				error = data.message || i18n[currentLang].paymentPending;
+				error = i18n[currentLang].paymentPending;
 			}
 		} catch {
 			error = i18n[currentLang].networkError;
@@ -261,7 +270,7 @@
 						<div class="grid grid-cols-2 gap-3 pt-1 text-xs">
 							<div>
 								<span class="text-base-content/50 block">{t.statusLabel}</span>
-								<span class="font-bold text-emerald-600 dark:text-emerald-400 capitalize">{t.statusValid} ({order.status})</span>
+								<span class="font-bold text-emerald-600 dark:text-emerald-400 capitalize">{t.statusValid}</span>
 							</div>
 							<div>
 								<span class="text-base-content/50 block">{t.providerLabel}</span>
@@ -270,13 +279,7 @@
 							<div>
 								<span class="text-base-content/50 block">{t.dateLabel}</span>
 								<span class="font-medium text-base-content">
-									{new Date(order.paidAt || order.createdAt).toLocaleDateString(currentLang === 'fr' ? 'fr-FR' : 'ht-HT', {
-										day: 'numeric',
-										month: 'long',
-										year: 'numeric',
-										hour: '2-digit',
-										minute: '2-digit'
-									})}
+									{receiptDate ? `${receiptDate.date} · ${receiptDate.time}` : ''}
 								</span>
 							</div>
 							<div>
@@ -308,10 +311,10 @@
 							<a href={getHref('/dashboard')} class="btn btn-primary w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2">{t.viewMyResources} <ArrowRight size={18} /></a>
 						{:else}
 							<a
-								href={getHref(`/booking/${order.productId}/success`)}
+								href={getHref('/dashboard#sec-coaching')}
 								class="btn btn-primary w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2"
 							>
-								<span>{t.viewBookingDetails}</span>
+								<span>{t.viewBookings}</span>
 								<ArrowRight size={18} />
 							</a>
 						{/if}
@@ -339,7 +342,7 @@
 						<span>{t.questionOrder}</span>
 						{#if order.productType === 'coaching'}
 							<a
-								href="https://wa.me/50937001234?text=Bonjou,%20mwen%20gen%20yon%20kesyon%20sou%20rez%C3%A8vasyon%20coaching%20mwen%20an"
+								href={`https://wa.me/50937001234?text=${encodeURIComponent(t.whatsappMessage)}`}
 								target="_blank"
 								rel="noreferrer"
 								class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"

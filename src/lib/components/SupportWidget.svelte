@@ -47,6 +47,39 @@
 
 	const widgetI18n = {
 		fr: {
+			title: 'Assistance DJR',
+			subtitle: 'Assistance pour vos transactions et services',
+			close: 'Fermer',
+			newRequest: '✉️ Nouvelle demande',
+			history: '🕐 Historique',
+			loading: 'Chargement des données…',
+			noOrder: 'Aucune commande trouvée',
+			noOrderHelp: 'Cette assistance est réservée aux personnes ayant une transaction active (cours, livre numérique ou consultation).',
+			todayMessages: 'Messages aujourd’hui :',
+			remaining: 'restants',
+			quotaReached: '🚫 Limite atteinte pour aujourd’hui',
+			quotaHelp: 'Vous avez envoyé 3 demandes aujourd’hui. Réessayez demain.',
+			selectOrder: 'Choisissez la commande concernée :',
+			continue: 'Continuer ➔',
+			back: 'Retour',
+			generalQuestion: 'Question générale',
+			selectIssue: 'Quel est votre problème ?',
+			changeMessage: 'Changer de message',
+			whatsapp: 'Votre numéro WhatsApp',
+			required: 'Obligatoire',
+			optional: 'Facultatif',
+			whatsappHelp: 'La plupart des problèmes se résolvent automatiquement en 72 h. Si vous indiquez votre numéro WhatsApp, l’équipe pourra vous contacter si nécessaire.',
+			sending: 'Envoi en cours…',
+			send: 'Envoyer la demande 🚀',
+			noHistory: 'Vous n’avez encore envoyé aucune demande.',
+			teamReply: 'Réponse de l’équipe d’assistance :',
+			statusResolved: 'Résolu',
+			statusProgress: 'En cours',
+			statusPending: 'En attente',
+			orderPaid: 'Payée',
+			orderPending: 'En attente',
+			orderFailed: 'Échouée',
+			orderExpired: 'Expirée',
 			loginToast: 'Veuillez vous connecter à votre compte pour utiliser le service d\'assistance.',
 			errSelectPreset: 'Veuillez choisir un message d\'assistance.',
 			errInvalidWhatsapp: 'Veuillez saisir un numéro WhatsApp valide.',
@@ -56,17 +89,73 @@
 			errGeneric: 'Une erreur est survenue lors de l\'envoi.'
 		},
 		ht: {
-			loginToast: 'Tanpri konekte sou kont ou pou w ka sèvi ak asistans sipò an.',
+			title: 'Sipò DJR',
+			subtitle: 'Asistans pou tranzaksyon ak sèvis ou yo',
+			close: 'Fèmen',
+			newRequest: '✉️ Nouvo demann',
+			history: '🕐 Istwa',
+			loading: 'Done yo ap chaje…',
+			noOrder: 'Nou pa jwenn okenn kòmand',
+			noOrderHelp: 'Asistans sa a disponib sèlman pou moun ki gen yon tranzaksyon aktif (kou, liv dijital oswa konsiltasyon).',
+			todayMessages: 'Mesaj jodi a :',
+			remaining: 'ki rete',
+			quotaReached: '🚫 Ou rive nan limit pou jodi a',
+			quotaHelp: 'Ou voye 3 demann jodi a. Eseye ankò demen.',
+			selectOrder: 'Chwazi kòmand ki gen pwoblèm nan :',
+			continue: 'Kontinye ➔',
+			back: 'Retounen',
+			generalQuestion: 'Kesyon jeneral',
+			selectIssue: 'Ki pwoblèm ou genyen ?',
+			changeMessage: 'Chanje mesaj',
+			whatsapp: 'Nimewo WhatsApp ou',
+			required: 'Obligatwa',
+			optional: 'Si ou vle',
+			whatsappHelp: 'Pifò pwoblèm yo rezoud otomatikman nan 72 èdtan. Si ou bay nimewo WhatsApp ou, ekip la ka kontakte w si sa nesesè.',
+			sending: 'N ap voye demann nan…',
+			send: 'Voye demann nan 🚀',
+			noHistory: 'Ou poko voye okenn demann.',
+			teamReply: 'Repons ekip sipò a :',
+			statusResolved: 'Rezoud',
+			statusProgress: 'Ankou',
+			statusPending: 'Annatant',
+			orderPaid: 'Peye',
+			orderPending: 'Annatant',
+			orderFailed: 'Echwe',
+			orderExpired: 'Ekspire',
+			loginToast: 'Tanpri konekte sou kont ou pou w ka itilize sèvis asistans lan.',
 			errSelectPreset: 'Tanpri chwazi yon mesaj sipò.',
-			errInvalidWhatsapp: 'Tanpri mete yon nimewo WhatsApp valid.',
+			errInvalidWhatsapp: 'Tanpri antre yon nimewo WhatsApp ki valab.',
 			errQuotaLimit: 'Ou rive nan limit 3 mesaj sipò pou jodi a.',
 			successSend: 'Mesaj sipò w la voye ak siksè!',
-			errSendFailed: 'Nou pa ka voye mesaj la. Tanpri re-eseye.',
-			errGeneric: 'Yon erè rive pandan envoi an.'
+			errSendFailed: 'Nou pa ka voye mesaj la. Tanpri eseye ankò.',
+			errGeneric: 'Yon erè rive pandan nou t ap voye mesaj la.'
 		}
 	};
 
 	let wt = $derived(widgetI18n[currentLang]);
+
+	const presetI18n: Record<string, { fr: { label: string; description: string }; ht: { label: string; description: string } }> = {
+		no_access_after_payment: {
+			fr: { label: 'J’ai payé, mais je n’ai pas accès au produit', description: 'Le paiement a réussi, mais l’accès n’a pas été activé dans mon compte.' },
+			ht: { label: 'Mwen peye, men mwen pa jwenn aksè nan pwodui a', description: 'Peman an reyisi, men aksè a pa aktive nan kont mwen.' }
+		},
+		pending_transaction_help: {
+			fr: { label: 'J’ai payé, mais la transaction est toujours en attente', description: 'La transaction est encore en attente sur MonCash, NatCash ou par carte.' },
+			ht: { label: 'Mwen peye, men tranzaksyon an toujou ap tann', description: 'Tranzaksyon an toujou ap tann sou MonCash, NatCash oswa kat labank.' }
+		},
+		coaching_booking_issue: {
+			fr: { label: 'J’ai un problème avec ma réservation de consultation', description: 'J’ai besoin d’aide pour ma réservation de consultation.' },
+			ht: { label: 'Mwen gen yon pwoblèm ak rezèvasyon konsiltasyon mwen an', description: 'Mwen bezwen asistans pou rezèvasyon konsiltasyon mwen an.' }
+		}
+	};
+
+	function presetLabel(id: string, fallback: string): string {
+		return presetI18n[id]?.[currentLang].label ?? fallback;
+	}
+
+	function presetDescription(id: string, fallback: string): string {
+		return presetI18n[id]?.[currentLang].description ?? fallback;
+	}
 
 	async function loadStatus() {
 		if (!authState.user) { statusData = null; return; }
@@ -150,10 +239,11 @@
 				activeTab = 'history';
 				await loadStatus();
 			} else {
-				toast.error(res.error || wt.errSendFailed);
+				toast.error(wt.errSendFailed);
 			}
 		} catch (err: any) {
-			toast.error(err.message || wt.errGeneric);
+			console.error('Failed to send support message:', err);
+			toast.error(wt.errGeneric);
 		} finally {
 			submitting = false;
 		}
@@ -161,17 +251,29 @@
 
 	function getStatusBadge(status: string) {
 		switch (status) {
-			case 'resolved': return { text: 'Résolu', emoji: '✅', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-			case 'in_progress': return { text: 'En cours', emoji: '🔄', color: 'bg-blue-50 text-blue-700 border-blue-200' };
-			default: return { text: 'En attente', emoji: '⏳', color: 'bg-amber-50 text-amber-700 border-amber-200' };
+			case 'resolved': return { text: wt.statusResolved, emoji: '✅', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+			case 'in_progress': return { text: wt.statusProgress, emoji: '🔄', color: 'bg-blue-50 text-blue-700 border-blue-200' };
+			default: return { text: wt.statusPending, emoji: '⏳', color: 'bg-amber-50 text-amber-700 border-amber-200' };
 		}
+	}
+
+	function orderStatusLabel(status: string): string {
+		if (status === 'paid') return wt.orderPaid;
+		if (status === 'pending') return wt.orderPending;
+		if (status === 'failed') return wt.orderFailed;
+		return wt.orderExpired;
 	}
 
 	function formatDate(iso: string) {
 		try {
-			return new Intl.DateTimeFormat('fr-FR', {
-				day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
-			}).format(new Date(iso));
+			const formatter = new Intl.DateTimeFormat('fr-FR', {
+				day: '2-digit', month: currentLang === 'ht' ? 'numeric' : 'short', hour: '2-digit', minute: '2-digit'
+			});
+			const date = new Date(iso);
+			if (currentLang === 'fr') return formatter.format(date);
+			const parts = Object.fromEntries(formatter.formatToParts(date).map((part) => [part.type, part.value]));
+			const months = ['janvye', 'fevriye', 'mas', 'avril', 'me', 'jen', 'jiyè', 'out', 'septanm', 'oktòb', 'novanm', 'desanm'];
+			return `${parts.day} ${months[Number(parts.month) - 1]} ${parts.hour}:${parts.minute}`;
 		} catch { return iso; }
 	}
 
@@ -242,17 +344,15 @@
 						<Sparkles size={17} class="text-black" />
 					</div>
 					<div>
-						<h2 id="support-title" class="text-base font-bold text-zinc-900 leading-tight">
-							Sipò Rapid DJR
-						</h2>
-						<p class="text-xs text-zinc-400 mt-0.5">Asistans pou tranzaksyon & sèvis ou yo</p>
+						<h2 id="support-title" class="text-base font-bold text-zinc-900 leading-tight">{wt.title}</h2>
+						<p class="text-xs text-zinc-400 mt-0.5">{wt.subtitle}</p>
 					</div>
 				</div>
 				<button
 					type="button"
 					onclick={() => (open = false)}
 					class="size-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 grid place-items-center transition-colors cursor-pointer"
-					aria-label="Fermer"
+					aria-label={wt.close}
 				>
 					<X size={16} />
 				</button>
@@ -267,7 +367,7 @@
 						? 'border-amber-400 text-zinc-900'
 						: 'border-transparent text-zinc-400 hover:text-zinc-600'}"
 				>
-					✉️ Nouvelle demann
+					{wt.newRequest}
 				</button>
 				<button
 					type="button"
@@ -276,7 +376,7 @@
 						? 'border-amber-400 text-zinc-900'
 						: 'border-transparent text-zinc-400 hover:text-zinc-600'}"
 				>
-					🕐 Istwa
+					{wt.history}
 					{#if statusData?.messages?.length}
 						<span class="ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-zinc-100 text-zinc-600 rounded-full">
 							{statusData.messages.length}
@@ -292,7 +392,7 @@
 					<!-- Chargement -->
 					<div class="py-16 text-center text-zinc-400 space-y-3">
 						<Loader2 size={28} class="mx-auto animate-spin text-zinc-300" />
-						<p class="text-sm">Ap chèche done yo…</p>
+					<p class="text-sm">{wt.loading}</p>
 					</div>
 
 				{:else if !statusData?.eligible}
@@ -301,10 +401,8 @@
 						<div class="size-14 rounded-full bg-amber-50 grid place-items-center mx-auto">
 							<ShoppingBag size={24} class="text-amber-500" />
 						</div>
-						<h3 class="font-bold text-zinc-900">Nou pa jwenn kenn kòmande</h3>
-						<p class="text-sm text-zinc-500 leading-relaxed max-w-xs mx-auto">
-							Sipò sa a disponib sèlman pou moun ki gen yon tranzaksyon aktif (kou, ebook, oubyen coaching).
-						</p>
+					<h3 class="font-bold text-zinc-900">{wt.noOrder}</h3>
+					<p class="text-sm text-zinc-500 leading-relaxed max-w-xs mx-auto">{wt.noOrderHelp}</p>
 					</div>
 
 				{:else if activeTab === 'new'}
@@ -315,9 +413,9 @@
 					<!-- Quota banner -->
 					{#if statusData}
 						<div class="mb-4 flex items-center justify-between text-xs px-3 py-2 bg-zinc-50 rounded-xl border border-zinc-100">
-							<span class="text-zinc-500">Mesaj jodi a :</span>
+							<span class="text-zinc-500">{wt.todayMessages}</span>
 							<span class="font-bold {quotaColor}">
-								{statusData.dailyQuota.remaining} / {statusData.dailyQuota.max} ki rete
+								{statusData.dailyQuota.remaining} / {statusData.dailyQuota.max} {wt.remaining}
 							</span>
 						</div>
 					{/if}
@@ -325,8 +423,8 @@
 					{#if statusData && statusData.dailyQuota.remaining <= 0}
 						<!-- Quota épuisé -->
 						<div class="p-4 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-700 text-center space-y-1">
-							<p class="font-bold">🚫 Limit atenn pou jodi a</p>
-							<p class="text-xs text-red-500">Ou voye 3 mesaj sipò jodi a. Re-eseye demen.</p>
+						<p class="font-bold">{wt.quotaReached}</p>
+						<p class="text-xs text-red-500">{wt.quotaHelp}</p>
 						</div>
 
 					{:else}
@@ -334,9 +432,7 @@
 						<!-- ─ ÉTAPE 1 : Choisir commande ─ -->
 						{#if currentStep === 1}
 							<div class="space-y-3">
-								<p class="text-sm font-bold text-zinc-900 mb-3">
-									Chwazi kòmande ki gen pwoblèm nan :
-								</p>
+								<p class="text-sm font-bold text-zinc-900 mb-3">{wt.selectOrder}</p>
 
 								{#if statusData?.orders && statusData.orders.length > 0}
 									<div class="space-y-2.5">
@@ -368,7 +464,7 @@
 													<div class="flex items-center gap-2 mt-0.5">
 														<span class="text-xs text-zinc-500">{order.amount} HTG</span>
 														<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold uppercase {orderStatusColor(order.status)}">
-															{order.status}
+															{orderStatusLabel(order.status)}
 														</span>
 													</div>
 													{#if order.createdAt}
@@ -388,7 +484,7 @@
 										onclick={() => { currentStep = 2; }}
 										class="w-full h-12 mt-1 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.99]"
 									>
-										Kontinye ➔
+										{wt.continue}
 									</button>
 								{/if}
 							</div>
@@ -404,16 +500,14 @@
 										class="flex items-center gap-1 text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer"
 									>
 										<ChevronLeft size={14} />
-										Retounen
+										{wt.back}
 									</button>
 									<div class="text-xs text-zinc-400 font-medium truncate max-w-[200px] text-right">
-										{selectedOrder ? selectedOrder.productTitle : 'Kesyon jeneral'}
+										{selectedOrder ? selectedOrder.productTitle : wt.generalQuestion}
 									</div>
 								</div>
 
-								<p class="text-sm font-bold text-zinc-900 mb-3">
-									Ki pwoblèm ou an ?
-								</p>
+								<p class="text-sm font-bold text-zinc-900 mb-3">{wt.selectIssue}</p>
 
 								<div class="space-y-2.5">
 									{#each statusData?.presets ?? [] as preset (preset.id)}
@@ -437,9 +531,9 @@
 
 											<!-- Texte -->
 											<div class="flex-1 min-w-0">
-												<p class="font-semibold text-zinc-900 text-sm leading-snug">{preset.label}</p>
+												<p class="font-semibold text-zinc-900 text-sm leading-snug">{presetLabel(preset.id, preset.label)}</p>
 												{#if preset.description}
-													<p class="text-xs text-zinc-400 mt-0.5 leading-relaxed">{preset.description}</p>
+													<p class="text-xs text-zinc-400 mt-0.5 leading-relaxed">{presetDescription(preset.id, preset.description)}</p>
 												{/if}
 											</div>
 										</button>
@@ -453,7 +547,7 @@
 										onclick={() => { currentStep = 3; }}
 										class="w-full h-12 mt-1 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.99]"
 									>
-										Kontinye ➔
+										{wt.continue}
 									</button>
 								{/if}
 							</div>
@@ -469,7 +563,7 @@
 										class="flex items-center gap-1 text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer"
 									>
 										<ChevronLeft size={14} />
-										Chanje mesaj
+										{wt.changeMessage}
 									</button>
 								</div>
 
@@ -478,7 +572,7 @@
 									<div class="flex items-start gap-2">
 										<CheckCircle2 size={16} class="text-emerald-500 mt-0.5 shrink-0" />
 										<div>
-											<p class="font-semibold text-zinc-900">{selectedPreset?.label}</p>
+							<p class="font-semibold text-zinc-900">{selectedPreset ? presetLabel(selectedPreset.id, selectedPreset.label) : ''}</p>
 											{#if selectedOrder}
 												<p class="text-xs text-zinc-500 mt-0.5">
 													{productEmoji(selectedOrder.productType)} {selectedOrder.productTitle}
@@ -493,12 +587,12 @@
 									<label for="support-whatsapp" class="flex items-center justify-between text-sm font-semibold text-zinc-800">
 										<span class="flex items-center gap-1.5">
 											<MessageCircle size={15} class="text-emerald-500" />
-											Nimewo WhatsApp ou
+							{wt.whatsapp}
 										</span>
 										{#if requiresWhatsapp}
-											<span class="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Obligatwa</span>
+							<span class="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">{wt.required}</span>
 										{:else}
-											<span class="text-[10px] text-zinc-400">Opsyonèl</span>
+							<span class="text-[10px] text-zinc-400">{wt.optional}</span>
 										{/if}
 									</label>
 									<input
@@ -508,9 +602,7 @@
 										bind:value={whatsappNumber}
 										class="w-full text-sm bg-white border-2 border-zinc-200 focus:border-amber-400 rounded-xl px-4 py-3 focus:outline-none transition-colors font-mono"
 									/>
-									<p class="text-xs text-zinc-400 leading-relaxed">
-										La pifò pwoblèm rezoud otomatikman nan <span class="font-semibold text-zinc-500">72h</span>. Si ou mete nimewo WhatsApp ou, ekip la ka kontakte w si li nesesè.
-									</p>
+								<p class="text-xs text-zinc-400 leading-relaxed">{wt.whatsappHelp}</p>
 								</div>
 
 								<!-- Bouton Envoyer -->
@@ -522,10 +614,10 @@
 								>
 									{#if submitting}
 										<Loader2 size={18} class="animate-spin" />
-										<span>N ap voye…</span>
+										<span>{wt.sending}</span>
 									{:else}
 										<Send size={16} />
-										<span>Voye Demann Lan 🚀</span>
+										<span>{wt.send}</span>
 									{/if}
 								</button>
 							</div>
@@ -539,7 +631,7 @@
 					{#if !statusData?.messages?.length}
 						<div class="py-14 text-center space-y-2 text-zinc-400">
 							<Clock size={28} class="mx-auto text-zinc-200" />
-							<p class="text-sm">Ou pa voye okenn demann ankò.</p>
+						<p class="text-sm">{wt.noHistory}</p>
 						</div>
 					{:else}
 						<div class="space-y-3">
@@ -554,7 +646,7 @@
 									</div>
 
 									<div>
-										<p class="font-semibold text-zinc-900 text-sm">{message.presetLabel}</p>
+										<p class="font-semibold text-zinc-900 text-sm">{presetLabel(message.presetId, message.presetLabel)}</p>
 										{#if message.productTitle}
 											<p class="text-xs text-zinc-500 mt-0.5">📦 {message.productTitle}</p>
 										{/if}
@@ -570,7 +662,7 @@
 										<div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-xs space-y-1">
 											<p class="font-bold text-emerald-800 flex items-center gap-1">
 												<Sparkles size={11} class="text-emerald-600" />
-												Repons Ekip Sipò :
+												{wt.teamReply}
 											</p>
 											<p class="text-emerald-900 leading-relaxed">{message.adminReply}</p>
 										</div>

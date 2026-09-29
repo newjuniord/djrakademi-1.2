@@ -27,7 +27,7 @@
 			kicker: "Formation vidéo",
 			modulesCount: (n: number) => `${n} module${n > 1 ? 's' : ''}`,
 			lessonsCount: (n: number) => `${n} leçon${n > 1 ? 's' : ''}`,
-			watchPresentation: "Garder la présentation",
+			watchPresentation: "Regarder la présentation",
 			previewVideoTitle: "Vidéo de présentation",
 			free: "Gratuit",
 			btnFree: "Obtenir l'accès gratuit",
@@ -42,6 +42,7 @@
 			loginFreeToast: "Veuillez vous connecter à votre compte pour débloquer cet accès gratuit.",
 			alreadyOwnedToast: "Vous avez déjà cette formation ! Redirection en cours...",
 			freeClaimToast: "Accès gratuit débloqué ! Redirection en cours...",
+			paymentVerifiedToast: "Paiement confirmé ! Redirection en cours...",
 			errorToast: "Une erreur est survenue lors de l'inscription.",
 			errorPayment: "Une erreur est survenue lors du paiement."
 		},
@@ -64,12 +65,13 @@
 			loadingBtn: "Chajman...",
 			whatYouWillLearn: "Sa w pral aprann",
 			programTitle: "Pwogram kou a",
-			questions: "Kesyon ?",
+			questions: "Kesyon?",
 			contactForm: "Fòm kontak",
 			loginToast: "Tanpri konekte sou kont ou pou w ka achte fòmasyon sa a.",
 			loginFreeToast: "Tanpri konekte sou kont ou pou w ka jwenn aksè nan fòmasyon sa a.",
 			alreadyOwnedToast: "Ou gen fòmasyon sa a deja! N ap redirije w pou w gade l.",
 			freeClaimToast: "Aksè gratis debloke! N ap redirije w pou w gade l.",
+			paymentVerifiedToast: "Peman an konfime! N ap redirije w...",
 			errorToast: "Yon erè rive pandan enskripsyon an.",
 			errorPayment: "Yon erè rive pandan n ap trete peman an."
 		}
@@ -79,10 +81,9 @@
 
 	function getHref(path: string): string {
 		if (currentLang !== 'ht') return path;
-		const [pathname, search] = path.split('?');
-		const params = new URLSearchParams(search || '');
-		params.set('lang', 'ht');
-		return `${pathname}?${params.toString()}`;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const courseId = $derived(page.params.id);
@@ -150,7 +151,7 @@
 					const verification = await verifyLemonSqueezyPurchase(authState.user.email, 'course', course.id);
 					if (verification.ok && verification.success) {
 						const purchasedCourseId = course.id;
-						toast.success(verification.message, 5000);
+						toast.success(t.paymentVerifiedToast, 5000);
 						setTimeout(() => goto(getHref(`/learn/${purchasedCourseId}`)), 1800);
 						return;
 					}
@@ -233,11 +234,11 @@
 				window.location.href = redirectTarget;
 				return;
 			} else {
-				toast.error(res?.message || t.errorPayment);
+				toast.error(t.errorPayment);
 			}
 		} catch (e: any) {
 			console.error('Plopplop payment error:', e);
-			toast.error(e?.message || t.errorPayment);
+			toast.error(t.errorPayment);
 		} finally {
 			checkoutLoading = false;
 		}
@@ -245,7 +246,7 @@
 </script>
 
 <svelte:head>
-	<title>{course ? t.metaTitle(course.title) : t.metaTitle('Formation')}</title>
+	<title>{t.metaTitle(course?.title || t.kicker)}</title>
 	<meta name="description" content={t.metaDesc(course?.description ?? '')} />
 </svelte:head>
 

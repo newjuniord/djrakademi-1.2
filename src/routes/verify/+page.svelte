@@ -24,37 +24,40 @@
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
 		fr: {
-			pageTitle: 'Vérification de Paiement & Déblocage d\'Accès · DJR Akademi',
-			metaDesc: 'Page officielle pour vérifier vos paiements par carte bancaire (Lemon Squeezy), MonCash et Natcash afin de débloquer votre accès immédiatement.',
+			pageTitle: 'Vérification du paiement et déblocage de l\'accès · DJR Akademi',
+			metaDesc: 'Vérifiez vos paiements par carte bancaire (Lemon Squeezy), MonCash ou NatCash pour débloquer votre accès.',
 			backHome: 'Retour à l\'accueil',
-			title: 'Vérification de Paiement & Déblocage d\'Accès',
-			subtitle: 'Vérifiez votre transaction par carte bancaire ou paiement mobile sans attendre.',
-			supportBadge: 'Support & Vérification Directe',
-			supportHeading: 'Si vous avez déjà payé sur l\'ancien site et n\'avez pas reçu l\'accès, entrez votre email.',
-			supportDesc: 'Si vous avez payé par carte bancaire sur Lemon Squeezy ou via MonCash / Natcash et que votre accès n\'est pas activé automatiquement, nous le vérifierons immédiatement.',
+			title: 'Vérification du paiement et déblocage de l\'accès',
+			subtitle: 'Vérifiez votre paiement par carte bancaire ou paiement mobile.',
+			supportBadge: 'Assistance et vérification',
+			supportHeading: 'Si vous avez payé sur l\'ancien site sans recevoir votre accès, saisissez votre adresse e-mail.',
+			supportDesc: 'Si vous avez payé par carte bancaire avec Lemon Squeezy ou par MonCash / NatCash et que votre accès n\'est pas activé, vérifiez votre paiement ci-dessous.',
 			chooseMethod: 'Choisissez votre mode de paiement :',
 			cardMethod: 'Carte bancaire (Lemon Squeezy)',
-			mobileMethod: 'MonCash / Natcash',
-			cardEmailLabel: 'Email utilisé lors de votre paiement sur Lemon Squeezy *',
-			cardEmailPlaceholder: 'ex: email-paiement@gmail.com',
-			cardEmailNote: 'Saisissez l\'email utilisé lors du paiement. L\'accès sera débloqué uniquement sur votre compte actuel (',
-			connectToSee: 'connectez-vous pour voir votre email',
+			mobileMethod: 'MonCash / NatCash',
+			cardEmailLabel: 'Adresse e-mail utilisée lors du paiement avec Lemon Squeezy *',
+			cardEmailPlaceholder: 'Ex. : email-paiement@gmail.com',
+			cardEmailNote: 'Saisissez l\'adresse e-mail utilisée lors du paiement. L\'accès sera débloqué uniquement sur votre compte actuel (',
+			connectToSee: 'connectez-vous pour voir votre adresse e-mail',
 			otpPlaceholder: 'Code OTP',
-			mobileRefLabel: 'Numéro de référence de transaction MonCash / Natcash *',
-			mobileRefPlaceholder: 'ex: 6a94b44a001655dbf38d',
-			mobileRefNote: 'Entrez le numéro de référence présent sur votre message de confirmation MonCash / Natcash.',
+			mobileRefLabel: 'Numéro de référence de la transaction MonCash / NatCash *',
+			mobileRefPlaceholder: 'Ex. : 6a94b44a001655dbf38d',
+			mobileRefNote: 'Saisissez le numéro de référence figurant dans votre message de confirmation MonCash / NatCash.',
 			verifying: 'Vérification du paiement en cours...',
 			verifyBtn: 'Vérifier et débloquer mon accès',
 			successTitle: 'Succès !',
 			accessDashboard: 'Accéder à mon espace étudiant',
 			loginError: 'Vous devez être connecté à votre compte pour vérifier un paiement.',
-			emailRequiredError: 'Veuillez saisir une adresse email valide.',
-			otpSent: 'Code envoyé à votre adresse email.',
+			emailRequiredError: 'Veuillez saisir une adresse e-mail valide.',
+			otpSent: 'Code envoyé à votre adresse e-mail.',
 			cardSuccess: 'Votre paiement par carte a été vérifié avec succès ! Redirection en cours...',
 			cardSuccessToast: 'Accès débloqué avec succès ! Redirection en cours...',
 			cardError: 'Erreur lors de la vérification.',
@@ -64,38 +67,38 @@
 			genericError: 'Une erreur est survenue pendant la vérification. Veuillez nous contacter directement.'
 		},
 		ht: {
-			pageTitle: 'Verifikasyon Peman & Debloke Aksè · DJR Akademi',
-			metaDesc: 'Paj ofisyèl pou verifye peman kat bancaire (Lemon Squeezy), MonCash ak Natcash pou debloke aksè nan fòmasyon ak ebook ou yo imedyatman.',
+			pageTitle: 'Verifikasyon peman ak aksè · DJR Akademi',
+			metaDesc: 'Verifye peman pa kat labank (Lemon Squeezy), MonCash oswa NatCash pou jwenn aksè nan acha ou yo.',
 			backHome: 'Tounen nan paj akèy',
-			title: 'Verifikasyon Peman & Debloke Aksè',
-			subtitle: 'Verifye tranzaksyon ou pa kat bancaire oswa mobil san ou pa bezwen tann.',
-			supportBadge: 'Sipò & Verifikasyon Directe',
-			supportHeading: 'Si ou te peye deja sou lòt sit la epi ou pa jwenn kou an, mete imèl ou.',
-			supportDesc: 'Si w te peye pa kat bancaire sou Lemon Squeezy oubyen via MonCash / Natcash epi aksè a pa aktive otomatikman, n ap verifye li pou w imedyatman.',
-			chooseMethod: 'Chwazi fason w te peye an :',
-			cardMethod: 'Kat bancaire (Lemon Squeezy)',
-			mobileMethod: 'MonCash / Natcash',
-			cardEmailLabel: 'Imel ou te itilize pou w peye sou Lemon Squeezy an *',
-			cardEmailPlaceholder: 'ex: imel-peman-ou@gmail.com',
-			cardEmailNote: 'Mete imel ou te antre lè w t ap peye an. Aksè a ap debloke sou kont ou an sèlman (',
-			connectToSee: 'konekte pou wè imel ou',
+			title: 'Verifye peman w epi jwenn aksè',
+			subtitle: 'Verifye peman w pa kat labank oswa pa telefòn.',
+			supportBadge: 'Sipò ak verifikasyon',
+			supportHeading: 'Si w te peye sou ansyen sit la men ou poko jwenn aksè, antre adrès imèl ou.',
+			supportDesc: 'Si w te peye pa kat labank avèk Lemon Squeezy oswa pa MonCash / NatCash epi aksè w la poko aktive, verifye peman w anba a.',
+			chooseMethod: 'Chwazi mwayen peman ou:',
+			cardMethod: 'Kat labank (Lemon Squeezy)',
+			mobileMethod: 'MonCash / NatCash',
+			cardEmailLabel: 'Adrès imèl ou te itilize pou peye avèk Lemon Squeezy *',
+			cardEmailPlaceholder: 'Egzanp: imel-peman-ou@gmail.com',
+			cardEmailNote: 'Antre adrès imèl ou te itilize pou peman an. Aksè a ap debloke sèlman sou kont ou konekte a (',
+			connectToSee: 'konekte pou wè adrès imèl ou',
 			otpPlaceholder: 'Kòd OTP',
-			mobileRefLabel: 'Nimewo referans tranzaksyon MonCash / Natcash an *',
-			mobileRefPlaceholder: 'ex: 6a94b44a001655dbf38d',
-			mobileRefNote: 'Antre nimewo referans ki sou mesaj konfimasyon MonCash / Natcash ou an pou n ka debloke kont ou.',
+			mobileRefLabel: 'Nimewo referans tranzaksyon MonCash / NatCash la *',
+			mobileRefPlaceholder: 'Egzanp: 6a94b44a001655dbf38d',
+			mobileRefNote: 'Antre nimewo referans ki nan mesaj konfimasyon MonCash / NatCash ou a.',
 			verifying: 'N ap verifye peman an...',
 			verifyBtn: 'Verifye ak debloke aksè mwen',
-			successTitle: 'Siksè !',
-			accessDashboard: 'Aksede nan espas etidyan mwen',
+			successTitle: 'Peman an verifye!',
+			accessDashboard: 'Ale nan espas etidyan mwen',
 			loginError: 'Ou dwe konekte sou kont ou pou w ka verifye yon peman.',
-			emailRequiredError: 'Tanpri antre yon adres imel ki valab.',
-			otpSent: 'Nou voye kòd la sou imel ou.',
-			cardSuccess: 'Peman pa kat ou a verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...',
-			cardSuccessToast: 'Aksè debloke ak siksè ! Redirèksyon en kous...',
-			cardError: 'Erè nan verifikasyon an.',
+			emailRequiredError: 'Tanpri antre yon adrès imèl ki valab.',
+			otpSent: 'Nou voye kòd la nan adrès imèl ou.',
+			cardSuccess: 'Peman pa kat ou a verifye! N ap redirije w…',
+			cardSuccessToast: 'Aksè w la debloke! N ap redirije w…',
+			cardError: 'Peman an pa t ka verifye.',
 			refRequiredError: 'Tanpri antre nimewo referans tranzaksyon an.',
-			mobileSuccess: 'Peman verifye avèk siksè! N ap redirije w pou w kòmanse gade fòmasyon an...',
-			mobileSuccessToast: 'Aksè debloke ak siksè ! Redirèksyon en kous...',
+			mobileSuccess: 'Peman an verifye! N ap redirije w…',
+			mobileSuccessToast: 'Aksè w la debloke! N ap redirije w…',
 			genericError: 'Yon erè rive pandan verifikasyon an. Tanpri kontakte nou dirèkteman.'
 		}
 	};
@@ -140,7 +143,7 @@
 
 				const resData = await verifyLemonSqueezyEmail(email, otpChallenge ? "confirm_otp" : "request_otp", otpChallenge || undefined, otpChallenge ? otpCode.trim() : undefined);
 
-				if (resData.otpRequired && resData.challenge) { otpChallenge = resData.challenge; supportSuccessMessage = resData.message; toast.success(t.otpSent); } else if (resData.ok && resData.success) {
+				if (resData.otpRequired && resData.challenge) { otpChallenge = resData.challenge; supportSuccessMessage = t.otpSent; toast.success(t.otpSent); } else if (resData.ok && resData.success) {
 					const targetUrl = resData.courseId ? getHref(`/learn/${resData.courseId}`) : getHref('/dashboard');
 					supportSuccessMessage = t.cardSuccess;
 					toast.success(t.cardSuccessToast);
@@ -148,7 +151,7 @@
 						goto(targetUrl);
 					}, 1000);
 				} else {
-					supportErrorMessage = resData.message || t.cardError;
+					supportErrorMessage = t.cardError;
 					toast.error(t.cardError);
 				}
 			} else {
@@ -169,7 +172,7 @@
 						goto(targetUrl);
 					}, 1000);
 				} else {
-					supportErrorMessage = resData.message || t.cardError;
+					supportErrorMessage = t.cardError;
 					toast.error(t.cardError);
 				}
 			}

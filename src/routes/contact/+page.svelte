@@ -19,45 +19,48 @@
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
 		fr: {
 			pageTitle: 'Nous contacter · DJR Akademi',
-			metaDesc: 'Contactez l\'équipe de DJR Akademi pour toute question sur nos formations, nos ebooks PDF ou nos coachings.',
+			metaDesc: 'Contactez l\'équipe de DJR Akademi pour toute question sur nos formations, nos livres numériques ou nos séances de coaching.',
 			backHome: 'Retour à l\'accueil',
 			successBannerTitle: 'Message envoyé avec succès !',
-			successDefaultMessage: 'Votre message a bien été envoyé ! Notre équipe vous répondra à votre adresse email en moins de 24 heures.',
+			successDefaultMessage: 'Votre message a bien été envoyé ! Notre équipe vous répondra par e-mail en moins de 24 heures.',
 			close: 'Fermer',
-			supportBadge: 'Service Support Client',
+			supportBadge: 'Service client',
 			heroTitle: 'Vous avez une question ? Contactez-nous',
 			heroDesc: 'Notre équipe est là pour vous aider dans votre apprentissage, répondre à vos questions sur notre contenu ou résoudre tout problème technique.',
 			fastResponseTitle: 'Réponse rapide garantie',
-			fastResponseDesc: 'Nous répondons à votre message en moins de 24h',
+			fastResponseDesc: 'Nous répondons à votre message en moins de 24 heures',
 			personalizedSupportTitle: 'Support personnalisé',
 			personalizedSupportDesc: 'Une personne dédiée pour vous aider à chaque demande',
 			faqTitle: 'Foire aux questions',
 			faqAccessTitle: 'Accès formation :',
 			faqAccessDesc: 'Disponible directement après confirmation du paiement.',
-			faqEbookTitle: 'Ebook PDF :',
+			faqEbookTitle: 'Livre numérique PDF :',
 			faqEbookDesc: 'Téléchargement direct en haute qualité.',
 			faqPaymentTitle: 'Moyens de paiement :',
-			faqPaymentDesc: 'MonCash, Natcash et cartes internationales sont acceptés.',
+			faqPaymentDesc: 'MonCash, NatCash et les cartes internationales sont acceptés.',
 			formTitle: 'Envoyez-nous un message',
 			formSubtitle: 'Remplissez ce formulaire et nous répondrons à votre demande',
 			fullNameLabel: 'Votre nom complet *',
-			fullNamePlaceholder: 'Ex: Jean Pierre',
-			emailLabel: 'Votre adresse email *',
+			fullNamePlaceholder: 'Ex. : Jean Pierre',
+			emailLabel: 'Votre adresse e-mail *',
 			emailPlaceholder: 'jean.pierre@example.com',
 			subjectLabel: 'Sujet de votre message *',
 			subjOption1: 'Question sur une formation vidéo',
-			subjOption2: 'Acheter ou télécharger un Ebook PDF',
-			subjOption3: 'Session de Coaching 1:1',
-			subjOption4: 'Support technique / Accès au compte',
+			subjOption2: 'Acheter ou télécharger un livre numérique PDF',
+			subjOption3: 'Séance de coaching individuel',
+			subjOption4: 'Assistance technique / Accès au compte',
 			subjOption5: 'Autre demande',
 			messageLabel: 'Votre message *',
-			messagePlaceholder: 'Écrivez votre demande avec tous les détails...',
+			messagePlaceholder: 'Décrivez votre demande en détail…',
 			privacyNote: '* Vos informations restent confidentielles.',
 			sending: 'Envoi en cours...',
 			sendBtn: 'Envoyer le message',
@@ -65,41 +68,41 @@
 		},
 		ht: {
 			pageTitle: 'Kontakte nou · DJR Akademi',
-			metaDesc: 'Kontakte ekip DJR Akademi an pou nenpòt kesyon sou fòmasyon nou yo, ebook PDF nou yo oswa coaching nou yo.',
+			metaDesc: 'Kontakte ekip DJR Akademi an pou nenpòt kesyon sou fòmasyon nou yo, liv dijital nou yo oswa sesyon konsiltasyon nou yo.',
 			backHome: 'Tounen nan akèy',
-			successBannerTitle: 'Mesaj la voye ak siksè !',
-			successDefaultMessage: 'Mesaj ou a byen voye! Ekip nou an ap reponn ou nan adrès imèl ou nan mwens pase 24 èdtan.',
+			successBannerTitle: 'Mesaj la ale avèk siksè!',
+			successDefaultMessage: 'Nou resevwa mesaj ou a! Ekip nou an ap reponn ou pa imèl nan mwens pase 24 èdtan.',
 			close: 'Fèmen',
 			supportBadge: 'Sèvis Sipò Kliyan',
-			heroTitle: 'Ou gen yon kesyon ? Kontakte nou',
+			heroTitle: 'Ou gen yon kesyon? Kontakte nou',
 			heroDesc: 'Ekip nou an la pou ede w nan aprantisaj ou, reponn kesyon w sou kontni nou yo oswa rezoud nenpòt pwoblèm teknik.',
 			fastResponseTitle: 'Repons rapid garanti',
-			fastResponseDesc: 'N ap reponn mesaj ou an mwens ke 24h',
+			fastResponseDesc: 'N ap reponn mesaj ou a nan mwens pase 24 èdtan',
 			personalizedSupportTitle: 'Sipò pèsonalize',
-			personalizedSupportDesc: 'Yon moun pou ede w nan chak demand',
+			personalizedSupportDesc: 'Yon moun pou ede w ak chak demann',
 			faqTitle: 'Kesyon moun poze souvan',
-			faqAccessTitle: 'Aksè fòmasyon :',
+			faqAccessTitle: 'Aksè nan fòmasyon:',
 			faqAccessDesc: 'Disponib dirèkteman apre peman an konfime.',
-			faqEbookTitle: 'Ebook PDF :',
-			faqEbookDesc: 'Telechajman dirèk nan bon kalite.',
-			faqPaymentTitle: 'Mwayen peman :',
-			faqPaymentDesc: 'MonCash, Natcash ak kat entènasyonal yo aksepte.',
+			faqEbookTitle: 'Liv dijital PDF:',
+			faqEbookDesc: 'Ou ka telechaje l dirèkteman nan bon kalite.',
+			faqPaymentTitle: 'Mwayen peman:',
+			faqPaymentDesc: 'Nou aksepte MonCash, NatCash ak kat entènasyonal.',
 			formTitle: 'Voye yon mesaj pou nou',
-			formSubtitle: 'Ranpli fòm sa a n ap reponn demand ou an',
-			fullNameLabel: 'Non konplè ou *',
-			fullNamePlaceholder: 'Ex: Jean Pierre',
-			emailLabel: 'Adrès Imèl ou *',
+			formSubtitle: 'Ranpli fòm sa a, n ap reponn demann ou an',
+			fullNameLabel: 'Non konplè w *',
+			fullNamePlaceholder: 'Egzanp: Jean Pierre',
+			emailLabel: 'Adrès imèl ou *',
 			emailPlaceholder: 'jean.pierre@example.com',
 			subjectLabel: 'Sijè mesaj ou a *',
 			subjOption1: 'Kesyon sou yon fòmasyon videyo',
-			subjOption2: 'Achte oswa telechaje yon Ebook PDF',
-			subjOption3: 'Sesyon Coaching 1:1',
-			subjOption4: 'Sipò teknik / Aksè nan kont',
-			subjOption5: 'Lòt demand',
+			subjOption2: 'Achte oswa telechaje yon liv dijital PDF',
+			subjOption3: 'Sesyon konsiltasyon endividyèl',
+			subjOption4: 'Sipò teknik / Aksè nan kont ou',
+			subjOption5: 'Yon lòt demann',
 			messageLabel: 'Mesaj ou a *',
 			messagePlaceholder: 'Ekri sa w bezwen an ak tout detay...',
-			privacyNote: '* Enfòmasyon ou yo rete ansekirite.',
-			sending: 'Voye ap fèt...',
+			privacyNote: '* Enfòmasyon ou yo rete konfidansyèl.',
+			sending: 'N ap voye mesaj la…',
 			sendBtn: 'Voye mesaj la',
 			sendError: 'Mesaj la pa ka voye.'
 		}
@@ -128,14 +131,15 @@
 				body: JSON.stringify({ name: fullName, email: userEmail, subject, message })
 			});
 			const data = await response.json().catch(() => ({}));
-			if (!response.ok) throw new Error(data.message || t.sendError);
+			if (!response.ok) throw new Error(t.sendError);
 			isSubmitting = false;
 			successMessage = t.successDefaultMessage;
 			fullName = '';
 			userEmail = '';
 			message = '';
 		} catch (error) {
-			errorMessage = error instanceof Error ? error.message : t.sendError;
+			console.error('[Contact]:', error);
+			errorMessage = t.sendError;
 		} finally {
 			isSubmitting = false;
 		}

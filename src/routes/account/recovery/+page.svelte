@@ -8,7 +8,10 @@
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
@@ -23,7 +26,7 @@
 			confirmPasswordLabel: 'Confirmer le mot de passe',
 			minCharPlaceholder: '8 caractères minimum',
 			confirmPlaceholder: 'Saisissez-le une seconde fois',
-			submiting: 'Modification en cours…',
+			submitting: 'Modification en cours…',
 			submitBtn: 'Enregistrer le nouveau mot de passe',
 			hidePassword: 'Masquer le mot de passe',
 			showPassword: 'Afficher le mot de passe',
@@ -35,23 +38,23 @@
 			errGeneric: 'Impossible de modifier le mot de passe.'
 		},
 		ht: {
-			title: 'Nouvèl Mopas · DJR Akademi',
+			title: 'Nouvo modpas · DJR Akademi',
 			backHome: 'Tounen nan akèy',
-			changedTitle: 'Mopas la chanje',
-			changedSubtitle: 'Ou ka konekte kounye a ak nouvèl mopas ou an.',
-			createTitle: 'Kreye yon nouvèl mopas',
-			createSubtitle: 'Chwazi yon mopas ki gen omwens 8 karaktè.',
-			newPasswordLabel: 'Nouvèl mopas',
-			confirmPasswordLabel: 'Konfime mopas la',
-			minCharPlaceholder: '8 karaktè minimum',
+			changedTitle: 'Modpas la chanje',
+			changedSubtitle: 'Ou ka konekte kounye a ak nouvo modpas ou a.',
+			createTitle: 'Kreye yon nouvo modpas',
+			createSubtitle: 'Chwazi yon modpas ki gen omwen 8 karaktè.',
+			newPasswordLabel: 'Nouvo modpas',
+			confirmPasswordLabel: 'Konfime modpas la',
+			minCharPlaceholder: 'Omwen 8 karaktè',
 			confirmPlaceholder: 'Mete l yon dezyèm fwa',
-			submiting: 'Modifikasyon an ap fèt…',
-			submitBtn: 'Anregistre nouvèl mopas la',
-			hidePassword: 'Masquer le mot de passe',
-			showPassword: 'Afficher le mot de passe',
-			hideConfirmation: 'Masquer la confirmation',
-			showConfirmation: 'Afficher la confirmation',
-			errMinLength: 'Modpas la dwe gen omwens 8 karaktè.',
+			submitting: 'N ap chanje modpas la…',
+			submitBtn: 'Anrejistre nouvo modpas la',
+			hidePassword: 'Kache modpas la',
+			showPassword: 'Montre modpas la',
+			hideConfirmation: 'Kache konfimasyon an',
+			showConfirmation: 'Montre konfimasyon an',
+			errMinLength: 'Modpas la dwe gen omwen 8 karaktè.',
 			errMismatch: 'Modpas yo pa menm.',
 			errIncompleteLink: 'Lyen rekiperasyon an pa bon oswa li pa konplè.',
 			errGeneric: 'Nou pa ka chanje modpas la.'
@@ -96,7 +99,7 @@
 			if (!response.ok) throw new Error(result.message || t.errGeneric);
 			completed = true;
 		} catch (error) {
-			errorMessage = translateAuthError(error);
+			errorMessage = translateAuthError(error, currentLang);
 		} finally {
 			loading = false;
 		}
@@ -147,7 +150,7 @@
 				{#if errorMessage}<div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">{errorMessage}</div>{/if}
 				<button class="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-950 py-3.5 text-sm font-bold text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60" disabled={loading}>
 					{#if loading}<Loader2 class="animate-spin" size={16} />{:else}<ShieldCheck size={17} />{/if}
-					{loading ? t.submiting : t.submitBtn}
+					{loading ? t.submitting : t.submitBtn}
 				</button>
 			</form>
 		{/if}

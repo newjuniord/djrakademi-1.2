@@ -27,20 +27,24 @@
 	import { authState } from '$lib/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { getUserOrders, type Order } from '$lib/services/orders';
+	import { formatDateTimeInTimezone } from '$lib/coaching/timezone';
 
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
 		fr: {
-			pageTitle: 'Mes Transactions · DJR Akademi',
+			pageTitle: 'Mes transactions · DJR Akademi',
 			metaDesc: 'Historique complet de vos commandes, reçus et factures de paiement sur DJR Akademi.',
 			loadingMsg: 'Chargement de vos transactions...',
 			backToSpace: 'Retour à mon espace',
-			title: 'Mes Transactions',
+			title: 'Mes transactions',
 			subtitle: 'Historique de vos commandes, factures et reçus de paiement.',
 			verifyTitle: 'Vous avez un paiement qui ne s\'affiche pas ou un accès bloqué ?',
 			verifySub: 'Utilisez la page de vérification pour chercher et débloquer votre commande immédiatement.',
@@ -53,19 +57,25 @@
 			currencyNote: 'Devises officielles : HTG / USD',
 			emptyTitle: 'Aucune transaction trouvée',
 			emptySubSearch: 'Aucun résultat ne correspond à votre recherche.',
-			emptySubDefault: 'Vous n\'avez effectué aucun achat pour le moment. Explorez nos formations et ebooks !',
+			emptySubDefault: 'Vous n\'avez effectué aucun achat pour le moment. Découvrez nos formations et livres électroniques !',
 			exploreCatalog: 'Explorer le catalogue',
 			statusPaid: 'Payé',
 			statusPending: 'En attente',
 			statusFailed: 'Échoué',
 			productTypeLabel: 'Type :',
 			providerLabel: 'Mode :',
-			copyToast: 'Réf ID copié dans le presse-papier !',
+			copyToast: 'Numéro de commande copié.',
 			pdfReceipt: 'Reçu PDF',
 			watchBtn: 'Suivre',
-			ebookBtn: 'Ebook',
-			sessionBtn: 'Session',
-			receiptModalTitle: 'Reçu Officiel de Paiement',
+			ebookBtn: 'Livre électronique',
+			bundleBtn: 'Mes ressources',
+			sessionBtn: 'Mes réservations',
+			receiptModalTitle: 'Reçu de paiement',
+			receiptNumber: 'REÇU N°',
+			datePrefix: 'Date :',
+			referencePrefix: 'Réf. :',
+			copyOrderId: 'Copier le numéro de commande',
+			statusLabel: 'Statut :',
 			brandSub: 'Plateforme d\'apprentissage et de suivi',
 			billedTo: 'Facturé à',
 			paymentMethod: 'Mode de paiement',
@@ -81,58 +91,66 @@
 			close: 'Fermer',
 			printSavePdf: 'Imprimer / Sauvegarder en PDF',
 			courseType: 'Formation vidéo',
-			ebookType: 'Ebook PDF',
-			coachingType: 'Session Coaching 1:1',
-			digitalType: 'Produit digital'
+			ebookType: 'Livre électronique PDF',
+			bundleType: 'Offre groupée',
+			coachingType: 'Séance de coaching',
+			digitalType: 'Produit numérique'
 		},
 		ht: {
-			pageTitle: 'Tranzaksyon Mwen Yo · DJR Akademi',
-			metaDesc: 'Istwa konplè kòmand, resi ak faktir peman ou yo sou DJR Akademi.',
+			pageTitle: 'Tranzaksyon mwen yo · DJR Akademi',
+			metaDesc: 'Istwa kòmand, resi ak fakti peman ou yo sou DJR Akademi.',
 			loadingMsg: 'N ap chaje tranzaksyon ou yo...',
 			backToSpace: 'Tounen nan espas mwen',
-			title: 'Tranzaksyon Mwen Yo',
-			subtitle: 'Istwa kòmand, faktir ak resi peman ou yo.',
-			verifyTitle: 'Ou gen yon peman ki pa parèt oswa aksè ki pa debloke ?',
+			title: 'Tranzaksyon mwen yo',
+			subtitle: 'Istwa kòmand, fakti ak resi peman ou yo.',
+			verifyTitle: 'Ou gen yon peman ki pa parèt oswa yon aksè ki pa debloke?',
 			verifySub: 'Sèvi ak paj verifikasyon an pou chèche epi debloke kòmand ou a imedyatman.',
 			verifyBtn: 'Verifye peman m lan',
 			searchPlaceholder: 'Chèche pa pwodui oswa ID tranzaksyon...',
 			filterAll: 'Tout',
 			filterPaid: 'Peye',
-			filterPending: 'Enatant',
+			filterPending: 'Ap tann',
 			historyTitle: 'Istwa detaye peman yo',
-			currencyNote: 'Lajan ofisyèl : HTG / USD',
-			emptyTitle: 'Pa gen okenn tranzaksyon ki jwenn',
-			emptySubSearch: 'Pa gen okenn rezilta ki koresponn ak chèch ou an.',
-			emptySubDefault: 'Ou poko fè okenn achte pou kounye a. Eksplore fòmasyon ak ebook nou yo pou kòmanse !',
+			currencyNote: 'Lajan yo itilize: HTG / USD',
+			emptyTitle: 'Pa gen tranzaksyon pou montre',
+			emptySubSearch: 'Pa gen okenn rezilta ki koresponn ak rechèch ou a.',
+			emptySubDefault: 'Ou poko fè okenn acha. Dekouvri fòmasyon ak liv dijital nou yo pou kòmanse!',
 			exploreCatalog: 'Eksplore katalòg la',
 			statusPaid: 'Peye',
-			statusPending: 'Enatant',
+			statusPending: 'Ap tann',
 			statusFailed: 'Echwe',
-			productTypeLabel: 'Fòm :',
-			providerLabel: 'Fason :',
-			copyToast: 'Réf ID kopye nan presse-papier !',
+			productTypeLabel: 'Kalite:',
+			providerLabel: 'Mwayen peman:',
+			copyToast: 'Nimewo kòmand lan kopye.',
 			pdfReceipt: 'Resi PDF',
 			watchBtn: 'Swiv',
-			ebookBtn: 'Ebook',
-			sessionBtn: 'Sesyon',
-			receiptModalTitle: 'Resi Ofisyèl Peman',
+			ebookBtn: 'Liv dijital',
+			bundleBtn: 'Resous mwen yo',
+			sessionBtn: 'Rezèvasyon mwen yo',
+			receiptModalTitle: 'Resi peman',
+			receiptNumber: 'RESI N°',
+			datePrefix: 'Dat:',
+			referencePrefix: 'Nimewo:',
+			copyOrderId: 'Kopye nimewo kòmand lan',
+			statusLabel: 'Estati:',
 			brandSub: 'Platfòm aprantisaj ak swivi',
 			billedTo: 'Faktire bay',
 			paymentMethod: 'Mwayen peman',
-			statusPaidTag: 'Sitiyasyon : Peye ✓',
+			statusPaidTag: 'Estati: Peye ✓',
 			productDescHeader: 'Deskripsyon pwodui a',
 			typeHeader: 'Kalite',
 			amountHeader: 'Montan',
-			subtotal: 'Sous-total :',
-			fees: 'Frais tretman :',
-			totalAmount: 'Montan Total :',
-			receiptThankYou: 'Mèsi pou konfyans ou nan DJR Akademi !',
-			receiptElectronicNote: 'Resi elektwonik sa a se yon prèv achte ofisyèl.',
+			subtotal: 'Sou-total:',
+			fees: 'Frè tretman:',
+			totalAmount: 'Montan total:',
+			receiptThankYou: 'Mèsi paske ou fè DJR Akademi konfyans!',
+			receiptElectronicNote: 'Resi elektwonik sa a se yon prèv acha ofisyèl.',
 			close: 'Fèmen',
 			printSavePdf: 'Enprime / Sove an PDF',
 			courseType: 'Fòmasyon videyo',
-			ebookType: 'Ebook PDF',
-			coachingType: 'Sesyon Coaching 1:1',
+			ebookType: 'Liv dijital PDF',
+			bundleType: 'Pakèt resous',
+			coachingType: 'Sesyon konsiltasyon',
 			digitalType: 'Pwodui dijital'
 		}
 	};
@@ -218,13 +236,8 @@
 
 	function formatDate(isoString: string): string {
 		try {
-			return new Date(isoString).toLocaleDateString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR', {
-				day: 'numeric',
-				month: 'long',
-				year: 'numeric',
-				hour: '2-digit',
-				minute: '2-digit'
-			});
+			const formatted = formatDateTimeInTimezone(isoString, Intl.DateTimeFormat().resolvedOptions().timeZone, currentLang);
+			return `${formatted.date} · ${formatted.time}`;
 		} catch (e) {
 			return isoString;
 		}
@@ -235,13 +248,13 @@
 			case 'moncash':
 				return 'MonCash';
 			case 'natcash':
-				return 'Natcash';
+				return 'NatCash';
 			case 'card':
-				return currentLang === 'ht' ? 'Kat bankè' : 'Carte Bancaire';
+				return currentLang === 'ht' ? 'Kat labank' : 'Carte bancaire';
 			case 'free':
 				return currentLang === 'ht' ? 'Gratis' : 'Gratuit';
 			case 'admin':
-				return currentLang === 'ht' ? 'Aksè Manwèl' : 'Accès Manuel';
+				return currentLang === 'ht' ? 'Aksè manyèl' : 'Accès manuel';
 			default:
 				return provider || (currentLang === 'ht' ? 'Peman' : 'Paiement');
 		}
@@ -255,6 +268,8 @@
 				return t.ebookType;
 			case 'coaching':
 				return t.coachingType;
+			case 'bundle':
+				return t.bundleType;
 			default:
 				return t.digitalType;
 		}
@@ -449,12 +464,12 @@
 											</p>
 
 											<p class="text-[11px] text-zinc-400 font-mono flex items-center gap-1.5">
-												<span>Réf : {order.id.slice(0, 16)}</span>
+								<span>{t.referencePrefix} {order.id.slice(0, 16)}</span>
 												<button
 													type="button"
 													onclick={() => copyOrderId(order.id)}
 													class="p-1 hover:bg-zinc-200/60 hover:text-zinc-950 rounded transition-colors text-zinc-400 cursor-pointer inline-flex items-center"
-													title="Kopye ID kòmand lan"
+									title={t.copyOrderId}
 												>
 													{#if copiedOrderId === order.id}
 														<Check size={13} class="text-emerald-500" />
@@ -501,9 +516,17 @@
 														<span>{t.ebookBtn}</span>
 														<Download size={12} />
 													</a>
+												{:else if order.productType === 'bundle'}
+													<a
+														href={getHref('/dashboard')}
+														class="inline-flex items-center gap-1 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-[11px] rounded-xl transition-colors"
+													>
+														<span>{t.bundleBtn}</span>
+														<ExternalLink size={12} />
+													</a>
 												{:else}
 													<a
-														href={getHref('/profile')}
+														href={getHref('/dashboard#sec-coaching')}
 														class="inline-flex items-center gap-1 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-[11px] rounded-xl transition-colors"
 													>
 														<span>{t.sessionBtn}</span>
@@ -538,6 +561,7 @@
 					type="button"
 					onclick={closeInvoiceModal}
 					class="size-8 rounded-full bg-white/10 hover:bg-white/20 text-white grid place-items-center transition-colors"
+					aria-label={t.close}
 				>
 					<X size={16} />
 				</button>
@@ -550,14 +574,14 @@
 					<div>
 						<h2 class="text-2xl font-black tracking-tight text-zinc-950">DJR AKADEMI</h2>
 						<p class="text-xs text-zinc-500 mt-0.5">{t.brandSub}</p>
-						<p class="text-[11px] text-zinc-400 font-mono mt-1">contact@djrakademi.net · Haïti</p>
+						<p class="text-[11px] text-zinc-400 font-mono mt-1">contact@djrakademi.net · {currentLang === 'ht' ? 'Ayiti' : 'Haïti'}</p>
 					</div>
 					<div class="text-right">
 						<span class="px-3 py-1 bg-zinc-100 text-zinc-800 font-mono font-bold text-xs rounded-lg inline-block">
-							RESI N° {selectedOrderForInvoice.id.slice(0, 12).toUpperCase()}
+							{t.receiptNumber} {selectedOrderForInvoice.id.slice(0, 12).toUpperCase()}
 						</span>
 						<p class="text-[11px] text-zinc-400 font-mono mt-1">
-							Dat : {formatDate(selectedOrderForInvoice.createdAt)}
+							{t.datePrefix} {formatDate(selectedOrderForInvoice.createdAt)}
 						</p>
 					</div>
 				</div>
@@ -573,7 +597,7 @@
 						<span class="text-[10px] font-bold uppercase text-zinc-400 block">{t.paymentMethod}</span>
 						<p class="font-bold text-zinc-950">{getProviderLabel(selectedOrderForInvoice.paymentProvider)}</p>
 						<p class="text-emerald-700 font-bold uppercase text-[11px]">
-							{selectedOrderForInvoice.status === 'paid' ? t.statusPaidTag : `Sitiyasyon : ${selectedOrderForInvoice.status}`}
+							{selectedOrderForInvoice.status === 'paid' ? t.statusPaidTag : `${t.statusLabel} ${selectedOrderForInvoice.status === 'pending' ? t.statusPending : t.statusFailed}`}
 						</p>
 					</div>
 				</div>

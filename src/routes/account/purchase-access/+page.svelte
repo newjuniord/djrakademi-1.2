@@ -10,7 +10,10 @@
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
@@ -19,29 +22,29 @@
 			heading: 'Accès à votre achat',
 			connecting: 'Connexion sécurisée à votre compte…',
 			incompleteLink: 'Ce lien de connexion est incomplet.',
-			preparingEbook: 'Préparation de votre e-book…',
+			preparingEbook: 'Préparation de votre livre numérique…',
 			accessConfirmed: 'Accès confirmé. Redirection…',
-			loginSuccessEbook: 'Connexion réussie. Préparation de votre e-book…',
+			loginSuccessEbook: 'Connexion réussie. Préparation de votre livre numérique…',
 			loginSuccessRedirect: 'Connexion réussie. Redirection…',
 			accessError: 'Une erreur est survenue lors de la connexion. Connectez-vous à votre compte pour accéder à votre achat.',
 			unlockError: 'Impossible de débloquer cet accès.',
-			invalidSecret: 'Secret de connexion invalide.',
+			invalidSecret: 'Code de connexion invalide.',
 			loginBtn: 'Se connecter',
 			contactSupport: 'Contacter le support'
 		},
 		ht: {
-			title: 'Aksè ansekirite · DJR Akademi',
-			heading: 'Aksè nan achte w la',
-			connecting: 'N ap konekte w nan kont ou ansekirite…',
+			title: 'Aksè an sekirite · DJR Akademi',
+			heading: 'Aksè nan acha w la',
+			connecting: 'N ap konekte w sou kont ou an sekirite…',
 			incompleteLink: 'Lyen koneksyon sa a pa konplè.',
-			preparingEbook: 'N ap prepare ebook ou an…',
-			accessConfirmed: 'Aksè konfime. Redirection…',
-			loginSuccessEbook: 'Koneksyon an reyisi. N ap prepare ebook ou an…',
-			loginSuccessRedirect: 'Koneksyon an reyisi. Redireksyon…',
-			accessError: 'Yon erè rive pandan koneksyon an. Konekte w sou kont ou pou w jwenn achte w la.',
+			preparingEbook: 'N ap prepare liv dijital ou a…',
+			accessConfirmed: 'Aksè a konfime. N ap redirije w…',
+			loginSuccessEbook: 'Ou konekte. N ap prepare liv dijital ou a…',
+			loginSuccessRedirect: 'Ou konekte. N ap redirije w…',
+			accessError: 'Yon erè rive pandan koneksyon an. Konekte sou kont ou pou w jwenn acha w la.',
 			unlockError: 'Nou pa ka debloke aksè sa a.',
-			invalidSecret: 'Mopas koneksyon an pa bon.',
-			loginBtn: 'Konekte',
+			invalidSecret: 'Kòd koneksyon an pa valab.',
+			loginBtn: 'Konekte sou kont ou',
 			contactSupport: 'Kontakte sipò a'
 		}
 	};
@@ -53,7 +56,7 @@
 
 	function safeDestination(value: string | null): string {
 		if (!value || !value.startsWith('/') || value.startsWith('//')) return getHref('/dashboard');
-		return currentLang === 'ht' && !value.includes('lang=ht') ? (value.includes('?') ? `${value}&lang=ht` : `${value}?lang=ht`) : value;
+		return getHref(value);
 	}
 
 	onMount(async () => {
@@ -100,7 +103,7 @@
 				});
 				const data = await res.json().catch(() => ({}));
 				if (!res.ok || !data.secret) {
-					throw new Error(data.message || i18n[currentLang].unlockError);
+					throw new Error(i18n[currentLang].unlockError);
 				}
 				activeSecret = data.secret;
 			}
@@ -116,7 +119,9 @@
 		} catch (error: any) {
 			console.error('[Purchase access]:', error);
 			status = 'error';
-			message = error?.message || i18n[currentLang].accessError;
+			message = error?.message === i18n[currentLang].unlockError || error?.message === i18n[currentLang].invalidSecret
+				? error.message
+				: i18n[currentLang].accessError;
 		}
 	});
 </script>
@@ -137,7 +142,7 @@
 			<p class="text-sm text-base-content/65">{message}</p>
 			{#if status === 'error'}
 				<div class="mt-4 flex w-full flex-col gap-2">
-					<a class="btn btn-primary" href={getHref('/')}>{t.loginBtn}</a>
+					<a class="btn btn-primary" href={getHref('/login')}>{t.loginBtn}</a>
 					<a class="btn btn-ghost" href={getHref('/contact')}>{t.contactSupport}</a>
 				</div>
 			{/if}

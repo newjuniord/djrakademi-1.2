@@ -28,18 +28,21 @@
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
 		fr: {
 			pageTitle: 'À propos de DJR Akademi · DJR Akademi',
-			metaDesc: 'Découvrez la mission de DJR Akademi : Apprenez à utiliser l\'intelligence artificielle pour développer vos compétences. Cours, Ebooks, Consultations et Coaching Privé.',
+			metaDesc: 'Découvrez la mission de DJR Akademi : apprendre à utiliser l\'intelligence artificielle pour développer vos compétences. Cours, livres numériques, consultations et coaching privé.',
 			badge: 'À propos de DJR Akademi',
 			heroTitle: 'Apprenez à utiliser l\'intelligence artificielle pour développer vos compétences.',
-			heroDesc: 'DJR Akademi s\'adresse à tous ceux qui ne veulent pas rester en arrière à l\'ère de l\'intelligence artificielle. Conçu pour les créateurs de contenu, entrepreneurs, étudiants, professionnels, leaders, pasteurs, parents, vendeurs, politiques et toute personne souhaitant mieux s\'exprimer, créer, vendre et réussir.',
-			check1: '100% axé sur la pratique et les résultats réels',
-			check2: 'Modes de paiement locaux faciles (MonCash & Natcash)',
+			heroDesc: 'DJR Akademi s\'adresse à tous ceux qui veulent évoluer à l\'ère de l\'intelligence artificielle. La plateforme est conçue pour les créateurs de contenu, entrepreneurs, étudiants, professionnels, leaders, pasteurs, parents, vendeurs, responsables politiques et toute personne souhaitant mieux s\'exprimer, créer et vendre.',
+			check1: '100 % axé sur la pratique et les résultats concrets',
+			check2: 'Moyens de paiement locaux simples (MonCash et NatCash)',
 			check3: 'Suivi personnalisé et communauté d\'étudiants motivés',
 			exploreBtn: 'Explorer nos formations',
 			learningTag: 'Apprentissage facile et flexible',
@@ -53,194 +56,194 @@
 			whyDesc: 'Nous simplifions l\'apprentissage pour vous offrir une expérience fluide, rapide et axée sur les résultats.',
 			values: [
 				{
-					title: 'Excellence et Pratique',
+					title: 'Excellence et pratique',
 					description: 'Chaque cours est conçu pour une application immédiate dans la vie réelle, sans perdre de temps en théorie inutile.'
 				},
 				{
-					title: 'Paiements Locaux Faciles',
-					description: 'Nous facilitons l\'accès à l\'apprentissage en acceptant MonCash, Natcash et les cartes bancaires sans soucis.'
+					title: 'Paiements locaux simples',
+					description: 'Nous facilitons l\'accès à l\'apprentissage en acceptant MonCash, NatCash et les cartes bancaires.'
 				},
 				{
-					title: 'Coaching & Mentorat 1:1',
+					title: 'Coaching et mentorat individuel',
 					description: 'Bénéficiez d\'un suivi personnalisé pour débloquer vos projets et atteindre vos objectifs plus rapidement.'
 				},
 				{
-					title: 'Autonomie Financière',
+					title: 'Autonomie financière',
 					description: 'Notre mission principale est de fournir à chaque étudiant des compétences solides pour réussir dans le monde numérique.'
 				}
 			],
-			founderBadge: 'Message du Fondateur',
+			founderBadge: 'Message du fondateur',
 			founderName: 'Jean Ronald Dumervil',
-			founderRole: 'Auteur, Formateur & Créateur de Contenu',
+			founderRole: 'Auteur, formateur et créateur de contenu',
 			manifestoQuote: '« Après avoir accumulé des millions de vues, réuni près d\'un million d\'abonnés et généré des dizaines de milliers de dollars en ligne, je conclus que : Le monde offre assez de richesses pour que chacun puisse vivre dignement. Mais cela n\'empêche pas un groupe d\'être prospère tandis qu\'un autre stagne. »',
 			manifestoText1: 'La ligne qui sépare ces deux groupes s\'appelle le savoir. C\'est pour cela que DJR Akademi a été fondée : pour éliminer cette frontière et briser les barrières de la précarité pour tous ceux qui le souhaitent.',
 			manifestoHighlightTitle: 'DJR Akademi s\'adresse à tous ceux qui veulent évoluer avec l\'intelligence artificielle.',
 			manifestoHighlightText: 'Elle s\'adresse aux créateurs, entrepreneurs, étudiants, professionnels, leaders, pasteurs, parents, vendeurs, politiciens et à quiconque désire mieux s\'exprimer, créer, vendre et bâtir une vie d\'opportunités.',
 			manifestoText2: 'Nombreux sont ceux qui ont du potentiel mais manquent de direction. Ils ne savent pas comment créer du contenu, bâtir une marque, s\'exprimer avec impact ou monétiser ce qu\'ils savent déjà.',
-			manifestoText3: 'Sur DJR Akademi, vous trouverez des cours, ebooks, consultations, coaching privé et services pratiques pour apprendre vite, appliquer facilement et progresser en toute confiance.',
+			manifestoText3: 'Sur DJR Akademi, vous trouverez des cours, livres numériques, consultations, coaching privé et services pratiques pour apprendre vite, appliquer facilement et progresser en toute confiance.',
 			manifestoNote: 'DJR Akademi n\'est pas qu\'une théorie. C\'est le fruit de l\'expérience de Jean Ronald Dumervil en tant qu\'auteur, formateur, créateur de contenu et conférencier engagé au quotidien.',
-			catHeaderBadge: 'Catégories & Services',
-			catHeaderTitle: '4 Grandes Catégories de Services DJR Akademi',
+			catHeaderBadge: 'Catégories et services',
+			catHeaderTitle: '4 grandes catégories de services DJR Akademi',
 			catCatalogBtn: 'Explorer le catalogue',
 			cat1Badge: 'Catégorie 1',
-			cat1Title: 'COURS (Formations Vidéo)',
-			cat1Desc: 'Formations vidéo complètes structurées en modules pour maîtriser l\'intelligence artificielle, la création de contenu, la prise de parole en public et le business digital à votre rythme.',
+			cat1Title: 'COURS (Formations vidéo)',
+			cat1Desc: 'Formations vidéo complètes structurées en modules pour maîtriser l\'intelligence artificielle, la création de contenu, la prise de parole en public et l\'entrepreneuriat numérique à votre rythme.',
 			cat2Badge: 'Catégorie 2',
-			cat2Title: 'EBOOK (Livres Numériques PDF)',
+			cat2Title: 'LIVRES NUMÉRIQUES (PDF)',
 			cat2Desc: 'Guides PDF clairs, pratiques et directement téléchargeables sur votre téléphone ou ordinateur pour progresser rapidement.',
 			cat3Badge: 'Catégorie 3',
 			cat3Title: 'CONSULTATIONS ET SERVICES PRATIQUES',
-			cat3Sub1: 'Consultations Personnalisées :',
-			cat3Sub2: 'Services Pratiques que nous Réalisons :',
+			cat3Sub1: 'Consultations personnalisées :',
+			cat3Sub2: 'Services pratiques que nous réalisons :',
 			servicesList: [
 				'Rédaction de scripts vidéo',
-				'Création de plan de contenu sur 30 jours',
-				'Correction / organisation d\'ebooks',
+				'Création de plans de contenu sur 30 jours',
+				'Correction et organisation de livres numériques',
 				'Rédaction et correction de mémoires de fin d\'études',
-				'Conceptualisation d\'ebooks prêts à la vente',
-				'Création de stratégie de marque (Branding)',
+				'Conception de livres numériques prêts à la vente',
+				'Création de stratégies de marque',
 				'Préparation de discours, présentations ou messages publics',
-				'Création de prompts IA sur-mesure pour votre entreprise et vos contenus'
+				'Création d\'instructions sur mesure pour l\'IA, adaptées à votre entreprise et à vos contenus'
 			],
 			consultationsList: [
-				'Consultation Branding Personnel',
-				'Consultation Création de Contenu',
-				'Consultation Business Digital',
-				'Consultation Écriture de Livre / Ebook',
-				'Consultation Storytelling & Communication',
-				'Consultation Stratégie IA pour votre travail ou entreprise'
+				'Consultation sur la marque personnelle',
+				'Consultation sur la création de contenu',
+				'Consultation sur l\'entrepreneuriat numérique',
+				'Consultation sur l\'écriture de livres et de livres numériques',
+				'Consultation sur la narration et la communication',
+				'Consultation sur la stratégie d\'IA pour votre travail ou votre entreprise'
 			],
 			cat4Badge: 'Catégorie 4',
-			cat4Title: 'COACHING PRIVÉ (1-sur-1)',
-			cat4Desc: 'Un programme personnalisé pour pasteurs, prêtres, parents, leaders, politiques, vendeurs, CEOs et influenceurs désirant s\'exprimer avec clarté, autorité et conviction.',
-			faqTitle: 'Foire Aux Questions (FAQ)',
+			cat4Title: 'COACHING PRIVÉ (INDIVIDUEL)',
+			cat4Desc: 'Un programme personnalisé pour pasteurs, prêtres, parents, leaders, responsables politiques, vendeurs, dirigeants d\'entreprise et influenceurs désirant s\'exprimer avec clarté, autorité et conviction.',
+			faqTitle: 'Foire aux questions',
 			faqSubtitle: 'Réponses simples aux questions les plus fréquentes.',
 			faqs: [
 				{
 					q: 'Comment accéder à mes cours après le paiement ?',
-					a: 'Dès la confirmation du paiement (MonCash, Natcash ou Carte), votre accès est débloqué immédiatement dans votre espace étudiant.'
+					a: 'Dès la confirmation du paiement (MonCash, NatCash ou carte bancaire), votre accès est débloqué dans votre espace étudiant.'
 				},
 				{
 					q: 'Les formations sont-elles accessibles sur smartphone ?',
-					a: 'Oui, 100% de notre plateforme est optimisée pour smartphones, tablettes et ordinateurs.'
+					a: 'Oui, notre plateforme est adaptée aux smartphones, tablettes et ordinateurs.'
 				},
 				{
 					q: 'Puis-je obtenir un reçu ou une facture pour mon achat ?',
-					a: 'Absolument ! Dans la rubrique "Mes Transactions", vous pouvez télécharger un reçu PDF officiel pour chaque commande.'
+					a: 'Oui ! Dans la rubrique « Mes transactions », vous pouvez télécharger un reçu PDF pour chaque commande.'
 				},
 				{
-					q: 'Comment se déroule une session de Coaching 1:1 ?',
+					q: 'Comment se déroule une séance de coaching individuel ?',
 					a: 'Vous choisissez un créneau disponible dans le calendrier. Une fois confirmé, vous recevez un lien direct pour votre session en ligne.'
 				}
 			],
 			ctaTitle: 'Prêt à monter en compétences ?',
-			ctaDesc: 'Rejoignez des milliers d\'étudiants et accédez directement aux meilleures formations d\'Haïti.',
+			ctaDesc: 'Rejoignez les étudiants de DJR Akademi et accédez à nos formations.',
 			ctaJoin: 'Rejoindre DJR Akademi',
 			ctaContact: 'Nous contacter'
 		},
 		ht: {
 			pageTitle: 'Konsènan DJR Akademi · DJR Akademi',
-			metaDesc: 'Dekouvri misyon DJR Akademi : Aprann sèvi ak entelijans atifisyèl pou w ka sispann razè. Kou, Ebook, Konsiltasyon ak Coaching Prive.',
+			metaDesc: 'Dekouvri misyon DJR Akademi: aprann sèvi ak entèlijans atifisyèl pou devlope konpetans ou. Kou, liv dijital, konsiltasyon ak ankadreman pèsonalize.',
 			badge: 'Konsènan DJR Akademi',
-			heroTitle: 'Aprann sèvi ak entelijans atifisyèl pou w ka sispann razè.',
-			heroDesc: 'DJR Akademi se pou Ayisyen ki pa vle rete dèyè nan epòk entelijans atifisyèl la. Li fèt pou kreyatè kontni, antreprenè, elèv, pwofesyonèl, lidè, pastè, paran, vandè, politisyen ak tout moun ki vle aprann pale pi byen, kreye pi byen, vann pi byen, epi konstwi yon lavi ki gen plis opòtinite.',
-			check1: '100% bati sou pratik ak fè lajan pou tout bon',
-			check2: 'Mwayen peman lokal ki fasil (MonCash & Natcash)',
-			check3: 'Swivi pèsonalize ak yon kominote etidyan ki motivé',
+			heroTitle: 'Aprann sèvi ak entèlijans atifisyèl pou devlope konpetans ou.',
+			heroDesc: 'DJR Akademi se pou tout moun ki vle avanse nan epòk entèlijans atifisyèl la. Li fèt pou kreyatè kontni, antreprenè, etidyan, pwofesyonèl, lidè, pastè, paran, vandè, politisyen ak tout moun ki vle kominike, kreye ak vann pi byen.',
+			check1: '100 % konsantre sou pratik ak rezilta konkrè',
+			check2: 'Mwayen peman lokal ki senp (MonCash ak NatCash)',
+			check3: 'Swivi pèsonalize ak yon kominote etidyan ki motive',
 			exploreBtn: 'Eksplore fòmasyon nou yo',
-			learningTag: 'Aprantisaj Fasil ak Soupl',
-			learningQuote: '"Fòme w ak moun ki mèt nan domèn nan epi transfòme konesans ou an lajan."',
+			learningTag: 'Aprantisaj fasil ak fleksib',
+			learningQuote: '"Aprann nan men ekspè nan domèn nan epi fè konesans ou tounen opòtinite."',
 			stats: [
-				{ value: '600+', label: 'Etidyan ki pasyone', detail: 'Nan tout Ayiti ak nan dyaspora a' },
-				{ value: '98%', label: 'Nivo satisfaksyon', detail: 'Avis pozitif ki verifye' },
-				{ value: '24/7', label: 'Aksè san limit', detail: 'Aprann nan pwòp rythm ou' }
+				{ value: '600+', label: 'Etidyan ki pasyone', detail: 'Nan Ayiti ak nan dyaspora a' },
+				{ value: '98%', label: 'Nivo satisfaksyon', detail: 'Opinyon pozitif ki verifye' },
+				{ value: '24/7', label: 'Aksè san limit', detail: 'Aprann nan rit pa w' }
 			],
-			whyTitle: 'Poukisa pou w Chwazi DJR Akademi ?',
-			whyDesc: 'Nou retire tout tèt chaje nan fason moun te konn aprann anvan pou n ba w yon ekspeyans ki fasil, rapid epi ki bay rezilta.',
+			whyTitle: 'Poukisa pou w chwazi DJR Akademi?',
+			whyDesc: 'Nou senplifye aprantisaj la pou ba w yon eksperyans ki fasil, rapid epi ki chita sou rezilta.',
 			values: [
 				{
-					title: 'Ekselans ak Pratik',
-					description: 'Chak kou fèt pou w ka sèvi ak li menm kote a nan lavi reyèl la, san pèdi tan nan teyori ki pa itil.'
+					title: 'Ekselans ak pratik',
+					description: 'Chak kou fèt pou w ka aplike sa w aprann nan lavi chak jou, san pèdi tan nan teyori ki pa itil.'
 				},
 				{
-					title: 'Peman Lokal ki Fasil',
-					description: 'Nou rann aprantisaj la fasil lè nou aksepte MonCash, Natcash ak kat bankè san okenn tèt chaje.'
+					title: 'Peman lokal ki senp',
+					description: 'Nou fasilite aksè nan aprantisaj lè nou aksepte MonCash, NatCash ak kat labank.'
 				},
 				{
-					title: 'Coaching ak Mentora 1:1',
-					description: 'Jwenn yon swivi pèsonalize pou w debloke pwojè w yo epi rive nan objektif ou pi vit.'
+					title: 'Ankadreman ak konsèy endividyèl',
+					description: 'Jwenn swivi pèsonalize pou fè pwojè w yo avanse epi atenn objektif ou pi vit.'
 				},
 				{
-					title: 'Otonomi Finansyè',
-					description: 'Misyon prensipal nou se ba chak etidyan konpetans solid pou yo reyisi nan mond dijital la.'
+					title: 'Otonomi finansye',
+					description: 'Misyon prensipal nou se bay chak etidyan konpetans solid pou yo reyisi nan mond dijital la.'
 				}
 			],
-			founderBadge: 'Mesaj Fondatè a',
+			founderBadge: 'Mesaj fondatè a',
 			founderName: 'Jean Ronald Dumervil',
-			founderRole: 'Otè, Fòmatè & Kreyatè Kontni',
-			manifestoQuote: '“Apre m fin ranmase plizyè milyon vyouz, gen prèske yon milyon moun kap swiv mwen, fè plizyè dizèn milye dola benefis sou entènèt la, mwen konkli ke: Mond lan gen ase richès pou tout moun jwenn epi viv byen. Men sa pa anpeche gen yon gwoup moun kap viv nan richès ak yon lòt gwoup kap viv nan povrete.”',
-			manifestoText1: 'Liy ki separe de gwoup moun sa yo rele konesans. Se pou sa DJR Akademi fonde: pou elimine liy sa a, men tou kraze baryè povrete sa a nan lavi tout Ayisyen ki vle.',
-			manifestoHighlightTitle: 'DJR Akademi se pou Ayisyen ki pa vle rete dèyè nan epòk entelijans atifisyèl la.',
-			manifestoHighlightText: 'Li fèt pou kreyatè kontni, antreprenè, elèv, pwofesyonèl, lidè, pastè, paran, vandè, politisyen ak tout moun ki vle aprann pale pi byen, kreye pi byen, vann pi byen, epi konstwi yon lavi ki gen plis opòtinite.',
-			manifestoText2: 'Anpil moun gen kapasite, men yo pa gen direksyon. Yo pa konn kijan pou yo kreye kontni, kijan pou yo bati yon mak, kijan pou yo pale pou enfliyanse, ni kijan pou yo itilize sa yo deja konnen pou fè lajan.',
-			manifestoText3: 'Sou DJR Akademi, gen kou, ebook, konsiltasyon, coaching prive, ak sèvis pratik ki ede w aprann vit, aplike fasil, epi avanse ak plis konfyans.',
-			manifestoNote: 'DJR Akademi pa sèlman baze sou teyori. Se eksperyans Jean Ronald Dumervil kòm otè, fòmatè, kreyatè kontni, oratè, ak moun ki ap travay chak jou pou ede Ayisyen devlope konpetans yo, itilize teknoloji, epi pa rete viktim povrete, mank opòtinite, ak mank direksyon.',
-			catHeaderBadge: 'Kategori & Sèvis',
-			catHeaderTitle: '4 Gwo Kategori Sèvis DJR Akademi',
+			founderRole: 'Otè, fòmatè ak kreyatè kontni',
+			manifestoQuote: '« Apre m fin fè plizyè milyon vizyalizasyon, reyini prèske yon milyon moun k ap swiv mwen epi fè plizyè dizèn milye dola sou entènèt, mwen rive nan konklizyon sa a: gen ase richès nan mond lan pou chak moun viv ak diyite. Men sa pa anpeche yon gwoup moun pwospere pandan yon lòt gwoup rete dèyè. »',
+			manifestoText1: 'Konesans se sa ki separe de gwoup sa yo. Se poutèt sa DJR Akademi te fonde: pou elimine baryè sa a epi ede moun ki vle yo soti nan prekaryete.',
+			manifestoHighlightTitle: 'DJR Akademi se pou tout moun ki vle avanse ak entèlijans atifisyèl.',
+			manifestoHighlightText: 'Li fèt pou kreyatè kontni, antreprenè, etidyan, pwofesyonèl, lidè, pastè, paran, vandè, politisyen ak tout moun ki vle kominike, kreye, vann epi bati plis opòtinite.',
+			manifestoText2: 'Anpil moun gen kapasite, men yo manke direksyon. Yo pa konnen kijan pou yo kreye kontni, bati yon mak, pale avèk enpak oswa fè konesans yo tounen yon sous revni.',
+			manifestoText3: 'Sou DJR Akademi, w ap jwenn kou, liv dijital, konsiltasyon, ankadreman prive ak sèvis pratik pou aprann vit, aplike sa w aprann epi avanse ak konfyans.',
+			manifestoNote: 'DJR Akademi baze sou eksperyans Jean Ronald Dumervil kòm otè, fòmatè, kreyatè kontni ak oratè ki angaje nan travay li chak jou.',
+			catHeaderBadge: 'Kategori ak sèvis',
+			catHeaderTitle: '4 gwo kategori sèvis DJR Akademi',
 			catCatalogBtn: 'Eksplore katalòg la',
 			cat1Badge: 'Kategori 1',
-			cat1Title: 'KOU (Fòmasyon Videyo)',
-			cat1Desc: 'Fòmasyon videyo konplè ki bati pa modil pou w ka mèt sou entelijans atifisyèl, kreyasyon kontni, pale an piblik ak biznis dijital nan pwòp rit ou.',
+			cat1Title: 'KOU (Fòmasyon videyo)',
+			cat1Desc: 'Fòmasyon videyo konplè ki òganize an modil pou w metrize entèlijans atifisyèl, kreyasyon kontni, pale an piblik ak biznis dijital nan rit pa w.',
 			cat2Badge: 'Kategori 2',
-			cat2Title: 'EBOOK (Liv Dijital PDF)',
-			cat2Desc: 'Gid PDF ki klè, pratik ak konsèy dirèk, ou ka telechaje ak aksepte menm kote a sou telefòn ou oswa konpitè w pou avanse rapid.',
+			cat2Title: 'LIV DIJITAL (PDF)',
+			cat2Desc: 'Gid PDF ki klè e pratik. Ou ka telechaje yo dirèkteman sou telefòn ou oswa òdinatè w pou avanse pi vit.',
 			cat3Badge: 'Kategori 3',
 			cat3Title: 'KONSILTASYON AK SÈVIS PRATIK',
-			cat3Sub1: 'Konsiltasyon Pèsonalize :',
-			cat3Sub2: 'Sèvis Nou Ede W Realize :',
+			cat3Sub1: 'Konsiltasyon pèsonalize:',
+			cat3Sub2: 'Sèvis pratik nou bay:',
 			servicesList: [
-				'Ekri script videyo',
+				'Ekri tèks pou videyo',
 				'Kreye plan kontni pou 30 jou',
-				'Korije / òganize ebook',
-				'Ekri ak korije memwa sòti inivèsite',
-				'Konseptyalize ebook pou vann',
-				'Kreye estrateji brand',
-				'Prepare diskou, prezantasyon, oswa mesaj piblik',
-				'Kreye prompt entelijans atifisyèl pou biznis ou ak kontni'
+				'Korije ak òganize liv dijital',
+				'Ekri ak korije memwa fen etid',
+				'Konsepsyon liv dijital pou vann',
+				'Kreye estrateji mak',
+				'Prepare diskou, prezantasyon oswa mesaj piblik',
+				'Kreye enstriksyon pou entèlijans atifisyèl adapte ak biznis ou ak kontni w'
 			],
 			consultationsList: [
-				'Konsiltasyon Brand Pèsonèl',
-				'Konsiltasyon Kreyasyon Kontni',
-				'Konsiltasyon Biznis Dijital',
-				'Konsiltasyon Ekriti Liv / Ebook',
-				'Konsiltasyon Storytelling ak Kominikasyon',
-				'Konsiltasyon Estrateji entelijans atifisyèl pou travay oswa biznis ou'
+				'Konsiltasyon sou mak pèsonèl',
+				'Konsiltasyon sou kreyasyon kontni',
+				'Konsiltasyon sou biznis dijital',
+				'Konsiltasyon sou ekriti liv ak liv dijital',
+				'Konsiltasyon sou rakonte istwa ak kominikasyon',
+				'Konsiltasyon sou estrateji entèlijans atifisyèl pou travay ou oswa biznis ou'
 			],
 			cat4Badge: 'Kategori 4',
-			cat4Title: 'COACHING PRIVE (1-ak-1)',
-			cat4Desc: 'Yon pwogram pèsonalize pou pastè, pè, paran, lidè, politisyen, vandè, CEO ak enfliyansè ki vle aprann pale ak plis klète, otorite, emosyon ak konviksyon, pou yo ka enfliyanse, konvenk, dirije epi touche moun yo ap adrese yo.',
-			faqTitle: 'Kesyon Moun Poze Souvan (FAQ)',
-			faqSubtitle: 'Repons ki senp pou kesyon moun plis poze yo.',
+			cat4Title: 'ANKADREMAN PRIVE (YON MOUN AK YON MOUN)',
+			cat4Desc: 'Yon pwogram pèsonalize pou pastè, prèt, paran, lidè, politisyen, vandè, direktè antrepriz ak moun ki gen enfliyans ki vle pale avèk klète, otorite ak konviksyon.',
+			faqTitle: 'Kesyon moun poze souvan',
+			faqSubtitle: 'Repons senp pou kesyon moun poze pi souvan yo.',
 			faqs: [
 				{
-					q: 'Kouman pou m jwenn aksè nan kou mwen yo apre peman an ?',
-					a: 'Kominikou peman an konfime (MonCash, Natcash oswa Kat), aksè w la debloke menm kote a. Ou ap jwenn tout fòmasyon w yo nan espas etidyan ou an.'
+					q: 'Kijan pou m jwenn aksè nan kou mwen yo apre peman an?',
+					a: 'Depi peman an konfime (MonCash, NatCash oswa kat labank), aksè w la debloke tousuit nan espas etidyan ou an.'
 				},
 				{
-					q: 'Èske fòmasyon yo disponib sou telefòn ?',
-					a: 'Wi, 100% nan platfòm nou an fèt pou mache trè byen sou telefòn, tablèt ak konpitè. Ou ka swiv kou w yo nenpòt kote w ye.'
+					q: 'Èske fòmasyon yo disponib sou telefòn?',
+					a: 'Wi, platfòm nou an adapte ak telefòn, tablèt ak òdinatè. Ou ka suiv kou w yo kote w ye a.'
 				},
 				{
-					q: 'Èske m ka jwenn yon resi oswa faktir pou achte m an ?',
-					a: 'Absoliman ! Nan seksyon "Tranzaksyon Mwen Yo", ou ka telechaje ak enprime yon resi PDF ofisyèl pou chak kòmand ou fè.'
+					q: 'Èske m ka jwenn yon resi oswa yon fakti pou acha mwen?',
+					a: 'Wi! Nan seksyon "Tranzaksyon mwen yo", ou ka telechaje yon resi PDF pou chak kòmann.'
 				},
 				{
-					q: 'Kouman yon sesyon Coaching 1:1 mache ?',
-					a: 'Ou chwazi yon dat ak lè ki disponib nan kalandriye a. Lè l konfime, ou resevwa yon lyen dirèk pou sesyon an sou entènèt ak coach ou an.'
+					q: 'Kijan yon sesyon konsiltasyon endividyèl fèt?',
+					a: 'Ou chwazi yon lè ki disponib nan kalandriye a. Lè rezèvasyon an konfime, ou resevwa yon lyen pou sesyon an sou entènèt.'
 				}
 			],
-			ctaTitle: 'Ou pare pou w moute nivo konpetans ou ?',
-			ctaDesc: 'Antre ansanm ak plizyè milye etidyan epi jwenn aksè dirèkteman nan pi bon fòmasyon nan peyi Ayiti.',
+			ctaTitle: 'Ou pare pou devlope konpetans ou?',
+			ctaDesc: 'Rejwenn lòt etidyan epi jwenn aksè nan fòmasyon DJR Akademi yo.',
 			ctaJoin: 'Antre nan DJR Akademi',
 			ctaContact: 'Kontakte nou'
 		}

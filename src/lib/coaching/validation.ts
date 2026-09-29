@@ -33,10 +33,10 @@ export function validateCoaching(value: CoachingFormValue): string | null {
 	return null;
 }
 
-export function validateBookingInput(input: { name: string; email: string; whatsapp: string; timezone: string }): string | null {
-	if (!input.name.trim()) return 'Votre nom est obligatoire.';
-	if (!isValidEmail(input.email)) return 'Adresse email invalide.';
-	if (!isValidE164(input.whatsapp)) return 'Numéro WhatsApp invalide.';
-	if (!isValidTimezone(input.timezone)) return 'Fuseau horaire invalide.';
+export function validateBookingInput(input: { name: string; email: string; whatsapp: string; timezone: string }, language: 'fr' | 'ht' = 'fr'): string | null {
+	if (!input.name.trim()) return language === 'ht' ? 'Non w obligatwa.' : 'Votre nom est obligatoire.';
+	if (!isValidEmail(input.email)) return language === 'ht' ? 'Adrès imèl la pa kòrèk.' : 'Adresse e-mail invalide.';
+	if (!isValidE164(input.whatsapp)) return language === 'ht' ? 'Nimewo WhatsApp la pa kòrèk.' : 'Numéro WhatsApp invalide.';
+	if (!isValidTimezone(input.timezone)) return language === 'ht' ? 'Fizo lè a pa kòrèk.' : 'Fuseau horaire invalide.';
 	return null;
 }

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import type { Course } from '$lib/types/admin';
 	import { X, BookOpen, ExternalLink, Upload, Image as ImageIcon, Trash2 } from 'lucide-svelte';
 
@@ -17,6 +19,7 @@
 		onSave: (courseData: Partial<Course>, coverFile?: File | null) => void;
 		onManageLessons?: (courseId: string) => void;
 	} = $props();
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	// Local state synced with active course
 	let title = $state('');
@@ -63,11 +66,11 @@
 		if (target.files && target.files.length > 0) {
 			const file = target.files[0];
 			if (!file.type.startsWith('image/')) {
-				alert('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).');
+				alert(translateAdminMessage('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).', currentLang));
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				alert("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.");
+				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.", currentLang));
 				return;
 			}
 			coverFile = file;
@@ -80,11 +83,11 @@
 		if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
 			const file = e.dataTransfer.files[0];
 			if (!file.type.startsWith('image/')) {
-				alert('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).');
+				alert(translateAdminMessage('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).', currentLang));
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				alert("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.");
+				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.", currentLang));
 				return;
 			}
 			coverFile = file;
@@ -102,7 +105,7 @@
 		e.preventDefault();
 		if (submitting || saving) return;
 		if (!isFree && (!Number.isInteger(price) || price < 1 || price > 100000)) {
-			alert('Le prix doit être un montant entier compris entre 1 et 100 000 HTG.');
+			alert(translateAdminMessage('Le prix doit être un montant entier compris entre 1 et 100 000 HTG.', currentLang));
 			return;
 		}
 		submitting = true;
@@ -150,7 +153,7 @@
 		<div class="p-6 border-b border-base-200 flex items-center justify-between shrink-0 bg-base-100">
 			<div>
 				<h2 id="drawer-title" class="text-xl font-bold text-base-content">
-					{course ? 'Modifier le cours' : 'Nouveau cours'}
+					{course ? (currentLang === 'ht' ? 'Modifye kou a' : 'Modifier le cours') : (currentLang === 'ht' ? 'Nouvo kou' : 'Nouveau cours')}
 				</h2>
 				<p class="text-xs text-base-content/60 mt-0.5">
 					Informations générales et tarification.

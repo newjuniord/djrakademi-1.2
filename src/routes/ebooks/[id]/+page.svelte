@@ -52,6 +52,7 @@
 			loginFreeToast: "Veuillez vous connecter à votre compte pour télécharger ce livre électronique.",
 			alreadyOwnedToast: "Vous possédez déjà ce livre électronique ! Redirection en cours...",
 			freeClaimToast: "Livre électronique débloqué ! Vous pouvez le télécharger.",
+			paymentVerifiedToast: "Paiement confirmé ! Redirection vers vos livres électroniques...",
 			errorClaimToast: "Impossible de débloquer ce livre électronique.",
 			errorPayment: "Une erreur est survenue lors du paiement."
 		},
@@ -67,10 +68,10 @@
 			formatPdf: "Fòma PDF",
 			free: "Gratis",
 			btnFree: "Telechaje gratis",
-			btnBuy: "Achte ebook sa a",
+			btnBuy: "Achte liv dijital sa a",
 			btnBuyBottom: "Achte kounye a",
 			loadingBtn: "Chajman...",
-			aboutTitle: "Konsènan ebook sa a",
+			aboutTitle: "Konsènan liv dijital sa a",
 			aboutDescSuffix: "Gid sa a fèt pou w ka aplike l dirèkteman: chak seksyon ba w zouti, egzanp ak etap konkrè pou w avanse byen vit.",
 			features: [
 				"Aksè imedyat apre peman",
@@ -79,18 +80,19 @@
 				"Sipò pa imèl enkli"
 			],
 			featGrid: [
-				{ icon: '📄', title: 'Fòma PDF', desc: 'Konpatib ak ordinatè, tablèt ak telefòn' },
+				{ icon: '📄', title: 'Fòma PDF', desc: 'Konpatib ak òdinatè, tablèt ak telefòn' },
 				{ icon: '⚡', title: 'Aksè imedyat', desc: 'Telechajman osito peman an konfime' },
 				{ icon: '🎯', title: 'Kontni pratik', desc: 'Eksèsis ak ka pratik enkli' },
-				{ icon: '🔄', title: 'Mizajou gratis', desc: 'Nouvèl vèsyon enkli pou tout tan' }
+				{ icon: '🔄', title: 'Mizajou gratis', desc: 'Nouvo vèsyon yo enkli pou tout tan' }
 			],
-			questions: "Kesyon ?",
+			questions: "Kesyon?",
 			contactForm: "Fòm kontak",
-			loginToast: "Tanpri konekte sou kont ou pou w ka achte ebook sa a.",
-			loginFreeToast: "Tanpri konekte sou kont ou pou w ka telechaje ebook sa a.",
-			alreadyOwnedToast: "Ou gen ebook sa a deja! N ap redirije w nan espas ou an.",
-			freeClaimToast: "Ebook debloke! Ou ka telechaje l kounye a.",
-			errorClaimToast: "Nou pa ka debloke ebook sa a.",
+			loginToast: "Tanpri konekte sou kont ou pou w ka achte liv dijital sa a.",
+			loginFreeToast: "Tanpri konekte sou kont ou pou w ka telechaje liv dijital sa a.",
+			alreadyOwnedToast: "Ou gen liv dijital sa a deja! N ap redirije w nan espas ou an.",
+			freeClaimToast: "Liv dijital la debloke! Ou ka telechaje l kounye a.",
+			paymentVerifiedToast: "Peman an konfime! N ap redirije w nan liv dijital ou yo...",
+			errorClaimToast: "Nou pa ka debloke liv dijital sa a.",
 			errorPayment: "Yon erè rive pandan n ap trete peman an."
 		}
 	};
@@ -99,10 +101,9 @@
 
 	function getHref(path: string): string {
 		if (currentLang !== 'ht') return path;
-		const [pathname, search] = path.split('?');
-		const params = new URLSearchParams(search || '');
-		params.set('lang', 'ht');
-		return `${pathname}?${params.toString()}`;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	let ebook = $state<Ebook | null>(null);
@@ -149,7 +150,7 @@
 				try {
 					const verification = await verifyLemonSqueezyPurchase(authState.user.email, 'ebook', ebook.id);
 					if (verification.ok && verification.success) {
-						toast.success(verification.message, 5000);
+						toast.success(t.paymentVerifiedToast, 5000);
 						setTimeout(() => goto(getHref('/dashboard#sec-ebooks')), 1800);
 						return;
 					}
@@ -181,7 +182,7 @@
 			toast.success(t.freeClaimToast);
 			await goto(getHref('/dashboard#sec-ebooks'));
 		} catch (caught) {
-			toast.error(caught instanceof Error ? caught.message : t.errorClaimToast);
+			toast.error(t.errorClaimToast);
 		} finally {
 			checkoutLoading = false;
 		}
@@ -229,11 +230,11 @@
 				window.location.href = redirectTarget;
 				return;
 			} else {
-				toast.error(res?.message || t.errorPayment);
+				toast.error(t.errorPayment);
 			}
 		} catch (e: any) {
 			console.error('Plopplop ebook payment error:', e);
-			toast.error(e?.message || t.errorPayment);
+			toast.error(t.errorPayment);
 		} finally {
 			checkoutLoading = false;
 		}
@@ -241,7 +242,7 @@
 </script>
 
 <svelte:head>
-	<title>{ebook ? t.metaTitle(ebook.title) : t.metaTitle('Ebook')}</title>
+	<title>{t.metaTitle(ebook?.title || t.kicker)}</title>
 	<meta name="description" content={t.metaDesc(ebook?.description ?? '')} />
 </svelte:head>
 

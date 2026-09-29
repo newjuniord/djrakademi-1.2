@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import type { Ebook } from '$lib/types/admin';
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 	import { FileText, Upload, Image as ImageIcon, CheckCircle, ArrowLeft, Loader2 } from 'lucide-svelte';
 
 	let {
@@ -49,11 +52,11 @@
 		if (target.files && target.files.length > 0) {
 			const file = target.files[0];
 			if (!file.type.startsWith('image/')) {
-				alert('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).');
+				alert(translateAdminMessage('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).', currentLang));
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				alert("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.");
+				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.", currentLang));
 				return;
 			}
 			coverFile = file;
@@ -69,7 +72,7 @@
 				pdfFile = file;
 				fileName = file.name;
 			} else {
-				alert('Seuls les fichiers PDF sont acceptés pour les ebooks.');
+				alert(translateAdminMessage('Seuls les fichiers PDF sont acceptés pour les ebooks.', currentLang));
 			}
 		}
 	}
@@ -82,7 +85,7 @@
 				pdfFile = file;
 				fileName = file.name;
 			} else {
-				alert('Seuls les fichiers PDF sont acceptés pour les ebooks.');
+				alert(translateAdminMessage('Seuls les fichiers PDF sont acceptés pour les ebooks.', currentLang));
 			}
 		}
 	}

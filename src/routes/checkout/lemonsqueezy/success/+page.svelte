@@ -19,6 +19,7 @@
 		LayoutDashboard,
 		RefreshCw
 	} from 'lucide-svelte';
+	import { formatDateTimeInTimezone } from '$lib/coaching/timezone';
 
 	interface LemonOrder {
 		id: string;
@@ -38,12 +39,15 @@
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
 		fr: {
-			title: 'Confirmation Paiment Carte · DJR Akademi',
+			title: 'Confirmation du paiement par carte · DJR Akademi',
 			verifyingTitle: 'Vérification du paiement par carte (Lemon Squeezy)…',
 			verifyingDesc: 'Nous vérifions la confirmation de la transaction par carte.',
 			missingOrderIdMsg: 'Aucun numéro de commande trouvé dans le lien.',
@@ -51,21 +55,21 @@
 			missingHeading: 'Aucun numéro de commande trouvé',
 			missingDesc: 'Cette page requiert un code de transaction pour afficher votre reçu. Si vous avez effectué un achat par carte, veuillez vérifier le lien dans votre e-mail de confirmation ou consulter vos transactions.',
 			viewTransactionsBtn: 'Consulter mes transactions',
-			goToDashboardBtn: 'Aller sur mon Espace',
-			verifyingBadge: 'Vérification Paiement Carte',
+			goToDashboardBtn: 'Aller à mon espace',
+			verifyingBadge: 'Vérification du paiement par carte',
 			orderLabel: 'Commande #',
-			reverifyBtn: 'Re-vérifier mon accès maintenant',
-			reverifyingBtn: 'Re-vérification en cours…',
+			reverifyBtn: 'Vérifier à nouveau mon accès',
+			reverifyingBtn: 'Nouvelle vérification en cours…',
 			paidAlreadyQ: 'Paiement déjà débité ?',
 			paidAlreadyDesc: 'Si votre transaction est confirmée sur votre carte mais toujours indisponible, contactez notre support.',
-			contactSupportBtn: 'Support Client (Contact)',
-			cardConfirmedBadge: 'Paiement par Carte Confirmé (Lemon Squeezy)',
+			contactSupportBtn: 'Contacter le service client',
+			cardConfirmedBadge: 'Paiement par carte confirmé (Lemon Squeezy)',
 			thanksOrderTitle: 'Merci pour votre commande !',
 			unlockedDesc: 'Votre transaction est confirmée dans le système. Votre accès est débloqué dans votre compte.',
 			typeCourse: 'Formation en ligne',
-			typeEbook: 'E-book PDF',
-			typeBundle: 'Bundle',
-			typeCoaching: 'Session Coaching',
+			typeEbook: 'Livre électronique PDF',
+			typeBundle: 'Offre groupée',
+			typeCoaching: 'Séance de coaching',
 			customerLabel: 'Client :',
 			amountPaidLabel: 'Montant payé (USD)',
 			receiptDetailsTitle: 'Détails du reçu',
@@ -76,45 +80,46 @@
 			txDateLabel: 'Date de transaction',
 			currencyLabel: 'Devise',
 			followCourseNow: 'Suivre le cours maintenant',
-			followDownloadEbook: 'Consulter & Télécharger l\'E-book',
+			followDownloadEbook: 'Voir et télécharger le livre électronique',
 			viewResourcesNow: 'Voir mes ressources',
-			viewBookingDetails: 'Voir les détails du rendez-vous',
+			viewBookings: 'Voir mes réservations',
 			viewAllTransactions: 'Voir toutes mes transactions',
 			printReceiptBtn: 'Imprimer le reçu',
 			cardQuestion: 'Une question concernant votre paiement par carte ?',
-			whatsappSupport: 'Support WhatsApp Coaching',
-			contactPageLink: 'Page Contact',
+			whatsappSupport: 'Assistance WhatsApp',
+			contactPageLink: 'Nous contacter',
+			whatsappMessage: 'Bonjour, j’ai une question concernant ma réservation de coaching.',
 			defaultErrorText: 'Le paiement par carte est toujours en cours de traitement. Si vous avez déjà payé, cliquez sur le bouton ci-dessous pour re-vérifier votre accès.',
 			verifyErrorText: 'Impossible de vérifier la transaction Lemon Squeezy.',
 			networkErrorText: 'Erreur réseau lors de la vérification du paiement Lemon Squeezy.'
 		},
 		ht: {
-			title: 'Konfimasyon Peman Kat · DJR Akademi',
+			title: 'Konfimasyon peman ak kat · DJR Akademi',
 			verifyingTitle: 'N ap verifye peman pa kat la (Lemon Squeezy)…',
-			verifyingDesc: 'N ap verifye si w gen kou/ebook la deja oswa si tranzaksyon kat la konfime ak siksè.',
+			verifyingDesc: 'N ap verifye si w gen kou a oswa liv dijital la deja, oubyen si peman pa kat la konfime.',
 			missingOrderIdMsg: 'Okenn nimewo kòmand pa jwenn nan lyen an.',
 			missingBadge: 'Lyen enkonplè',
 			missingHeading: 'Okenn nimewo kòmand pa jwenn',
-			missingDesc: 'Paj sa a mande yon kòd tranzaksyon pou l ka afiche resi w la. Si w te fè yon achte ak kat, tanpri verifye lyen ki nan imèl konfimasyon w la oswa konsilte istwa tranzaksyon w yo.',
+			missingDesc: 'Paj sa a mande yon kòd tranzaksyon pou l ka montre resi w la. Si w te fè yon acha ak kat, verifye lyen ki nan imèl konfimasyon w la oswa gade istwa tranzaksyon w yo.',
 			viewTransactionsBtn: 'Konsilte tranzaksyon m yo',
-			goToDashboardBtn: 'Ale nan Espas mwen',
-			verifyingBadge: 'Verifikasyon Peman Kat',
+			goToDashboardBtn: 'Ale nan espas mwen',
+			verifyingBadge: 'Verifikasyon peman ak kat',
 			orderLabel: 'Kòmand #',
-			reverifyBtn: 'Re-verifye aksè mwen an kounye a',
-			reverifyingBtn: 'N ap re-verifye...',
-			paidAlreadyQ: 'Peman an te debouse deja ?',
+			reverifyBtn: 'Verifye aksè mwen ankò',
+			reverifyingBtn: 'N ap verifye ankò...',
+			paidAlreadyQ: 'Yo deja retire lajan an sou kat ou?',
 			paidAlreadyDesc: 'Si tranzaksyon ou an konfime sou kat ou men li toujou endisponib, kontakte sipò nou an.',
-			contactSupportBtn: 'Sipò Kliyan (Contact)',
-			cardConfirmedBadge: 'Peman pa Kat Konfime (Lemon Squeezy)',
-			thanksOrderTitle: 'Mèsi pou kòmand ou an !',
-			unlockedDesc: 'Tranzaksyon ou an konfime nan sistèm nan. Aksè ou a debloke nèt nan kont ou.',
+			contactSupportBtn: 'Kontakte sèvis kliyan an',
+			cardConfirmedBadge: 'Peman ak kat la konfime (Lemon Squeezy)',
+			thanksOrderTitle: 'Mèsi pou kòmand ou an!',
+			unlockedDesc: 'Tranzaksyon ou an konfime. Ou ka jwenn sa w achte a nan kont ou.',
 			typeCourse: 'Fòmasyon sou entènèt',
-			typeEbook: 'E-book PDF',
-			typeBundle: 'Bundle',
-			typeCoaching: 'Sesyon Coaching',
-			customerLabel: 'Kliyan :',
+			typeEbook: 'Liv dijital PDF',
+			typeBundle: 'Pakèt resous',
+			typeCoaching: 'Sesyon konsiltasyon',
+			customerLabel: 'Kliyan:',
 			amountPaidLabel: 'Montan peye (USD)',
-			receiptDetailsTitle: 'Detay resi an',
+			receiptDetailsTitle: 'Detay resi a',
 			paymentStatusLabel: 'Sitiyasyon peman an',
 			paidStatusText: 'Peye ✓',
 			paymentMethodLabel: 'Mwayen peman',
@@ -122,15 +127,16 @@
 			txDateLabel: 'Dat tranzaksyon an',
 			currencyLabel: 'Deviz',
 			followCourseNow: 'Swiv kou a kounye a',
-			followDownloadEbook: 'Swiv & Telechaje E-book la',
+			followDownloadEbook: 'Gade epi telechaje liv dijital la',
 			viewResourcesNow: 'Gade resous mwen yo',
-			viewBookingDetails: 'Gade detay rendez-vous an',
+			viewBookings: 'Gade rezèvasyon mwen yo',
 			viewAllTransactions: 'Gade tout tranzaksyon m yo',
-			printReceiptBtn: 'Enprime resi an',
-			cardQuestion: 'Ou gen yon kesyon sou peman pa kat ou an ?',
-			whatsappSupport: 'Sipò WhatsApp Coaching',
-			contactPageLink: 'Paj Kontakte n',
-			defaultErrorText: 'Peman pa kat la ap trete toujou oswa li pa t ka konfime. Si w te peye deja, klike sou bouton anba a pou n re-verifye aksè w la.',
+			printReceiptBtn: 'Enprime resi a',
+			cardQuestion: 'Ou gen yon kesyon sou peman ak kat ou a?',
+			whatsappSupport: 'Asistans WhatsApp',
+			contactPageLink: 'Kontakte nou',
+			whatsappMessage: 'Bonjou, mwen gen yon kesyon sou rezèvasyon konsiltasyon mwen an.',
+			defaultErrorText: 'Peman ak kat la toujou ap trete oswa li poko konfime. Si w te peye deja, klike sou bouton anba a pou verifye aksè w ankò.',
 			verifyErrorText: 'Nou pa t ka verifye tranzaksyon Lemon Squeezy an.',
 			networkErrorText: 'Erè rezo lè n t ap verifye peman Lemon Squeezy an.'
 		}
@@ -143,6 +149,9 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let verifying = $state(false);
+	let receiptDate = $derived(order
+		? formatDateTimeInTimezone(order.paidAt || order.createdAt, Intl.DateTimeFormat().resolvedOptions().timeZone, currentLang)
+		: null);
 
 	onMount(async () => {
 		orderId =
@@ -180,7 +189,7 @@
 					error = i18n[currentLang].defaultErrorText;
 				}
 			} else {
-				error = data?.message || i18n[currentLang].verifyErrorText;
+				error = i18n[currentLang].verifyErrorText;
 			}
 		} catch {
 			error = i18n[currentLang].networkErrorText;
@@ -371,13 +380,7 @@
 							<div>
 								<span class="text-base-content/50 block">{t.txDateLabel}</span>
 								<span class="font-medium text-base-content">
-									{new Date(order.paidAt || order.createdAt).toLocaleDateString(currentLang === 'fr' ? 'fr-FR' : 'ht-HT', {
-										day: 'numeric',
-										month: 'long',
-										year: 'numeric',
-										hour: '2-digit',
-										minute: '2-digit'
-									})}
+									{receiptDate ? `${receiptDate.date} · ${receiptDate.time}` : ''}
 								</span>
 							</div>
 							<div>
@@ -409,10 +412,10 @@
 							<a href={getHref('/dashboard')} class="btn btn-primary w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2">{t.viewResourcesNow} <ArrowRight size={18} /></a>
 						{:else}
 							<a
-								href={getHref(`/booking/${order.productId}/success`)}
+								href={getHref('/dashboard#sec-coaching')}
 								class="btn bg-zinc-950 hover:bg-zinc-800 text-white w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2"
 							>
-								<span>{t.viewBookingDetails}</span>
+								<span>{t.viewBookings}</span>
 								<ArrowRight size={18} />
 							</a>
 						{/if}
@@ -440,7 +443,7 @@
 						<span>{t.cardQuestion}</span>
 						{#if order.productType === 'coaching'}
 							<a
-								href="https://wa.me/50937001234?text=Bonjou,%20mwen%20gen%20yon%20kesyon%20sou%20rez%C3%A8vasyon%20coaching%20mwen%20an"
+								href={`https://wa.me/50937001234?text=${encodeURIComponent(t.whatsappMessage)}`}
 								target="_blank"
 								rel="noreferrer"
 								class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"

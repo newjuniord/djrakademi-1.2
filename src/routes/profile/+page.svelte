@@ -9,12 +9,15 @@
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
 		fr: {
-			pageTitle: 'Mon Profil · DJR Akademi',
+			pageTitle: 'Mon profil · DJR Akademi',
 			metaDesc: 'Gérez votre profil et vos informations personnelles sur DJR Akademi.',
 			loadingProfile: 'Chargement de votre profil...',
 			backToSpace: 'Retour à mon espace',
@@ -32,8 +35,8 @@
 			requiredNote: 'Les champs marqués d\'une étoile (*) sont obligatoires.',
 			fullNameLabel: 'Nom complet',
 			fullNameNote: 'C\'est ce nom qui apparaîtra sur votre compte.',
-			emailLabel: 'Adresse email',
-			emailNote: 'Cet email est lié à votre compte et ne peut pas être modifié ici.',
+			emailLabel: 'Adresse e-mail',
+			emailNote: 'Cette adresse e-mail est liée à votre compte et ne peut pas être modifiée ici.',
 			whatsappLabel: 'Numéro WhatsApp',
 			whatsappPlaceholder: '+509 00 00 0000',
 			whatsappNote: 'Utilisez un numéro sur lequel l\'équipe peut vous contacter en cas de besoin.',
@@ -44,7 +47,7 @@
 			errorMsg: 'Impossible de mettre à jour le profil pour le moment.'
 		},
 		ht: {
-			pageTitle: 'Pwofil Mwen · DJR Akademi',
+			pageTitle: 'Pwofil mwen · DJR Akademi',
 			metaDesc: 'Jere pwofil ak enfòmasyon pèsonèl ou sou DJR Akademi.',
 			loadingProfile: 'N ap chaje pwofil ou...',
 			backToSpace: 'Tounen nan espas mwen',
@@ -70,8 +73,8 @@
 			checkBeforeSave: 'Verifye enfòmasyon yo anvan ou anrejistre.',
 			saving: 'Anrejistreman...',
 			saveChanges: 'Anrejistre chanjman yo',
-			successMsg: 'Enfòmasyon sou kont ou an mete ajou ak siksè !',
-			errorMsg: 'Nou pa ka mete ajou profil la nan kounye a.'
+			successMsg: 'Enfòmasyon sou kont ou yo mete ajou.',
+			errorMsg: 'Nou pa ka mete pwofil la ajou kounye a.'
 		}
 	};
 	let t = $derived(i18n[currentLang]);
@@ -122,7 +125,7 @@
 			}, 4000);
 		} catch (e: any) {
 			console.error('Failed to update profile:', e);
-			saveErrorMessage = e.message || t.errorMsg;
+			saveErrorMessage = t.errorMsg;
 		} finally {
 			saving = false;
 		}
@@ -179,7 +182,7 @@
 						<a href={getHref('/dashboard')} class="profile-dashboard-link">{t.goToCourses}</a>
 
 						{#if authState.isAdmin}
-							<a href="/admin" class="profile-admin-link"><Shield size={15} /> {t.adminSpace}</a>
+						<a href={getHref('/admin')} class="profile-admin-link"><Shield size={15} /> {t.adminSpace}</a>
 						{/if}
 					</aside>
 

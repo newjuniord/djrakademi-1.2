@@ -15,8 +15,8 @@
 			close: 'Fermer'
 		},
 		ht: {
-			title: 'Antretyen ankou',
-			heading: 'Aplikasyon an, nan antretyen kounye a.',
+			title: 'Antretyen an kou',
+			heading: 'Aplikasyon an an antretyen kounye a.',
 			body: 'Nou pa ka trete acha oswa rezèvasyon pou moman an. Tanpri eseye ankò pita.',
 			understand: 'Mwen konprann',
 			close: 'Fèmen'

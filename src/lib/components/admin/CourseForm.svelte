@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import { untrack } from 'svelte';
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 	import type { Course, CourseModule, Lesson } from '$lib/types/admin';
 	import {
 		Plus,
@@ -49,11 +52,11 @@
 		if (target.files && target.files.length > 0) {
 			const file = target.files[0];
 			if (!file.type.startsWith('image/')) {
-				alert('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).');
+				alert(translateAdminMessage('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).', currentLang));
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				alert("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.");
+				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.", currentLang));
 				return;
 			}
 			coverFile = file;
@@ -66,11 +69,11 @@
 		if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
 			const file = e.dataTransfer.files[0];
 			if (!file.type.startsWith('image/')) {
-				alert('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).');
+				alert(translateAdminMessage('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).', currentLang));
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				alert("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.");
+				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.", currentLang));
 				return;
 			}
 			coverFile = file;
@@ -187,7 +190,7 @@
 		e.preventDefault();
 		if (submitting || saving) return;
 		if (!isFree && (!Number.isInteger(price) || price < 1 || price > 100000)) {
-			alert('Le prix doit être un montant entier compris entre 1 et 100 000 HTG.');
+			alert(translateAdminMessage('Le prix doit être un montant entier compris entre 1 et 100 000 HTG.', currentLang));
 			return;
 		}
 		submitting = true;

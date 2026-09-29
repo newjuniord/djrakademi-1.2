@@ -51,8 +51,8 @@
 			heroIntro2: "DJR Akademi s'adresse à tous ceux qui souhaitent prendre une longueur d'avance à l'ère de l'intelligence artificielle.",
 			ctaCourses: "Découvrir les formations",
 			ctaCoaching: "Réserver une consultation",
-			ratingText: "Évaluation 4.9 sur 5, plus de 600 étudiants",
-			ratingScore: "4.9/5",
+			ratingText: "Évaluation de 4,9 sur 5, plus de 600 étudiants",
+			ratingScore: "4,9/5",
 			ratingCount: "600+ étudiants",
 			statCourses: "Formation",
 			statEbooks: "Livres électroniques",
@@ -67,14 +67,14 @@
 			freeLabel: "Gratuit",
 			
 			ebooksKicker: "Bibliothèque DJR",
-			ebooksTitle: "Livres numériques pratiques à lire et appliquer.",
-			ebooksDesc: "Des livres numériques à lire et appliquer pour évoluer à votre propre rythme.",
+			ebooksTitle: "Livres numériques pour apprendre et passer à l’action.",
+			ebooksDesc: "Des guides concrets à lire et à mettre en pratique à votre rythme.",
 			ebooksCount: (n: number) => `${n} livre${n > 1 ? 's' : ''} électronique${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}`,
 			ebookFormat: "LIVRE ÉLECTRONIQUE",
 			ebookRead: "Lire le livre",
 
 			bundlesKicker: "Offres groupées",
-			bundlesTitle: "Packs Formation + Livres électroniques",
+			bundlesTitle: "Packs de formations et de livres électroniques",
 			bundlesDesc: "Un pack complet regroupant des ressources complémentaires à un tarif préférentiel.",
 			bundlesLink: "Voir tous les packs",
 
@@ -85,16 +85,16 @@
 			coachingCTA: "Réserver une consultation",
 			coachingDuration: (m: number) => `${m} min`,
 
-			supportKicker: "Support & Problèmes d'accès",
+			supportKicker: "Assistance et problèmes d'accès",
 			supportTitle: "Vous avez payé mais n'avez pas reçu votre accès ?",
 			supportDesc: "Si vous avez déjà effectué un paiement et n'avez pas accès à votre contenu, saisissez votre e-mail ou votre référence ci-dessous pour vérifier votre accès immédiatement.",
 			supportTabLabel: "Sélectionnez votre mode de paiement :",
 			supportTabCard: "Carte bancaire",
-			supportTabMobile: "MonCash / Natcash",
+			supportTabMobile: "MonCash / NatCash",
 			supportCardLabel: "E-mail de votre compte (identique à celui utilisé lors de l'achat sur Lemon Squeezy) *",
 			supportCardHelp: "Pour votre sécurité, utilisez l'e-mail de votre compte :",
-			supportRefLabel: "Numéro de référence de la transaction MonCash / Natcash *",
-			supportRefHelp: "Saisissez la référence figurant sur votre message de confirmation MonCash / Natcash.",
+			supportRefLabel: "Numéro de référence de la transaction MonCash / NatCash *",
+			supportRefHelp: "Saisissez la référence figurant sur votre message de confirmation MonCash / NatCash.",
 			supportBtnLoading: "Vérification en cours...",
 			supportBtnSubmit: "Vérifier et débloquer mon accès",
 			supportNeedLogin: "Vous devez être connecté à votre compte pour vérifier un paiement.",
@@ -151,21 +151,21 @@
 
 			coachingKicker: "Konsiltasyon",
 			coachingTitle: "Konsiltasyon endividyèl",
-			coachingDesc: "Yon swivi sou mezire pou w ale pi lwen.",
+			coachingDesc: "Yon akonpayman ki adapte ak bezwen w pou w ale pi lwen.",
 			coachingCount: (n: number) => `${n} konsiltasyon disponib`,
 			coachingCTA: "Rezève yon konsiltasyon",
 			coachingDuration: (m: number) => `${m} min`,
 
-			supportKicker: "Sipò & Pwoblèm aksè",
+			supportKicker: "Sipò ak pwoblèm aksè",
 			supportTitle: "Ou peye epi w pa jwenn aksè?",
 			supportDesc: "Si ou te peye deja epi ou pa jwenn fòmasyon an, antre imèl ou oswa referans tranzaksyon w lan anba a pou n verifye aksè w la imedyatman.",
 			supportTabLabel: "Chwazi kijan w te peye:",
 			supportTabCard: "Kat bankè",
-			supportTabMobile: "MonCash / Natcash",
-			supportCardLabel: "Imèl kont ou an (menm ak sa w te itilize pandan achte a sou Lemon Squeezy) *",
+			supportTabMobile: "MonCash / NatCash",
+			supportCardLabel: "Adrès imèl kont ou a (menm ak sa w te itilize pou acha a sou Lemon Squeezy) *",
 			supportCardHelp: "Pou sekirite w, itilize imèl kont ou an:",
-			supportRefLabel: "Nimewo referans tranzaksyon MonCash / Natcash an *",
-			supportRefHelp: "Antre nimewo referans ki sou mesaj konfimasyon MonCash / Natcash ou an.",
+			supportRefLabel: "Nimewo referans tranzaksyon MonCash / NatCash la *",
+			supportRefHelp: "Antre nimewo referans ki nan mesaj konfimasyon MonCash / NatCash ou a.",
 			supportBtnLoading: "N ap verifye...",
 			supportBtnSubmit: "Verifye ak debloke aksè mwen",
 			supportNeedLogin: "Ou dwe konekte sou kont ou pou w ka verifye yon peman.",
@@ -185,6 +185,13 @@
 	};
 
 	let t = $derived(i18n[currentLang]);
+
+	function getHref(path: string): string {
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return url.pathname + url.search + url.hash;
+	}
 
 	let publishedCourses = $state<Course[]>([]);
 	let publishedEbooks = $state<Ebook[]>([]);
@@ -239,10 +246,10 @@
 					supportSuccessMessage = t.supportCardSuccess;
 					toast.success(t.supportCardSuccess);
 					setTimeout(() => {
-						goto(targetUrl);
+						goto(getHref(targetUrl));
 					}, 1000);
 				} else {
-					supportErrorMessage = resData.message || t.supportCardError(email);
+					supportErrorMessage = resData.status === 404 ? t.supportCardError(email) : t.supportErrorGeneral;
 					toast.error(supportErrorMessage || t.supportErrorGeneral);
 				}
 			} else {
@@ -260,10 +267,10 @@
 					supportSuccessMessage = t.supportRefSuccess;
 					toast.success(t.supportRefSuccess);
 					setTimeout(() => {
-						goto(targetUrl);
+						goto(getHref(targetUrl));
 					}, 1000);
 				} else {
-					supportErrorMessage = resData.message || t.supportRefError(ref);
+					supportErrorMessage = resData.status === 404 ? t.supportRefError(ref) : t.supportErrorGeneral;
 					toast.error(supportErrorMessage || t.supportErrorGeneral);
 				}
 			}
@@ -355,7 +362,7 @@
 
 				<div class="courses-grid">
 					{#each publishedCourses as course, index (course.id)}
-						<a href="/cours/{course.id}" class="course-showcase-card">
+						<a href={getHref(`/cours/${course.id}`)} class="course-showcase-card">
 							<div class="course-showcase-visual">
 								{#if course.cover}
 									<img src={course.cover} alt={course.title} loading="lazy" />
@@ -401,7 +408,7 @@
 
 				<div class="ebooks-grid">
 					{#each publishedEbooks as ebook, index (ebook.id)}
-						<a href="/ebooks/{ebook.id}" class="ebook-showcase-card">
+						<a href={getHref(`/ebooks/${ebook.id}`)} class="ebook-showcase-card">
 							<div class="ebook-showcase-visual">
 								{#if ebook.cover}
 									<img src={ebook.cover} alt={ebook.title} loading="lazy" />
@@ -435,7 +442,7 @@
 							<h2 id="home-bundles-title" class="mt-2 text-3xl font-black tracking-tight text-zinc-950">{t.bundlesTitle}</h2>
 							<p class="mt-2 max-w-2xl text-sm text-zinc-600">{t.bundlesDesc}</p>
 						</div>
-						<a href="/bundles" class="inline-flex items-center gap-2 text-sm font-black text-zinc-950 hover:text-amber-700">{t.bundlesLink} <ArrowRight size={17} /></a>
+						<a href={getHref('/bundles')} class="inline-flex items-center gap-2 text-sm font-black text-zinc-950 hover:text-amber-700">{t.bundlesLink} <ArrowRight size={17} /></a>
 					</div>
 					<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{#each publishedBundles.slice(0, 3) as bundle (bundle.id)}<BundleCard {bundle} />{/each}</div>
 				</div>
@@ -473,7 +480,7 @@
 				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 					{#each activeCoaching as coaching (coaching.id)}
 						<a
-							href="/coaching/{coaching.slug}"
+							href={getHref(`/coaching/${coaching.slug}`)}
 							class="group relative text-left flex flex-col p-7 sm:p-8 bg-gradient-to-b from-white via-white to-zinc-50/70 rounded-3xl border border-zinc-200/90 shadow-xs hover:shadow-2xl hover:border-amber-400/70 hover:-translate-y-1.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-zinc-950 overflow-hidden"
 						>
 							<!-- Background Ambient Glow -->
@@ -506,7 +513,7 @@
 
 							<!-- Price Row -->
 							<div class="relative z-10 pt-4 border-t border-zinc-100 mb-5 flex items-center justify-between">
-								<span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Tarif / Pri</span>
+								<span class="text-xs font-bold uppercase tracking-wider text-zinc-400">{currentLang === 'ht' ? 'Pri' : 'Tarif'}</span>
 								<div>
 									{#if coaching.isFree || coaching.price === 0}
 										<span class="font-black text-lg text-emerald-600">{t.freeLabel}</span>
@@ -599,7 +606,7 @@
 									</p>
 								</div>
 							{:else}
-								<!-- MonCash / Natcash Reference Input -->
+								<!-- MonCash / NatCash Reference Input -->
 								<div class="space-y-2">
 									<label for="support-ref" class="block text-xs font-bold text-white/90">
 										{t.supportRefLabel}
@@ -659,10 +666,10 @@
 					<div class="testimonials-score-wrapper" aria-label={t.ratingText}>
 						<!-- Overlapping Avatars Stack -->
 						<div class="flex items-center -space-x-3">
-							<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Etidyan" class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
-							<img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" alt="Etidyan" class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
-							<img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" alt="Etidyan" class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
-							<img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" alt="Etidyan" class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
+							<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt={currentLang === 'ht' ? 'Etidyan' : 'Étudiante'} class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
+							<img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" alt={currentLang === 'ht' ? 'Etidyan' : 'Étudiant'} class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
+							<img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" alt={currentLang === 'ht' ? 'Etidyan' : 'Étudiante'} class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
+							<img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" alt={currentLang === 'ht' ? 'Etidyan' : 'Étudiant'} class="size-10 rounded-full object-cover ring-2 ring-[#f7f1e8] shadow-xs" />
 							<div class="size-10 rounded-full bg-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center ring-2 ring-[#f7f1e8] shadow-xs">
 								+600
 							</div>
@@ -671,7 +678,7 @@
 						<!-- Rating Score & Stars -->
 						<div class="flex flex-col items-center sm:items-start text-center sm:text-left">
 							<div class="flex items-center gap-1 text-amber-500">
-								<span class="font-black text-zinc-950 text-base mr-1">4.9</span>
+								<span class="font-black text-zinc-950 text-base mr-1">{currentLang === 'ht' ? '4.9' : '4,9'}</span>
 								{#each [1, 2, 3, 4, 5] as _}
 									<Star size={15} fill="currentColor" />
 								{/each}

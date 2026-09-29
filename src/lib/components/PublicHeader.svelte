@@ -48,7 +48,9 @@
 			mainMenu: 'Menu principal',
 			myAccount: 'Mon compte',
 			closeMenu: 'Fermer le menu',
-			langLabel: 'Langue / Lang',
+			langLabel: 'Langue',
+			chooseLanguage: 'Choisir la langue',
+			publicNavigation: 'Navigation publique',
 			navSection: 'Navigation',
 			helpSection: 'Assistance',
 			helpLink: 'Aide & Assistance',
@@ -61,7 +63,7 @@
 			logout: 'Déconnexion'
 		},
 		ht: {
-			home: 'Akey',
+			home: 'Akèy',
 			catalogue: 'Katalòg',
 			bundles: 'Pakèt',
 			mobileMenu: 'Meni',
@@ -69,11 +71,13 @@
 			mySpace: 'Espas mwen',
 			signup: 'Enskri',
 			login: 'Konekte',
-			closeBanner: 'Fèmen bannye an',
+			closeBanner: 'Fèmen banyè a',
 			mainMenu: 'Meni prensipal',
 			myAccount: 'Kont mwen',
 			closeMenu: 'Fèmen meni an',
-			langLabel: 'Lang / Langue',
+			langLabel: 'Lang',
+			chooseLanguage: 'Chwazi lang',
+			publicNavigation: 'Navigasyon piblik',
 			navSection: 'Navigasyon',
 			helpSection: 'Asistans',
 			helpLink: 'Èd ak Asistans',
@@ -241,7 +245,7 @@
 			</span>
 		</a>
 
-		<nav class="hidden items-center gap-6 text-[18px] font-bold text-zinc-600 header-desktop-nav min-[821px]:flex" aria-label="Catalogue public">
+		<nav class="hidden items-center gap-6 text-[18px] font-bold text-zinc-600 header-desktop-nav min-[821px]:flex" aria-label={ht.publicNavigation}>
 			<a href={getHref('/')} class="transition-colors hover:text-zinc-950">{ht.home}</a>
 			<a href={getHref('/catalogue')} class="transition-colors hover:text-zinc-950">{ht.catalogue}</a>
 			<a href={getHref('/bundles')} class="transition-colors hover:text-amber-700">{ht.bundles}</a>
@@ -268,7 +272,7 @@
 					class="inline-flex h-11 items-center gap-2 rounded-xl px-4 text-[15px] font-bold text-zinc-800 transition-all hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-amber-400/50 cursor-pointer active:scale-[0.98]"
 					aria-expanded={langDropdownOpen}
 					aria-haspopup="true"
-					aria-label="Choisir la langue"
+					aria-label={ht.chooseLanguage}
 				>
 					{#if currentLang === 'ht'}
 						<span class="text-base leading-none">🇭🇹</span>
@@ -520,6 +524,5 @@
 		}
 	}
 </style>
-
 
 

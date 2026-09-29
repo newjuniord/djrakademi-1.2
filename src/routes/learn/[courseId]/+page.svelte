@@ -25,7 +25,10 @@
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
@@ -57,22 +60,22 @@
 		ht: {
 			pageTitleLesson: 'Leson',
 			pageTitleCourse: 'Fòmasyon',
-			loginError: 'Tanpri konekte sou kont ou pou aksede fòmasyon sa a.',
+			loginError: 'Tanpri konekte sou kont ou pou w ka jwenn aksè nan fòmasyon sa a.',
 			accessError: 'Aksè pa otorize pou fòmasyon sa a.',
-			persistError: 'Enposib pou anrejistre pwogrè w.',
+			persistError: 'Nou pa ka anrejistre pwogrè w. Tanpri eseye ankò.',
 			mySpace: 'Espas mwen',
 			courseLabel: 'Fòmasyon',
-			loading: 'Chajman...',
+			loading: 'N ap chaje...',
 			curriculumMobile: 'Pwogram',
 			curriculumTitle: 'Pwogram kou a',
-			lessonsDone: '{completed} sou {total} leson ki fini',
-			closeProgram: 'Fèmen pwogram an',
-			invalidVideo: 'Okenn lyen vidyo ki valab pa configuré pou leson sa a.',
-			textLessonNote: 'Leson sa a se yon gid ekri. Gade feyè yo anba a.',
+			lessonsDone: '{completed} leson fini sou {total}',
+			closeProgram: 'Fèmen pwogram nan',
+			invalidVideo: 'Pa gen videyo ki disponib pou leson sa a.',
+			textLessonNote: 'Leson sa a se yon gid ekri. Gade nòt ki anba yo.',
 			curriculumLessons: 'Pwogram leson yo',
 			lessonCompletedBtn: 'Leson an fini ✓',
-			markCompletedBtn: 'Maki ke l fini',
-			notesHeading: 'Nòt ak resous leson an :',
+			markCompletedBtn: 'Make leson an fini',
+			notesHeading: 'Nòt ak resous leson an:',
 			prevLesson: 'Leson anvan',
 			nextLesson: 'Leson apre',
 			modulePrefix: 'Modil',
@@ -108,7 +111,8 @@
 			completedLessonIds = new Set(course.progress?.completedLessonIds || []);
 			activeLessonId = course.progress?.lastLessonId || course.modules.flatMap((module) => module.lessons)[0]?.id || '';
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : t.accessError);
+			console.error('Course access error:', error);
+			toast.error(t.accessError);
 			goto(getHref(`/cours/${id}`));
 		} finally {
 			courseLoading = false;
@@ -154,7 +158,8 @@
 		try {
 			await saveCourseProgress(courseId, { completedLessonIds: [...completed], lastLessonId: lastLessonId || undefined });
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : t.persistError);
+			console.error('Course progress error:', error);
+			toast.error(t.persistError);
 		}
 	}
 

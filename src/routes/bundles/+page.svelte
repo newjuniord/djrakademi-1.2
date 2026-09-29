@@ -46,21 +46,20 @@
 
 	function getHref(path: string): string {
 		if (currentLang !== 'ht') return path;
-		const [pathname, search] = path.split('?');
-		const params = new URLSearchParams(search || '');
-		params.set('lang', 'ht');
-		return `${pathname}?${params.toString()}`;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	let bundles = $state<Bundle[]>([]);
 	let loading = $state(true);
-	let error = $state('');
+	let loadFailed = $state(false);
 
 	onMount(async () => {
 		try {
 			bundles = await getPublishedBundles();
 		} catch {
-			error = t.loadError;
+			loadFailed = true;
 		} finally {
 			loading = false;
 		}
@@ -78,8 +77,8 @@
 		<section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
 			{#if loading}
 				<div class="py-20 text-center text-zinc-500">{t.loading}</div>
-			{:else if error}
-				<div class="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">{error}</div>
+			{:else if loadFailed}
+				<div class="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">{t.loadError}</div>
 			{:else if !bundles.length}
 				<div class="rounded-2xl border border-zinc-200 bg-white px-6 py-16 text-center">
 					<Layers3 size={34} class="mx-auto mb-4 text-amber-500" />

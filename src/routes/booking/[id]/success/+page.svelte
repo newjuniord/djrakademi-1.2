@@ -10,7 +10,10 @@
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
-		return currentLang === 'ht' ? `${path}?lang=ht` : path;
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	const i18n = {
@@ -42,18 +45,18 @@
 			notFoundDesc: 'Pa gen okenn rezèvasyon ki jwenn ak ID sa a.',
 			backHome: 'Tounen nan akèy',
 			confirmedTitle: 'Rezèvasyon konfime',
-			confirmedSubtitle: 'Dat ak lè ou an rezeve. Konseye enfòmasyon sa yo.',
+			confirmedSubtitle: 'Dat ak lè sesyon w lan rezève. Konsève enfòmasyon sa yo.',
 			unconfirmedTitle: 'Rezèvasyon pa konfime',
-			unconfirmedSubtitle: 'Lè sa a enatant oswa li fin pase.',
+			unconfirmedSubtitle: 'Rezèvasyon sa a toujou ap tann konfimasyon oswa li ekspire.',
 			clientLabel: 'Kliyan',
 			dateLabel: 'Dat',
 			localTimeLabel: 'Lè lokal',
 			amountLabel: 'Montan',
 			freeText: 'Gratis',
-			timezoneLabel: 'Fizo orè',
+			timezoneLabel: 'Fizo lè',
 			localTimeCity: 'Lè lokal ·',
-			whatsappCoach: 'WhatsApp Coach',
-			contactCoachBtn: 'Kontakte coach la',
+			whatsappCoach: 'WhatsApp konseye a',
+			contactCoachBtn: 'Kontakte konseye a',
 			bookingNum: 'Rezèvasyon #'
 		}
 	};
@@ -86,8 +89,8 @@
 		}
 	});
 
-	let local = $derived(booking ? formatDateTimeInTimezone(booking.startAt, booking.customerTimezone) : { date: '', time: '' });
-	let supportHref = $derived(whatsappNumber ? whatsappLink(whatsappNumber, currentLang === 'fr' ? `Bonjour, je viens de réserver ma session coaching pour le ${local.date} à ${local.time}.` : `Bonjou, mwen sot resève sesyon coaching mwen an pou dat ${local.date} nan lè ${local.time}.`) : getHref('/contact'));
+	let local = $derived(booking ? formatDateTimeInTimezone(booking.startAt, booking.customerTimezone, currentLang) : { date: '', time: '' });
+	let supportHref = $derived(whatsappNumber ? whatsappLink(whatsappNumber, currentLang === 'fr' ? `Bonjour, je viens de réserver ma séance de coaching pour le ${local.date} à ${local.time}.` : `Bonjou, mwen sot rezève sesyon konsiltasyon mwen an pou ${local.date} a ${local.time}.`) : getHref('/contact'));
 
 	function downloadCalendar() {
 		if (!booking) return;

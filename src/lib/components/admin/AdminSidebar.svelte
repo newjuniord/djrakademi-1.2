@@ -45,7 +45,7 @@
 		{
 			title: { fr: 'Vue principale', ht: 'Paj prensipal' },
 			items: [
-				{ label: { fr: "Vue d’ensemble", ht: 'Vipriz anblòk' }, href: '/admin', icon: LayoutDashboard },
+				{ label: { fr: "Vue d’ensemble", ht: 'Apèsi jeneral' }, href: '/admin', icon: LayoutDashboard },
 				{ label: { fr: 'Utilisateurs', ht: 'Itilizatè yo' }, href: '/admin/users', icon: Users }
 			]
 		},
@@ -53,23 +53,23 @@
 			title: { fr: 'Catalogue et services', ht: 'Katalòg ak Sèvis' },
 			items: [
 				{ label: { fr: 'Cours', ht: 'Kou yo' }, href: '/admin/courses', icon: BookOpen },
-				{ label: { fr: 'Livres numériques', ht: 'E-books PDF' }, href: '/admin/ebooks', icon: FileText },
+				{ label: { fr: 'Livres numériques', ht: 'Liv dijital yo' }, href: '/admin/ebooks', icon: FileText },
 				{ label: { fr: 'Offres groupées', ht: 'Pakèt resous' }, href: '/admin/bundles', icon: Layers3 },
-				{ label: { fr: 'Coaching', ht: 'Sesyon Coaching' }, href: '/admin/coaching', icon: CalendarCheck }
+				{ label: { fr: 'Coaching', ht: 'Sesyon konsèy' }, href: '/admin/coaching', icon: CalendarCheck }
 			]
 		},
 		{
 			title: { fr: 'Finances et ventes', ht: 'Vant ak Finans' },
 			items: [
 				{ label: { fr: 'Commandes', ht: 'Kòmand yo' }, href: '/admin/orders', icon: ShoppingBag },
-				{ label: { fr: 'Assistance client', ht: 'Sipò Kliyan' }, href: '/admin/support', icon: MessageSquare }
+				{ label: { fr: 'Assistance client', ht: 'Sipò kliyan' }, href: '/admin/support', icon: MessageSquare }
 			]
 		},
 		{
 			title: { fr: 'Système et supervision', ht: 'Sistèm ak Sipèvizyon' },
 			items: [
 				{ label: { fr: 'Journaux de vérification', ht: 'Jounal verifikasyon' }, href: '/admin/verifications', icon: ShieldCheck },
-				{ label: { fr: 'Santé et journaux API', ht: 'Santé ak Jounal API' }, href: '/admin/health', icon: Activity }
+				{ label: { fr: 'Santé et journaux API', ht: 'Eta sistèm nan ak jounal API' }, href: '/admin/health', icon: Activity }
 			]
 		}
 	];

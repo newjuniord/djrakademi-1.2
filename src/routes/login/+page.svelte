@@ -23,6 +23,13 @@
 
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
+	function getHref(path: string): string {
+		if (currentLang !== 'ht' || !path.startsWith('/') || path.startsWith('//')) return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
+	}
+
 	const i18n = {
 		fr: {
 			pageTitleLogin: 'Connexion · DJR Akademi',
@@ -41,7 +48,7 @@
 			phonePlaceholder: '+509 37 00 1234',
 			phoneHint: 'Format international, par exemple +50937001234',
 			phoneInvalid: 'Entrez un numéro valide au format international, par exemple +50937001234.',
-			emailLabel: 'Adresse email',
+			emailLabel: 'Adresse e-mail',
 			emailPlaceholder: 'vous@exemple.com',
 			passwordLabel: 'Mot de passe',
 			passwordPlaceholder: '8 caractères minimum',
@@ -74,8 +81,8 @@
 			fullNamePlaceholder: 'Jan Batis',
 			phoneLabel: 'Nimewo telefòn',
 			phonePlaceholder: '+509 37 00 1234',
-			phoneHint: 'Fòma entènasyonal, pa egzanp +50937001234',
-			phoneInvalid: 'Antre yon nimewo ki valab nan fòma entènasyonal, pa egzanp +50937001234.',
+			phoneHint: 'Fòma entènasyonal, pa egzanp: +50937001234',
+			phoneInvalid: 'Antre yon nimewo ki kòrèk nan fòma entènasyonal, pa egzanp: +50937001234.',
 			emailLabel: 'Adrès imèl',
 			emailPlaceholder: 'ou@egzanp.com',
 			passwordLabel: 'Modpas',
@@ -91,15 +98,13 @@
 			visualTitle: 'Pwochen konpetans ou kòmanse isit la.',
 			visualSub: 'Fòmasyon pratik ki fèt pou transfòme lide ou yo an rezilta.',
 			benefitOne: 'Aprann nan rit pa w',
-			benefitTwo: 'Jwenn kontni ou nenpòt kote',
+			benefitTwo: 'Jwenn kontni ou yo nenpòt kote',
 			benefitThree: 'Avanse ak zouti ki pratik'
 		}
 	};
 	let t = $derived(i18n[currentLang]);
 
-	let redirectTarget = $derived(
-		page.url.searchParams.get('redirect') || (currentLang === 'ht' ? '/dashboard?lang=ht' : '/dashboard')
-	);
+	let redirectTarget = $derived(getHref(page.url.searchParams.get('redirect') || '/dashboard'));
 
 	let mode = $state<'login' | 'signup'>('login');
 	let name = $state('');
@@ -164,7 +169,7 @@
 			await goto(redirectTarget);
 		} catch (error: any) {
 			console.error('[LoginPage] Auth error:', error);
-			errorMessage = translateAuthError(error);
+			errorMessage = translateAuthError(error, currentLang);
 		} finally {
 			loading = false;
 		}

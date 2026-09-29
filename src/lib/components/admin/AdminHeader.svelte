@@ -12,6 +12,7 @@
 	} from 'lucide-svelte';
 	import { authState } from '$lib/auth.svelte';
 	import { account } from '$lib/appwrite';
+	import { allowNextFrenchAdminNavigation } from '$lib/admin/admin-localization';
 
 	let { onMenuClick }: { onMenuClick: () => void } = $props();
 
@@ -23,6 +24,7 @@
 		if (lang === 'ht') {
 			url.searchParams.set('lang', 'ht');
 		} else {
+			allowNextFrenchAdminNavigation();
 			url.searchParams.delete('lang');
 		}
 		goto(url.pathname + url.search + url.hash, { replaceState: true, keepFocus: true, invalidateAll: false });
@@ -55,14 +57,14 @@
 		utilisateurs: { fr: 'Utilisateurs', ht: 'Itilizatè yo' },
 		courses: { fr: 'Cours', ht: 'Kou yo' },
 		cours: { fr: 'Cours', ht: 'Kou yo' },
-		ebooks: { fr: 'Livres numériques', ht: 'E-books PDF' },
+		ebooks: { fr: 'Livres numériques', ht: 'Liv dijital yo' },
 		bundles: { fr: 'Offres groupées', ht: 'Pakèt resous' },
-		coaching: { fr: 'Coaching', ht: 'Sesyon Coaching' },
+		coaching: { fr: 'Coaching', ht: 'Sesyon konsèy' },
 		orders: { fr: 'Commandes', ht: 'Kòmand yo' },
 		commandes: { fr: 'Commandes', ht: 'Kòmand yo' },
-		support: { fr: 'Assistance client', ht: 'Sipò Kliyan' },
+		support: { fr: 'Assistance client', ht: 'Sipò kliyan' },
 		verifications: { fr: 'Journaux de vérification', ht: 'Jounal verifikasyon' },
-		health: { fr: 'Santé et journaux API', ht: 'Santé ak Jounal API' },
+		health: { fr: 'Santé et journaux API', ht: 'Eta sistèm nan ak jounal API' },
 		settings: { fr: 'Paramètres', ht: 'Paramèt jeneral' },
 		parametres: { fr: 'Paramètres', ht: 'Paramèt jeneral' }
 	};
@@ -84,14 +86,14 @@
 		ht: {
 			adminLabel: 'Admin',
 			defaultTitle: 'Administrasyon',
-			overviewTitle: 'Vipriz anblòk',
+			overviewTitle: 'Apèsi jeneral',
 			sectionDesc: (name: string) => `Jere ak kontwole seksyon ${name.toLowerCase()} an.`,
 			overviewDesc: 'Apèsi jeneral sou pèfòmans ak aktivite sou platfòm nan.',
 			viewSite: 'Gade sit la',
 			myProfile: 'Pwofil mwen',
 			generalSettings: 'Paramèt jeneral',
 			logout: 'Dekonekte',
-			superAdmin: 'Sipè Admin',
+			superAdmin: 'Administratè prensipal',
 			openMenu: 'Louvri meni an'
 		}
 	};
@@ -162,7 +164,10 @@
 						<span>🇫🇷</span>
 						<span>Français</span>
 					{/if}
-					<ChevronDown size={12} class="opacity-60 transition-transform duration-200" class:rotate-180={langDropdownOpen} />
+					<ChevronDown
+						size={12}
+						class={`opacity-60 transition-transform duration-200 ${langDropdownOpen ? 'rotate-180' : ''}`}
+					/>
 				</button>
 
 				{#if langDropdownOpen}

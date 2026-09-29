@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import AdminSidebar from '$lib/components/admin/AdminSidebar.svelte';
 	import AdminToast from '$lib/components/admin/AdminToast.svelte';
 	import { getAdminSession } from '$lib/admin/admin-client';
 	import { authState } from '$lib/auth.svelte';
 	import { Loader2 } from 'lucide-svelte';
+	import { page } from '$app/state';
+	import { consumeFrenchAdminNavigation, localizeAdmin } from '$lib/admin/admin-localization';
 
 	let { children } = $props();
 	let drawerOpen = $state(false);
@@ -30,12 +32,26 @@
 		}
 	});
 
-	import { page } from '$app/state';
-
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+	let adminRoot = $state<HTMLDivElement>();
 
 	onMount(() => {
 		checkAccess();
+	});
+
+	$effect(() => {
+		if (!adminRoot) return;
+		return localizeAdmin(adminRoot, currentLang);
+	});
+
+	beforeNavigate(({ to, cancel }) => {
+		if (!to || (to.url.pathname !== '/admin' && !to.url.pathname.startsWith('/admin/'))) return;
+		if (consumeFrenchAdminNavigation()) return;
+		if (currentLang !== 'ht' || to.url.searchParams.has('lang')) return;
+		const target = new URL(to.url);
+		target.searchParams.set('lang', 'ht');
+		cancel();
+		void goto(target.pathname + target.search + target.hash);
 	});
 
 	$effect(() => {
@@ -53,7 +69,7 @@
 		</div>
 	</div>
 {:else}
-	<div class="admin-root drawer lg:drawer-open">
+	<div bind:this={adminRoot} class="admin-root drawer lg:drawer-open">
 		<input id="admin-drawer" class="drawer-toggle" type="checkbox" bind:checked={drawerOpen} />
 
 		<div class="drawer-content flex min-h-dvh min-w-0 flex-col bg-base-200">

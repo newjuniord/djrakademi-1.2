@@ -54,6 +54,7 @@
 			securePaymentText: "Paiement sécurisé. Accès activé immédiatement après confirmation.",
 			loginToast: "Veuillez vous connecter pour acheter cette offre groupée.",
 			ownedToast: "Vous possédez déjà tout le contenu de cette offre groupée ! Redirection en cours...",
+			paymentVerifiedToast: "Paiement confirmé ! Redirection vers votre espace...",
 			errorToast: "Impossible de lancer le paiement."
 		},
 		ht: {
@@ -73,7 +74,7 @@
 			typeCourse: "Fòmasyon videyo",
 			typeEbook: "Liv dijital PDF",
 			lessonsCount: (n: number) => `${n} leson`,
-			btnHideLessons: "Masye leson",
+			btnHideLessons: "Kache leson yo",
 			btnShowLessons: "Gade leson",
 			noLessonsYet: "Pwogram leson yo ap disponib nan espas ou apre peman an.",
 			sidebarTitle: "Pri espesyal pakèt la",
@@ -84,6 +85,7 @@
 			securePaymentText: "Peman sekirize. Aksè yo aktive apre konfimasyon.",
 			loginToast: "Tanpri konekte pou w achte pakèt sa a.",
 			ownedToast: "Ou gen tout fòmasyon ak liv dijital ki nan pak sa a deja! N ap redirije w nan espas ou an.",
+			paymentVerifiedToast: "Peman an konfime! N ap redirije w nan espas ou an...",
 			errorToast: "Nou pa ka lanse peman an."
 		}
 	};
@@ -92,15 +94,13 @@
 
 	function getHref(path: string): string {
 		if (currentLang !== 'ht') return path;
-		const [pathname, search] = path.split('?');
-		const params = new URLSearchParams(search || '');
-		params.set('lang', 'ht');
-		return `${pathname}?${params.toString()}`;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
 	}
 
 	let bundle = $state<Bundle | null>(null);
 	let loading = $state(true);
-	let error = $state('');
 	let checkoutLoading = $state(false);
 	let showPaymentModal = $state(false);
 	let expandedItems = $state<Record<string, boolean>>({});
@@ -109,7 +109,7 @@
 		try {
 			bundle = await getBundleById(page.params.id || '');
 		} catch {
-			error = t.notFoundDesc;
+			bundle = null;
 		} finally {
 			loading = false;
 		}
@@ -138,7 +138,7 @@
 			try {
 				const verification = await verifyLemonSqueezyPurchase(authState.user.email, 'bundle', bundle.id);
 				if (verification.ok && verification.success) {
-					toast.success(verification.message, 5000);
+					toast.success(t.paymentVerifiedToast, 5000);
 					setTimeout(() => goto(getHref('/dashboard')), 1800);
 					return;
 				}
@@ -179,10 +179,10 @@
 				window.location.href = target;
 				return;
 			} else {
-				toast.error(result.message || t.errorToast);
+				toast.error(t.errorToast);
 			}
 		} catch (caught) {
-			toast.error(caught instanceof Error ? caught.message : t.errorToast);
+			toast.error(t.errorToast);
 		} finally {
 			checkoutLoading = false;
 		}
@@ -205,7 +205,7 @@
 		{:else if !bundle}
 			<div class="mx-auto max-w-7xl px-4 py-24 text-center">
 				<h1 class="text-2xl font-black">{t.notFoundTitle}</h1>
-				<p class="mt-2 text-zinc-500">{error || t.notFoundDesc}</p>
+				<p class="mt-2 text-zinc-500">{t.notFoundDesc}</p>
 				<a href={getHref('/bundles')} class="mt-6 inline-block font-bold text-amber-700">
 					{t.viewAllBundles}
 				</a>

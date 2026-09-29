@@ -45,24 +45,24 @@
 			backToLoginAction: 'Retour à la connexion'
 		},
 		ht: {
-			closeModal: 'Fermer la fenêtre d\'authentification',
+			closeModal: 'Fèmen fenèt koneksyon an',
 			loginHeading: 'Mèsi paske ou tounen !',
 			signupHeading: 'Kreye yon kont',
-			forgotHeading: 'Mo de pas bliye',
+			forgotHeading: 'Ou bliye modpas ou ?',
 			loginSub: 'Konekte pou w ka jwenn aksè ak fòmasyon ak zouti ou yo.',
-			signupSub: 'Rebòne DJR Akademi epi devlope konpetans ou.',
-			forgotSub: 'Antre imèl ou pou w ka chanje mo de pas ou.',
+			signupSub: 'Vin jwenn DJR Akademi epi devlope konpetans ou.',
+			forgotSub: 'Antre imèl ou pou w ka chanje modpas ou.',
 			fullNameLabel: 'Non konplè',
 			fullNamePlaceholder: 'Jean Dupont',
 			phoneLabel: 'Nimewo telefòn',
 			phonePlaceholder: '+509 00 00 0000',
 			emailLabel: 'Adrès imèl',
 			emailPlaceholder: 'jean@exemple.com',
-			passwordLabel: 'Mo de pas',
+			passwordLabel: 'Modpas',
 			forgotPassBtn: 'Bliye ?',
 			passwordPlaceholder: '••••••••',
-			hidePassword: 'Kache mo de pas a',
-			showPassword: 'Montre mo de pas a',
+			hidePassword: 'Kache modpas la',
+			showPassword: 'Montre modpas la',
 			loadingText: 'Tanpri tann yon ti moman...',
 			loginSubmit: 'Konekte',
 			signupSubmit: 'Kreye kont mwen',
@@ -71,7 +71,7 @@
 			signupAction: 'Enskri',
 			hasAccountText: 'Ou gen yon kont deja ?',
 			loginAction: 'Konekte',
-			rememberPassText: 'Mwen sonje mo de pas mwen an.',
+			rememberPassText: 'Mwen sonje modpas mwen an.',
 			backToLoginAction: 'Tounen nan koneksyon'
 		}
 	};
@@ -139,7 +139,7 @@
 					onLogin();
 				}
 			} catch (error: any) {
-				errorMessage = translateAuthError(error);
+				errorMessage = translateAuthError(error, currentLang);
 			} finally {
 				loading = false;
 			}
@@ -165,7 +165,7 @@
 					onLogin();
 				}
 			} catch (error: any) {
-				errorMessage = translateAuthError(error);
+				errorMessage = translateAuthError(error, currentLang);
 			} finally {
 				loading = false;
 			}
@@ -181,7 +181,7 @@
 				if (!response.ok) throw new Error(result.message || 'Impossible d’envoyer le lien de récupération.');
 				successMessage = result.message;
 			} catch (error: any) {
-				errorMessage = translateAuthError(error);
+				errorMessage = translateAuthError(error, currentLang);
 			} finally {
 				loading = false;
 			}
