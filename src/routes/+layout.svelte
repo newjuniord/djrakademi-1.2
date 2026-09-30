@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 	import { authState } from '$lib/auth.svelte';
 	import AdminToast from '$lib/components/admin/AdminToast.svelte';
 	import ImpersonationBanner from '$lib/components/ImpersonationBanner.svelte';
@@ -10,6 +11,9 @@
 	import { client } from '$lib/appwrite';
 
 	let { children } = $props();
+	let showFloatingWidgets = $derived(
+		!['/admin', '/learn'].some((prefix) => page.url.pathname === prefix || page.url.pathname.startsWith(`${prefix}/`))
+	);
 
 	onMount(() => {
 		authState.check();
@@ -28,6 +32,8 @@
 <ImpersonationBanner />
 {@render children()}
 <AuthModal bind:isOpen={authState.showAuthModal} onLogin={handleLoginSuccess} />
-<SupportWidget />
-<TawkChat />
+{#if showFloatingWidgets}
+	<SupportWidget />
+{/if}
+<TawkChat visible={showFloatingWidgets} />
 <AdminToast />

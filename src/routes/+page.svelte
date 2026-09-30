@@ -1057,7 +1057,7 @@
 
 		.hero-title {
 			margin-top: 28px;
-			font-size: clamp(62px, 19vw, 82px);
+			font-size: calc(clamp(62px, 19vw, 82px) - 5px);
 		}
 
 		.hero-intro {
@@ -1117,7 +1117,8 @@
 
 	@media (max-width: 520px) {
 		:global(.home-header header > div > a:first-child > span) {
-			display: none !important;
+			display: inline-block;
+			font-size: 15px !important;
 		}
 
 
@@ -1125,7 +1126,7 @@
 
 
 		.hero-title {
-			font-size: clamp(57px, 18.5vw, 72px);
+			font-size: calc(clamp(57px, 18.5vw, 72px) - 5px);
 		}
 
 		.hero-intro p:first-child {

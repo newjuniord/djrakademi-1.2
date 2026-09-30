@@ -240,12 +240,12 @@
 		<!-- Brand Logo Image & Name -->
 		<a href={getHref('/')} class="flex min-w-0 items-center gap-3 group">
 			<img src={logoUrl} alt={siteName} class="h-10 w-auto shrink-0 object-contain sm:h-11" />
-			<span class="hidden truncate font-black text-[19px] tracking-tight text-zinc-950 uppercase transition-colors group-hover:text-amber-500 min-[430px]:inline-block sm:text-[21px]">
+			<span class="inline-block truncate font-black text-[15px] tracking-tight text-zinc-950 uppercase transition-colors group-hover:text-amber-500 sm:text-[21px]">
 				{siteName}
 			</span>
 		</a>
 
-		<nav class="hidden items-center gap-6 text-[18px] font-bold text-zinc-600 header-desktop-nav min-[821px]:flex" aria-label={ht.publicNavigation}>
+		<nav class="hidden items-center gap-6 text-[18px] font-bold text-zinc-600 header-desktop-nav lg:flex" aria-label={ht.publicNavigation}>
 			<a href={getHref('/')} class="transition-colors hover:text-zinc-950">{ht.home}</a>
 			<a href={getHref('/catalogue')} class="transition-colors hover:text-zinc-950">{ht.catalogue}</a>
 			<a href={getHref('/bundles')} class="transition-colors hover:text-amber-700">{ht.bundles}</a>
@@ -255,7 +255,7 @@
 		<button
 			type="button"
 			onclick={() => (drawerOpen = true)}
-			class="p-2 text-zinc-900 hover:text-amber-600 active:scale-95 transition-colors header-menu-btn min-[821px]:hidden cursor-pointer focus:outline-none"
+			class="p-2 text-zinc-900 hover:text-amber-600 active:scale-95 transition-colors header-menu-btn lg:hidden cursor-pointer focus:outline-none"
 			aria-label={ht.mainMenu}
 			aria-expanded={drawerOpen}
 		>
@@ -263,7 +263,7 @@
 		</button>
 
 		<!-- Desktop actions -->
-		<div class="hidden shrink-0 items-center gap-2.5 header-desktop-actions min-[821px]:flex">
+		<div class="hidden shrink-0 items-center gap-2.5 header-desktop-actions lg:flex">
 			<!-- Custom Language Dropdown -->
 			<div class="relative" use:clickOutside>
 				<button
@@ -429,7 +429,7 @@
 		</div>
 
 		<nav class="flex-1 px-4 py-5" aria-label={ht.mainMenu}>
-			<div class="header-drawer-nav min-[821px]:hidden">
+			<div class="header-drawer-nav lg:hidden">
 				<p class="mb-2 px-3 text-xs font-bold text-zinc-500">{ht.navSection}</p>
 				<div class="divide-y divide-zinc-100 border-y border-zinc-100">
 					<a href={getHref('/')} onclick={closeDrawer} class="flex min-h-14 items-center px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">{ht.home}</a>
@@ -500,7 +500,7 @@
 <AuthModal bind:isOpen={authModalOpen} onLogin={login} initialView={authModalInitialView} />
 
 <style>
-	@media (max-width: 820px) {
+	@media (max-width: 1023px) {
 		:global(.header-desktop-nav) {
 			display: none !important;
 		}
@@ -512,7 +512,7 @@
 		}
 	}
 
-	@media (min-width: 821px) {
+	@media (min-width: 1024px) {
 		:global(.header-desktop-nav) {
 			display: flex !important;
 		}
@@ -524,5 +524,4 @@
 		}
 	}
 </style>
-
 
