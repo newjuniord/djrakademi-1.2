@@ -2,7 +2,7 @@ import { grantBundleAccess } from '$lib/server/bundles';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
-import { sendPurchaseConfirmationEmail } from '$lib/server/purchase-email';
+import { sendPurchaseNotifications } from '$lib/server/purchase-notifications';
 import { ID, Query } from 'node-appwrite';
 import crypto from 'node:crypto';
 
@@ -220,11 +220,12 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 
 		// Email de confirmation
 		try {
-			await sendPurchaseConfirmationEmail({
+			await sendPurchaseNotifications({
 				id: orderRow.$id,
 				userId: orderRow.user_id,
 				customerName: orderRow.customer_name || 'Client',
 				customerEmail: orderRow.customer_email || '',
+				customerPhone: orderRow.customer_phone || undefined,
 				productType: orderRow.product_type,
 				productId: orderRow.product_id,
 				productTitle: orderRow.product_title || '',

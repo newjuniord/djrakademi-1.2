@@ -4,7 +4,7 @@ import { Account, Client, ID, Query, type Models } from 'node-appwrite';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
 import type { Order } from '$lib/services/orders';
 import { getBundle, grantBundleAccess } from '$lib/server/bundles';
-import { sendPurchaseConfirmationEmail } from '$lib/server/purchase-email';
+import { sendPurchaseNotifications } from '$lib/server/purchase-notifications';
 import { lemonSqueezySetup, createCheckout } from '@lemonsqueezy/lemonsqueezy.js';
 
 const ORDERS_TABLE = 'orders';
@@ -539,7 +539,7 @@ export async function confirmPlopplopPaymentServer(
 		const paidOrder = mapOrder(row);
 		let emailSent = false;
 		try {
-			emailSent = (await sendPurchaseConfirmationEmail(paidOrder)).sent;
+			emailSent = (await sendPurchaseNotifications(paidOrder)).emailSent;
 		} catch (emailError) {
 			console.error('[Purchase email] Envoi impossible pour la commande', orderId, emailError instanceof Error ? emailError.message : emailError);
 		}

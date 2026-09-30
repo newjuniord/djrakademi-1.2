@@ -23,7 +23,7 @@ function escapeHtml(value: string): string {
 	}[character]!));
 }
 
-function publicAppUrl(): string {
+export function publicAppUrl(): string {
 	const configured = (env.APP_URL || DEFAULT_APP_URL).trim().replace(/\/$/, '');
 	try {
 		const url = new URL(configured);
@@ -60,6 +60,19 @@ function magicUrl(origin: string, orderId: string, userId: string, token: string
 	return url.toString();
 }
 
+export function purchaseAccessLinks(order: Order): { accessUrl: string; downloadUrl?: string } {
+	if (!order.userId) throw new Error('La commande ne contient pas d’utilisateur.');
+	const origin = publicAppUrl();
+	const token = createPurchaseAccessToken(order.id, order.userId);
+	const destination = productDestination(order);
+	return {
+		accessUrl: magicUrl(origin, order.id, order.userId, token, destination),
+		...(order.productType === 'ebook'
+			? { downloadUrl: magicUrl(origin, order.id, order.userId, token, destination, order.productId) }
+			: {})
+	};
+}
+
 export interface PurchaseEmailResult {
 	sent: boolean;
 	attachmentIncluded: boolean;
@@ -74,13 +87,7 @@ export async function sendPurchaseConfirmationEmail(order: Order): Promise<Purch
 	if (!order.userId) throw new Error('La commande ne contient pas d’utilisateur.');
 	if (!EMAIL_PATTERN.test(order.customerEmail) || !EMAIL_PATTERN.test(replyTo)) throw new Error('Adresse e-mail de commande invalide.');
 
-	const token = createPurchaseAccessToken(order.id, order.userId);
-	const origin = publicAppUrl();
-	const destination = productDestination(order);
-	const accessUrl = magicUrl(origin, order.id, order.userId, token, destination);
-	const downloadUrl = order.productType === 'ebook'
-		? magicUrl(origin, order.id, order.userId, token, destination, order.productId)
-		: undefined;
+	const { accessUrl, downloadUrl } = purchaseAccessLinks(order);
 
 	let attachment: { filename: string; content: string } | undefined;
 	if (order.productType === 'ebook') {
@@ -122,4 +129,3 @@ export async function sendPurchaseConfirmationEmail(order: Order): Promise<Purch
 		return { sent: true, attachmentIncluded: Boolean(attachment) };
 	} finally { clearTimeout(timeout); }
 }
-

@@ -2,6 +2,7 @@ import { ID, Query, type Models } from 'node-appwrite';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
 import { generateDynamicSlots } from '$lib/coaching/availability';
 import { DEFAULT_SETTINGS, mapServiceDoc, mapSettingsDoc } from '$lib/services/coaching';
+import { sendPurchaseNotifications } from '$lib/server/purchase-notifications';
 
 const HOLD_MINUTES = 60;
 const TABLES = { services: 'coaching_services', bookings: 'bookings', orders: 'orders', settings: 'coaching_settings', unavailability: 'coaching_unavailability' };
@@ -105,9 +106,11 @@ export async function createBookingServer(body: any, user: Models.User<Models.Pr
 			}
 		});
 
+		let freeOrderId: string | undefined;
 		if (isFree) {
+			freeOrderId = ID.unique();
 			await tables.createRow({
-				databaseId: DATABASE_ID, tableId: TABLES.orders, rowId: ID.unique(), transactionId: transaction.$id,
+				databaseId: DATABASE_ID, tableId: TABLES.orders, rowId: freeOrderId, transactionId: transaction.$id,
 				data: {
 					user_id: user.$id, customer_name: customerName, customer_email: user.email, customer_phone: customerWhatsapp,
 					product_type: 'coaching', product_id: bookingId, product_title: String(service.title || 'Coaching'), amount: 0,
@@ -117,6 +120,14 @@ export async function createBookingServer(body: any, user: Models.User<Models.Pr
 		}
 
 		await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
+		if (isFree && freeOrderId) {
+			await sendPurchaseNotifications({
+				id: freeOrderId, userId: user.$id, customerName, customerEmail: user.email,
+				customerPhone: customerWhatsapp, productType: 'coaching', productId: bookingId,
+				productTitle: String(service.title || 'Coaching'), amount: 0, currency: 'HTG',
+				paymentProvider: 'free', status: 'paid', createdAt: now.toISOString(), paidAt: now.toISOString()
+			}).catch((error) => console.error('[Booking notifications]', error));
+		}
 		return { bookingId, status: isFree ? 'confirmed' as const : 'pending_payment' as const, holdExpiresAt, amount, currency: 'HTG' as const };
 	} catch (error) {
 		await tables.updateTransaction({ transactionId: transaction.$id, rollback: true }).catch(() => undefined);
