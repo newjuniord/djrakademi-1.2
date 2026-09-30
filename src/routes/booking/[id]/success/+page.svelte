@@ -177,7 +177,7 @@
 							target="_blank"
 							rel="noreferrer"
 						>
-							<MessageCircle size={18} /> {t.contactCoachBtn} ({whatsappNumber || ''})
+							<img src="/whatsapp.png" alt="WhatsApp" class="size-5 object-contain shrink-0" /> {t.contactCoachBtn} ({whatsappNumber || ''})
 						</a>
 					</div>
 				{/if}

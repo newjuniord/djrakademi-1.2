@@ -158,7 +158,7 @@
 											rel="noreferrer"
 											aria-label={`Contacter ${booking.customerName} sur WhatsApp`}
 										>
-											<MessageCircle size={16} />
+											<img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" />
 										</a>
 									{/if}
 								</div>

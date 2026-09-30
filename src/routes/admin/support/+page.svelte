@@ -244,7 +244,7 @@
 											rel="noreferrer"
 											class="btn btn-xs btn-success gap-1 text-[11px] font-bold text-white shadow-xs"
 										>
-											<MessageCircle size={13} />
+											<img src="/whatsapp.png" alt="WhatsApp" class="size-3.5 object-contain shrink-0" />
 											<span>{ticket.whatsapp}</span>
 										</a>
 									{:else}
@@ -377,7 +377,7 @@
 							rel="noreferrer"
 							class="link link-primary font-bold flex items-center gap-1"
 						>
-							<MessageCircle size={14} />
+							<img src="/whatsapp.png" alt="WhatsApp" class="size-3.5 object-contain shrink-0" />
 							<span>{selectedTicket.whatsapp}</span>
 						</a>
 					</div>
@@ -407,7 +407,7 @@
 						rel="noreferrer"
 						class="btn btn-success btn-sm font-bold"
 					>
-						<MessageCircle size={16} />
+						<img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" />
 						<span>Ouvrir WhatsApp</span>
 					</a>
 				{/if}

@@ -253,25 +253,12 @@
 
 				<!-- SECTION 1: MES FORMATIONS -->
 				<section id="sec-courses" class="scroll-mt-24 space-y-6">
-					<div class="dashboard-section-head flex items-center justify-between pb-4 border-b border-zinc-200">
-						<div class="flex items-center gap-3">
-							<div class="size-9 bg-zinc-950 text-amber-400 rounded-xl grid place-items-center">
-								<BookOpen size={18} />
-							</div>
-							<div>
-								<h2 class="text-2xl font-black tracking-tight text-zinc-950">{t.coursesTitle} ({myCourses.length})</h2>
-								<p class="text-xs text-zinc-400 mt-0.5">{t.coursesSub}</p>
-							</div>
-						</div>
-						<span class="text-xs text-zinc-400 font-medium hidden sm:inline-block">{t.coursesAccess}</span>
-					</div>
 
 					{#if myCourses.length === 0}
 						<div class="bg-white rounded-2xl border border-zinc-200/80 p-8 sm:p-12 text-center text-zinc-500 space-y-3">
 							<div class="size-12 bg-amber-400/10 text-amber-500 rounded-2xl grid place-items-center mx-auto">
 								<BookOpen size={24} />
 							</div>
-							<h3 class="font-black text-base text-zinc-950">{t.noCoursesTitle}</h3>
 							<p class="text-xs text-zinc-400 max-w-md mx-auto">{t.noCoursesSub}</p>
 							<a href={getHref('/catalogue')} class="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm mt-2">
 								{t.exploreCatalog} <ArrowRight size={14} />
@@ -344,25 +331,12 @@
 
 				<!-- SECTION 2: MES EBOOKS -->
 				<section id="sec-ebooks" class="scroll-mt-24 space-y-6">
-					<div class="dashboard-section-head flex items-center justify-between pb-4 border-b border-zinc-200">
-						<div class="flex items-center gap-3">
-							<div class="size-9 bg-zinc-950 text-emerald-400 rounded-xl grid place-items-center">
-								<FileText size={18} />
-							</div>
-							<div>
-								<h2 class="text-2xl font-black tracking-tight text-zinc-950">{t.ebooksTitle} ({myEbooks.length})</h2>
-								<p class="text-xs text-zinc-400 mt-0.5">{t.ebooksSub}</p>
-							</div>
-						</div>
-						<span class="text-xs text-zinc-400 font-medium hidden sm:inline-block">{t.unlimitedDownload}</span>
-					</div>
 
 					{#if myEbooks.length === 0}
 						<div class="bg-white rounded-2xl border border-zinc-200/80 p-8 sm:p-12 text-center text-zinc-500 space-y-3">
 							<div class="size-12 bg-emerald-400/10 text-emerald-500 rounded-2xl grid place-items-center mx-auto">
 								<FileText size={24} />
 							</div>
-							<h3 class="font-black text-base text-zinc-950">{t.noEbooksTitle}</h3>
 							<p class="text-xs text-zinc-400 max-w-md mx-auto">{t.noEbooksSub}</p>
 							<a href={getHref('/catalogue')} class="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm mt-2">
 								{t.exploreEbooks} <ArrowRight size={14} />
@@ -408,27 +382,12 @@
 
 				<!-- SECTION 3: MES COACHING -->
 				<section id="sec-coaching" class="scroll-mt-24 space-y-6">
-					<div class="dashboard-section-head flex items-center justify-between pb-4 border-b border-zinc-200">
-						<div class="flex items-center gap-3">
-							<div class="size-9 bg-zinc-950 text-orange-400 rounded-xl grid place-items-center">
-								<CalendarCheck size={18} />
-							</div>
-							<div>
-								<h2 class="text-2xl font-black tracking-tight text-zinc-950">{t.coachingTitle} ({myBookings.length})</h2>
-								<p class="text-xs text-zinc-400 mt-0.5">{t.coachingSub}</p>
-							</div>
-						</div>
-						<a href={getHref('/#coaching')} class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
-							{t.bookAnother} <ArrowRight size={12} />
-						</a>
-					</div>
 
 					{#if myBookings.length === 0}
 						<div class="bg-white rounded-2xl border border-zinc-200/80 p-8 sm:p-12 text-center text-zinc-500 space-y-3">
 							<div class="size-12 bg-orange-400/10 text-orange-500 rounded-2xl grid place-items-center mx-auto">
 								<CalendarCheck size={24} />
 							</div>
-							<h3 class="font-black text-base text-zinc-950">{t.noCoachingTitle}</h3>
 							<p class="text-xs text-zinc-400 max-w-md mx-auto">{t.noCoachingSub}</p>
 							<a href={getHref('/#coaching')} class="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm mt-2">
 								{t.bookSession} <ArrowRight size={14} />
@@ -456,7 +415,7 @@
 											</p>
 											{#if booking.coachWhatsapp}
 												<p class="text-xs font-bold text-emerald-700 flex items-center gap-1.5 pt-0.5">
-													<MessageCircle size={13} class="text-emerald-600 shrink-0" />
+													<img src="/whatsapp.png" alt="WhatsApp" class="size-3.5 object-contain shrink-0" />
 													<span>{t.whatsappCoach} {booking.coachWhatsapp}</span>
 												</p>
 											{/if}
@@ -470,7 +429,7 @@
 											rel="noreferrer"
 											class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-colors shadow-sm"
 										>
-											<MessageCircle size={14} />
+											<img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" />
 											<span>{t.contactCoach} ({booking.coachWhatsapp || '+50937000000'})</span>
 										</a>
 									</div>
@@ -578,107 +537,6 @@
 		font-size: 11px;
 		line-height: 1.3;
 	}
-	.dashboard-section-head {
-		gap: 24px;
-		padding: 22px 24px;
-		border: 1px solid #ded7cc;
-		background: #fff;
-		box-shadow: 0 8px 28px rgba(37, 29, 18, 0.045);
-	}
-
-	.dashboard-section-head > div {
-		min-width: 0;
-	}
-
-	.dashboard-section-head > div > div:first-child {
-		width: 44px;
-		height: 44px;
-		border-radius: 0;
-		background: #171713;
-	}
-
-	.dashboard-section-head h2 {
-		margin: 0;
-		font-family: Georgia, 'Times New Roman', serif;
-		font-size: clamp(20px, 2.2vw, 27px);
-		font-weight: 700;
-		letter-spacing: -0.025em;
-		line-height: 1.15;
-	}
-
-	.dashboard-section-head h2 + p {
-		margin-top: 6px;
-		color: #777067;
-		font-size: 12px;
-		line-height: 1.5;
-	}
-
-	.dashboard-section-head > span {
-		display: inline-flex;
-		min-height: 34px;
-		align-items: center;
-		padding: 0 12px;
-		border: 1px solid #ddd5c9;
-		background: #f8f5ef;
-		color: #70685d;
-		font-size: 10px;
-		font-weight: 800;
-		white-space: nowrap;
-	}
-
-	.dashboard-section-head > a {
-		display: inline-flex;
-		min-height: 40px;
-		align-items: center;
-		justify-content: center;
-		gap: 7px;
-		padding: 0 14px;
-		border: 1px solid #d49b29;
-		background: #e3ad3d;
-		color: #17130d;
-		font-size: 11px;
-		font-weight: 850;
-		white-space: nowrap;
-		transition: background-color 160ms ease, transform 160ms ease;
-	}
-
-	.dashboard-section-head > a:hover {
-		background: #edbc55;
-		color: #17130d;
-		transform: translateY(-1px);
-	}
-
-	@media (max-width: 640px) {
-		.dashboard-section-head {
-			align-items: flex-start;
-			gap: 17px;
-			padding: 18px;
-			flex-direction: column;
-		}
-
-		.dashboard-section-head > div {
-			align-items: flex-start;
-		}
-
-		.dashboard-section-head > div > div:first-child {
-			width: 40px;
-			height: 40px;
-		}
-
-		.dashboard-section-head h2 {
-			font-size: 21px;
-		}
-
-		.dashboard-section-head > span {
-			display: inline-flex;
-		}
-
-		.dashboard-section-head > a {
-			width: 100%;
-		}
-	}
-
-
 	@media (max-width: 640px) {
 		.dashboard-hero {
 			padding-top: 34px;
@@ -724,9 +582,5 @@
 		}
 
 		.dashboard-quick-link:last-child { border-bottom: 0; }
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.dashboard-section-head > a { transition: none; }
 	}
 </style>

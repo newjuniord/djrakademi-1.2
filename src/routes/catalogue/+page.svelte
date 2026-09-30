@@ -192,7 +192,7 @@
 				<section id="sec-courses" class="catalogue-section">
 					<div class="section-heading">
 						<div class="section-heading-copy">
-							<div><span>{t.sec01Kicker}</span><h2>{t.sec01Title}</h2><p>{t.sec01Desc}</p></div>
+							<div><span>{t.sec01Kicker}</span><h2>{t.sec01Title}</h2></div>
 						</div>
 						<span class="section-count">{displayedCourses.length} / {filteredCourses.length}</span>
 					</div>
@@ -228,7 +228,7 @@
 				<section id="sec-ebooks" class="catalogue-section">
 					<div class="section-heading">
 						<div class="section-heading-copy">
-							<div><span>{t.sec02Kicker}</span><h2>{t.sec02Title}</h2><p>{t.sec02Desc}</p></div>
+							<div><span>{t.sec02Kicker}</span><h2>{t.sec02Title}</h2></div>
 						</div>
 						<span class="section-count">{displayedEbooks.length} / {filteredEbooks.length}</span>
 					</div>

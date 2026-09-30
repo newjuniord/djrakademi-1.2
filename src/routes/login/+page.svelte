@@ -5,6 +5,7 @@
 	import { account, ID } from '$lib/appwrite';
 	import { getOrCreateProfile, updateProfile } from '$lib/services/profiles';
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
+	import InternationalPhoneInput from '$lib/components/InternationalPhoneInput.svelte';
 	import {
 		ArrowRight,
 		AlertCircle,
@@ -209,17 +210,8 @@
 
 			<div class="flex items-center p-6 sm:p-10 lg:p-12 xl:p-16">
 				<div class="mx-auto w-full max-w-md">
-					<div class="mb-7">
-						<p class="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-amber-700">{t.eyebrow}</p>
-						<h1 class="text-3xl font-black tracking-[-0.035em] text-zinc-950 sm:text-4xl">
-							{mode === 'login' ? t.headingLogin : t.headingSignup}
-						</h1>
-						<p class="mt-3 text-sm font-medium leading-relaxed text-zinc-500">
-							{mode === 'login' ? t.subLogin : t.subSignup}
-						</p>
-					</div>
 
-					<div class="mb-6 grid grid-cols-2 rounded-2xl bg-zinc-100 p-1.5" role="tablist" aria-label={t.eyebrow}>
+					<div class="mb-6 grid grid-cols-2 rounded-2xl bg-zinc-100 p-1.5" role="tablist" aria-label="Authentification">
 						<button
 							type="button"
 							role="tab"
@@ -267,26 +259,15 @@
 								</div>
 							</div>
 
-							<div class="space-y-1.5">
-								<label for="phone" class="ml-1 block text-xs font-bold text-zinc-700">{t.phoneLabel}</label>
-								<div class="relative">
-									<Phone size={17} class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
-									<input
-										id="phone"
-										type="tel"
-										bind:value={phone}
-										required
-										maxlength="20"
-										autocomplete="tel"
-										inputmode="tel"
-										disabled={loading}
-										placeholder={t.phonePlaceholder}
-										aria-describedby="phone-hint"
-										class="h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50 pl-11 pr-4 text-sm font-medium text-zinc-950 outline-none transition hover:border-zinc-300 focus:border-amber-400 focus:bg-white focus:ring-4 focus:ring-amber-100 disabled:opacity-60"
-									/>
-								</div>
-								<p id="phone-hint" class="ml-1 text-[11px] font-medium text-zinc-400">{t.phoneHint}</p>
-							</div>
+							<InternationalPhoneInput
+								id="phone"
+								bind:value={phone}
+								required
+								disabled={loading}
+								label={t.phoneLabel}
+								showLabel={true}
+								lang={currentLang}
+							/>
 						{/if}
 
 						<div class="space-y-1.5">

@@ -4,6 +4,7 @@
 	import { account, ID } from '$lib/appwrite';
 	import { authState, translateAuthError } from '$lib/auth.svelte';
 	import { getOrCreateProfile, updateProfile } from '$lib/services/profiles';
+	import InternationalPhoneInput from './InternationalPhoneInput.svelte';
 
 	let { isOpen = $bindable(false), onLogin, initialView = "login" } = $props<{
 		isOpen: boolean;
@@ -267,24 +268,15 @@
 								/>
 							</div>
 						</div>
-						<div class="space-y-1.5">
-							<label for="signup-phone" class="text-xs font-bold text-zinc-700 ml-1">{t.phoneLabel}</label>
-							<div class="relative">
-								<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400">
-									<Phone size={16} />
-								</div>
-								<input
-									id="signup-phone"
-									type="tel"
-									autocomplete="tel"
-									required
-									bind:value={phone}
-									disabled={loading}
-									class="w-full bg-zinc-50 border border-zinc-200 hover:border-zinc-300 focus:border-amber-400 focus:bg-white rounded-xl py-3 pl-11 pr-4 text-sm text-zinc-950 placeholder-zinc-400 outline-none transition-all disabled:opacity-60"
-									placeholder={t.phonePlaceholder}
-								/>
-							</div>
-						</div>
+						<InternationalPhoneInput
+							id="signup-phone"
+							bind:value={phone}
+							required
+							disabled={loading}
+							label={t.phoneLabel}
+							showLabel={true}
+							lang={currentLang}
+						/>
 					{/if}
 
 					<div class="space-y-1.5">

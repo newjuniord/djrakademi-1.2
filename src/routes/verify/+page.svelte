@@ -64,7 +64,7 @@
 			refRequiredError: 'Veuillez saisir le numéro de référence de la transaction.',
 			mobileSuccess: 'Paiement vérifié avec succès ! Redirection en cours...',
 			mobileSuccessToast: 'Accès débloqué avec succès ! Redirection en cours...',
-			genericError: 'Une erreur est survenue pendant la vérification. Veuillez nous contacter directement.'
+			genericError: 'Une erreur est survenue pendant la vérification.'
 		},
 		ht: {
 			pageTitle: 'Verifikasyon peman ak aksè · DJR Akademi',
@@ -99,7 +99,7 @@
 			refRequiredError: 'Tanpri antre nimewo referans tranzaksyon an.',
 			mobileSuccess: 'Peman an verifye! N ap redirije w…',
 			mobileSuccessToast: 'Aksè w la debloke! N ap redirije w…',
-			genericError: 'Yon erè rive pandan verifikasyon an. Tanpri kontakte nou dirèkteman.'
+			genericError: 'Yon erè rive pandan verifikasyon an.'
 		}
 	};
 	let t = $derived(i18n[currentLang]);

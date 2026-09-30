@@ -98,7 +98,6 @@
 		<div class="footer-directory">
 			<div class="footer-statement">
 				<span class="footer-kicker">{t.kicker}</span>
-				<h2>{t.statement}</h2>
 			</div>
 
 			<nav class="footer-column" aria-label={t.exploreGroup}>

@@ -104,7 +104,7 @@
 			supportInvalidRef: "Veuillez saisir le numéro de référence de la transaction.",
 			supportRefSuccess: "Paiement vérifié avec succès ! Redirection en cours...",
 			supportRefError: (ref: string) => `Aucun paiement valide trouvé pour la référence "${ref}".`,
-			supportErrorGeneral: "Une erreur est survenue lors de la vérification. Veuillez nous contacter directement.",
+			supportErrorGeneral: "Une erreur est survenue lors de la vérification.",
 			
 			testimonialsKicker: "Témoignages",
 			t1Quote: "Je suis vraiment satisfait de la formation. J'ai appris beaucoup de choses que je ne savais pas auparavant.",
@@ -175,7 +175,7 @@
 			supportInvalidRef: "Tanpri antre nimewo referans tranzaksyon an.",
 			supportRefSuccess: "Peman verifye ak siksè! N ap redirije w pou w kòmanse fòmasyon an...",
 			supportRefError: (ref: string) => `Nou pa jwenn okenn peman valide pou referans "${ref}".`,
-			supportErrorGeneral: "Yon erè rive pandan verifikasyon an. Tanpri kontakte nou dirèkteman.",
+			supportErrorGeneral: "Yon erè rive pandan verifikasyon an.",
 
 			testimonialsKicker: "Temwayaj",
 			t1Quote: "Mwen vrèman satisfè ak fòmasyon an. Mwen aprann anpil bagay mwen pa t konnen anvan.",
@@ -355,7 +355,6 @@
 				<div class="courses-heading">
 					<div>
 						<h2>{t.coursesTitle}</h2>
-						<p>{t.coursesDesc}</p>
 					</div>
 					<span class="courses-count">{t.coursesCount(publishedCourses.length)}</span>
 				</div>
@@ -548,10 +547,6 @@
 			<div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="space-y-6">
 						<div class="space-y-3">
-							<div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-400/10 border border-amber-400/20 rounded-full text-amber-400 text-xs font-bold uppercase tracking-wider">
-								<HelpCircle size={14} />
-								{t.supportKicker}
-							</div>
 							<h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
 								{t.supportTitle}
 							</h2>

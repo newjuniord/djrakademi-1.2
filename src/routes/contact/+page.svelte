@@ -7,12 +7,7 @@
 		User,
 		Send,
 		CheckCircle2,
-		Sparkles,
 		ChevronLeft,
-		Clock,
-		ShieldCheck,
-		HelpCircle,
-		BookOpen,
 		MessageSquareText
 	} from 'lucide-svelte';
 
@@ -198,192 +193,117 @@
 				</div>
 			{/if}
 
-			<!-- MAIN TWO-COLUMN CONTAINER -->
-			<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+			<!-- CENTERED CONTACT FORM CONTAINER -->
+			<div class="max-w-2xl mx-auto">
+				<div class="bg-white rounded-3xl border border-zinc-200/80 p-8 sm:p-10 shadow-sm space-y-8">
 
-				<!-- LEFT COLUMN: HERO INFORMATION CARD -->
-				<div class="lg:col-span-5 space-y-6">
-
-					<!-- Dark Hero Card -->
-					<div class="bg-zinc-950 text-white rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden space-y-6 border border-zinc-800">
-						<div class="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>
-
-						<div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/10 rounded-full text-xs font-bold text-amber-400 border border-white/10">
-							<Sparkles size={14} />
-							{t.supportBadge}
-						</div>
-
-						<h1 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
-							{t.heroTitle}
-						</h1>
-
-						<p class="text-white/60 text-sm leading-relaxed">
-							{t.heroDesc}
-						</p>
-
-						<div class="pt-4 border-t border-white/10 space-y-4">
-							<div class="flex items-center gap-3">
-								<div class="size-9 bg-amber-400/20 text-amber-400 rounded-xl grid place-items-center shrink-0">
-									<Clock size={18} />
-								</div>
-								<div>
-									<p class="text-xs font-bold text-white">{t.fastResponseTitle}</p>
-									<p class="text-[11px] text-white/50">{t.fastResponseDesc}</p>
-								</div>
-							</div>
-
-							<div class="flex items-center gap-3">
-								<div class="size-9 bg-emerald-400/20 text-emerald-400 rounded-xl grid place-items-center shrink-0">
-									<ShieldCheck size={18} />
-								</div>
-								<div>
-									<p class="text-xs font-bold text-white">{t.personalizedSupportTitle}</p>
-									<p class="text-[11px] text-white/50">{t.personalizedSupportDesc}</p>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Secondary Quick FAQ Card -->
-					<div class="bg-white rounded-3xl border border-zinc-200/80 p-6 sm:p-8 shadow-sm space-y-4">
+					<div class="flex items-center justify-between pb-6 border-b border-zinc-100">
 						<div class="flex items-center gap-3">
-							<div class="size-8 bg-zinc-100 text-zinc-950 rounded-xl grid place-items-center">
-								<HelpCircle size={18} />
+							<div class="size-10 bg-zinc-950 text-amber-400 rounded-2xl grid place-items-center">
+								<MessageSquareText size={20} />
 							</div>
-							<h3 class="font-black text-sm text-zinc-950">{t.faqTitle}</h3>
+							<div>
+								<h2 class="text-xl font-black text-zinc-950">{t.formTitle}</h2>
+								<p class="text-xs text-zinc-400">{t.formSubtitle}</p>
+							</div>
 						</div>
-
-						<ul class="space-y-3 text-xs text-zinc-600">
-							<li class="flex items-start gap-2">
-								<span class="text-amber-500 font-black">·</span>
-								<span><strong>{t.faqAccessTitle}</strong> {t.faqAccessDesc}</span>
-							</li>
-							<li class="flex items-start gap-2">
-								<span class="text-amber-500 font-black">·</span>
-								<span><strong>{t.faqEbookTitle}</strong> {t.faqEbookDesc}</span>
-							</li>
-							<li class="flex items-start gap-2">
-								<span class="text-amber-500 font-black">·</span>
-								<span><strong>{t.faqPaymentTitle}</strong> {t.faqPaymentDesc}</span>
-							</li>
-						</ul>
+						<span class="text-xs font-bold text-zinc-400 uppercase tracking-wider hidden sm:inline-block">
+							DJR Support
+						</span>
 					</div>
 
-				</div>
+					<form onsubmit={handleSubmit} class="space-y-6">
 
-				<!-- RIGHT COLUMN: THE CONTACT FORM CARD -->
-				<div class="lg:col-span-7">
-					<div class="bg-white rounded-3xl border border-zinc-200/80 p-8 sm:p-10 shadow-sm space-y-8">
-
-						<div class="flex items-center justify-between pb-6 border-b border-zinc-100">
-							<div class="flex items-center gap-3">
-								<div class="size-10 bg-zinc-950 text-amber-400 rounded-2xl grid place-items-center">
-									<MessageSquareText size={20} />
-								</div>
-								<div>
-									<h2 class="text-xl font-black text-zinc-950">{t.formTitle}</h2>
-									<p class="text-xs text-zinc-400">{t.formSubtitle}</p>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+							<!-- Full Name -->
+							<div>
+								<label for="full-name" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+									{t.fullNameLabel}
+								</label>
+								<div class="relative">
+									<input
+										id="full-name"
+										type="text"
+										bind:value={fullName}
+										placeholder={t.fullNamePlaceholder}
+										required
+										class="w-full h-12 pl-11 pr-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
+									/>
+									<User size={18} class="absolute left-4 top-3.5 text-zinc-400" />
 								</div>
 							</div>
-							<span class="text-xs font-bold text-zinc-400 uppercase tracking-wider hidden sm:inline-block">
-								DJR Support
+
+							<!-- Email Address -->
+							<div>
+								<label for="user-email" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+									{t.emailLabel}
+								</label>
+								<div class="relative">
+									<input
+										id="user-email"
+										type="email"
+										bind:value={userEmail}
+										placeholder={t.emailPlaceholder}
+										required
+										class="w-full h-12 pl-11 pr-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
+									/>
+									<Mail size={18} class="absolute left-4 top-3.5 text-zinc-400" />
+								</div>
+							</div>
+						</div>
+
+						<!-- Subject Dropdown -->
+						<div>
+							<label for="subject" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+								{t.subjectLabel}
+							</label>
+							<select
+								id="subject"
+								bind:value={subject}
+								class="w-full h-12 px-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all bg-white"
+							>
+								<option value="Question sur une formation">{t.subjOption1}</option>
+								<option value="Question sur un ebook">{t.subjOption2}</option>
+								<option value="Coaching individuel">{t.subjOption3}</option>
+								<option value="Support technique">{t.subjOption4}</option>
+								<option value="Autre demande">{t.subjOption5}</option>
+							</select>
+						</div>
+
+						<!-- Message Textarea -->
+						<div>
+							<label for="message" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+								{t.messageLabel}
+							</label>
+							<textarea
+								id="message"
+								bind:value={message}
+								rows="5"
+								placeholder={t.messagePlaceholder}
+								required
+								class="w-full p-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all resize-none"
+							></textarea>
+						</div>
+
+						<!-- Submit Button -->
+						<div class="pt-4 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+							<span class="text-xs text-zinc-400">
+								{t.privacyNote}
 							</span>
+
+							<button
+								type="submit"
+								disabled={isSubmitting}
+								class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-2xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 cursor-pointer"
+							>
+								<Send size={15} />
+								{isSubmitting ? t.sending : t.sendBtn}
+							</button>
 						</div>
 
-						<form onsubmit={handleSubmit} class="space-y-6">
+					</form>
 
-							<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-								<!-- Full Name -->
-								<div>
-									<label for="full-name" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-										{t.fullNameLabel}
-									</label>
-									<div class="relative">
-										<input
-											id="full-name"
-											type="text"
-											bind:value={fullName}
-											placeholder={t.fullNamePlaceholder}
-											required
-											class="w-full h-12 pl-11 pr-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
-										/>
-										<User size={18} class="absolute left-4 top-3.5 text-zinc-400" />
-									</div>
-								</div>
-
-								<!-- Email Address -->
-								<div>
-									<label for="user-email" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-										{t.emailLabel}
-									</label>
-									<div class="relative">
-										<input
-											id="user-email"
-											type="email"
-											bind:value={userEmail}
-											placeholder={t.emailPlaceholder}
-											required
-											class="w-full h-12 pl-11 pr-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all"
-										/>
-										<Mail size={18} class="absolute left-4 top-3.5 text-zinc-400" />
-									</div>
-								</div>
-							</div>
-
-							<!-- Subject Dropdown -->
-							<div>
-								<label for="subject" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-									{t.subjectLabel}
-								</label>
-								<select
-									id="subject"
-									bind:value={subject}
-									class="w-full h-12 px-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all bg-white"
-								>
-									<option value="Question sur une formation">{t.subjOption1}</option>
-									<option value="Question sur un ebook">{t.subjOption2}</option>
-									<option value="Coaching individuel">{t.subjOption3}</option>
-									<option value="Support technique">{t.subjOption4}</option>
-									<option value="Autre demande">{t.subjOption5}</option>
-								</select>
-							</div>
-
-							<!-- Message Textarea -->
-							<div>
-								<label for="message" class="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-									{t.messageLabel}
-								</label>
-								<textarea
-									id="message"
-									bind:value={message}
-									rows="5"
-									placeholder={t.messagePlaceholder}
-									required
-									class="w-full p-4 rounded-2xl border border-zinc-200 text-sm font-medium focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 outline-none transition-all resize-none"
-								></textarea>
-							</div>
-
-							<!-- Submit Button -->
-							<div class="pt-4 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-								<span class="text-xs text-zinc-400">
-									{t.privacyNote}
-								</span>
-
-								<button
-									type="submit"
-									disabled={isSubmitting}
-									class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-2xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 cursor-pointer"
-								>
-									<Send size={15} />
-									{isSubmitting ? t.sending : t.sendBtn}
-								</button>
-							</div>
-
-						</form>
-
-					</div>
 				</div>
-
 			</div>
 
 		</div>

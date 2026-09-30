@@ -310,7 +310,7 @@
 	<button
 		type="button"
 		onclick={toggleWidget}
-		class="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2.5 px-4.5 py-3 rounded-full bg-zinc-950 text-white font-bold text-sm shadow-2xl border border-zinc-700/80 hover:bg-amber-400 hover:text-zinc-950 hover:border-amber-300 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer group"
+		class="fixed bottom-6 left-6 z-40 inline-flex items-center gap-2.5 px-4.5 py-3 rounded-full bg-zinc-950 text-white font-bold text-sm shadow-2xl border border-zinc-700/80 hover:bg-amber-400 hover:text-zinc-950 hover:border-amber-300 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer group"
 		aria-label={buttonText}
 	>
 		<div class="size-7 rounded-full bg-amber-400 text-zinc-950 grid place-items-center font-black group-hover:bg-zinc-950 group-hover:text-amber-400 transition-colors">
@@ -586,7 +586,7 @@
 								<div class="space-y-2">
 									<label for="support-whatsapp" class="flex items-center justify-between text-sm font-semibold text-zinc-800">
 										<span class="flex items-center gap-1.5">
-											<MessageCircle size={15} class="text-emerald-500" />
+											<img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" />
 							{wt.whatsapp}
 										</span>
 										{#if requiresWhatsapp}
@@ -651,8 +651,8 @@
 											<p class="text-xs text-zinc-500 mt-0.5">📦 {message.productTitle}</p>
 										{/if}
 										{#if message.whatsapp}
-											<p class="text-xs text-emerald-600 mt-0.5 flex items-center gap-1">
-												<MessageCircle size={11} />
+											<p class="text-xs text-emerald-600 mt-0.5 flex items-center gap-1.5">
+												<img src="/whatsapp.png" alt="WhatsApp" class="size-3.5 object-contain shrink-0" />
 												{message.whatsapp}
 											</p>
 										{/if}
