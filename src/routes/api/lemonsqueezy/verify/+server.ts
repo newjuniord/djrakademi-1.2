@@ -211,11 +211,11 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 
 		await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
 
-		// Envoi de l'email de confirmation de commande
+		// Notifications de confirmation après validation du paiement
 		try {
 			await sendPurchaseNotifications({
 				id: orderRow.$id,
-				userId: orderRow.user_id,
+				userId: userId || orderRow.user_id,
 				customerName: orderRow.customer_name || 'Client',
 				customerEmail: orderRow.customer_email || '',
 				customerPhone: orderRow.customer_phone || undefined,

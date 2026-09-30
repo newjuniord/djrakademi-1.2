@@ -24,6 +24,13 @@
 
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
+	function setLanguage(language: 'fr' | 'ht') {
+		const url = new URL(page.url);
+		if (language === 'ht') url.searchParams.set('lang', 'ht');
+		else url.searchParams.delete('lang');
+		void goto(`${url.pathname}${url.search}${url.hash}`, { replaceState: true, noScroll: true });
+	}
+
 	function getHref(path: string) {
 		if (currentLang !== 'ht') return path;
 		const url = new URL(path, page.url);
@@ -229,6 +236,23 @@
 
 		<!-- Right Header Actions -->
 		<div class="flex items-center gap-2 shrink-0">
+			<div class="inline-flex items-center rounded-lg border border-white/10 bg-white/5 p-0.5" aria-label="Langue / Lang">
+				<button
+					type="button"
+					onclick={() => setLanguage('fr')}
+					aria-label="Français"
+					aria-pressed={currentLang === 'fr'}
+					class="rounded-md px-2 py-1 text-[11px] font-bold transition-colors {currentLang === 'fr' ? 'bg-amber-400 text-zinc-950' : 'text-white/70 hover:text-white'}"
+				>FR</button>
+				<button
+					type="button"
+					onclick={() => setLanguage('ht')}
+					aria-label="Kreyòl ayisyen"
+					aria-pressed={currentLang === 'ht'}
+					class="rounded-md px-2 py-1 text-[11px] font-bold transition-colors {currentLang === 'ht' ? 'bg-amber-400 text-zinc-950' : 'text-white/70 hover:text-white'}"
+				>HT</button>
+			</div>
+
 			<!-- Progress Pill -->
 			<div class="flex items-center gap-2 px-2.5 py-1 bg-white/5 rounded-lg border border-white/10 text-xs">
 				<div class="w-12 sm:w-24 h-1.5 bg-zinc-800 rounded-full overflow-hidden hidden xs:block">

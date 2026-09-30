@@ -68,6 +68,13 @@
 
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
+	function getHref(path: string): string {
+		if (currentLang !== 'ht') return path;
+		const url = new URL(path, page.url);
+		url.searchParams.set('lang', 'ht');
+		return `${url.pathname}${url.search}${url.hash}`;
+	}
+
 	const drawerI18n = {
 		fr: {
 			loginToast: 'Veuillez vous connecter à votre compte pour continuer.',
@@ -168,7 +175,7 @@
 		if (type === "coaching" && coachingItem) {
 			checkoutLoading = false;
 			onClose();
-			await goto(`/coaching/${coachingItem.slug}`);
+			await goto(getHref(`/coaching/${coachingItem.slug}`));
 			return;
 		}
 
@@ -180,7 +187,7 @@
 				if (existingAccess) {
 					toast.info(dt.alreadyOwnedToast);
 					onClose();
-					goto('/dashboard');
+					goto(getHref('/dashboard'));
 					return;
 				}
 				if (!currentIsFree) {
@@ -191,7 +198,7 @@
 							const purchasedId = item.id;
 							toast.success(verification.message, 5000);
 							onClose();
-							setTimeout(() => goto(purchasedType === 'course' ? `/learn/${purchasedId}` : '/dashboard#sec-ebooks'), 1800);
+							setTimeout(() => goto(getHref(purchasedType === 'course' ? `/learn/${purchasedId}` : '/dashboard#sec-ebooks')), 1800);
 							return;
 						}
 					} catch (err) {
@@ -236,7 +243,7 @@
 			setTimeout(() => {
 				checkoutSuccess = false;
 				onClose();
-				goto('/dashboard');
+				goto(getHref('/dashboard'));
 			}, 1500);
 		} catch (e) {
 			console.error('Free enrollment error:', e);
@@ -276,7 +283,7 @@
 					showPaymentModal = false;
 					toast.info(dt.alreadyOwnedToast);
 					onClose();
-					goto('/dashboard');
+					goto(getHref('/dashboard'));
 					return;
 				}
 			}

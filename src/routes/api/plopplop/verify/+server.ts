@@ -136,7 +136,7 @@ async function fulfillOrder(orderId: string, customData?: Record<string, any>, t
 
 		await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
 
-		// Envoi de l'email de confirmation de commande
+		// Notifications de confirmation après validation du paiement
 		try {
 			await sendPurchaseNotifications({
 				id: orderRow.$id,
