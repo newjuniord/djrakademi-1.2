@@ -206,32 +206,31 @@
 			<!-- CENTERED CONTACT FORM & WHATSAPP CONTAINER -->
 			<div class="max-w-2xl mx-auto space-y-6">
 
-				<!-- WhatsApp Direct Contact Card -->
-				<div class="bg-emerald-950 text-white rounded-3xl border border-emerald-800/80 p-6 sm:p-7 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-					<div class="flex items-center gap-4">
-						<div class="size-12 bg-emerald-500/20 rounded-2xl grid place-items-center shrink-0">
-							<img src="/whatsapp.png" alt="WhatsApp" class="size-7 object-contain shrink-0" />
+				<!-- WhatsApp Direct Contact Card (Column Design) -->
+				<div class="bg-emerald-950 text-white rounded-3xl border border-emerald-800/80 p-6 sm:p-8 shadow-lg flex flex-col items-center text-center gap-4">
+					<div class="size-14 bg-emerald-500/20 rounded-2xl grid place-items-center shrink-0">
+						<img src="/whatsapp.png" alt="WhatsApp" class="size-8 object-contain shrink-0" />
+					</div>
+
+					<div class="space-y-1">
+						<div class="flex items-center justify-center gap-2">
+							<h3 class="font-black text-lg text-white">{t.whatsappTitle}</h3>
+							<span class="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase rounded-full">
+								{t.whatsappBadge}
+							</span>
 						</div>
-						<div class="space-y-0.5">
-							<div class="flex items-center gap-2">
-								<h3 class="font-black text-base text-white">{t.whatsappTitle}</h3>
-								<span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase rounded-full">
-									{t.whatsappBadge}
-								</span>
-							</div>
-							<p class="text-xs text-emerald-200/80 font-medium">
-								{t.whatsappDesc} <strong class="text-white font-mono">+1 201-534-2884</strong>
-							</p>
-						</div>
+						<p class="text-xs sm:text-sm text-emerald-200/80 font-medium max-w-md mx-auto">
+							{t.whatsappDesc} <strong class="text-white font-mono text-sm sm:text-base block sm:inline mt-0.5 sm:mt-0">+1 201-534-2884</strong>
+						</p>
 					</div>
 
 					<a
 						href={whatsappLink('+12015342884', currentLang === 'ht' ? 'Bonjou, mwen gen yon kesyon konsènan DJR Akademi...' : 'Bonjour, j’ai une question concernant DJR Akademi...')}
 						target="_blank"
 						rel="noreferrer"
-						class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-extrabold text-xs rounded-2xl transition-all shadow-md shrink-0 w-full sm:w-auto"
+						class="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-extrabold text-xs sm:text-sm rounded-2xl transition-all shadow-md w-full sm:w-auto mt-1"
 					>
-						<img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" />
+						<img src="/whatsapp.png" alt="WhatsApp" class="size-4.5 object-contain shrink-0" />
 						<span>{t.contactWhatsappBtn}</span>
 					</a>
 				</div>
