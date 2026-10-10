@@ -3,6 +3,7 @@ import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
 import { generateDynamicSlots } from '$lib/coaching/availability';
 import { DEFAULT_SETTINGS, mapServiceDoc, mapSettingsDoc } from '$lib/services/coaching';
 import { sendPurchaseNotifications } from '$lib/server/purchase-notifications';
+import { resolveCoachingWhatsapp } from '$lib/server/coaching-contact';
 
 const HOLD_MINUTES = 60;
 const TABLES = { services: 'coaching_services', bookings: 'bookings', orders: 'orders', settings: 'coaching_settings', unavailability: 'coaching_unavailability' };
@@ -180,6 +181,6 @@ export async function getOwnedBookingServer(bookingId: string, userId: string) {
 		servicePrice: Number(service?.price) || 0,
 		servicePriceUsd: Number(service?.price_usd || service?.priceUsd) || 0,
 		serviceIsFree: Boolean(service?.is_free),
-		supportWhatsapp: settings.rows[0]?.whatsapp || ''
+		supportWhatsapp: resolveCoachingWhatsapp(settings.rows[0]?.whatsapp)
 	};
 }

@@ -4,6 +4,7 @@ import { ID, Query } from 'node-appwrite';
 import { requirePaymentUser, PaymentServerError } from '$lib/server/payments';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
 import { mapBooking } from '$lib/server/bookings';
+import { resolveCoachingWhatsapp } from '$lib/server/coaching-contact';
 
 export const GET: RequestHandler = async ({ request }) => {
 	try {
@@ -131,7 +132,7 @@ export const GET: RequestHandler = async ({ request }) => {
 			}).catch(() => ({ rows: [] }))
 		]);
 		const serviceTitles = new Map(serviceRows.filter(Boolean).map((row: any) => [row.$id, row.title]));
-		const coachWhatsapp = settingsResult.rows[0]?.whatsapp || '+50937000000';
+		const coachWhatsapp = resolveCoachingWhatsapp(settingsResult.rows[0]?.whatsapp);
 		const courseProgress = Object.fromEntries(progressRows.rows.map((row: any) => {
 			let completedLessonIds: string[] = [];
 			try { completedLessonIds = JSON.parse(row.completed_lesson_ids || '[]'); } catch { /* Empty progress. */ }

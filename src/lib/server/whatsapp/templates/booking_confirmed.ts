@@ -5,7 +5,7 @@ export interface BookingConfirmedParams {
 	booking: string; // {{1}} Ex: "Coaching Personnalisé DJ"
 	date: string;    // {{2}} Ex: "Mardi 15 Octobre 2026"
 	hours: string;   // {{3}} Ex: "14:00"
-	link: string;    // {{4}} Ex: "https://djrakademi.net/dashboard#sec-coaching"
+	link: string;    // {{4}} Lien de connexion automatique /account/purchase-access avec next=/bookings
 	languageCode?: string; // Défaut 'fr'
 }
 

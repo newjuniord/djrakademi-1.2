@@ -185,7 +185,7 @@
 		const endDate = booking.endAt ? new Date(booking.endAt) : new Date(startDate.getTime() + 60 * 60 * 1000);
 		const formatUtc = (d: Date) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
 		const title = encodeURIComponent(`Coaching: ${booking.serviceTitle}`);
-		const details = encodeURIComponent(`Booking ID: ${booking.id}\nWhatsApp: ${booking.coachWhatsapp || '+50937000000'}`);
+		const details = encodeURIComponent(`Booking ID: ${booking.id}${booking.coachWhatsapp ? `\nWhatsApp: ${booking.coachWhatsapp}` : ''}`);
 		const dates = `${formatUtc(startDate)}/${formatUtc(endDate)}`;
 		return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}`;
 	}
@@ -323,10 +323,10 @@
 
 								<!-- Action Buttons -->
 								<div class="flex items-center gap-2.5 shrink-0 flex-wrap">
-									{#if booking.coachWhatsapp || '+50937000000'}
+									{#if booking.coachWhatsapp}
 										<a
 											href={whatsappLink(
-												booking.coachWhatsapp || '+50937000000',
+												booking.coachWhatsapp,
 												t.whatsappMsg
 													.replace('{title}', booking.serviceTitle)
 													.replace('{date}', `${dateInfo.date} ${dateInfo.time}`)

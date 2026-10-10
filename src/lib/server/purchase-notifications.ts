@@ -1,7 +1,7 @@
 import { Query } from 'node-appwrite';
 import type { Order } from '$lib/services/orders';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
-import { sendPurchaseConfirmationEmail, purchaseAccessLinks, publicAppUrl } from '$lib/server/purchase-email';
+import { sendPurchaseConfirmationEmail, purchaseAccessLinks } from '$lib/server/purchase-email';
 import { sendWhatsappMessage } from '$lib/server/whatsapp-message';
 import { sendCoachingBookingTemplate, sendBookingConfirmedTemplate } from '$lib/server/whatsapp';
 
@@ -82,19 +82,20 @@ export async function sendPurchaseNotifications(order: Order): Promise<{ emailSe
 		const coaching = order.productType === 'coaching' ? await coachingDetails(order) : null;
 		const recipient = coaching?.customerPhone || phone;
 		if (recipient) {
-			const { accessUrl } = purchaseAccessLinks(order);
+			const accessLink = new URL(purchaseAccessLinks(order).accessUrl);
+			if (order.productType === 'coaching') accessLink.searchParams.set('next', '/bookings');
+			const accessUrl = accessLink.toString();
 			const text = `${order.id} Il y a un problème avec le bouton de connexion. Utilise plutôt ce lien de connexion : ${accessUrl}`;
 			
 			// Si c'est un coaching, on envoie d'abord la confirmation de réservation dédiée au client
 			if (order.productType === 'coaching' && coaching) {
 				try {
-					const appUrl = publicAppUrl();
 					await sendBookingConfirmedTemplate({
 						to: recipient,
 						booking: coaching.title,
 						date: coaching.customerDate,
 						hours: coaching.customerTime,
-						link: `${appUrl}/bookings`
+						link: accessUrl
 					});
 					whatsappSent = true;
 				} catch (bookingErr) {

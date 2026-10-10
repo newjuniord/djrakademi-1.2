@@ -20,7 +20,7 @@
 	import { toast } from '$lib/toast.svelte';
 
 	let country = $state('HT');
-	let whatsapp = $state('+50937000000');
+	let whatsapp = $state('');
 	let timezone = $state('America/Port-au-Prince');
 	let timezoneOpen = $state(false);
 	let workingDays = $state([1, 2, 3, 4, 5]);
@@ -58,7 +58,7 @@
 				breakDuration = s.breakDuration;
 				noticeHours = s.noticeHours;
 				maxAdvanceDays = s.maxAdvanceDays;
-				whatsapp = s.whatsapp || '+50937000000';
+				whatsapp = s.whatsapp || '';
 				if (s.timezone && isValidTimezone(s.timezone)) {
 					timezone = s.timezone;
 				} else {

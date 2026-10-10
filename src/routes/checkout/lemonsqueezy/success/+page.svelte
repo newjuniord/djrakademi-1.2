@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { PageData } from './$types';
+	let { data }: { data: PageData } = $props();
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import {
@@ -431,11 +433,11 @@
 					</div>
 
 					<!-- Assistance Footer -->
-					{#if order.productType === 'coaching'}
+					{#if order.productType === 'coaching' && data.supportWhatsapp}
 						<div class="text-center pt-4 border-t border-base-200 text-xs text-base-content/60 print:hidden flex items-center justify-between">
 							<span>{t.cardQuestion}</span>
 							<a
-								href={whatsappLink((order as any)?.coachWhatsapp || '+50937000000', t.whatsappMessage)}
+								href={whatsappLink(data.supportWhatsapp, t.whatsappMessage)}
 								target="_blank"
 								rel="noreferrer"
 								class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"
