@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/private';
 
-export const KAPSO_ENDPOINT = 'https://api.kapso.ai/meta/whatsapp/v24.0/1328054823728545/messages';
+const DEFAULT_PHONE_NUMBER_ID = '1328054823728545';
 
 /**
  * Nettoie et formate un numéro de téléphone au format international sans '+' ni espaces.
@@ -26,7 +26,7 @@ export interface KapsoSendTemplateInput {
 /**
  * Envoie un message template WhatsApp via l'API Kapso Meta Cloud API.
  */
-export async function sendKapsoTemplate(input: KapsoSendTemplateInput): Promise<{ success: boolean; messageId?: string }> {
+export async function sendKapsoTemplate(input: KapsoSendTemplateInput): Promise<{ success: boolean; messageId: string }> {
 	const number = normalizeWhatsappNumber(input.to);
 	if (!number) {
 		throw new Error(`Numéro WhatsApp invalide : ${input.to}`);
@@ -35,6 +35,10 @@ export async function sendKapsoTemplate(input: KapsoSendTemplateInput): Promise<
 	const apiKey = env.KAPSO_API_KEY?.trim();
 	if (!apiKey) {
 		throw new Error('KAPSO_API_KEY n’est pas configurée dans le fichier .env.');
+	}
+	const phoneNumberId = env.KAPSO_PHONE_NUMBER_ID?.trim() || DEFAULT_PHONE_NUMBER_ID;
+	if (!/^\d+$/.test(phoneNumberId)) {
+		throw new Error('KAPSO_PHONE_NUMBER_ID doit être l’identifiant numérique du numéro WhatsApp dans Kapso.');
 	}
 
 	const payload = {
@@ -59,27 +63,32 @@ export async function sendKapsoTemplate(input: KapsoSendTemplateInput): Promise<
 	const timeout = setTimeout(() => controller.abort(), 12_000);
 
 	try {
-		const response = await fetch(KAPSO_ENDPOINT, {
+		const response = await fetch(`https://api.kapso.ai/meta/whatsapp/v24.0/${phoneNumberId}/messages`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'X-Kapso-API-Key': apiKey,
-				'Authorization': `Bearer ${apiKey}`
+				'X-API-Key': apiKey
 			},
 			body: JSON.stringify(payload),
-			signal: controller.signal
+			signal: controller.signal,
+			redirect: 'error'
 		});
 
 		const result = await response.json().catch(() => null);
 
-		if (!response.ok || (result?.error && !result?.messages?.[0]?.id)) {
+		if (!response.ok || result?.error) {
 			const errMsg = result?.error?.message || (result?.message ? String(result.message) : `HTTP ${response.status}`);
 			throw new Error(`Réponse Kapso WhatsApp invalide (HTTP ${response.status}, message : ${errMsg.slice(0, 150)}).`);
 		}
+		const messageId = result?.messages?.[0]?.id;
+		if (typeof messageId !== 'string' || !messageId.trim()) {
+			throw new Error('Kapso n’a pas confirmé la prise en charge du message WhatsApp (identifiant absent).');
+		}
 
+		// La prise en charge est confirmée ici ; la livraison est consultable dans Kapso.
 		return {
 			success: true,
-			messageId: result?.messages?.[0]?.id
+			messageId
 		};
 	} finally {
 		clearTimeout(timeout);

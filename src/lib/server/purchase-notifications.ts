@@ -1,10 +1,9 @@
 import { Query } from 'node-appwrite';
 import type { Order } from '$lib/services/orders';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
-import { sendPurchaseConfirmationEmail, purchaseAccessLinks } from '$lib/server/purchase-email';
+import { sendPurchaseConfirmationEmail, purchaseAccessLinks, publicAppUrl } from '$lib/server/purchase-email';
 import { sendWhatsappMessage } from '$lib/server/whatsapp-message';
 import { sendCoachingBookingTemplate, sendBookingConfirmedTemplate } from '$lib/server/whatsapp';
-import { env } from '$env/dynamic/private';
 
 async function customerPhone(order: Order): Promise<string> {
 	if (order.customerPhone) return order.customerPhone;
@@ -89,7 +88,7 @@ export async function sendPurchaseNotifications(order: Order): Promise<{ emailSe
 			// Si c'est un coaching, on envoie d'abord la confirmation de réservation dédiée au client
 			if (order.productType === 'coaching' && coaching) {
 				try {
-					const appUrl = env.PUBLIC_APP_URL || 'https://djrakademi.net';
+					const appUrl = publicAppUrl();
 					await sendBookingConfirmedTemplate({
 						to: recipient,
 						booking: coaching.title,

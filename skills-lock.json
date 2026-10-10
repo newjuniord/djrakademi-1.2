@@ -66,6 +66,30 @@
       "sourceType": "github",
       "skillPath": "skills/appwrite-typescript/SKILL.md",
       "computedHash": "abf6b3631d6aea32fa83c682c9c54881fbe13d81908d1a934be6a13809b3ff61"
+    },
+    "automate-whatsapp": {
+      "source": "gokapso/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/automate-whatsapp/SKILL.md",
+      "computedHash": "f7bd3c28a0a94879405a2b1715eed40793d6885eafb32cf1d878797e20b3caf9"
+    },
+    "integrate-whatsapp": {
+      "source": "gokapso/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/integrate-whatsapp/SKILL.md",
+      "computedHash": "a77e1d3fb41444511984fdeae0ec94f7da2fc9f3d0e2c4a7af8d07d1bf85c4dc"
+    },
+    "integrate-whatsapp-calling": {
+      "source": "gokapso/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/integrate-whatsapp-calling/SKILL.md",
+      "computedHash": "00a5c10806b8200eb8bbb10cd0b5518e4e916fa2f85433ff8e649c79711ab8e2"
+    },
+    "observe-whatsapp": {
+      "source": "gokapso/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/observe-whatsapp/SKILL.md",
+      "computedHash": "dc07c781277bf04e692fb6eb80e52cfb7d11b77a17f63dfec07670ca79dedd47"
     }
   }
 }
