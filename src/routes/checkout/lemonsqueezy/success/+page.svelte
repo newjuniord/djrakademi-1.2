@@ -19,6 +19,7 @@
 		RefreshCw
 	} from 'lucide-svelte';
 	import { formatDateTimeInTimezone } from '$lib/coaching/timezone';
+	import { whatsappLink } from '$lib/coaching/validation';
 
 	interface LemonOrder {
 		id: string;
@@ -411,7 +412,7 @@
 							<a href={getHref('/dashboard')} class="btn btn-primary w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2">{t.viewResourcesNow} <ArrowRight size={18} /></a>
 						{:else}
 							<a
-								href={getHref('/dashboard#sec-coaching')}
+								href={getHref('/bookings')}
 								class="btn bg-zinc-950 hover:bg-zinc-800 text-white w-full min-h-12 rounded-xl text-sm font-bold shadow-md gap-2"
 							>
 								<span>{t.viewBookings}</span>
@@ -434,7 +435,7 @@
 						<div class="text-center pt-4 border-t border-base-200 text-xs text-base-content/60 print:hidden flex items-center justify-between">
 							<span>{t.cardQuestion}</span>
 							<a
-								href={`https://wa.me/50937001234?text=${encodeURIComponent(t.whatsappMessage)}`}
+								href={whatsappLink((order as any)?.coachWhatsapp || '+50937000000', t.whatsappMessage)}
 								target="_blank"
 								rel="noreferrer"
 								class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"

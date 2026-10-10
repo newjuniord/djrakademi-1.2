@@ -511,7 +511,7 @@
 													</a>
 												{:else}
 													<a
-														href={getHref('/dashboard#sec-coaching')}
+														href={getHref('/bookings')}
 														class="inline-flex items-center gap-1 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-[11px] rounded-xl transition-colors"
 													>
 														<span>{t.sessionBtn}</span>
