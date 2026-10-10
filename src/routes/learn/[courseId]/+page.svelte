@@ -92,18 +92,18 @@
 	};
 	let t = $derived(i18n[currentLang]);
 
-	$effect(() => {
-		if (!authState.loading && !authState.user) {
-			goto(getHref('/'));
-		}
-	});
-
 	// Find requested course by route param
 	const courseId = $derived(page.params.courseId);
 	let course = $state<Course | null>(null);
 	let courseLoading = $state(true);
+	let loadError = $state<string | null>(null);
 
 	$effect(() => {
+		if (authState.loading) return;
+		if (!authState.user) {
+			goto(getHref('/'));
+			return;
+		}
 		const id = courseId;
 		if (id) {
 			loadCourse(id);
@@ -112,15 +112,21 @@
 
 	async function loadCourse(id: string) {
 		courseLoading = true;
+		loadError = null;
 		try {
-			if (!authState.user) throw new Error(t.loginError);
+			if (!authState.user) return;
 			course = await getOwnedCourseById(id);
 			completedLessonIds = new Set(course.progress?.completedLessonIds || []);
 			activeLessonId = course.progress?.lastLessonId || course.modules.flatMap((module) => module.lessons)[0]?.id || '';
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Course access error:', error);
-			toast.error(t.accessError);
-			goto(getHref(`/cours/${id}`));
+			const msg = String(error?.message || '');
+			if (msg.includes('403') || msg.includes('acheter cette formation')) {
+				toast.error(t.accessError);
+				goto(getHref(`/cours/${id}`));
+			} else {
+				loadError = msg || t.accessError;
+			}
 		} finally {
 			courseLoading = false;
 		}
@@ -275,11 +281,26 @@
 	     ═══════════════════════════════════════════════════ -->
 	<div class="flex-1 flex overflow-hidden relative">
 
-		{#if authState.loading}
-			<div class="flex-1 flex items-center justify-center">
+		{#if authState.loading || courseLoading}
+			<div class="flex-1 flex flex-col items-center justify-center gap-3">
 				<span class="loading loading-spinner text-amber-500 loading-lg"></span>
+				<p class="text-xs text-white/50 font-medium">{t.loading}</p>
 			</div>
-		{:else if authState.user}
+		{:else if loadError && !course}
+			<div class="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
+				<div class="size-14 bg-red-500/10 text-red-400 rounded-2xl grid place-items-center mb-2">
+					<BookOpen size={28} />
+				</div>
+				<p class="text-white/80 text-sm max-w-md font-medium">{loadError}</p>
+				<button
+					type="button"
+					onclick={() => courseId && loadCourse(courseId)}
+					class="px-6 py-3 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs rounded-xl transition-colors cursor-pointer"
+				>
+					Réessayer
+				</button>
+			</div>
+		{:else if authState.user && course}
 			<!-- LEFT / CENTER: VIDEO PLAYER & LESSON DETAILS -->
 			<main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 flex flex-col gap-5 sm:gap-6">
 
