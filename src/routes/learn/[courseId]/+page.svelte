@@ -225,10 +225,10 @@
 				<span>{t.mySpace}</span>
 			</button>
 
-			<div class="h-5 w-px bg-white/10 shrink-0"></div>
+			<div class="h-5 w-px bg-white/10 shrink-0 hidden sm:block"></div>
 
 			<!-- Course title on header -->
-			<div class="min-w-0">
+			<div class="min-w-0 hidden sm:block">
 				<p class="text-[10px] sm:text-xs text-white/40 font-medium truncate">{t.courseLabel}</p>
 				<h1 class="text-xs sm:text-sm font-black text-white truncate">{course ? course.title : t.loading}</h1>
 			</div>
@@ -236,22 +236,15 @@
 
 		<!-- Right Header Actions -->
 		<div class="flex items-center gap-2 shrink-0">
-			<div class="inline-flex items-center rounded-lg border border-white/10 bg-white/5 p-0.5" aria-label="Langue / Lang">
-				<button
-					type="button"
-					onclick={() => setLanguage('fr')}
-					aria-label="Français"
-					aria-pressed={currentLang === 'fr'}
-					class="rounded-md px-2 py-1 text-[11px] font-bold transition-colors {currentLang === 'fr' ? 'bg-amber-400 text-zinc-950' : 'text-white/70 hover:text-white'}"
-				>FR</button>
-				<button
-					type="button"
-					onclick={() => setLanguage('ht')}
-					aria-label="Kreyòl ayisyen"
-					aria-pressed={currentLang === 'ht'}
-					class="rounded-md px-2 py-1 text-[11px] font-bold transition-colors {currentLang === 'ht' ? 'bg-amber-400 text-zinc-950' : 'text-white/70 hover:text-white'}"
-				>HT</button>
-			</div>
+			<select
+				value={currentLang}
+				onchange={(e) => setLanguage(e.currentTarget.value as 'fr' | 'ht')}
+				aria-label="Langue / Lang"
+				class="rounded-lg border border-white/10 bg-white/5 text-amber-400 font-bold text-xs px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer transition-colors"
+			>
+				<option value="fr" class="bg-zinc-900 text-white">FR</option>
+				<option value="ht" class="bg-zinc-900 text-white">HT</option>
+			</select>
 
 			<!-- Progress Pill -->
 			<div class="flex items-center gap-2 px-2.5 py-1 bg-white/5 rounded-lg border border-white/10 text-xs">
