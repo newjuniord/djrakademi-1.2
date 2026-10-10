@@ -11,7 +11,7 @@
 
 	let { children } = $props();
 	let showFloatingWidgets = $derived(
-		!['/admin', '/learn', '/cours', '/dashboard'].some((prefix) => page.url.pathname === prefix || page.url.pathname.startsWith(`${prefix}/`))
+		page.url.pathname === '/' || page.url.pathname === '/contact'
 	);
 	$effect(() => {
 		document.documentElement.lang = page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr';
