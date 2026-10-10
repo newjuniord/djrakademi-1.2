@@ -47,6 +47,13 @@
 			return String(obj);
 		}
 	}
+
+	function statusLabel(code: number): string {
+		if (code >= 200 && code < 300) return 'Succès';
+		if (code >= 400 && code < 500) return 'Erreur client';
+		if (code >= 500) return 'Erreur serveur';
+		return 'Réponse HTTP';
+	}
 </script>
 
 {#if open && log}
@@ -55,7 +62,7 @@
 		type="button"
 		class="fixed inset-0 bg-black/50 z-40 transition-opacity"
 		onclick={onClose}
-		aria-label="Fermer le détails du log"
+		aria-label="Fermer les détails du journal"
 	></button>
 
 	<!-- Right Slide Drawer -->
@@ -81,7 +88,7 @@
 					</h2>
 				</div>
 				<p class="text-xs text-base-content/60 mt-1">
-					ID Requête: <span class="font-mono text-base-content/80 font-bold">{log.id}</span>
+					Identifiant de la requête : <span class="font-mono text-base-content/80 font-bold">{log.id}</span>
 				</p>
 			</div>
 
@@ -103,24 +110,24 @@
 					<div class="flex items-center gap-1 mt-0.5">
 						{#if log.statusCode < 300}
 							<CheckCircle2 size={14} class="text-success" />
-							<span class="font-bold text-success">{log.statusCode} {log.statusText}</span>
+							<span class="font-bold text-success">{log.statusCode} {statusLabel(log.statusCode)}</span>
 						{:else if log.statusCode < 500}
 							<AlertTriangle size={14} class="text-warning" />
-							<span class="font-bold text-warning">{log.statusCode} {log.statusText}</span>
+							<span class="font-bold text-warning">{log.statusCode} {statusLabel(log.statusCode)}</span>
 						{:else}
 							<XCircle size={14} class="text-error" />
-							<span class="font-bold text-error">{log.statusCode} {log.statusText}</span>
+							<span class="font-bold text-error">{log.statusCode} {statusLabel(log.statusCode)}</span>
 						{/if}
 					</div>
 				</div>
 
 				<div>
-					<span class="text-[11px] text-base-content/60 block font-semibold">Temps réponse</span>
+					<span class="text-[11px] text-base-content/60 block font-semibold">Temps de réponse</span>
 					<span class="font-mono font-bold text-base-content mt-0.5 block">{log.responseTimeMs} ms</span>
 				</div>
 
 				<div>
-					<span class="text-[11px] text-base-content/60 block font-semibold">Client IP</span>
+					<span class="text-[11px] text-base-content/60 block font-semibold">Adresse IP du client</span>
 					<span class="font-mono font-bold text-base-content mt-0.5 block">{log.clientIp}</span>
 				</div>
 
@@ -130,9 +137,9 @@
 				</div>
 			</div>
 
-			<!-- User Agent -->
+			<!-- Agent utilisateur -->
 			<div class="space-y-1">
-				<span class="text-xs font-bold text-base-content/70">User Agent</span>
+				<span class="text-xs font-bold text-base-content/70">Agent utilisateur</span>
 				<div class="p-2.5 bg-base-200/30 border border-base-200/60 text-[11px] font-mono text-base-content/80 break-all">
 					{log.userAgent}
 				</div>
@@ -142,7 +149,7 @@
 			<div class="space-y-2">
 				<span class="text-xs font-bold text-base-content/70 flex items-center gap-1.5">
 					<Code2 size={14} class="text-primary" />
-					En-têtes Requête (Request Headers)
+					En-têtes de la requête
 				</span>
 				<pre class="p-3 bg-neutral text-neutral-content text-[11px] font-mono rounded-none overflow-x-auto leading-relaxed">{formatJson(log.requestHeaders)}</pre>
 			</div>
@@ -152,7 +159,7 @@
 				<div class="flex items-center justify-between">
 					<span class="text-xs font-bold text-base-content/70 flex items-center gap-1.5">
 						<Code2 size={14} class="text-primary" />
-						Payload Requête JSON (Request Payload)
+						Données de la requête (JSON)
 					</span>
 					{#if log.requestPayload}
 						<button
@@ -178,7 +185,7 @@
 				<div class="flex items-center justify-between">
 					<span class="text-xs font-bold text-base-content/70 flex items-center gap-1.5">
 						<Code2 size={14} class="text-accent" />
-						Réponse JSON (Response Payload)
+						Données de la réponse (JSON)
 					</span>
 					{#if log.responsePayload}
 						<button
@@ -207,7 +214,7 @@
 				class="btn bg-black text-white hover:bg-black/90 border-none rounded-none text-xs font-semibold px-6"
 				onclick={onClose}
 			>
-				Fermer l'inspecteur
+				Fermer les détails
 			</button>
 		</div>
 	</div>

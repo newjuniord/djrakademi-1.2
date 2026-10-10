@@ -13,7 +13,7 @@ export interface RevenueItem {
 	emphasis?: boolean;
 }
 
-export type ProductType = 'Cours' | 'Ebook' | 'Coaching';
+export type ProductType = 'Cours' | 'Livre numérique' | 'Offre groupée' | 'Coaching';
 
 export interface RecentOrder {
 	id: string;

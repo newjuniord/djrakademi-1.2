@@ -43,7 +43,9 @@
 			hasAccountText: 'Vous avez déjà un compte ?',
 			loginAction: 'Se connecter',
 			rememberPassText: 'Je me souviens de mon mot de passe.',
-			backToLoginAction: 'Retour à la connexion'
+			backToLoginAction: 'Retour à la connexion',
+			recoverySent: 'Si un compte correspond à cette adresse, un lien de récupération vient d’être envoyé.',
+			recoveryError: 'Impossible d’envoyer le lien de récupération.'
 		},
 		ht: {
 			closeModal: 'Fèmen fenèt koneksyon an',
@@ -73,7 +75,9 @@
 			hasAccountText: 'Ou gen yon kont deja ?',
 			loginAction: 'Konekte',
 			rememberPassText: 'Mwen sonje modpas mwen an.',
-			backToLoginAction: 'Tounen nan koneksyon'
+			backToLoginAction: 'Tounen nan koneksyon',
+			recoverySent: 'Si gen yon kont ki sèvi ak adrès sa a, nou fèk voye yon lyen pou chanje modpas la.',
+			recoveryError: 'Nou pa ka voye lyen pou chanje modpas la.'
 		}
 	};
 	let t = $derived(i18n[currentLang]);
@@ -176,11 +180,14 @@
 				const response = await fetch('/api/account/recovery/request', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ email })
+					body: JSON.stringify({ email, lang: currentLang })
 				});
 				const result = await response.json().catch(() => ({}));
-				if (!response.ok) throw new Error(result.message || 'Impossible d’envoyer le lien de récupération.');
-				successMessage = result.message;
+				if (!response.ok) {
+					errorMessage = t.recoveryError;
+					return;
+				}
+				successMessage = t.recoverySent;
 			} catch (error: any) {
 				errorMessage = translateAuthError(error, currentLang);
 			} finally {

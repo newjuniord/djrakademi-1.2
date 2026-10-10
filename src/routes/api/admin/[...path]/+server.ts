@@ -737,6 +737,7 @@ export const PUT: RequestHandler = async ({ request, params }) => {
 		const announcementText = String(settings?.announcementText || '').trim();
 		const announcementTextColor = ['noir', 'blanc', 'rouge'].includes(settings?.announcementTextColor) ? settings.announcementTextColor : 'blanc';
 		const announcementBgColor = ['noir', 'blanc', 'rouge', 'jaune', 'verte'].includes(settings?.announcementBgColor) ? settings.announcementBgColor : 'noir';
+		const kapsoUrl = String(settings?.kapsoUrl || '').trim();
 
 		if (!siteName || siteName.length > 120 || tagline.length > 240 || !/^\S+@\S+\.\S+$/.test(contactEmail) || !whatsappNumber || whatsappNumber.length > 32 || !timezone || timezone.length > 64) throw new AdminServerError('Les paramètres de la plateforme sont invalides.', 400);
 		try { new Intl.DateTimeFormat('fr', { timeZone: timezone }).format(); }
@@ -764,6 +765,7 @@ export const PUT: RequestHandler = async ({ request, params }) => {
 			announcement_text: announcementText,
 			announcement_text_color: announcementTextColor,
 			announcement_bg_color: announcementBgColor,
+			...(kapsoUrl ? { kapso_url: kapsoUrl } : {}),
 			updated_at: now
 		};
 		if (uploadedFileId) data.logo_file_id = uploadedFileId;
@@ -786,6 +788,7 @@ export const PUT: RequestHandler = async ({ request, params }) => {
 				if (msg.includes('announcement_text')) delete fallbackData.announcement_text;
 				if (msg.includes('announcement_text_color')) delete fallbackData.announcement_text_color;
 				if (msg.includes('announcement_bg_color')) delete fallbackData.announcement_bg_color;
+				if (msg.includes('kapso_url')) delete fallbackData.kapso_url;
 				try {
 					saved = await trySave(fallbackData);
 				} catch (retryErr) {

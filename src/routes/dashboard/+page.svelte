@@ -56,7 +56,7 @@
 			noCoursesTitle: 'Aucune formation débloquée',
 			noCoursesSub: 'Vous n\'avez débloqué aucune formation. Découvrez notre catalogue pour commencer l\'apprentissage.',
 			exploreCatalog: 'Explorer le catalogue',
-			completed: 'complété',
+			completed: 'terminé',
 			doneBadge: 'Terminé ✓',
 			progress: 'Progrès',
 			lessons: 'leçons',
@@ -75,15 +75,17 @@
 			downloadError: 'Téléchargement impossible.',
 			coachingTitle: 'Mes séances de coaching',
 			coachingSub: 'Vos rendez-vous individuels avec le coach',
-			bookAnother: 'Réserver une autre session',
+			bookAnother: 'Réserver une autre séance',
 			noCoachingTitle: 'Aucune session réservée',
 			noCoachingSub: 'Vous n\'avez aucun rendez-vous de coaching actuellement.',
-			bookSession: 'Réserver une session',
+			bookSession: 'Réserver une séance',
 			confirmed: 'Confirmé',
 			pending: 'En attente',
 			whatsappCoach: 'WhatsApp Coach :',
 			contactCoach: 'Contacter le coach',
-			whatsappMsg: 'Bonjour, j\'ai une question concernant ma réservation de coaching ({title}).'
+			whatsappMsg: 'Bonjour, j\'ai une question concernant ma réservation de coaching ({title}).',
+			viewAllBookingsBtn: 'Voir la page dédiée à mes réservations (Dates proches & passées)',
+			viewBookingsPage: 'Gérer toutes mes réservations de coaching'
 		},
 		ht: {
 			pageTitle: 'Espas fòmasyon mwen · DJR Akademi',
@@ -129,7 +131,9 @@
 			pending: 'Ap tann',
 			whatsappCoach: 'WhatsApp konseye a:',
 			contactCoach: 'Kontakte konseye a',
-			whatsappMsg: 'Bonjou, mwen gen yon kesyon sou rezèvasyon konsiltasyon mwen an ({title}).'
+			whatsappMsg: 'Bonjou, mwen gen yon kesyon sou rezèvasyon konsiltasyon mwen an ({title}).',
+			viewAllBookingsBtn: 'Gade paj spesyal pou rezèvasyon m yo (Dat k ap vini & sa ki pase)',
+			viewBookingsPage: 'Jere tout rezèvasyon konsiltasyon m yo'
 		}
 	};
 	let t = $derived(i18n[currentLang]);
@@ -251,7 +255,30 @@
 					</div>
 				{/if}
 
-				<!-- SECTION 1: MES FORMATIONS -->
+				<!-- SECTION 1: MES COACHING -->
+				<section id="sec-coaching" class="scroll-mt-24">
+					<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-white border border-zinc-200/80 p-6 sm:p-8 rounded-2xl shadow-sm">
+						<div class="flex items-start gap-4">
+							<div class="size-12 bg-amber-400/20 text-amber-600 rounded-xl grid place-items-center shrink-0">
+								<CalendarCheck size={24} />
+							</div>
+							<div class="space-y-1">
+								<h2 class="font-black text-lg text-zinc-950">{t.coachingTitle}</h2>
+								<p class="text-xs text-zinc-500 max-w-md">{t.coachingSub}</p>
+							</div>
+						</div>
+
+						<a
+							href={getHref('/bookings')}
+							class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm shrink-0"
+						>
+							<span>{t.viewBookingsPage}</span>
+							<ArrowRight size={14} />
+						</a>
+					</div>
+				</section>
+
+				<!-- SECTION 2: MES FORMATIONS -->
 				<section id="sec-courses" class="scroll-mt-24 space-y-6">
 
 					{#if myCourses.length === 0}
@@ -329,7 +356,7 @@
 					{/if}
 				</section>
 
-				<!-- SECTION 2: MES EBOOKS -->
+				<!-- SECTION 3: MES EBOOKS -->
 				<section id="sec-ebooks" class="scroll-mt-24 space-y-6">
 
 					{#if myEbooks.length === 0}
@@ -373,65 +400,6 @@
 											<Download size={14} class={downloadingEbookId === ebook.id ? 'animate-bounce' : ''} />
 											{downloadingEbookId === ebook.id ? t.preparingDownload : t.downloadPdf}
 										</button>
-									</div>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</section>
-
-				<!-- SECTION 3: MES COACHING -->
-				<section id="sec-coaching" class="scroll-mt-24 space-y-6">
-
-					{#if myBookings.length === 0}
-						<div class="bg-white rounded-2xl border border-zinc-200/80 p-8 sm:p-12 text-center text-zinc-500 space-y-3">
-							<div class="size-12 bg-orange-400/10 text-orange-500 rounded-2xl grid place-items-center mx-auto">
-								<CalendarCheck size={24} />
-							</div>
-							<p class="text-xs text-zinc-400 max-w-md mx-auto">{t.noCoachingSub}</p>
-							<a href={getHref('/#coaching')} class="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm mt-2">
-								{t.bookSession} <ArrowRight size={14} />
-							</a>
-						</div>
-					{:else}
-						<div class="space-y-4">
-							{#each myBookings as booking (booking.id)}
-								<div class="bg-white rounded-2xl border border-zinc-200/80 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
-									<div class="flex items-start gap-4">
-										<div class="size-12 bg-amber-400/20 text-amber-600 rounded-xl grid place-items-center shrink-0">
-											<CalendarCheck size={22} />
-										</div>
-										<div class="space-y-1">
-											<div class="flex items-center gap-2">
-												<h3 class="font-black text-base text-zinc-950">{booking.serviceTitle}</h3>
-												<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase rounded-full">
-													{booking.status === 'confirmed' ? t.confirmed : t.pending}
-												</span>
-												<span class="text-[10px] text-zinc-400 font-mono border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 rounded-md">ID: {booking.id}</span>
-											</div>
-											<p class="text-xs text-zinc-500 font-medium flex items-center gap-2">
-												<Clock size={13} class="text-zinc-400" />
-												{formatBookingDate(booking.startAt)}
-											</p>
-											{#if booking.coachWhatsapp}
-												<p class="text-xs font-bold text-emerald-700 flex items-center gap-1.5 pt-0.5">
-													<img src="/whatsapp.png" alt="WhatsApp" class="size-3.5 object-contain shrink-0" />
-													<span>{t.whatsappCoach} {booking.coachWhatsapp}</span>
-												</p>
-											{/if}
-										</div>
-									</div>
-
-									<div class="flex items-center gap-3 shrink-0">
-										<a
-											href={whatsappLink(booking.coachWhatsapp || '+50937000000', t.whatsappMsg.replace('{title}', booking.serviceTitle))}
-											target="_blank"
-											rel="noreferrer"
-											class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-colors shadow-sm"
-										>
-											<img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" />
-											<span>{t.contactCoach} ({booking.coachWhatsapp || '+50937000000'})</span>
-										</a>
 									</div>
 								</div>
 							{/each}

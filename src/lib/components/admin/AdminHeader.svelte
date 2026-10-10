@@ -62,7 +62,9 @@
 		coaching: { fr: 'Coaching', ht: 'Sesyon konsèy' },
 		orders: { fr: 'Commandes', ht: 'Kòmand yo' },
 		commandes: { fr: 'Commandes', ht: 'Kòmand yo' },
-		support: { fr: 'Assistance client', ht: 'Sipò kliyan' },
+		whatsapp: { fr: 'Assistance WhatsApp', ht: 'Sipò WhatsApp' },
+		'whatsapp-support': { fr: 'Assistance WhatsApp', ht: 'Sipò WhatsApp' },
+		marketing: { fr: 'E-mails marketing', ht: 'Imèl maketing' },
 		verifications: { fr: 'Journaux de vérification', ht: 'Jounal verifikasyon' },
 		health: { fr: 'Santé et journaux API', ht: 'Eta sistèm nan ak jounal API' },
 		settings: { fr: 'Paramètres', ht: 'Paramèt jeneral' },
@@ -71,7 +73,7 @@
 
 	const i18n = {
 		fr: {
-			adminLabel: 'Admin',
+			adminLabel: 'Administration',
 			defaultTitle: 'Administration',
 			overviewTitle: 'Vue d’ensemble',
 			sectionDesc: (name: string) => `Gérez et supervisez la section ${name.toLowerCase()}.`,
@@ -80,7 +82,7 @@
 			myProfile: 'Mon profil',
 			generalSettings: 'Paramètres généraux',
 			logout: 'Déconnexion',
-			superAdmin: 'Super Admin',
+			superAdmin: 'Administrateur principal',
 			openMenu: 'Ouvrir le menu'
 		},
 		ht: {
@@ -106,7 +108,7 @@
 		section ? t.sectionDesc(title) : t.overviewDesc
 	);
 
-	let adminName = $derived(authState.profile?.name || authState.user?.name || 'Admin DJR');
+	let adminName = $derived(authState.profile?.name || authState.user?.name || (currentLang === 'ht' ? 'Administratè DJR' : 'Administrateur DJR'));
 	let adminEmail = $derived(authState.user?.email || 'admin@djrakademi.com');
 	let initials = $derived(adminName.slice(0, 2).toUpperCase() || 'AD');
 
@@ -155,7 +157,7 @@
 					onclick={() => (langDropdownOpen = !langDropdownOpen)}
 					class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-base-300 bg-base-200/60 px-3 text-xs font-bold text-base-content transition-all hover:bg-base-200 cursor-pointer"
 					aria-expanded={langDropdownOpen}
-					aria-label="Choisir la langue / Chwazi lang"
+					aria-label={currentLang === 'ht' ? 'Chwazi lang' : 'Choisir la langue'}
 				>
 					{#if currentLang === 'ht'}
 						<span>🇭🇹</span>

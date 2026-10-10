@@ -123,15 +123,15 @@
 </script>
 
 <svelte:head>
-	<title>Paramètres Coaching · Administration</title>
+	<title>Paramètres de coaching · Administration</title>
 </svelte:head>
 
 <div class="mx-auto max-w-4xl space-y-8">
 	<!-- Page Header -->
 	<div>
 		<div class="flex items-center gap-2 mb-1">
-			<span class="badge badge-warning font-bold text-[10px] uppercase tracking-wider">Multi-Régions</span>
-			<h2 class="text-2xl sm:text-3xl font-black text-base-content tracking-tight">Paramètres de Coaching</h2>
+			<span class="badge badge-warning font-bold text-[10px] uppercase tracking-wider">Plusieurs régions</span>
+			<h2 class="text-2xl sm:text-3xl font-black text-base-content tracking-tight">Paramètres de coaching</h2>
 		</div>
 		<p class="text-sm text-base-content/60">
 			Configurez votre disponibilité horaire et vos coordonnées WhatsApp. Les réservations sont automatiquement adaptées au fuseau local de vos élèves en Amérique, Europe ou Asie.
@@ -158,7 +158,7 @@
 		<div class="bg-base-100 p-6 border border-base-200 space-y-4 rounded-none">
 			<div class="flex items-center justify-between pb-3 border-b border-base-200/60">
 				<div>
-					<h3 class="font-bold text-sm text-base-content">Contact WhatsApp Professionnel</h3>
+					<h3 class="font-bold text-sm text-base-content">Contact WhatsApp professionnel</h3>
 					<p class="text-xs text-base-content/50 mt-0.5">Transmission automatique des liens de visioconférence et rappels clients.</p>
 				</div>
 			</div>
@@ -180,11 +180,11 @@
 							<Globe2 size={19} />
 						</div>
 						<div>
-							<h3 class="font-extrabold text-base text-base-content tracking-tight">Fuseau Horaire de Référence</h3>
+							<h3 class="font-extrabold text-base text-base-content tracking-tight">Fuseau horaire de référence</h3>
 							<p class="text-xs text-base-content/60 mt-0.5 font-medium">Conversion automatique en norme internationale UTC pour vos clients dans le monde entier</p>
 						</div>
 					</div>
-					<span class="badge badge-ghost font-mono text-[10px] font-bold tracking-wider uppercase bg-base-200 shrink-0">IANA Standard</span>
+					<span class="badge badge-ghost font-mono text-[10px] font-bold tracking-wider uppercase bg-base-200 shrink-0">Norme IANA</span>
 				</div>
 
 				<!-- Live Detected Info -->
@@ -238,7 +238,7 @@
 				<div class="p-3.5 rounded-xl bg-base-200/50 border border-base-300/60 flex items-start gap-2.5">
 					<ShieldCheck size={16} class="text-primary shrink-0 mt-0.5" />
 					<p class="text-xs text-base-content/70 leading-relaxed font-medium">
-						<strong>Gestion Automatique des Décalages :</strong> Tous vos créneaux sont enregistrés en norme UTC. Lorsque des clients réservent depuis la Corée du Sud, les États-Unis ou l'Europe, les heures s'adaptent instantanément à leur heure locale sans aucun risque d'erreur d'inattention.
+						<strong>Gestion automatique des décalages :</strong> Tous vos créneaux sont enregistrés au format UTC. Lorsque des clients réservent depuis la Corée du Sud, les États-Unis ou l’Europe, les heures s’adaptent automatiquement à leur fuseau horaire.
 					</p>
 				</div>
 			</div>

@@ -6,7 +6,7 @@
 
 	function typeBadge(type: RecentOrder['type']) {
 		if (type === 'Cours') return 'badge-primary';
-		if (type === 'Ebook') return 'badge-neutral';
+		if (type === 'Livre numérique') return 'badge-neutral';
 		return 'badge-outline';
 	}
 

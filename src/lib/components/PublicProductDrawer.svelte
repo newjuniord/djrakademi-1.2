@@ -85,8 +85,11 @@
 			paymentLoginToast: 'Veuillez vous connecter à votre compte pour effectuer le paiement.',
 			paymentError: 'Impossible de lancer le paiement. Veuillez réessayer.',
 			paymentProcessError: 'Une erreur est survenue lors du traitement du paiement.',
+			paymentVerifiedToast: 'Paiement confirmé ! Redirection vers votre espace…',
+			closeDrawer: 'Fermer les détails du produit',
+			coachingDuration: (minutes: number) => `${minutes} minutes de séance individuelle`,
 			badgeCourse: 'Formation',
-			badgeEbook: 'Ebook PDF',
+			badgeEbook: 'Livre numérique PDF',
 			badgeCoaching: 'Coaching 1:1',
 			programPriceLabel: 'Prix du programme',
 			freeLabel: 'Gratuit',
@@ -95,7 +98,7 @@
 			lessonsSummary: (count: number) => `${count} leçons vidéo et fiches récapitulatives`,
 			fileDetails: 'Détails du fichier',
 			formatLabel: 'Format :',
-			formatValue: 'PDF Haute Qualité',
+			formatValue: 'PDF haute qualité',
 			fileLabel: 'Fichier :',
 			downloadLabel: 'Téléchargement :',
 			downloadValue: 'Accès immédiat après achat',
@@ -105,7 +108,7 @@
 			redirectingBanner: 'Redirection vers votre espace étudiant...',
 			processingBtn: 'Traitement en cours...',
 			getFreeAccessBtn: 'Obtenir l\'accès gratuit',
-			payAmountBtn: (amount: string) => `Payer ${amount} HTG (Choisir le moyen)`,
+			payAmountBtn: (amount: string) => `Payer ${amount} HTG (choisir le moyen de paiement)`,
 			secureNotice: 'Paiement sécurisé · Support client sur WhatsApp'
 		},
 		ht: {
@@ -117,28 +120,31 @@
 			paymentLoginToast: 'Tanpri konekte sou kont ou pou w ka fè peman an.',
 			paymentError: 'Nou pa ka lanse peman an. Tanpri eseye ankò.',
 			paymentProcessError: 'Yon erè rive pandan n ap trete peman an.',
+			paymentVerifiedToast: 'Peman an konfime! N ap redirije w nan espas ou an…',
+			closeDrawer: 'Fèmen detay pwodwi a',
+			coachingDuration: (minutes: number) => `${minutes} minit sesyon endividyèl`,
 			badgeCourse: 'Fòmasyon',
-			badgeEbook: 'Ebook PDF',
+			badgeEbook: 'Liv dijital PDF',
 			badgeCoaching: 'Coaching 1:1',
-			programPriceLabel: 'Prix pwogram an',
+			programPriceLabel: 'Pri pwogram nan',
 			freeLabel: 'Gratis',
 			programOutline: 'Pwogram fòmasyon an',
 			modulesCount: (count: number) => `(${count} modil)`,
 			lessonsSummary: (count: number) => `${count} leson videyo ak feyè rezime`,
 			fileDetails: 'Detay fichye a',
 			formatLabel: 'Fòma :',
-			formatValue: 'PDF Kvalite Gwo',
+			formatValue: 'PDF bon kalite',
 			fileLabel: 'Fichye :',
 			downloadLabel: 'Telechajman :',
-			downloadValue: 'Aksè imedyat apre achte',
+			downloadValue: 'Aksè tousuit apre acha a',
 			chooseDateTitle: 'Chwazi dat ou a',
 			chooseDateSub: 'Dat ki disponib yo ap parèt sou paj rezèvasyon an.',
-			unlockedBanner: 'Aksè debloke ak siksè !',
-			redirectingBanner: 'Redirèksyon nan espas etidyan ou...',
+			unlockedBanner: 'Aksè a debloke!',
+			redirectingBanner: 'N ap redirije w nan espas etidyan ou an…',
 			processingBtn: 'Tretman an ap fèt...',
 			getFreeAccessBtn: 'Jwenn aksè gratis',
-			payAmountBtn: (amount: string) => `Peye ${amount} HTG (Chwazi fason)`,
-			secureNotice: 'Peman ansekirite · Sipò kliyan sou WhatsApp'
+			payAmountBtn: (amount: string) => `Peye ${amount} HTG (chwazi mwayen peman an)`,
+			secureNotice: 'Peman an sekirite · Sipò kliyan sou WhatsApp'
 		}
 	};
 
@@ -196,7 +202,7 @@
 						if (verification.ok && verification.success) {
 							const purchasedType = type;
 							const purchasedId = item.id;
-							toast.success(verification.message, 5000);
+							toast.success(dt.paymentVerifiedToast, 5000);
 							onClose();
 							setTimeout(() => goto(getHref(purchasedType === 'course' ? `/learn/${purchasedId}` : '/dashboard#sec-ebooks')), 1800);
 							return;
@@ -304,11 +310,11 @@
 				window.location.href = redirectTarget;
 				return;
 			} else {
-				toast.error(res?.message || dt.paymentError);
+				toast.error(dt.paymentError);
 			}
 		} catch (e: any) {
 			console.error('Plopplop payment initiation error:', e);
-			toast.error(e?.message || dt.paymentProcessError);
+			toast.error(dt.paymentProcessError);
 		} finally {
 			checkoutLoading = false;
 		}
@@ -321,7 +327,7 @@
 		type="button"
 		class="fixed inset-0 bg-black/60 z-50 transition-opacity backdrop-blur-xs"
 		onclick={onClose}
-		aria-label="Fermer le tiroir produit"
+		aria-label={dt.closeDrawer}
 	></button>
 
 	<!-- Right Slide Drawer -->
@@ -336,15 +342,15 @@
 			<div class="flex items-center gap-2">
 				{#if isCourse}
 					<span class="badge bg-black text-white font-bold text-[10px] uppercase rounded-none px-2 py-0.5">
-						Fòmasyon
+						{dt.badgeCourse}
 					</span>
 				{:else if isEbook}
 					<span class="badge badge-secondary font-bold text-[10px] uppercase rounded-none px-2 py-0.5">
-						Ebook PDF
+						{dt.badgeEbook}
 					</span>
 				{:else}
 					<span class="badge badge-accent font-bold text-[10px] uppercase rounded-none px-2 py-0.5">
-						Coaching 1:1
+						{dt.badgeCoaching}
 					</span>
 				{/if}
 
@@ -357,6 +363,7 @@
 				type="button"
 				class="btn btn-ghost btn-square btn-sm rounded-none text-base-content/70 hover:text-base-content"
 				onclick={onClose}
+				aria-label={dt.closeDrawer}
 			>
 				<X size={20} />
 			</button>
@@ -380,7 +387,7 @@
 					</div>
 					<div>
 						<span class="font-bold text-sm text-base-content block">{coachingItem?.title}</span>
-						<span class="text-xs text-base-content/65 font-medium">{coachingItem?.durationMinutes} minit sesyon endividyèl</span>
+						<span class="text-xs text-base-content/65 font-medium">{dt.coachingDuration(coachingItem?.durationMinutes || 0)}</span>
 					</div>
 				</div>
 			{/if}
@@ -397,9 +404,9 @@
 
 			<!-- Price Box -->
 			<div class="p-4 bg-base-200/50 border border-base-200 flex items-center justify-between">
-				<span class="font-semibold text-xs text-base-content/70">Prix pwogram an</span>
+				<span class="font-semibold text-xs text-base-content/70">{dt.programPriceLabel}</span>
 				{#if ('isFree' in item && item.isFree) || item.price === 0}
-					<span class="text-xl font-extrabold text-success">Gratis</span>
+					<span class="text-xl font-extrabold text-success">{dt.freeLabel}</span>
 				{:else}
 					<div class="text-right">
 						<span class="text-xl font-black text-base-content block">
@@ -418,14 +425,14 @@
 			{#if isCourse && courseItem?.modules}
 				<div class="space-y-3">
 					<span class="font-bold text-xs text-base-content block uppercase tracking-wider text-[11px] text-base-content/60">
-						Pwogram fòmasyon an ({courseItem.modules.length} modil)
+						{dt.programOutline} {dt.modulesCount(courseItem.modules.length)}
 					</span>
 					<div class="space-y-2">
 						{#each courseItem.modules as module, i}
 							<div class="p-3 bg-base-200/40 border border-base-200/80 space-y-1">
 								<span class="font-bold text-xs text-base-content block">{module.title}</span>
 								<p class="text-[11px] text-base-content/60">
-									{module.lessons.length} leson videyo ak feyè rezime
+									{dt.lessonsSummary(module.lessons.length)}
 								</p>
 							</div>
 						{/each}
@@ -434,35 +441,35 @@
 			{:else if isEbook && ebookItem}
 				<div class="space-y-3">
 					<span class="font-bold text-xs text-base-content block uppercase tracking-wider text-[11px] text-base-content/60">
-						Detay fichye a
+						{dt.fileDetails}
 					</span>
 					<div class="p-4 bg-base-200/40 border border-base-200 space-y-2 font-mono text-[11px]">
 						<div class="flex justify-between">
-							<span class="text-base-content/60">Fòma :</span>
-							<span class="font-bold text-base-content">PDF Kvalite Gwo</span>
+							<span class="text-base-content/60">{dt.formatLabel}</span>
+							<span class="font-bold text-base-content">{dt.formatValue}</span>
 						</div>
 						<div class="flex justify-between">
-							<span class="text-base-content/60">Fichye :</span>
+							<span class="text-base-content/60">{dt.fileLabel}</span>
 							<span class="font-bold text-base-content">{ebookItem.fileName}</span>
 						</div>
 						<div class="flex justify-between">
-							<span class="text-base-content/60">Telechajman :</span>
-							<span class="font-bold text-success">Aksè imedyat apre achte</span>
+							<span class="text-base-content/60">{dt.downloadLabel}</span>
+							<span class="font-bold text-success">{dt.downloadValue}</span>
 						</div>
 					</div>
 				</div>
 			{:else if isCoaching && coachingItem}
 				<div class="border border-base-200 bg-base-200/40 p-4">
-					<p class="font-bold text-base-content">Chwazi dat ou a</p>
-					<p class="mt-1 text-[11px] leading-relaxed text-base-content/60">Dat ki disponib yo ap parèt sou paj rezèvasyon an.</p>
+					<p class="font-bold text-base-content">{dt.chooseDateTitle}</p>
+					<p class="mt-1 text-[11px] leading-relaxed text-base-content/60">{dt.chooseDateSub}</p>
 				</div>
 			{/if}
 
 			{#if checkoutSuccess}
 				<div class="p-4 bg-success/15 text-success border border-success/30 font-bold text-xs text-center space-y-1">
 					<CheckCircle2 size={24} class="mx-auto text-success" />
-					<p>Aksè debloke ak siksè !</p>
-					<p class="text-[11px] font-normal text-success/80">Redirèksyon nan espas etidyan ou...</p>
+					<p>{dt.unlockedBanner}</p>
+					<p class="text-[11px] font-normal text-success/80">{dt.redirectingBanner}</p>
 				</div>
 			{/if}
 		</div>
@@ -477,19 +484,19 @@
 			>
 				{#if checkoutLoading}
 					<Loader2 size={16} class="animate-spin" />
-					<span>Tretman an ap fèt...</span>
+					<span>{dt.processingBtn}</span>
 				{:else}
 					<CreditCard size={16} />
 					{#if currentIsFree}
-						<span>Jwenn aksè gratis</span>
+						<span>{dt.getFreeAccessBtn}</span>
 					{:else}
-						<span>Peye {currentAmount.toLocaleString('fr-FR')} HTG (Chwazi fason)</span>
+						<span>{dt.payAmountBtn(currentAmount.toLocaleString('fr-FR'))}</span>
 					{/if}
 				{/if}
 			</button>
 
 			<p class="text-[10px] text-center text-base-content/50 font-medium">
-				Peman ansekirite · Sipò kliyan sou WhatsApp
+				{dt.secureNotice}
 			</p>
 		</div>
 	</div>

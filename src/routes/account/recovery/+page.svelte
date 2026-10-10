@@ -96,7 +96,7 @@
 				body: JSON.stringify({ userId, secret, password })
 			});
 			const result = await response.json().catch(() => ({}));
-			if (!response.ok) throw new Error(result.message || t.errGeneric);
+			if (!response.ok) throw new Error(t.errGeneric);
 			completed = true;
 		} catch (error) {
 			errorMessage = translateAuthError(error, currentLang);

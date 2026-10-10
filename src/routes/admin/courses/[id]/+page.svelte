@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import { getAdminCourseById, saveCourseCurriculum, updateCourse } from '$lib/services/courses';
 	import type { Course, CourseModule, Lesson } from '$lib/types/admin';
 	import CourseDrawer from '$lib/components/admin/CourseDrawer.svelte';
@@ -27,6 +28,7 @@
 	} from 'lucide-svelte';
 
 	const courseId = $derived(page.params.id);
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 	let currentCourse = $state<Course | null>(null);
 	let loading = $state(true);
 	let saving = $state(false);
@@ -91,11 +93,11 @@
 			...modules,
 			{
 				id: `mod-${Date.now()}`,
-				title: `Module ${modules.length + 1} — Nouveau module`,
+				title: currentLang === 'ht' ? `Modil ${modules.length + 1} — Nouvo modil` : `Module ${modules.length + 1} — Nouveau module`,
 				lessons: [
 					{
 						id: `les-${Date.now()}`,
-						title: 'Bienvenue dans la leçon',
+						title: translateAdminMessage('Bienvenue dans la leçon', currentLang),
 						type: 'video',
 						videoUrl: 'https://vimeo.com/76979871'
 					}
@@ -144,7 +146,7 @@
 			...updated[mIndex].lessons,
 			{
 				id: `les-${Date.now()}`,
-				title: `Leçon ${newLIndex + 1}`,
+				title: currentLang === 'ht' ? `Leson ${newLIndex + 1}` : `Leçon ${newLIndex + 1}`,
 				type: 'video',
 				videoUrl: 'https://vimeo.com/76979871'
 			}
@@ -262,7 +264,7 @@
 </script>
 
 <svelte:head>
-	<title>{currentCourse?.title ?? 'Studio de formation'} · DJR Akademi</title>
+	<title>{currentCourse?.title ?? translateAdminMessage('Studio de formation', currentLang)} · DJR Akademi</title>
 </svelte:head>
 
 
@@ -292,7 +294,7 @@
 					onclick={() => (drawerOpen = true)}
 				>
 					<Edit3 size={14} />
-					Modifier infos (Drawer)
+					Modifier les informations
 				</button>
 			</div>
 		</div>
@@ -328,7 +330,9 @@
 						{/if}
 					</div>
 					<p class="text-xs text-base-content/60 mt-1">
-						Studio d'édition : {modules.reduce((acc, m) => acc + m.lessons.length, 0)} leçons sur {modules.length} modules.
+						{currentLang === 'ht'
+							? `Estidyo koreksyon : ${modules.reduce((acc, m) => acc + m.lessons.length, 0)} leson nan ${modules.length} modil.`
+							: `Studio d'édition : ${modules.reduce((acc, m) => acc + m.lessons.length, 0)} leçons sur ${modules.length} modules.`}
 					</p>
 				</div>
 			</div>
@@ -356,12 +360,12 @@
 				<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-base-200/70 pb-4">
 					<div>
 						<div class="flex items-center gap-2 text-xs text-base-content/50 font-semibold mb-1">
-							<span>Module {activeModuleIndex + 1}</span>
+							<span>{translateAdminMessage('Module', currentLang)} {activeModuleIndex + 1}</span>
 							<ChevronRight size={13} />
-							<span>Leçon {activeLessonIndex + 1}</span>
+							<span>{translateAdminMessage('Leçon', currentLang)} {activeLessonIndex + 1}</span>
 						</div>
 						<h2 class="text-lg font-bold text-base-content">
-							Édition & Visualisation de la leçon
+							Modification et aperçu de la leçon
 						</h2>
 					</div>
 
@@ -414,7 +418,7 @@
 								class="select select-sm bg-base-100 rounded-none text-xs border border-base-300 font-bold text-base-content shadow-2xs focus:bg-base-100"
 							>
 								<option value="video">🎥 Vidéo (YouTube, Vimeo, MP4)</option>
-								<option value="text">📄 Contenu Texte</option>
+								<option value="text">📄 Contenu textuel</option>
 							</select>
 						</div>
 					</div>
@@ -429,7 +433,7 @@
 								id="active-video-url"
 								type="text"
 								bind:value={activeLesson.videoUrl}
-								placeholder="Ex: https://www.youtube.com/watch?v=... ou https://vimeo.com/76979871"
+								placeholder="Ex. : https://www.youtube.com/watch?v=... ou https://vimeo.com/76979871"
 								class="input input-sm bg-base-100 w-full rounded-none text-xs border border-base-300 font-mono text-base-content shadow-2xs focus:bg-base-100"
 							/>
 						</div>
@@ -474,11 +478,11 @@
 						<div class="flex items-center justify-between">
 							<span class="text-xs font-bold text-base-content flex items-center gap-1.5">
 								<Play size={14} class="text-primary" />
-								Visualisation de la vidéo (YouTube / Vimeo Player)
+								Aperçu de la vidéo (YouTube ou Vimeo)
 							</span>
 							{#if videoSource}
 								<span class="badge badge-success badge-sm text-[10px] font-semibold bg-success/15 text-success border-none">
-									{videoSource.type === 'iframe' ? 'Lecteur Embed' : 'Vidéo Directe'}
+									{videoSource.type === 'iframe' ? 'Lecteur intégré' : 'Vidéo directe'}
 								</span>
 							{/if}
 						</div>
@@ -540,7 +544,7 @@
 					</button>
 
 					<span class="text-xs text-base-content/60 font-medium">
-						Leçon {activeLessonIndex + 1} / {activeModule?.lessons.length ?? 1}
+						{translateAdminMessage(`Leçon ${activeLessonIndex + 1} / ${activeModule?.lessons.length ?? 1}`, currentLang)}
 					</span>
 
 					<button

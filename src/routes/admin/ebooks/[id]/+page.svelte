@@ -33,7 +33,7 @@
 			await updateEbook(
 				ebookId,
 				{
-					title: updated.title || 'Ebook',
+					title: updated.title || 'Livre numérique',
 					description: updated.description || '',
 					price: updated.price ?? 0,
 					priceUsd: updated.priceUsd,
@@ -45,11 +45,11 @@
 				coverFile,
 				pdfFile
 			);
-			toast.success('Ebook mis à jour avec succès.');
+			toast.success('Livre numérique mis à jour avec succès.');
 			goto('/admin/ebooks');
 		} catch (error: any) {
 			console.error('Failed to update ebook in Appwrite:', error);
-			toast.error(`Erreur : ${error?.message || "Impossible de mettre à jour l'ebook."}`);
+			toast.error(`Erreur : ${error?.message || "Impossible de mettre à jour le livre numérique."}`);
 		} finally {
 			saving = false;
 		}
@@ -61,7 +61,7 @@
 </script>
 
 <svelte:head>
-	<title>Modifier {currentEbook?.title ?? 'Ebook'} · DJR Akademi Admin</title>
+	<title>Modifier {currentEbook?.title ?? 'Livre numérique'} · Administration DJR Akademi</title>
 </svelte:head>
 
 <div class="space-y-6 p-1 max-w-4xl mx-auto">
@@ -72,15 +72,15 @@
 			class="btn btn-ghost btn-xs rounded-none gap-1 font-semibold text-xs text-base-content/60 hover:text-base-content self-start"
 		>
 			<ArrowLeft size={14} />
-			Retour aux ebooks
+			Retour aux livres numériques
 		</a>
 
 		<div>
 			<h1 class="text-xl font-bold tracking-tight text-base-content sm:text-2xl">
-				Modifier l'ebook
+				Modifier le livre numérique
 			</h1>
 			<p class="text-xs text-base-content/60 mt-1">
-				Mettez à jour les informations et le fichier de votre ebook.
+				Mettez à jour les informations et le fichier de votre livre numérique.
 			</p>
 		</div>
 	</div>
@@ -89,13 +89,13 @@
 	{#if loading}
 		<div class="bg-base-100 p-12 text-center text-base-content/50 space-y-3">
 			<Loader2 size={32} class="mx-auto animate-spin text-primary" />
-			<p class="text-xs font-semibold">Chargement de l'ebook...</p>
+			<p class="text-xs font-semibold">Chargement du livre numérique…</p>
 		</div>
 	{:else if currentEbook}
 		<EbookForm ebook={currentEbook} {saving} onSave={handleSave} onCancel={handleCancel} />
 	{:else}
 		<div class="bg-base-100 p-12 text-center text-base-content/50 space-y-3">
-			<p class="text-sm font-bold text-error">Ebook introuvable.</p>
+			<p class="text-sm font-bold text-error">Livre numérique introuvable.</p>
 			<a href="/admin/ebooks" class="btn btn-ghost btn-xs rounded-none">Retour à la liste</a>
 		</div>
 	{/if}

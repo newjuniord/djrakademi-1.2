@@ -1,6 +1,11 @@
 <script lang="ts">
 	import type { CoachingService } from '$lib/types/coaching';
 	import { ArrowRight, Clock, CalendarCheck } from 'lucide-svelte';
+	import { page } from '$app/state';
+	let currentLang = $derived(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+	let priceLabel = $derived(currentLang === 'ht' ? 'Pri sesyon an' : 'Prix de la séance');
+	let freeLabel = $derived(currentLang === 'ht' ? 'Gratis' : 'Gratuit');
+	let viewLabel = $derived(currentLang === 'ht' ? 'Gade dat ki disponib yo' : 'Voir les dates disponibles');
 
 	let {
 		coaching,
@@ -38,9 +43,9 @@
 	<div class="space-y-4 pt-4 border-t border-base-200/60">
 		<!-- Price Display -->
 		<div class="flex items-baseline justify-between">
-			<span class="text-xs font-semibold text-base-content/60">Prix sesyon an</span>
+			<span class="text-xs font-semibold text-base-content/60">{priceLabel}</span>
 			{#if coaching.isFree || coaching.price === 0}
-				<span class="text-lg font-extrabold text-success">Gratis</span>
+				<span class="text-lg font-extrabold text-success">{freeLabel}</span>
 			{:else}
 				<span class="text-xl font-extrabold text-base-content">
 					{coaching.price.toLocaleString('fr-FR')} <span class="text-sm font-semibold text-base-content/60">{coaching.currency}</span>
@@ -55,7 +60,7 @@
 				class="btn btn-outline border-base-300 w-full rounded-none btn-sm text-xs font-bold gap-2 group-hover:bg-black group-hover:text-white group-hover:border-black transition-all"
 				onclick={() => onSelect?.(coaching)}
 			>
-				<span>Gade dat ki disponib</span>
+				<span>{viewLabel}</span>
 				<ArrowRight size={14} />
 			</button>
 		{:else}
@@ -63,7 +68,7 @@
 				href="#coaching"
 				class="btn btn-outline border-base-300 w-full rounded-none btn-sm text-xs font-bold gap-2 group-hover:bg-black group-hover:text-white group-hover:border-black transition-all"
 			>
-				<span>Gade dat ki disponib</span>
+				<span>{viewLabel}</span>
 				<ArrowRight size={14} />
 			</a>
 		{/if}

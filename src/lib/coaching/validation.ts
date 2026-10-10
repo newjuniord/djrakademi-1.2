@@ -27,7 +27,7 @@ export function whatsappLink(phone: string, message: string): string {
 
 export function validateCoaching(value: CoachingFormValue): string | null {
 	if (!value.title.trim()) return 'Le titre est obligatoire.';
-	if (!value.slug.trim()) return 'Le slug est obligatoire.';
+	if (!value.slug.trim()) return 'L’adresse personnalisée de la page est obligatoire.';
 	if (!VALID_DURATIONS.includes(value.durationMinutes)) return 'La durée sélectionnée est invalide.';
 	if (!Number.isFinite(value.price) || value.price < 0) return 'Le prix doit être supérieur ou égal à zéro.';
 	return null;

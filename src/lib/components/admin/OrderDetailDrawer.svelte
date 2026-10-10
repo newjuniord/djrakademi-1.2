@@ -101,13 +101,13 @@
 			<div class="space-y-3">
 				<h3 class="text-xs font-bold text-base-content/50 uppercase tracking-wider flex items-center gap-2 border-b border-base-200/70 pb-2">
 					<User size={15} class="text-primary" />
-					Informations Client
+					Informations sur le client
 				</h3>
 				<div class="bg-base-200/40 p-4 rounded-none border border-base-200/60 space-y-2 text-xs">
 					<div class="flex items-center justify-between">
 						<span class="font-bold text-base-content">{order.customerName}</span>
 						{#if order.userId}
-							<span class="text-[10px] font-mono text-base-content/40">ID: {order.userId}</span>
+							<span class="text-[10px] font-mono text-base-content/40">Identifiant : {order.userId}</span>
 						{/if}
 					</div>
 					<div class="flex items-center gap-2 text-base-content/70">
@@ -129,12 +129,12 @@
 			<div class="space-y-3">
 				<h3 class="text-xs font-bold text-base-content/50 uppercase tracking-wider flex items-center gap-2 border-b border-base-200/70 pb-2">
 					<ShoppingBag size={15} class="text-primary" />
-					Produit Acheté
+					Produit acheté
 				</h3>
 				<div class="bg-base-200/40 p-4 rounded-none border border-base-200/60 flex items-center justify-between gap-4">
 					<div>
 						<span class="font-bold text-xs text-base-content block">{order.productTitle}</span>
-						<span class="text-[11px] text-base-content/50 font-mono">Ref Produit: {order.productId}</span>
+						<span class="text-[11px] text-base-content/50 font-mono">Référence du produit : {order.productId}</span>
 					</div>
 
 					{#if order.type === 'course'}
@@ -143,10 +143,10 @@
 						</span>
 					{:else if order.type === 'ebook'}
 						<span class="badge badge-secondary badge-sm font-bold text-[10px] shrink-0">
-							Ebook
+							Livre numérique
 						</span>
 					{:else if order.type === 'bundle'}
-						<span class="badge badge-warning badge-sm font-bold text-[10px] shrink-0">Bundle</span>
+						<span class="badge badge-warning badge-sm font-bold text-[10px] shrink-0">Offre groupée</span>
 					{:else}
 						<span class="badge badge-accent badge-sm font-bold text-[10px] shrink-0">
 							Coaching
@@ -159,7 +159,7 @@
 			<div class="space-y-3">
 				<h3 class="text-xs font-bold text-base-content/50 uppercase tracking-wider flex items-center gap-2 border-b border-base-200/70 pb-2">
 					<CreditCard size={15} class="text-primary" />
-					Paiement & Transaction
+					Paiement et transaction
 				</h3>
 				<div class="bg-base-200/40 p-4 rounded-none border border-base-200/60 space-y-3 text-xs">
 					<div class="flex items-center justify-between border-b border-base-200/50 pb-2">
@@ -172,7 +172,7 @@
 					</div>
 					{#if order.paymentId}
 						<div class="flex items-center justify-between">
-							<span class="text-base-content/60">ID Transaction :</span>
+							<span class="text-base-content/60">Identifiant de la transaction :</span>
 							<span class="font-mono font-semibold text-base-content">{order.paymentId}</span>
 						</div>
 					{/if}
@@ -193,7 +193,7 @@
 			<div class="space-y-3">
 				<h3 class="text-xs font-bold text-base-content/50 uppercase tracking-wider flex items-center gap-2 border-b border-base-200/70 pb-2">
 					<CheckCircle2 size={15} class="text-primary" />
-					Vérification de l'Accès
+					Vérification de l’accès
 				</h3>
 
 				<div class="p-4 rounded-none border border-base-200/60 text-xs space-y-2 {order.status === 'paid' ? 'bg-success/10 border-success/30' : 'bg-base-200/30'}">
@@ -201,13 +201,13 @@
 						<div class="flex items-center gap-2 font-bold text-success text-sm">
 							<CheckCircle2 size={18} />
 							{#if order.type === 'course'}
-								<span>Accès au cours : Accordé</span>
+								<span>Accès au cours : accordé</span>
 							{:else if order.type === 'ebook'}
-								<span>Accès à l'ebook : Accordé</span>
+								<span>Accès au livre numérique : accordé</span>
 							{:else if order.type === 'bundle'}
-								<span>Accès aux contenus du bundle : Accordé</span>
+								<span>Accès aux contenus de l’offre groupée : accordé</span>
 							{:else}
-								<span>Réservation : Confirmée</span>
+								<span>Réservation : confirmée</span>
 							{/if}
 						</div>
 						<p class="text-[11px] text-base-content/70">
@@ -222,7 +222,7 @@
 					{:else if order.status === 'pending'}
 						<div class="flex items-center gap-2 font-bold text-warning text-sm">
 							<Clock size={18} />
-							<span>Accès suspendu (En attente de paiement)</span>
+							<span>Accès suspendu (paiement en attente)</span>
 						</div>
 						<p class="text-[11px] text-base-content/70">
 							La transaction est en cours de traitement par le fournisseur de paiement.

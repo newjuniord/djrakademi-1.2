@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { PUBLIC_APPWRITE_ENDPOINT, PUBLIC_APPWRITE_PROJECT } from '$env/static/public';
 	import {
@@ -22,6 +23,7 @@
 		Megaphone
 	} from 'lucide-svelte';
 	import { getPlatformSettings, updatePlatformSettings, type PlatformSettings } from '$lib/admin/admin-client';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import { TIMEZONE_OPTIONS } from '$lib/coaching/timezone';
 	import PhoneInput from '$lib/components/coaching/PhoneInput.svelte';
 	import { toast } from '$lib/toast.svelte';
@@ -44,6 +46,14 @@
 	let loadError = $state<string | null>(null);
 	let logoFile = $state<File | null>(null);
 	let logoPreview = $state<string | null>(null);
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+	let localizedLoadError = $derived(
+		loadError && currentLang === 'ht'
+			? translateAdminMessage(loadError, 'ht') === loadError
+				? 'Pa kapab chaje paramèt yo.'
+				: translateAdminMessage(loadError, 'ht')
+			: loadError
+	);
 
 	onMount(loadSettings);
 
@@ -102,7 +112,7 @@
 </script>
 
 <svelte:head>
-	<title>Paramètres généraux · DJR Akademi Admin</title>
+	<title>Paramètres généraux · Administration DJR Akademi</title>
 </svelte:head>
 
 <div class="mx-auto max-w-5xl space-y-6">
@@ -151,7 +161,7 @@
 		<div class="alert alert-error rounded-2xl shadow-sm border border-error/20 flex items-center justify-between">
 			<div class="flex items-center gap-3">
 				<AlertCircle size={20} />
-				<span class="text-xs font-semibold">{loadError}</span>
+				<span class="text-xs font-semibold">{localizedLoadError}</span>
 			</div>
 			<button type="button" class="btn btn-sm btn-ghost font-bold rounded-xl" onclick={loadSettings}>
 				Réessayer
@@ -174,7 +184,7 @@
 						</div>
 					</div>
 					<label class="flex cursor-pointer items-center gap-3 rounded-xl border border-base-300 bg-base-100 px-4 py-3">
-						<span class="text-xs font-bold">{settings.maintenanceMode ? 'Activée' : 'Désactivée'}</span>
+						<span class="text-xs font-bold">{translateAdminMessage(settings.maintenanceMode ? 'Activée' : 'Désactivée', currentLang)}</span>
 						<input class="toggle toggle-warning" type="checkbox" bind:checked={settings.maintenanceMode} />
 					</label>
 				</div>
@@ -185,7 +195,7 @@
 				{/if}
 			</section>
 
-			<!-- Bannière d'annonce (Top Banner) -->
+			<!-- Bannière d’annonce -->
 			<section class="card bg-base-100 border border-base-300/70 shadow-xs overflow-hidden">
 				<div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between border-b border-base-300/70 bg-base-200/40">
 					<div class="flex items-start gap-3">
@@ -193,7 +203,7 @@
 							<Megaphone size={18} />
 						</div>
 						<div>
-							<h2 class="font-bold text-sm text-base-content">Bannière d'annonce (Top Banner)</h2>
+							<h2 class="font-bold text-sm text-base-content">Bannière d’annonce</h2>
 							<p class="mt-0.5 text-xs text-base-content/60">
 								Affichez un message d'information ou une promotion tout en haut de votre site.
 							</p>
@@ -201,7 +211,7 @@
 					</div>
 
 					<label class="flex cursor-pointer items-center gap-3 rounded-xl border border-base-300 bg-base-100 px-4 py-2.5 shrink-0">
-						<span class="text-xs font-bold">{settings.announcementEnabled ? 'Activée' : 'Désactivée'}</span>
+						<span class="text-xs font-bold">{translateAdminMessage(settings.announcementEnabled ? 'Activée' : 'Désactivée', currentLang)}</span>
 						<input class="toggle toggle-primary toggle-sm" type="checkbox" bind:checked={settings.announcementEnabled} />
 					</label>
 				</div>
@@ -213,7 +223,7 @@
 						<input
 							type="text"
 							bind:value={settings.announcementText}
-							placeholder="Ex: 🔥 Promotion de lancement : -50% sur tous les cours cette semaine !"
+							placeholder="Ex. : 🔥 Promotion de lancement : −50 % sur tous les cours cette semaine !"
 							class="input input-bordered w-full rounded-xl text-xs font-medium text-base-content bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
 						/>
 					</label>
@@ -234,7 +244,7 @@
 										onclick={() => (settings.announcementTextColor = opt.id as any)}
 									>
 										<span class={`size-3.5 rounded-full ${opt.dot}`}></span>
-										<span>{opt.label}</span>
+										<span>{translateAdminMessage(opt.label, currentLang)}</span>
 									</button>
 								{/each}
 							</div>
@@ -257,7 +267,7 @@
 										onclick={() => (settings.announcementBgColor = opt.id as any)}
 									>
 										<span class={`size-3.5 rounded-full ${opt.dot}`}></span>
-										<span>{opt.label}</span>
+										<span>{translateAdminMessage(opt.label, currentLang)}</span>
 									</button>
 								{/each}
 							</div>
@@ -266,7 +276,7 @@
 
 					<!-- APERÇU EN DIRECT (LIVE PREVIEW) -->
 					<div class="space-y-2 pt-2 border-t border-base-200">
-						<span class="text-[11px] font-bold text-base-content/50 uppercase tracking-wider block">Aperçu en direct (Live Preview)</span>
+						<span class="text-[11px] font-bold text-base-content/50 uppercase tracking-wider block">Aperçu en direct</span>
 						<div
 							class="w-full py-3 px-4 rounded-xl font-semibold text-xs text-center flex items-center justify-between shadow-xs transition-all"
 							style={`
@@ -368,12 +378,12 @@
 					</label>
 
 					<label class="form-control w-full space-y-1.5">
-						<span class="label-text font-bold text-xs text-base-content/70">Slogan / Tagline</span>
+						<span class="label-text font-bold text-xs text-base-content/70">Slogan</span>
 						<input
 							type="text"
 							maxlength="240"
 							bind:value={settings.tagline}
-							placeholder="Ex. Plateforme de formation & coaching en ligne"
+							placeholder="Ex. : Plateforme de formation et de coaching en ligne"
 							class="input input-bordered w-full rounded-xl text-xs text-base-content bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
 						/>
 					</label>
@@ -381,20 +391,20 @@
 			</section>
 
 			<!-- Section 3: Coordonnées de contact -->
-			<section class="card bg-base-100 border border-base-300/70 shadow-xs overflow-hidden">
-				<div class="flex items-center gap-3 border-b border-base-300/70 p-5 bg-base-200/40">
+			<section class="card relative z-10 bg-base-100 border border-base-300/70 shadow-xs overflow-visible">
+				<div class="flex items-center gap-3 rounded-t-[inherit] border-b border-base-300/70 p-5 bg-base-200/40">
 					<div class="grid size-9 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
 						<Mail size={18} />
 					</div>
 					<div>
-						<h2 class="font-bold text-sm text-base-content">Coordonnées & Contact</h2>
+						<h2 class="font-bold text-sm text-base-content">Coordonnées et contact</h2>
 						<p class="text-xs text-base-content/55">Canaux utilisés pour l'assistance et les notifications clients.</p>
 					</div>
 				</div>
 				<div class="p-6 grid gap-6 sm:grid-cols-2 items-end">
 					<label class="form-control w-full space-y-1.5">
 						<span class="label-text font-bold text-xs text-base-content/70 flex items-center gap-1.5">
-							<Mail size={14} class="text-primary" /> Email de contact *
+							<Mail size={14} class="text-primary" /> Adresse e-mail de contact *
 						</span>
 						<input
 							type="email"
@@ -413,6 +423,18 @@
 						label="Numéro WhatsApp Officiel"
 						placeholder="+509 3700 1234"
 					/>
+
+					<label class="form-control w-full space-y-1.5 sm:col-span-2">
+						<span class="label-text font-bold text-xs text-base-content/70 flex items-center gap-1.5">
+							<Globe size={14} class="text-emerald-500" /> URL de l’espace de travail WhatsApp (fenêtre intégrée)
+						</span>
+						<input
+							type="url"
+							bind:value={settings.kapsoUrl}
+							placeholder="https://app.kapso.ai"
+							class="input input-bordered w-full rounded-xl text-xs font-mono font-medium text-base-content bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+						/>
+					</label>
 				</div>
 			</section>
 
@@ -423,7 +445,7 @@
 						<Globe size={18} />
 					</div>
 					<div>
-						<h2 class="font-bold text-sm text-base-content">Fuseau horaire & Monnaie</h2>
+						<h2 class="font-bold text-sm text-base-content">Fuseau horaire et monnaie</h2>
 						<p class="text-xs text-base-content/55">Région de référence pour les plannings et la facturation.</p>
 					</div>
 				</div>
@@ -438,7 +460,7 @@
 							class="select select-bordered w-full rounded-xl text-xs font-semibold text-base-content bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
 						>
 							{#each TIMEZONE_OPTIONS as tzOption}
-								<option value={tzOption.value}>{tzOption.label}</option>
+								<option value={tzOption.value}>{translateAdminMessage(tzOption.label, currentLang)}</option>
 							{/each}
 						</select>
 					</label>
@@ -450,7 +472,7 @@
 						<div class="input input-bordered w-full rounded-xl text-xs font-bold text-base-content bg-base-200/60 border-base-300 flex items-center justify-between px-4">
 							<span>{settings.currency || 'HTG'}</span>
 							<span class="badge badge-sm font-semibold text-[10px] bg-base-300 text-base-content/60 border-none">
-								Gourde Haïtienne
+								Gourde haïtienne
 							</span>
 						</div>
 					</div>
@@ -466,7 +488,7 @@
 						</div>
 						<div>
 							<h2 class="font-bold text-sm text-base-content">Infrastructure Appwrite</h2>
-							<p class="text-xs text-base-content/55">État de la connexion backend et identifiants du projet.</p>
+							<p class="text-xs text-base-content/55">État de la connexion au serveur et identifiants du projet.</p>
 						</div>
 					</div>
 					<a href="/admin/health" class="btn btn-outline btn-sm font-semibold rounded-xl text-xs gap-1.5">
@@ -476,7 +498,7 @@
 
 				<div class="grid gap-4 text-xs sm:grid-cols-2 mt-4">
 					<div class="bg-base-200/50 border border-base-300/60 p-4 rounded-xl space-y-1.5">
-						<dt class="text-base-content/55 font-bold uppercase tracking-wider text-[10px]">Endpoint Appwrite</dt>
+						<dt class="text-base-content/55 font-bold uppercase tracking-wider text-[10px]">Adresse du serveur Appwrite</dt>
 						<dd class="font-mono font-bold text-xs text-base-content break-all flex items-center justify-between gap-2">
 							<span>{PUBLIC_APPWRITE_ENDPOINT || 'Non configuré'}</span>
 							<span class="badge badge-success badge-xs gap-1 font-semibold text-[10px] shrink-0">
@@ -486,11 +508,11 @@
 					</div>
 
 					<div class="bg-base-200/50 border border-base-300/60 p-4 rounded-xl space-y-1.5">
-						<dt class="text-base-content/55 font-bold uppercase tracking-wider text-[10px]">Identifiant du Projet</dt>
+						<dt class="text-base-content/55 font-bold uppercase tracking-wider text-[10px]">Identifiant du projet</dt>
 						<dd class="font-mono font-bold text-xs text-base-content flex items-center justify-between gap-2">
 							<span>{PUBLIC_APPWRITE_PROJECT || 'Non configuré'}</span>
 							<span class="badge badge-neutral badge-xs font-semibold text-[10px] shrink-0">
-								Project ID
+								Identifiant du projet
 							</span>
 						</dd>
 					</div>
@@ -499,4 +521,3 @@
 		</form>
 	{/if}
 </div>
-

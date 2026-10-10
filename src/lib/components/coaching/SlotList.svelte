@@ -331,7 +331,7 @@
 					onclick={() => (mode = 'bulk')}
 				>
 					<Zap size={14} class={mode === 'bulk' ? 'text-amber-500 fill-amber-500' : ''} />
-					<span>Générateur en masse (Recommandé)</span>
+					<span>Générateur en masse (recommandé)</span>
 				</button>
 				<button
 					type="button"
@@ -421,7 +421,7 @@
 					<div class="space-y-3 pt-3 border-t border-base-200">
 						<span class="text-xs font-extrabold uppercase tracking-wider text-base-content/70 flex items-center gap-1.5">
 							<span class="size-5 rounded-full bg-primary/10 text-primary text-[10px] font-black grid place-items-center">3</span>
-							Horaire quotidien & Durées
+							Horaires quotidiens et durées
 						</span>
 
 						<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -484,7 +484,7 @@
 								<span>Génération en cours…</span>
 							{:else}
 								<Eye size={16} class="text-amber-300" />
-								<span>Revoir & Générer ({calculatedBatch.length} créneaux)</span>
+								<span>Vérifier et générer ({calculatedBatch.length} créneaux)</span>
 							{/if}
 						</button>
 					</div>
@@ -687,12 +687,12 @@
 						<span>Génération en cours…</span>
 					{:else}
 						<CheckCircle2 size={16} />
-						<span>Confirmer & Générer les {calculatedBatch.length} créneaux</span>
+						<span>Confirmer et générer les {calculatedBatch.length} créneaux</span>
 					{/if}
 				</button>
 			</div>
 		</div>
-		<button class="modal-backdrop" type="button" aria-label="Fermer" onclick={() => (showReviewModal = false)}>close</button>
+		<button class="modal-backdrop" type="button" aria-label="Fermer" onclick={() => (showReviewModal = false)}>Fermer</button>
 	</div>
 {/if}
 
@@ -754,6 +754,6 @@
 				</button>
 			</div>
 		</div>
-		<button class="modal-backdrop" type="button" aria-label="Fermer" onclick={() => (showBulkDeleteConfirm = false)}>close</button>
+		<button class="modal-backdrop" type="button" aria-label="Fermer" onclick={() => (showBulkDeleteConfirm = false)}>Fermer</button>
 	</div>
 {/if}

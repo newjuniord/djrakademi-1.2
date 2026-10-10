@@ -132,6 +132,7 @@ export function mapSettings(row?: any) {
 		announcementText: row?.announcement_text || '',
 		announcementTextColor: (row?.announcement_text_color || 'blanc') as 'noir' | 'blanc' | 'rouge',
 		announcementBgColor: (row?.announcement_bg_color || 'noir') as 'noir' | 'blanc' | 'rouge' | 'jaune' | 'verte',
+		kapsoUrl: row?.kapso_url || undefined,
 		logoUrl
 	};
 }

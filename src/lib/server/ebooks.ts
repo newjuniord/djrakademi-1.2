@@ -32,8 +32,8 @@ export async function claimFreeEbookServer(ebookId: string, user: Models.User<Mo
 	const transaction = await tables.createTransaction({ ttl: 60 });
 	try {
 		const ebook: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: EBOOKS_TABLE, rowId: ebookId, transactionId: transaction.$id });
-		if (!ebook.published) throw new EbookServerError('Cet ebook n’est pas disponible.', 404);
-		if (!ebook.is_free && Number(ebook.price) > 0) throw new EbookServerError('Cet ebook nécessite un paiement.', 409);
+		if (!ebook.published) throw new EbookServerError('Ce livre numérique n’est pas disponible.', 404);
+		if (!ebook.is_free && Number(ebook.price) > 0) throw new EbookServerError('Ce livre numérique nécessite un paiement.', 409);
 		const existing = await tables.listRows({
 			databaseId: DATABASE_ID, tableId: ACCESS_TABLE, transactionId: transaction.$id,
 			queries: [Query.equal('user_id', user.$id), Query.equal('item_type', 'ebook'), Query.equal('item_id', ebookId), Query.limit(1)]
@@ -51,7 +51,7 @@ export async function claimFreeEbookServer(ebookId: string, user: Models.User<Mo
 			databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: ID.unique(), transactionId: transaction.$id,
 			data: {
 				user_id: user.$id, customer_name: user.name || 'Client', customer_email: user.email,
-				product_type: 'ebook', product_id: ebookId, product_title: String(ebook.title || 'Ebook'), amount: 0,
+				product_type: 'ebook', product_id: ebookId, product_title: String(ebook.title || 'Livre numérique'), amount: 0,
 				currency: 'HTG', payment_provider: 'free', status: 'paid', created_at: now, paid_at: now
 			}
 		});
@@ -60,7 +60,7 @@ export async function claimFreeEbookServer(ebookId: string, user: Models.User<Mo
 	} catch (error) {
 		await tables.updateTransaction({ transactionId: transaction.$id, rollback: true }).catch(() => undefined);
 		if (error instanceof EbookServerError) throw error;
-		if ((error as any)?.code === 404) throw new EbookServerError('Ebook introuvable.', 404);
+		if ((error as any)?.code === 404) throw new EbookServerError('Livre numérique introuvable.', 404);
 		if ((error as any)?.code === 409) return { success: true, alreadyOwned: true };
 		throw error;
 	}
@@ -70,12 +70,12 @@ export async function getEbookFileServer(ebookId: string, userId: string) {
 	const { tables, storage } = adminServices();
 	let ebook: any;
 	try { ebook = await tables.getRow({ databaseId: DATABASE_ID, tableId: EBOOKS_TABLE, rowId: ebookId }); }
-	catch { throw new EbookServerError('Ebook introuvable.', 404); }
+	catch { throw new EbookServerError('Livre numérique introuvable.', 404); }
 	const access = await tables.listRows({
 		databaseId: DATABASE_ID, tableId: ACCESS_TABLE,
 		queries: [Query.equal('user_id', userId), Query.equal('item_type', 'ebook'), Query.equal('item_id', ebookId), Query.limit(1)]
 	});
-	if (!access.rows.length) throw new EbookServerError('Vous ne possédez pas cet ebook.', 403);
+	if (!access.rows.length) throw new EbookServerError('Vous ne possédez pas ce livre numérique.', 403);
 	if (!ebook.pdf_file_id) throw new EbookServerError('Le fichier PDF n’est pas encore disponible.', 404);
 	try {
 		const [file, bytes] = await Promise.all([
@@ -92,7 +92,7 @@ export async function getEbookCoverServer(ebookId: string) {
 	const { tables, storage } = adminServices();
 	let ebook: any;
 	try { ebook = await tables.getRow({ databaseId: DATABASE_ID, tableId: EBOOKS_TABLE, rowId: ebookId }); }
-	catch { throw new EbookServerError('Ebook introuvable.', 404); }
+	catch { throw new EbookServerError('Livre numérique introuvable.', 404); }
 	if (!ebook.cover_file_id) throw new EbookServerError('Couverture introuvable.', 404);
 	try {
 		const [file, bytes] = await Promise.all([

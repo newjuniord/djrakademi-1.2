@@ -30,8 +30,6 @@
 			clientLabel: 'Client',
 			dateLabel: 'Date',
 			localTimeLabel: 'Heure locale',
-			amountLabel: 'Montant',
-			freeText: 'Gratuit',
 			timezoneLabel: 'Fuseau horaire',
 			localTimeCity: 'Heure locale ·',
 			whatsappCoach: 'WhatsApp Coach',
@@ -51,8 +49,6 @@
 			clientLabel: 'Kliyan',
 			dateLabel: 'Dat',
 			localTimeLabel: 'Lè lokal',
-			amountLabel: 'Montan',
-			freeText: 'Gratis',
 			timezoneLabel: 'Fizo lè',
 			localTimeCity: 'Lè lokal ·',
 			whatsappCoach: 'WhatsApp konseye a',
@@ -67,9 +63,6 @@
 	let booking = $state<Booking | null>(null);
 	let serviceTitle = $state('');
 	let whatsappNumber = $state<string | null>(null);
-	let servicePrice = $state(0);
-	let servicePriceUsd = $state(0);
-	let serviceIsFree = $state(false);
 
 	onMount(async () => {
 		const bookingId = page.params.id;
@@ -78,9 +71,6 @@
 			const result = await getOwnedBooking(bookingId) as any;
 			booking = result.booking;
 			serviceTitle = result.serviceTitle;
-			servicePrice = result.servicePrice || 0;
-			servicePriceUsd = result.servicePriceUsd || 0;
-			serviceIsFree = Boolean(result.serviceIsFree);
 			whatsappNumber = result.supportWhatsapp;
 		} catch (caught) {
 			console.warn("Failed to fetch owned booking:", caught);
@@ -140,21 +130,6 @@
 						<div class="flex justify-between gap-4">
 							<dt class="text-base-content/55">{t.localTimeLabel}</dt>
 							<dd class="font-medium">{local.time}</dd>
-						</div>
-						<div class="flex justify-between gap-4">
-							<dt class="text-base-content/55">{t.amountLabel}</dt>
-							<dd class="font-medium">
-								{#if (booking.amount || servicePrice) > 0}
-									{(booking.amount || servicePrice).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'ht-HT')} HTG
-									{#if servicePriceUsd > 0}
-										<span class="text-amber-600 font-semibold ml-1">(${servicePriceUsd} USD)</span>
-									{/if}
-								{:else if serviceIsFree}
-									{t.freeText}
-								{:else}
-									{t.freeText}
-								{/if}
-							</dd>
 						</div>
 						<div class="flex justify-between gap-4">
 							<dt class="text-base-content/55">{t.timezoneLabel}</dt>

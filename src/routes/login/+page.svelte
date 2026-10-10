@@ -211,7 +211,7 @@
 			<div class="flex items-center p-6 sm:p-10 lg:p-12 xl:p-16">
 				<div class="mx-auto w-full max-w-md">
 
-					<div class="mb-6 grid grid-cols-2 rounded-2xl bg-zinc-100 p-1.5" role="tablist" aria-label="Authentification">
+					<div class="mb-6 grid grid-cols-2 rounded-2xl bg-zinc-100 p-1.5" role="tablist" aria-label={currentLang === 'ht' ? 'Koneksyon oswa enskripsyon' : 'Connexion ou inscription'}>
 						<button
 							type="button"
 							role="tab"

@@ -61,6 +61,7 @@ export interface PlatformSettings {
 	announcementText?: string;
 	announcementTextColor?: BannerTextColor;
 	announcementBgColor?: BannerBgColor;
+	kapsoUrl?: string;
 }
 
 export class AdminApiError extends Error {
@@ -85,6 +86,17 @@ function getBasePath(): string {
 		throw new AdminApiError('PUBLIC_ADMIN_API_PATH doit être un chemin local commençant par /.');
 	}
 	return configured.replace(/\/$/, '');
+}
+
+export async function adminAuthorizedFetch(path: string, init: RequestInit = {}): Promise<Response> {
+	let jwt: string;
+	try { jwt = await getAdminJwt(); }
+	catch { throw new AdminApiError('Votre session a expiré. Reconnectez-vous.', 401); }
+	return fetch(`${getBasePath()}${path}`, {
+		...init,
+		credentials: 'same-origin',
+		headers: { ...init.headers, Authorization: `Bearer ${jwt}` }
+	});
 }
 
 export async function adminRequest<T>(path: string, init: RequestInit = {}): Promise<T> {

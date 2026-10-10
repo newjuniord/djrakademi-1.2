@@ -1,6 +1,10 @@
 <script lang="ts">
 	import type { Ebook } from '$lib/types/admin';
 	import { ArrowRight, FileText } from 'lucide-svelte';
+	import { page } from '$app/state';
+	let currentLang = $derived(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+	let freeLabel = $derived(currentLang === 'ht' ? 'Gratis' : 'Gratuit');
+	let viewLabel = $derived(currentLang === 'ht' ? 'Gade liv dijital la' : 'Voir le livre numérique');
 
 	let {
 		ebook,
@@ -32,7 +36,7 @@
 			<div class="absolute top-3 right-3">
 				{#if ebook.isFree || ebook.price === 0}
 					<span class="badge badge-success font-bold text-xs bg-success text-white border-none rounded-none px-2.5 py-1">
-						Gratis
+						{freeLabel}
 					</span>
 				{:else}
 					<span class="badge bg-black text-white font-bold text-xs border-none rounded-none px-2.5 py-1">
@@ -61,7 +65,7 @@
 				class="btn btn-outline border-base-300 w-full rounded-none btn-sm text-xs font-bold gap-2 group-hover:bg-black group-hover:text-white group-hover:border-black transition-all"
 				onclick={() => onSelect?.(ebook)}
 			>
-				<span>Gade ebook la</span>
+				<span>{viewLabel}</span>
 				<ArrowRight size={14} />
 			</button>
 		{:else}
@@ -69,7 +73,7 @@
 				href="#ebooks"
 				class="btn btn-outline border-base-300 w-full rounded-none btn-sm text-xs font-bold gap-2 group-hover:bg-black group-hover:text-white group-hover:border-black transition-all"
 			>
-				<span>Gade ebook la</span>
+				<span>{viewLabel}</span>
 				<ArrowRight size={14} />
 			</a>
 		{/if}

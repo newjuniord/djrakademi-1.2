@@ -13,7 +13,7 @@
 		try {
 			await createEbook(
 				{
-					title: newEbook.title || 'Nouvel Ebook',
+					title: newEbook.title || 'Nouveau livre numérique',
 					description: newEbook.description || '',
 					price: newEbook.price ?? 0,
 					priceUsd: newEbook.priceUsd,
@@ -25,11 +25,11 @@
 				coverFile,
 				pdfFile
 			);
-			toast.success('Ebook créé avec succès.');
+			toast.success('Livre numérique créé avec succès.');
 			goto('/admin/ebooks');
 		} catch (error: any) {
 			console.error('Failed to create ebook in Appwrite:', error);
-			toast.error(`Erreur : ${error?.message || "Impossible de créer l'ebook."}`);
+			toast.error(`Erreur : ${error?.message || "Impossible de créer le livre numérique."}`);
 		} finally {
 			saving = false;
 		}
@@ -41,7 +41,7 @@
 </script>
 
 <svelte:head>
-	<title>Nouvel Ebook · DJR Akademi Admin</title>
+	<title>Nouveau livre numérique · Administration DJR Akademi</title>
 </svelte:head>
 
 <div class="space-y-6 p-1 max-w-4xl mx-auto">
@@ -52,15 +52,15 @@
 			class="btn btn-ghost btn-xs rounded-none gap-1 font-semibold text-xs text-base-content/60 hover:text-base-content self-start"
 		>
 			<ArrowLeft size={14} />
-			Retour aux ebooks
+			Retour aux livres numériques
 		</a>
 
 		<div>
 			<h1 class="text-xl font-bold tracking-tight text-base-content sm:text-2xl">
-				Créer un ebook
+				Créer un livre numérique
 			</h1>
 			<p class="text-xs text-base-content/60 mt-1">
-				Ajoutez un nouvel ebook à votre catalogue.
+				Ajoutez un nouveau livre numérique à votre catalogue.
 			</p>
 		</div>
 	</div>

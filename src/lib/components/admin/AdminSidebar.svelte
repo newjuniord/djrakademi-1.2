@@ -14,13 +14,14 @@
 		Layers3,
 		ChevronRight,
 		Activity,
-		MessageSquare
+		Mail
 	} from 'lucide-svelte';
+	import WhatsAppIcon from '$lib/components/icons/WhatsAppIcon.svelte';
 
 	type NavItem = {
 		label: { fr: string; ht: string };
 		href: string;
-		icon: typeof LayoutDashboard;
+		icon: any;
 		badge?: { text: string; variant: 'primary' | 'secondary' | 'accent' | 'warning' | 'info' };
 	};
 
@@ -62,7 +63,8 @@
 			title: { fr: 'Finances et ventes', ht: 'Vant ak Finans' },
 			items: [
 				{ label: { fr: 'Commandes', ht: 'Kòmand yo' }, href: '/admin/orders', icon: ShoppingBag },
-				{ label: { fr: 'Assistance client', ht: 'Sipò kliyan' }, href: '/admin/support', icon: MessageSquare }
+				{ label: { fr: 'Assistance WhatsApp', ht: 'Sipò WhatsApp' }, href: '/admin/whatsapp', icon: WhatsAppIcon },
+				{ label: { fr: 'E-mails marketing', ht: 'Imèl maketing' }, href: '/admin/marketing', icon: Mail }
 			]
 		},
 		{
@@ -112,7 +114,7 @@
 	>
 		<div class="flex items-center gap-3.5">
 			<div class="relative flex items-center justify-center rounded-xl bg-white p-1.5 shadow-md shadow-base-300/50 border border-base-200 transition-transform duration-300 group-hover:scale-105">
-				<img src="/logo.png" alt="DJR Akademi Logo" class="h-8 w-auto object-contain" />
+				<img src="/logo.png" alt="Logo de DJR Akademi" class="h-8 w-auto object-contain" />
 				<span class="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-base-100 bg-success"></span>
 			</div>
 			<div class="flex flex-col leading-none">

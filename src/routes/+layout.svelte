@@ -6,14 +6,16 @@
 	import AdminToast from '$lib/components/admin/AdminToast.svelte';
 	import ImpersonationBanner from '$lib/components/ImpersonationBanner.svelte';
 	import AuthModal from '$lib/components/AuthModal.svelte';
-	import SupportWidget from '$lib/components/SupportWidget.svelte';
-	import TawkChat from '$lib/components/TawkChat.svelte';
+	import FloatingWhatsApp from '$lib/components/FloatingWhatsApp.svelte';
 	import { client } from '$lib/appwrite';
 
 	let { children } = $props();
 	let showFloatingWidgets = $derived(
 		!['/admin', '/learn'].some((prefix) => page.url.pathname === prefix || page.url.pathname.startsWith(`${prefix}/`))
 	);
+	$effect(() => {
+		document.documentElement.lang = page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr';
+	});
 
 	onMount(() => {
 		authState.check();
@@ -33,7 +35,6 @@
 {@render children()}
 <AuthModal bind:isOpen={authState.showAuthModal} onLogin={handleLoginSuccess} />
 {#if showFloatingWidgets}
-	<SupportWidget />
+	<FloatingWhatsApp />
 {/if}
-<TawkChat visible={showFloatingWidgets} />
 <AdminToast />

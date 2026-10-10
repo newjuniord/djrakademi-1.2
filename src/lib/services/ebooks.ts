@@ -152,7 +152,7 @@ export async function createEbook(
 	const now = new Date().toISOString();
 	const vId = (data.variantId || data.lemonsqueezyVariantId || '').trim();
 	const payload: Record<string, any> = {
-		title: data.title || 'Nouvel Ebook',
+		title: data.title || 'Nouveau livre numérique',
 		description: data.description || '',
 		price: typeof data.price === 'number' ? Math.max(0, data.price) : 0,
 		price_usd: typeof data.priceUsd === 'number' && data.priceUsd > 0 ? data.priceUsd : undefined,
@@ -189,7 +189,7 @@ export async function createEbook(
 			doc = await tryCreate(fallback);
 		} else {
 			console.error('[Appwrite Ebooks Service] Failed to create ebook document in Appwrite:', e);
-			throw new Error(e?.message || "Erreur lors de la création de l'ebook dans Appwrite.");
+			throw new Error(e?.message || "Erreur lors de la création du livre numérique dans Appwrite.");
 		}
 	}
 
@@ -252,7 +252,7 @@ export async function updateEbook(
 
 	const vId = (data.variantId || data.lemonsqueezyVariantId || '').trim();
 	const payload: Record<string, any> = {
-		title: data.title || 'Ebook',
+		title: data.title || 'Livre numérique',
 		description: data.description || '',
 		price: typeof data.price === 'number' ? Math.max(0, data.price) : 0,
 		price_usd: typeof data.priceUsd === 'number' && data.priceUsd > 0 ? data.priceUsd : 0,
@@ -287,7 +287,7 @@ export async function updateEbook(
 			updatedDoc = await tryUpdate(fallback);
 		} else {
 			console.error('[Appwrite Ebooks Service] Failed to update ebook document in Appwrite:', e);
-			throw new Error(e?.message || "Erreur lors de la mise à jour de l'ebook.");
+			throw new Error(e?.message || "Erreur lors de la mise à jour du livre numérique.");
 		}
 	}
 

@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import { adminRequest, getAdminCourses } from '$lib/admin/admin-client';
 	import { getEbooks } from '$lib/services/ebooks';
 	import { uploadCourseCover } from '$lib/services/courses';
@@ -46,6 +48,7 @@
 	// Filter & View State
 	let searchQuery = $state('');
 	let filterStatus = $state<'all' | 'published' | 'draft'>('all');
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 	let viewMode = $state<'grid' | 'table'>('grid');
 
 	// Drawer / Modal Form State
@@ -213,7 +216,7 @@
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				toast.error("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.");
+				toast.error("L'image est trop volumineuse. La taille maximale autorisée est de 10 Mo.");
 				return;
 			}
 			coverFile = file;
@@ -230,7 +233,7 @@
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				toast.error("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.");
+				toast.error("L'image est trop volumineuse. La taille maximale autorisée est de 10 Mo.");
 				return;
 			}
 			coverFile = file;
@@ -358,7 +361,7 @@
 </script>
 
 <svelte:head>
-	<title>Offres groupées · DJR Akademi Admin</title>
+	<title>Offres groupées · Administration DJR Akademi</title>
 </svelte:head>
 
 <div class="space-y-8 p-1">
@@ -372,7 +375,7 @@
 				Offres groupées
 			</h1>
 			<p class="text-xs text-base-content/60 mt-1">
-				Regroupez plusieurs formations et e-books avec une réduction attractive pour vos apprenants.
+				Regroupez plusieurs formations et livres numériques avec une réduction attractive pour vos apprenants.
 			</p>
 		</div>
 
@@ -441,7 +444,7 @@
 		<!-- Card 3: Brouillons -->
 		<div class="bg-base-100 p-6 shadow-sm rounded-none border-none flex items-center justify-between">
 			<div>
-				<span class="text-xs font-semibold text-base-content/60 block">Brouillons hors-ligne</span>
+				<span class="text-xs font-semibold text-base-content/60 block">Brouillons hors ligne</span>
 				<span class="text-2xl sm:text-3xl font-extrabold text-zinc-600 mt-1 block">
 					{draftCount}
 				</span>
@@ -492,21 +495,21 @@
 						class="px-3.5 py-1.5 text-xs font-semibold rounded-none transition-all {filterStatus === 'all' ? 'bg-base-100 text-base-content shadow-xs font-bold' : 'text-base-content/60 hover:text-base-content'}"
 						onclick={() => (filterStatus = 'all')}
 					>
-						Tous ({bundles.length})
+						{translateAdminMessage('Tous', currentLang)} ({bundles.length})
 					</button>
 					<button
 						type="button"
 						class="px-3.5 py-1.5 text-xs font-semibold rounded-none transition-all {filterStatus === 'published' ? 'bg-base-100 text-base-content shadow-xs font-bold' : 'text-base-content/60 hover:text-base-content'}"
 						onclick={() => (filterStatus = 'published')}
 					>
-						Publiés ({publishedCount})
+						{translateAdminMessage('Publiés', currentLang)} ({publishedCount})
 					</button>
 					<button
 						type="button"
 						class="px-3.5 py-1.5 text-xs font-semibold rounded-none transition-all {filterStatus === 'draft' ? 'bg-base-100 text-base-content shadow-xs font-bold' : 'text-base-content/60 hover:text-base-content'}"
 						onclick={() => (filterStatus = 'draft')}
 					>
-						Brouillons ({draftCount})
+						{translateAdminMessage('Brouillons', currentLang)} ({draftCount})
 					</button>
 				</div>
 
@@ -544,9 +547,9 @@
 				<h3 class="font-bold text-sm text-base-content">Aucune offre groupée trouvée</h3>
 				<p class="text-xs text-base-content/60 max-w-sm mx-auto">
 					{#if searchQuery || filterStatus !== 'all'}
-						Aucun bundle ne correspond à vos filtres de recherche.
+						Aucune offre groupée ne correspond à vos filtres de recherche.
 					{:else}
-						Vous n'avez pas encore créé de bundle. Associez 2 à 30 produits pour proposer des packs avantageux.
+						Vous n’avez pas encore créé d’offre groupée. Associez de 2 à 30 produits pour proposer des offres avantageuses.
 					{/if}
 				</p>
 				{#if !searchQuery && filterStatus === 'all'}
@@ -555,7 +558,7 @@
 						onclick={openCreateDrawer}
 						class="btn btn-sm bg-black text-white hover:bg-black/90 rounded-none font-semibold text-xs gap-2 mt-2"
 					>
-						<Plus size={16} /> Créer votre premier bundle
+						<Plus size={16} /> Créer votre première offre groupée
 					</button>
 				{/if}
 			</div>
@@ -579,7 +582,7 @@
 								<div class="w-full h-full bg-linear-to-br from-zinc-900 via-zinc-800 to-amber-950 p-6 flex flex-col justify-between">
 									<div class="flex items-center justify-between">
 										<span class="px-2.5 py-1 rounded-none text-[10px] font-black uppercase tracking-wider bg-amber-400 text-zinc-950">
-											PACK PROMO
+											OFFRE PROMOTIONNELLE
 										</span>
 									</div>
 									<Layers3 size={40} class="text-amber-400/30 self-end" />
@@ -593,7 +596,7 @@
 								</span>
 								{#if discount > 0}
 									<span class="badge bg-amber-400 text-zinc-950 font-black text-[10px] rounded-none border-none shadow-md px-2">
-										-{discount}% OFF
+										-{discount} % de réduction
 									</span>
 								{/if}
 							</div>
@@ -615,7 +618,7 @@
 								<div class="flex items-center justify-between text-[11px] font-bold text-base-content/70">
 									<span>Produits inclus ({bundle.items.length})</span>
 									<span class="text-base-content/40 font-normal">
-										{bundle.items.filter((i) => i.type === 'course').length} cours · {bundle.items.filter((i) => i.type === 'ebook').length} e-books
+										{translateAdminMessage(`${bundle.items.filter((i) => i.type === 'course').length} cours · ${bundle.items.filter((i) => i.type === 'ebook').length} livres numériques`, currentLang)}
 									</span>
 								</div>
 								<div class="space-y-1 max-h-24 overflow-y-auto pr-1">
@@ -714,8 +717,8 @@
 					<thead>
 						<tr class="border-b border-base-200 text-xs font-semibold text-base-content/50 uppercase tracking-wider bg-base-100">
 							<th class="py-4 px-4 font-bold">Offre groupée</th>
-							<th class="py-4 px-4 font-bold">Produits Inclus</th>
-							<th class="py-4 px-4 font-bold">Prix Pack</th>
+							<th class="py-4 px-4 font-bold">Produits inclus</th>
+							<th class="py-4 px-4 font-bold">Prix de l’offre</th>
 							<th class="py-4 px-4 font-bold">Réduction</th>
 							<th class="py-4 px-4 font-bold">Statut</th>
 							<th class="py-4 px-4 font-bold text-right">Actions</th>
@@ -756,14 +759,14 @@
 									</div>
 								</td>
 
-								<!-- Column 2: Produits Inclus -->
+								<!-- Column 2: Produits inclus -->
 								<td class="py-4 px-4">
 									<div class="flex flex-wrap items-center gap-1.5">
 										<span class="badge badge-neutral badge-xs font-bold rounded-none">
 											{bundle.items.length} produit{bundle.items.length > 1 ? 's' : ''}
 										</span>
 										<span class="text-[11px] text-base-content/60">
-											({bundle.items.filter((i) => i.type === 'course').length} cours, {bundle.items.filter((i) => i.type === 'ebook').length} e-books)
+											{translateAdminMessage(`(${bundle.items.filter((i) => i.type === 'course').length} cours, ${bundle.items.filter((i) => i.type === 'ebook').length} livres numériques)`, currentLang)}
 										</span>
 									</div>
 								</td>
@@ -890,7 +893,7 @@
 						{editingId ? 'Modifier l’offre groupée' : 'Créer une nouvelle offre groupée'}
 					</h2>
 					<p class="text-xs text-base-content/60">
-						{editingId ? 'Mettez à jour les informations et la composition de ce pack.' : 'Remplissez les détails et sélectionnez les formations/e-books à inclure.'}
+						{editingId ? 'Mettez à jour les informations et la composition de cette offre groupée.' : 'Remplissez les détails et sélectionnez les formations et les livres numériques à inclure.'}
 					</p>
 				</div>
 			</div>
@@ -917,14 +920,14 @@
 				<!-- Titre -->
 				<label class="form-control w-full">
 					<span class="mb-1.5 block text-xs font-bold text-base-content">
-						Titre du bundle *
+						Titre de l’offre groupée *
 					</span>
 					<input
 						type="text"
 						bind:value={title}
 						maxlength="255"
 						required
-						placeholder="Ex. Pack Ultime Productivité & entelijans atifisyèl"
+						placeholder="Ex. : Offre productivité et intelligence artificielle"
 						class="input input-bordered w-full rounded-none h-11 text-xs focus:border-amber-400 focus:outline-none"
 					/>
 				</label>
@@ -943,11 +946,11 @@
 					></textarea>
 				</label>
 
-				<!-- Image de présentation du bundle (Upload & URL) -->
+				<!-- Image de présentation de l’offre groupée (Upload & URL) -->
 				<div class="form-control w-full space-y-2.5">
 					<div class="flex items-center justify-between">
 						<span class="text-xs font-bold text-base-content">
-							Image de présentation du bundle
+							Image de présentation de l’offre groupée
 						</span>
 						<div class="flex items-center gap-1 bg-base-200 p-1 rounded-none">
 							<button
@@ -977,7 +980,7 @@
 
 					{#if activeCoverPreview}
 						<div class="relative w-full max-w-md aspect-video bg-zinc-900 border border-base-300 group overflow-hidden">
-							<img src={activeCoverPreview} alt="Aperçu couverture" class="w-full h-full object-cover" />
+							<img src={activeCoverPreview} alt="Aperçu de la couverture" class="w-full h-full object-cover" />
 							<div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 p-4">
 								<button
 									type="button"
@@ -1013,7 +1016,7 @@
 							</div>
 							<div>
 								<p class="font-bold text-xs text-base-content">Cliquez pour téléverser une image de présentation</p>
-								<p class="text-[11px] text-base-content/50 mt-0.5">ou glissez-déposez le fichier ici (JPG, PNG, WEBP, max 10 MB)</p>
+								<p class="text-[11px] text-base-content/50 mt-0.5">ou glissez-déposez le fichier ici (JPG, PNG, WEBP, 10 Mo maximum)</p>
 							</div>
 						</div>
 					{:else}
@@ -1032,14 +1035,14 @@
 			<!-- Section 2: Pricing & Payments -->
 			<div class="space-y-4 pt-2">
 				<h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 border-b border-base-200 pb-2">
-					2. Tarification & Paiement
+					2. Tarification et paiement
 				</h3>
 
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<!-- Prix HTG -->
 					<label class="form-control w-full">
 						<span class="mb-1.5 block text-xs font-bold text-base-content">
-							Prix du pack (HTG) *
+							Prix de l’offre (HTG) *
 						</span>
 						<input
 							type="number"
@@ -1055,7 +1058,7 @@
 					<!-- Prix USD -->
 					<label class="form-control w-full">
 						<span class="mb-1.5 block text-xs font-bold text-base-content">
-							Prix Carte (USD, optionnel)
+							Prix par carte (USD, facultatif)
 						</span>
 						<input
 							type="number"
@@ -1077,7 +1080,7 @@
 					<input
 						type="text"
 						bind:value={variantId}
-						placeholder="Ex. 589234"
+						placeholder="Ex. : 589234"
 						class="input input-bordered w-full rounded-none h-11 text-xs focus:border-amber-400 focus:outline-none font-mono"
 					/>
 				</label>
@@ -1097,17 +1100,17 @@
 				<!-- Live Discount Calculator Banner -->
 				<div class="p-4 bg-linear-to-r from-zinc-900 to-zinc-800 text-white rounded-none space-y-2 shadow-xs">
 					<div class="flex items-center justify-between text-xs">
-						<span class="text-zinc-400 font-semibold">Valeur séparée des produits :</span>
+						<span class="text-zinc-400 font-semibold">Valeur des produits achetés séparément :</span>
 						<span class="font-mono font-bold">{regularPrice.toLocaleString('fr-FR')} HTG</span>
 					</div>
 					<div class="flex items-center justify-between text-xs">
-						<span class="text-zinc-400 font-semibold">Prix fixé pour ce pack :</span>
+						<span class="text-zinc-400 font-semibold">Prix de cette offre :</span>
 						<span class="font-mono font-bold text-amber-400">{price > 0 ? `${price.toLocaleString('fr-FR')} HTG` : 'Non défini'}</span>
 					</div>
 					{#if regularPrice > 0 && price > 0 && price < regularPrice}
 						<div class="pt-2 border-t border-zinc-700/60 flex items-center justify-between text-xs">
 							<span class="text-emerald-400 font-bold flex items-center gap-1">
-								<Zap size={14} /> Économie client :
+								<Zap size={14} /> Économies pour le client :
 							</span>
 							<span class="font-bold text-emerald-400">
 								{savingsAmount.toLocaleString('fr-FR')} HTG (-{savingsPercentage}%)
@@ -1122,7 +1125,7 @@
 						<Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" />
 						<input
 							type="text"
-							placeholder="Filtrer les cours et e-books..."
+							placeholder="Filtrer les cours et les livres numériques…"
 							bind:value={productSearch}
 							class="input input-bordered w-full pl-9 pr-3 h-9 text-xs rounded-none focus:border-amber-400"
 						/>
@@ -1147,7 +1150,7 @@
 							class="px-2.5 py-1 text-[11px] font-semibold rounded-none {productFilterType === 'ebook' ? 'bg-base-100 text-base-content font-bold' : 'text-base-content/60'}"
 							onclick={() => (productFilterType = 'ebook')}
 						>
-							E-books
+							Livres numériques
 						</button>
 					</div>
 				</div>
@@ -1202,7 +1205,7 @@
 					<div>
 						<span class="block text-xs font-bold text-base-content">Publier immédiatement cette offre groupée</span>
 						<span class="text-[11px] text-base-content/60">
-							Rendre ce pack visible immédiatement sur la page d'accueil et dans le catalogue.
+							Rendre cette offre visible immédiatement sur la page d'accueil et dans le catalogue.
 						</span>
 					</div>
 					<input
@@ -1213,7 +1216,7 @@
 				</label>
 			</div>
 
-			<button type="submit" class="hidden">Submit</button>
+			<button type="submit" class="hidden">Envoyer</button>
 		</form>
 
 		<!-- Drawer Footer Buttons -->
@@ -1252,7 +1255,7 @@
 			<div class="flex items-center gap-3 text-error">
 				<AlertCircle size={22} />
 				<h3 class="font-bold text-base text-base-content">
-					Supprimer ce bundle ?
+					Supprimer cette offre groupée ?
 				</h3>
 			</div>
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { Plus, Loader2, AlertCircle } from 'lucide-svelte';
 	import RecentOrders from '$lib/components/admin/RecentOrders.svelte';
@@ -6,10 +7,19 @@
 	import StatCard from '$lib/components/admin/StatCard.svelte';
 	import UpcomingBookings from '$lib/components/admin/UpcomingBookings.svelte';
 	import { getAdminOverview } from '$lib/admin/admin-client';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import type { AdminStat, RecentOrder, RecentUser, UpcomingBooking } from '$lib/types/admin';
 
 	let loading = $state(true);
 	let loadError = $state<string | null>(null);
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+	let localizedLoadError = $derived(
+		loadError && currentLang === 'ht'
+			? translateAdminMessage(loadError, 'ht') === loadError
+				? 'Pa kapab chaje tablo kontwòl la.'
+				: translateAdminMessage(loadError, 'ht')
+			: loadError
+	);
 	let stats = $state<AdminStat[]>([]);
 	let ordersList = $state<RecentOrder[]>([]);
 	let usersList = $state<RecentUser[]>([]);
@@ -17,7 +27,7 @@
 	let totalRevenue = $state(0);
 	const quickActions = [
 		{ label: 'Ajouter un cours', href: '/admin/courses/new' },
-		{ label: 'Ajouter un ebook', href: '/admin/ebooks/new' },
+		{ label: 'Ajouter un livre numérique', href: '/admin/ebooks/new' },
 		{ label: 'Ajouter un coaching', href: '/admin/coaching/new' },
 		{ label: 'Gérer les utilisateurs', href: '/admin/users' }
 	];
@@ -61,7 +71,7 @@
 				{
 					label: 'Réservations',
 					value: `${overview.totalBookings}`,
-					detail: 'Sessions coaching',
+				detail: 'Séances de coaching',
 					icon: 'bookings'
 				}
 			];
@@ -70,7 +80,7 @@
 				id: o.id,
 				client: o.customerName,
 				product: o.productTitle,
-				type: (o.type === 'course' ? 'Cours' : o.type === 'ebook' ? 'Ebook' : 'Coaching') as 'Cours' | 'Ebook' | 'Coaching',
+				type: o.type === 'course' ? 'Cours' : o.type === 'ebook' ? 'Livre numérique' : o.type === 'bundle' ? 'Offre groupée' : 'Coaching',
 				amount: (o.currency as string)?.toUpperCase() === 'USD'
 					? `$${o.amount.toLocaleString('fr-FR')} USD`
 					: `${o.amount.toLocaleString('fr-FR')} HTG`,
@@ -111,7 +121,7 @@
 
 <div class="space-y-10 p-1">
 	{#if loadError}
-		<div class="alert alert-error rounded-none"><AlertCircle size={18} /><span>{loadError}</span><button type="button" class="btn btn-sm" onclick={loadOverview}>Réessayer</button></div>
+		<div class="alert alert-error rounded-none"><AlertCircle size={18} /><span>{localizedLoadError}</span><button type="button" class="btn btn-sm" onclick={loadOverview}>Réessayer</button></div>
 	{:else if loading}
 		<div class="card bg-base-100 p-12 text-center text-base-content/50 space-y-3">
 			<Loader2 size={36} class="mx-auto animate-spin text-primary" />

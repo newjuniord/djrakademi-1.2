@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import type { AdminUser, UserStatus } from '$lib/types/admin';
 	import {
@@ -51,6 +52,7 @@
 	}
 
 	let totalPages = $derived(Math.max(1, Math.ceil(totalUsers / pageSize)));
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 	let startRange = $derived(totalUsers === 0 ? 0 : (currentPage - 1) * pageSize + 1);
 	let endRange = $derived(Math.min(currentPage * pageSize, totalUsers));
 
@@ -98,14 +100,14 @@
 
 	function formatAccess(courseCount: number, ebookCount: number): string {
 		if (courseCount === 0 && ebookCount === 0) {
-			return 'Aucun accès';
+			return currentLang === 'ht' ? 'Pa gen aksè' : 'Aucun accès';
 		}
 		const parts: string[] = [];
 		if (courseCount > 0) {
-			parts.push(`${courseCount} ${courseCount > 1 ? 'cours' : 'cours'}`);
+			parts.push(`${courseCount} ${currentLang === 'ht' ? 'kou' : 'cours'}`);
 		}
 		if (ebookCount > 0) {
-			parts.push(`${ebookCount} ${ebookCount > 1 ? 'ebooks' : 'ebook'}`);
+			parts.push(`${ebookCount} ${currentLang === 'ht' ? 'liv dijital' : ebookCount > 1 ? 'ebooks' : 'ebook'}`);
 		}
 		return parts.join(' · ');
 	}
@@ -205,7 +207,7 @@
 					<Search size={18} class="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" />
 					<input
 						type="text"
-						placeholder="Rechercher par nom ou email..."
+						placeholder="Rechercher par nom ou e-mail…"
 						bind:value={searchQuery}
 						oninput={() => (currentPage = 1)}
 						class="input input-ghost bg-base-200/50 w-full pl-12 pr-10 h-11 text-sm rounded-none focus:bg-base-100 focus:shadow-xs border-none"
@@ -228,7 +230,7 @@
 						class="px-4 py-2 text-xs font-semibold rounded-none transition-all {statusFilter === 'all' ? 'bg-base-100 text-base-content shadow-xs font-bold' : 'text-base-content/60 hover:text-base-content'}"
 						onclick={() => { statusFilter = 'all'; currentPage = 1; }}
 					>
-						Tous ({totalUsers})
+						{currentLang === 'ht' ? 'Tout' : 'Tous'} ({totalUsers})
 					</button>
 					<button
 						type="button"
@@ -412,7 +414,7 @@
 		<div class="p-5 border-t border-base-200/70 flex flex-col sm:flex-row items-center justify-between gap-4 bg-base-100 text-xs select-none">
 			<!-- Range & Total Summary -->
 			<p class="text-base-content/60 font-medium">
-				Affichage de <strong class="text-base-content font-bold">{startRange}</strong> à <strong class="text-base-content font-bold">{endRange}</strong> sur <strong class="text-base-content font-bold">{totalUsers}</strong> utilisateurs
+				{currentLang === 'ht' ? 'Afiche' : 'Affichage de'} <strong class="text-base-content font-bold">{startRange}</strong> {currentLang === 'ht' ? 'a' : 'à'} <strong class="text-base-content font-bold">{endRange}</strong> {currentLang === 'ht' ? 'sou' : 'sur'} <strong class="text-base-content font-bold">{totalUsers}</strong> {currentLang === 'ht' ? 'itilizatè' : 'utilisateurs'}
 			</p>
 
 			<!-- Pagination Navigation Controls -->
@@ -428,7 +430,7 @@
 				</button>
 
 				<div class="flex items-center gap-1 font-semibold text-base-content/80 px-1">
-					<span>Page {currentPage} sur {totalPages}</span>
+					<span>{currentLang === 'ht' ? `Paj ${currentPage} sou ${totalPages}` : `Page ${currentPage} sur ${totalPages}`}</span>
 				</div>
 
 				<button
@@ -486,7 +488,7 @@
 						class="select select-bordered w-full text-sm rounded-xl border-base-300 focus:border-primary"
 					>
 						<option value="Cours">Cours</option>
-						<option value="Ebook">Ebook</option>
+						<option value="Ebook">Livre numérique</option>
 					</select>
 				</div>
 
@@ -549,7 +551,7 @@
 			</div>
 
 			<p class="text-xs text-base-content/70 mb-6 leading-relaxed">
-				<strong>{disableModalUser.name}</strong> n'aura plus accès à ses cours et ebooks tant que son compte restera désactivé.
+				<strong>{disableModalUser.name}</strong> n’aura plus accès à ses cours et livres numériques tant que son compte restera désactivé.
 			</p>
 
 			<div class="flex items-center justify-end gap-2 pt-3 border-t border-base-200">

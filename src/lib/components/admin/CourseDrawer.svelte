@@ -70,7 +70,7 @@
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.", currentLang));
+				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 Mo.", currentLang));
 				return;
 			}
 			coverFile = file;
@@ -87,7 +87,7 @@
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.", currentLang));
+				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 Mo.", currentLang));
 				return;
 			}
 			coverFile = file;
@@ -179,7 +179,7 @@
 					id="drawer-title-input"
 					type="text"
 					required
-					placeholder="Ex: Marketing Digital pour Créateurs"
+					placeholder="Ex. : Marketing numérique pour les créateurs"
 					bind:value={title}
 					class="input input-sm bg-base-100 w-full rounded-none font-bold text-xs border border-base-300 text-base-content shadow-2xs focus:bg-base-100"
 				/>
@@ -215,7 +215,7 @@
 
 				{#if cover}
 					<div class="relative w-full aspect-video bg-base-200 border border-base-300 group overflow-hidden">
-						<img src={cover} alt="Aperçu couverture" class="w-full h-full object-cover" />
+						<img src={cover} alt="Aperçu de la couverture" class="w-full h-full object-cover" />
 						<div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-4">
 							<button
 								type="button"
@@ -260,12 +260,12 @@
 			<!-- Vidéo de présentation -->
 			<div class="form-control w-full">
 				<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="drawer-video-input">
-					Vidéo de présentation (URL optionnelle)
+					Vidéo de présentation (URL facultative)
 				</label>
 				<input
 					id="drawer-video-input"
 					type="url"
-					placeholder="Ex: https://www.youtube.com/watch?v=... ou https://vimeo.com/..."
+					placeholder="Ex. : https://www.youtube.com/watch?v=... ou https://vimeo.com/..."
 					bind:value={videoUrl}
 					class="input input-bordered bg-base-200/40 w-full rounded-none focus:bg-base-100 text-xs border-base-300"
 				/>
@@ -276,7 +276,7 @@
 
 			<!-- Tarification -->
 			<div class="space-y-4 pt-2 border-t border-base-200">
-				<h3 class="text-sm font-bold text-base-content">Tarification & Visibilité</h3>
+				<h3 class="text-sm font-bold text-base-content">Tarification et visibilité</h3>
 
 				<div class="flex items-center justify-between p-4 bg-base-200/40 rounded-none border border-base-200">
 					<div>
@@ -306,12 +306,12 @@
 							bind:value={price}
 							class="input input-sm bg-base-100 w-full rounded-none text-xs border border-base-300 font-bold text-base-content shadow-2xs focus:bg-base-100 disabled:bg-base-200/40 disabled:text-base-content/40"
 						/>
-						<p class="mt-1 text-[10px] text-base-content/50">En Gourdes (HTG).</p>
+						<p class="mt-1 text-[10px] text-base-content/50">En gourdes (HTG).</p>
 					</div>
 
 					<div class="form-control w-full">
 						<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="drawer-priceusd-input">
-							Prix (USD $) <span class="text-base-content/40 font-normal">(Optionnel)</span>
+							Prix (USD $) <span class="text-base-content/40 font-normal">(facultatif)</span>
 						</label>
 						<input
 							id="drawer-priceusd-input"
@@ -321,7 +321,7 @@
 							step="0.01"
 							disabled={isFree}
 							bind:value={priceUsd}
-							placeholder="Ex: 15"
+							placeholder="Ex. : 15"
 							class="input input-sm bg-base-100 w-full rounded-none text-xs border border-base-300 text-base-content shadow-2xs focus:bg-base-100 disabled:bg-base-200/40 disabled:text-base-content/40"
 						/>
 						<p class="mt-1 text-[10px] text-base-content/50">Affiché à côté du prix HTG.</p>
@@ -331,16 +331,16 @@
 				<!-- Lemon Squeezy Variant ID -->
 				<div class="form-control w-full">
 					<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="drawer-variant-input">
-						Lemon Squeezy Variant ID (Paiement par Carte)
+						Identifiant de variante Lemon Squeezy (paiement par carte)
 					</label>
 					<input
 						id="drawer-variant-input"
 						type="text"
-						placeholder="Ex: 582910"
+						placeholder="Ex. : 582910"
 						bind:value={variantId}
 						class="input input-sm bg-base-100 w-full rounded-none text-xs border border-base-300 font-bold text-base-content shadow-2xs focus:bg-base-100"
 					/>
-					<p class="mt-1 text-[10px] text-base-content/50">Identifiant du variant de ce cours sur Lemon Squeezy.</p>
+					<p class="mt-1 text-[10px] text-base-content/50">Identifiant de la variante de ce cours sur Lemon Squeezy.</p>
 				</div>
 
 				<div class="flex items-center justify-between p-4 bg-base-200/40 rounded-none border border-base-200">

@@ -31,6 +31,7 @@
 	} = $props();
 
 	const initialCourse = untrack(() => course);
+	const initialLanguage = untrack(() => currentLang);
 
 	// Initialize reactive form state
 	let title = $state(initialCourse?.title ?? '');
@@ -56,7 +57,7 @@
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.", currentLang));
+				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 Mo.", currentLang));
 				return;
 			}
 			coverFile = file;
@@ -73,7 +74,7 @@
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.", currentLang));
+				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 Mo.", currentLang));
 				return;
 			}
 			coverFile = file;
@@ -94,11 +95,11 @@
 			: [
 					{
 						id: `mod-${Date.now()}`,
-						title: 'Module 1 — Introduction',
+						title: initialLanguage === 'ht' ? 'Modil 1 — Entwodiksyon' : 'Module 1 — Introduction',
 						lessons: [
 							{
 								id: `les-${Date.now()}`,
-								title: 'Bienvenue dans la formation',
+								title: translateAdminMessage('Bienvenue dans la formation', initialLanguage),
 								type: 'video',
 								videoUrl: ''
 							}
@@ -113,7 +114,7 @@
 			...modules,
 			{
 				id: `mod-${Date.now()}`,
-				title: `Module ${modules.length + 1} — Nouveau module`,
+				title: currentLang === 'ht' ? `Modil ${modules.length + 1} — Nouvo modil` : `Module ${modules.length + 1} — Nouveau module`,
 				lessons: []
 			}
 		];
@@ -148,7 +149,7 @@
 			...updated[moduleIndex].lessons,
 			{
 				id: `les-${Date.now()}`,
-				title: 'Nouvelle leçon',
+				title: translateAdminMessage('Nouvelle leçon', currentLang),
 				type: 'video',
 				videoUrl: ''
 			}
@@ -234,7 +235,7 @@
 				id="title"
 				type="text"
 				required
-				placeholder="Ex: Marketing Digital pour Créateurs"
+				placeholder="Ex. : Marketing numérique pour les créateurs"
 				bind:value={title}
 				class="input input-bordered bg-base-200/40 w-full rounded-none focus:bg-base-100 text-sm border-base-300"
 			/>
@@ -270,7 +271,7 @@
 
 			{#if cover}
 				<div class="relative w-full max-w-md aspect-video bg-base-200 border border-base-300 group overflow-hidden">
-					<img src={cover} alt="Aperçu couverture" class="w-full h-full object-cover" />
+					<img src={cover} alt="Aperçu de la couverture" class="w-full h-full object-cover" />
 					<div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-4">
 						<button
 							type="button"
@@ -315,17 +316,17 @@
 		<!-- Vidéo de présentation -->
 		<div class="form-control w-full">
 			<label class="label font-semibold text-xs text-base-content/70" for="videoUrl">
-				Vidéo de présentation / Bande-annonce (URL optionnelle)
+				Vidéo de présentation / Bande-annonce (URL facultative)
 			</label>
 			<input
 				id="videoUrl"
 				type="url"
-				placeholder="Ex: https://www.youtube.com/watch?v=... ou https://vimeo.com/..."
+				placeholder="Ex. : https://www.youtube.com/watch?v=... ou https://vimeo.com/..."
 				bind:value={videoUrl}
 				class="input input-bordered bg-base-200/40 w-full rounded-none focus:bg-base-100 text-sm border-base-300"
 			/>
 			<span class="text-[11px] text-base-content/50 mt-1">
-				Lien YouTube, Vimeo, Loom ou MP4 direct pour la vidéo de présentation sur la page du cours (optionnel).
+				Lien YouTube, Vimeo, Loom ou MP4 direct pour la vidéo de présentation sur la page du cours (facultatif).
 			</span>
 		</div>
 	</div>
@@ -333,7 +334,7 @@
 	<!-- Section: Vente & Publication -->
 	<div class="bg-base-100 p-6 shadow-sm rounded-none border-none flex flex-col gap-6">
 		<h2 class="text-lg font-bold text-base-content border-b border-base-200/70 pb-3">
-			Tarification & Publication
+			Tarification et publication
 		</h2>
 
 		<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -372,7 +373,7 @@
 			<!-- Prix USD -->
 			<div class="form-control w-full">
 				<label class="label font-semibold text-xs text-base-content/70" for="priceUsd">
-					Prix (USD $) <span class="text-base-content/40 font-normal">(Optionnel)</span>
+					Prix (USD $) <span class="text-base-content/40 font-normal">(facultatif)</span>
 				</label>
 				<input
 					id="priceUsd"
@@ -382,7 +383,7 @@
 					step="0.01"
 					disabled={isFree}
 					bind:value={priceUsd}
-					placeholder="Ex: 15"
+					placeholder="Ex. : 15"
 					class="input input-bordered bg-base-200/40 w-full rounded-none focus:bg-base-100 text-sm border-base-300 disabled:bg-base-200/20 disabled:text-base-content/40"
 				/>
 				<p class="mt-1 text-[10px] text-base-content/50">Affiché à côté du prix HTG.</p>
@@ -392,16 +393,16 @@
 		<!-- Variant ID Lemon Squeezy -->
 		<div class="form-control w-full">
 			<label class="label font-semibold text-xs text-base-content/70" for="variantId">
-				Lemon Squeezy Variant ID (Paiement par Carte)
+				Identifiant de variante Lemon Squeezy (paiement par carte)
 			</label>
 			<input
 				id="variantId"
 				type="text"
-				placeholder="Ex: 582910"
+				placeholder="Ex. : 582910"
 				bind:value={variantId}
 				class="input input-bordered bg-base-200/40 w-full rounded-none focus:bg-base-100 text-sm border-base-300"
 			/>
-			<p class="mt-1 text-[10px] text-base-content/50">Identifiant du variant produit sur votre compte Lemon Squeezy.</p>
+			<p class="mt-1 text-[10px] text-base-content/50">Identifiant de la variante du produit dans votre compte Lemon Squeezy.</p>
 		</div>
 
 		<!-- Publication Switch -->
@@ -453,7 +454,7 @@
 								</span>
 								<input
 									type="text"
-									placeholder="Titre du module (ex: Module 1 — Introduction)"
+									placeholder="Titre du module (ex. : module 1 — Introduction)"
 									bind:value={mod.title}
 									class="input input-sm bg-base-100 w-full rounded-none font-bold text-sm border-base-300 focus:border-primary"
 								/>
@@ -553,7 +554,7 @@
 										<div class="pt-1">
 											<input
 												type="text"
-												placeholder="URL YouTube, Vimeo ou MP4 (ex: https://www.youtube.com/watch?v=... ou https://vimeo.com/...)"
+												placeholder="URL YouTube, Vimeo ou MP4 (ex. : https://www.youtube.com/watch?v=... ou https://vimeo.com/...)"
 												bind:value={lesson.videoUrl}
 												class="input input-xs bg-base-200/30 w-full rounded-none text-xs border-base-200"
 											/>

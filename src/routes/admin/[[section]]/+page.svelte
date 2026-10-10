@@ -4,7 +4,7 @@
 	const labels: Record<string, string> = {
 		users: 'Utilisateurs',
 		courses: 'Cours',
-		ebooks: 'Ebooks',
+		ebooks: 'Livres numériques',
 		coaching: 'Coaching',
 		orders: 'Commandes',
 		settings: 'Paramètres'

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import { createCourse, updateCourse, deleteCourse as apiDeleteCourse } from '$lib/services/courses';
 	import { getAdminCourses } from '$lib/admin/admin-client';
 	import type { Course } from '$lib/types/admin';
@@ -43,6 +45,7 @@
 	// Search & Filter state
 	let searchQuery = $state('');
 	let statusFilter = $state<'all' | 'published' | 'draft'>('all');
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	// Drawer state
 	let drawerOpen = $state(false);
@@ -218,21 +221,21 @@
 						class="px-4 py-2 text-xs font-semibold rounded-none transition-all {statusFilter === 'all' ? 'bg-base-100 text-base-content shadow-xs font-bold' : 'text-base-content/60 hover:text-base-content'}"
 						onclick={() => (statusFilter = 'all')}
 					>
-						Tous ({courses.length})
+						{translateAdminMessage('Tous', currentLang)} ({courses.length})
 					</button>
 					<button
 						type="button"
 						class="px-4 py-2 text-xs font-semibold rounded-none transition-all {statusFilter === 'published' ? 'bg-base-100 text-base-content shadow-xs font-bold' : 'text-base-content/60 hover:text-base-content'}"
 						onclick={() => (statusFilter = 'published')}
 					>
-						Publiés ({courses.filter((c) => c.published).length})
+						{translateAdminMessage('Publiés', currentLang)} ({courses.filter((c) => c.published).length})
 					</button>
 					<button
 						type="button"
 						class="px-4 py-2 text-xs font-semibold rounded-none transition-all {statusFilter === 'draft' ? 'bg-base-100 text-base-content shadow-xs font-bold' : 'text-base-content/60 hover:text-base-content'}"
 						onclick={() => (statusFilter = 'draft')}
 					>
-						Brouillons ({courses.filter((c) => !c.published).length})
+						{translateAdminMessage('Brouillons', currentLang)} ({courses.filter((c) => !c.published).length})
 					</button>
 				</div>
 			</div>
@@ -334,7 +337,7 @@
 												onclick={() => openEditDrawer(course)}
 											>
 												<Sliders size={14} class="text-base-content/60" />
-												Modifier infos (Drawer)
+												Modifier les informations
 											</button>
 										</li>
 										<li>
@@ -378,7 +381,7 @@
 		<!-- TableCard Footer / Pagination Controls -->
 		<div class="p-5 border-t border-base-200/70 flex flex-col sm:flex-row items-center justify-between gap-4 bg-base-100 text-xs select-none">
 			<p class="text-base-content/60 font-medium">
-				Affichage de <strong class="text-base-content font-bold">{startRange}</strong> à <strong class="text-base-content font-bold">{endRange}</strong> sur <strong class="text-base-content font-bold">{filteredCourses.length}</strong> cours
+				{currentLang === 'ht' ? 'Afiche' : 'Affichage de'} <strong class="text-base-content font-bold">{startRange}</strong> {currentLang === 'ht' ? 'a' : 'à'} <strong class="text-base-content font-bold">{endRange}</strong> {currentLang === 'ht' ? 'sou' : 'sur'} <strong class="text-base-content font-bold">{filteredCourses.length}</strong> {currentLang === 'ht' ? 'kou' : 'cours'}
 			</p>
 
 			<div class="flex items-center gap-3">
@@ -393,7 +396,7 @@
 				</button>
 
 				<div class="flex items-center gap-1 font-semibold text-base-content/80 px-1">
-					<span>Page {currentPage} sur {totalPages}</span>
+					<span>{translateAdminMessage(`Page ${currentPage} sur ${totalPages}`, currentLang)}</span>
 				</div>
 
 				<button

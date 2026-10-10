@@ -35,14 +35,14 @@ export type Bundle = {
 
 export async function getPublishedBundles(): Promise<Bundle[]> {
 	const response = await fetch('/api/bundles');
-	if (!response.ok) throw new Error('Impossible de charger les bundles.');
+	if (!response.ok) throw new Error('Impossible de charger les offres groupées.');
 	return (await response.json()).bundles || [];
 }
 
 export async function getBundleById(id: string): Promise<Bundle | null> {
 	const response = await fetch(`/api/bundles/${encodeURIComponent(id)}`);
 	if (response.status === 404) return null;
-	if (!response.ok) throw new Error('Impossible de charger ce bundle.');
+	if (!response.ok) throw new Error('Impossible de charger cette offre groupée.');
 	return (await response.json()).bundle || null;
 }
 

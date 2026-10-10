@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import { CalendarOff, Loader2, Plus, Save, Trash2 } from 'lucide-svelte';
 	import type { CoachingSettings, CoachingUnavailability } from '$lib/types/coaching';
 	import {
@@ -32,6 +34,7 @@
 	let unavailable = $state<CoachingUnavailability[]>([]);
 	let loading = $state(true);
 	let saving = $state(false);
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	onMount(async () => {
 		workingDays = [...settings.workingDays];
@@ -94,13 +97,13 @@
 <div class="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
 	<section class="rounded-xl border border-base-300 bg-base-100 p-5 sm:p-6">
 		<h3 class="font-bold">Horaires récurrents</h3>
-		<p class="mt-1 text-xs text-base-content/55">Ces règles génèrent automatiquement les créneaux dans le fuseau {settings.timezone}.</p>
+		<p class="mt-1 text-xs text-base-content/55">{currentLang === 'ht' ? `Règ sa yo kreye lè rezèvasyon yo otomatikman nan zòn lè ${settings.timezone}.` : `Ces règles génèrent automatiquement les créneaux dans le fuseau ${settings.timezone}.`}</p>
 
 		<div class="mt-5">
 			<p class="mb-2 text-xs font-semibold text-base-content/70">Jours travaillés</p>
 			<div class="flex flex-wrap gap-2">
 				{#each weekdayOptions as day}
-					<button type="button" class="btn btn-sm" class:btn-primary={workingDays.includes(day.value)} class:btn-ghost={!workingDays.includes(day.value)} onclick={() => toggleDay(day.value)}>{day.label}</button>
+					<button type="button" class="btn btn-sm" class:btn-primary={workingDays.includes(day.value)} class:btn-ghost={!workingDays.includes(day.value)} onclick={() => toggleDay(day.value)}>{translateAdminMessage(day.label, currentLang)}</button>
 				{/each}
 			</div>
 		</div>
@@ -114,7 +117,7 @@
 		</div>
 		<button class="btn btn-primary mt-5 gap-2" type="button" disabled={saving} onclick={saveSchedule}>
 			{#if saving}<Loader2 size={17} class="animate-spin" />{:else}<Save size={17} />{/if}
-			Enregistrer les horaires
+			{translateAdminMessage('Enregistrer les horaires', currentLang)}
 		</button>
 	</section>
 

@@ -7,7 +7,7 @@
 
 <section class="bg-base-100 shadow-sm rounded-none border-none overflow-hidden">
 	<div class="card-body gap-0 p-6">
-		<h2 class="mb-2 text-base font-semibold">Prochains coachings</h2>
+		<h2 class="mb-2 text-base font-semibold">Prochaines séances de coaching</h2>
 		<ul class="divide-y divide-base-200">
 			{#each bookings as booking}
 				<li class="py-4 first:pt-2">

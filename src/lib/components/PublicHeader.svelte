@@ -40,7 +40,6 @@
 			catalogue: 'Catalogue',
 			bundles: 'Offres groupées',
 			mobileMenu: 'Menu',
-			assistance: 'Assistance',
 			mySpace: 'Mon espace',
 			signup: 'Créer un compte',
 			login: 'Connexion',
@@ -52,10 +51,9 @@
 			chooseLanguage: 'Choisir la langue',
 			publicNavigation: 'Navigation publique',
 			navSection: 'Navigation',
-			helpSection: 'Assistance',
-			helpLink: 'Aide & Assistance',
 			mySpaceSection: 'Mon espace',
 			myCourses: 'Mes cours',
+			myBookings: 'Mes réservations',
 			myProfile: 'Mon profil',
 			myTransactions: 'Mes transactions',
 			adminSection: 'Administration',
@@ -67,7 +65,6 @@
 			catalogue: 'Katalòg',
 			bundles: 'Pakèt',
 			mobileMenu: 'Meni',
-			assistance: 'Asistans',
 			mySpace: 'Espas mwen',
 			signup: 'Enskri',
 			login: 'Konekte',
@@ -79,10 +76,9 @@
 			chooseLanguage: 'Chwazi lang',
 			publicNavigation: 'Navigasyon piblik',
 			navSection: 'Navigasyon',
-			helpSection: 'Asistans',
-			helpLink: 'Èd ak Asistans',
 			mySpaceSection: 'Espas mwen',
 			myCourses: 'Kou mwen yo',
+			myBookings: 'Rezèvasyon mwen',
 			myProfile: 'Pwofil mwen',
 			myTransactions: 'Transaksyon mwen',
 			adminSection: 'Administrasyon',
@@ -206,11 +202,6 @@
 		closeDrawer();
 	}
 
-	function toggleHelp() {
-		if (typeof window !== 'undefined') {
-			window.dispatchEvent(new CustomEvent('djr:open-support'));
-		}
-	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -444,6 +435,9 @@
 					<div class="divide-y divide-zinc-100 border-y border-zinc-100">
 						<a href={getHref('/dashboard')} onclick={closeDrawer} class="flex min-h-14 items-center px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
 							<span>{ht.myCourses}</span>
+						</a>
+						<a href={getHref('/bookings')} onclick={closeDrawer} class="flex min-h-14 items-center px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
+							<span>{ht.myBookings}</span>
 						</a>
 						<a href={getHref('/profile')} onclick={closeDrawer} class="flex min-h-14 items-center px-3 py-3 text-sm font-semibold transition-colors hover:bg-zinc-50">
 							<span>{ht.myProfile}</span>

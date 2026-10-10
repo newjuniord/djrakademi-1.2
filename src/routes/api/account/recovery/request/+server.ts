@@ -40,6 +40,7 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 		if (!apiKey) throw new Error('RESEND_API_KEY n’est pas configurée.');
 		const token = await users.createToken({ userId: user.$id, length: 64, expire: 60 * 60 });
 		const resetUrl = new URL('/account/recovery', appOrigin());
+		if ((body as { lang?: unknown })?.lang === 'ht') resetUrl.searchParams.set('lang', 'ht');
 		resetUrl.searchParams.set('userId', user.$id);
 		resetUrl.searchParams.set('secret', token.secret);
 		const name = escapeHtml(user.name || 'Client');

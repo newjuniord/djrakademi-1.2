@@ -12,7 +12,6 @@
 		ArrowRight,
 		Search,
 		FileText,
-		Printer,
 		X,
 		Clock,
 		AlertCircle,
@@ -85,7 +84,7 @@
 			amountHeader: 'Montant',
 			subtotal: 'Sous-total :',
 			fees: 'Frais de traitement :',
-			totalAmount: 'Montant Total :',
+			totalAmount: 'Montant total :',
 			receiptThankYou: 'Merci pour votre confiance en DJR Akademi !',
 			receiptElectronicNote: 'Ce reçu électronique constitue une preuve d\'achat officielle.',
 			close: 'Fermer',
@@ -319,20 +318,7 @@
 					{t.backToSpace}
 				</a>
 
-				<!-- Page Header Banner -->
-				<div class="bg-zinc-950 text-white rounded-3xl p-6 sm:p-8 flex items-center justify-between gap-6 shadow-xl border border-zinc-800">
-					<div class="flex items-center gap-4">
-						<div class="size-14 bg-gradient-to-br from-amber-400 to-orange-500 text-black text-xl font-black rounded-2xl grid place-items-center shadow-lg shrink-0">
-							<Receipt size={26} />
-						</div>
-						<div class="space-y-1">
-							<h1 class="text-2xl sm:text-3xl font-black tracking-tight">{t.title}</h1>
-							<p class="text-white/60 text-xs font-medium">
-								{t.subtitle}
-							</p>
-						</div>
-					</div>
-				</div>
+
 
 				<!-- Verification Callout Banner -->
 				<div class="bg-amber-500/10 border border-amber-500/20 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
@@ -400,7 +386,6 @@
 							<CreditCard size={18} class="text-amber-500" />
 							{t.historyTitle}
 						</h2>
-						<span class="text-xs text-zinc-400 font-mono">{t.currencyNote}</span>
 					</div>
 
 					{#if filteredOrders.length === 0}
@@ -661,14 +646,6 @@
 					class="px-4 py-2 text-xs font-bold text-zinc-600 hover:text-zinc-950 transition-colors"
 				>
 					{t.close}
-				</button>
-				<button
-					type="button"
-					onclick={printInvoice}
-					class="px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl flex items-center gap-2 transition-colors shadow-sm"
-				>
-					<Printer size={14} />
-					<span>{t.printSavePdf}</span>
 				</button>
 			</div>
 		</div>

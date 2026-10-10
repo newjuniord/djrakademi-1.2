@@ -21,11 +21,17 @@
 
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
+	function setLanguage(language: 'fr' | 'ht') {
+		const url = new URL(page.url);
+		if (language === 'ht') url.searchParams.set('lang', 'ht');
+		else url.searchParams.delete('lang');
+		void goto(`${url.pathname}${url.search}${url.hash}`, { replaceState: true, noScroll: true });
+	}
+
 	const i18n = {
 		fr: {
 			metaTitle: (t: string) => `${t} · Consultation DJR Akademi`,
 			metaDesc: (d: string) => d || "Séance de consultation individuelle sur-mesure",
-			securityBadge: "Réservation 100% sécurisée",
 			loading: "Chargement de votre séance de consultation...",
 			notFoundTitle: "Service non disponible",
 			notFoundDesc: "Ce service de consultation n'existe pas ou est désactivé.",
@@ -78,56 +84,55 @@
 		},
 		ht: {
 			metaTitle: (t: string) => `${t} · DJR Akademi`,
-			metaDesc: (d: string) => d || "Sesyon konsiltasyon endividyèl",
-			securityBadge: "Rezèvasyon an sekirite",
-			loading: "Sesyon konsiltasyon ou a ap chaje...",
+			metaDesc: (d: string) => d || "Yon randevou ak coach la pou ou sèlman",
+			loading: "N ap chaje detay randevou a...",
 			notFoundTitle: "Sèvis sa a pa disponib",
-			notFoundDesc: "Sèvis konsiltasyon sa a pa egziste oswa li desaktive.",
-			backHome: "Tounen nan akèy",
-			backTrainings: "Gade tout òf yo",
-			badgeSession: "Sesyon endividyèl youn ak youn",
-			durationLabel: "Tan sesyon an",
+			notFoundDesc: "Nou pa jwenn sèvis sa a, oswa li pa disponib ankò.",
+			backHome: "Tounen nan paj akèy la",
+			backTrainings: "Gade tout sèvis yo",
+			badgeSession: "Yon randevou pou ou sèlman",
+			durationLabel: "Konbyen tan li dire",
 			minutes: (m: number) => `${m} minit`,
-			priceLabel: "Pri sesyon an",
+			priceLabel: "Pri randevou a",
 			free: "Gratis",
-			includedTitle: "Sa rezèvasyon w lan gen ladan l:",
-			inc1: "Konfimasyon ak detay yo disponib nan espas ou",
-			inc2: "Ajoute sesyon an nan kalandriye w ak yon sèl klik",
-			inc3: "Lè sesyon an ajiste selon vil ou",
+			includedTitle: "Sa w ap jwenn:",
+			inc1: "Tout detay randevou a nan kont ou",
+			inc2: "Mete randevou a nan kalandriye w fasil",
+			inc3: "Lè randevou a parèt selon vil ou",
 			step1Title: "1. Chwazi yon dat ak lè",
-			timezoneAdjustedFor: (city: string) => `Lè ki ajiste pou ${city}`,
-			noSlotsAvailable: "Pa gen dat ki disponib pou kounye a.",
-			noSlotsDesc: "N ap ajoute lòt dat ki disponib yo talè konsa.",
+			timezoneAdjustedFor: (city: string) => `Lè yo se lè ${city}`,
+			noSlotsAvailable: "Pa gen lè ki lib pou kounye a.",
+			noSlotsDesc: "N ap mete lòt dat ak lè pita.",
 			selectDateLabel: (n: number) => `Chwazi yon dat (${n} jou disponib):`,
-			selectSlotLabel: (date: string) => `Lè ki disponib pou ${date}:`,
+			selectSlotLabel: (date: string) => `Lè ki lib pou ${date}:`,
 			step2Title: "2. Enfòmasyon ou yo",
-			step2Subtitle: "Rezèvasyon an ap konekte dirèkteman ak kont ou.",
+			step2Subtitle: "Randevou a ap parèt nan kont ou.",
 			notLoggedIn: "Ou poko konekte sou kont ou?",
-			notLoggedInSub: "Konekte pou rezèvasyon an ka parèt otomatikman nan kont ou.",
+			notLoggedInSub: "Konekte pou w ka pran randevou a ak kont ou.",
 			btnLoginNow: "Konekte kounye a",
 			fullNameLabel: "Non konplè",
 			emailLabel: "Adrès imèl",
 			whatsappLabel: "Nimewo WhatsApp",
-			btnSubmit: "Kontinye nan peman an",
-			btnSubmitFree: "Konfime rezèvasyon gratis la",
-			btnSubmitRetry: "Reprann peman an",
-			loadingSubmit: "Rezèvasyon an ap kreye...",
-			selectSlotError: "Tanpri chwazi yon lè ki disponib.",
-			loginToast: "Tanpri konekte sou kont ou pou w ka rezève sesyon konsiltasyon sa a.",
-			bookingError: "Nou pa ka kreye rezèvasyon an. Tanpri eseye ankò.",
-			paymentError: "Nou pa ka lanse peman an. Tanpri eseye ankò.",
+			btnSubmit: "Kontinye pou peye",
+			btnSubmitFree: "Pran randevou gratis la",
+			btnSubmitRetry: "Kontinye peye",
+			loadingSubmit: "N ap anrejistre randevou a...",
+			selectSlotError: "Tanpri chwazi yon lè ki lib.",
+			loginToast: "Tanpri konekte sou kont ou pou w ka pran randevou a.",
+			bookingError: "Nou pa rive anrejistre randevou a. Tanpri eseye ankò.",
+			paymentError: "Nou pa rive ouvri paj peman an. Tanpri eseye ankò.",
 			namePlaceholder: "Egzanp: Jean-Marc Baptiste",
 			emailPlaceholder: "imel@egzanp.com",
-			benefitsKicker: "POUKISA W DWE PATISIPE?",
-			benefitsTitle: "PALE AK PLIS ASIRANS",
-			benefitsIntro: "Aprann kominike klèman ak plis asirans gras ak konsèy pratik ou ka aplike chak jou.",
+			benefitsKicker: "POUKISA PATISIPE?",
+			benefitsTitle: "PALE AK PLIS KONFYANS",
+			benefitsIntro: "Aprann pale klè epi santi w pi alèz ak konsèy ou ka sèvi ak yo chak jou.",
 			benefits: [
-				{ title: "KOMINIKASYON KLÈ", description: "Eksprime lide w yo ak presizyon pou moun konprann mesaj ou epi sonje l." },
-				{ title: "OTORITE NATIRÈL", description: "Pran lapawòl ak asirans epi fè moun respekte w san w pa fòse vwa w." },
-				{ title: "KONEKSYON EMOSYONÈL", description: "Kreye yon lyen sensè ak moun k ap koute w yo epi genyen konfyans yo." },
-				{ title: "ENFLIYANS AK ENPAK", description: "Prezante lide w yo ak konviksyon pou mobilize ekip ou oswa odyans ou." },
-				{ title: "JERE ESTRÈS", description: "Aprann rete kalm epi pale klè, kèlkeswa kantite moun k ap koute w." },
-				{ title: "IMAJ PWOFESYONÈL", description: "Bati yon repitasyon ki montre konpetans ou ak valè w yo." }
+				{ title: "PALE KLÈ", description: "Di sa w panse ak mo ki senp pou moun konprann ou epi sonje sa w di." },
+				{ title: "PALE AK KONFYANS", description: "Pale san pè epi fè moun pran w oserye san w pa bezwen pale fò." },
+				{ title: "FÈ MOUN SANTI YO ALÈZ", description: "Pale ak moun yon fason ki fè yo santi yo alèz epi fè w konfyans." },
+				{ title: "FÈ LIDE W YO PASE", description: "Esplike lide w yo byen pou ekip ou oswa moun k ap koute w yo anvi aji." },
+				{ title: "RETE KALM", description: "Aprann rete kalm epi pale klè menm lè gen anpil moun k ap koute w." },
+				{ title: "BAY YON BON IMAJ", description: "Montre sa w konn fè ak sa ki enpòtan pou ou pou moun pran w oserye." }
 			]
 		}
 	};
@@ -177,7 +182,11 @@
 		const groupsMap = new Map<string, { formattedDate: string; shortDate: string; slots: CoachingSlot[] }>();
 		for (const slot of slots) {
 			const { date: formattedDate } = formatDateTimeInTimezone(slot.startAt, timezone, currentLang);
-			const key = formattedDate;
+			const dateParts = new Intl.DateTimeFormat('en-CA', {
+				timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit'
+			}).formatToParts(new Date(slot.startAt));
+			const partsByType = Object.fromEntries(dateParts.map((part) => [part.type, part.value]));
+			const key = `${partsByType.year}-${partsByType.month}-${partsByType.day}`;
 			if (!groupsMap.has(key)) {
 				const parts = formattedDate.split(' ');
 				const shortDate = parts.length >= 3 ? `${parts[0]} ${parts[1]} ${parts[2]}` : formattedDate;
@@ -292,7 +301,7 @@
 			});
 			const redirectTarget = result?.url || result?.redirectUrl;
 			if (!result?.success || !redirectTarget) {
-				throw new Error(result?.message || t.paymentError);
+				throw new Error(t.paymentError);
 			}
 			window.location.href = redirectTarget;
 			return;
@@ -320,9 +329,11 @@
 				<img src="/logo.png" alt="DJR Akademi" class="h-9 w-auto object-contain" />
 				<span class="hidden min-[430px]:inline-block">DJR Akademi</span>
 			</a>
-			<div class="flex items-center gap-1.5 text-xs font-bold text-base-content/60 bg-base-200 px-3 py-1.5 rounded-full border border-base-300/60">
-				<ShieldCheck size={14} class="text-emerald-500" />
-				<span>{t.securityBadge}</span>
+			<div class="flex shrink-0 items-center gap-2">
+				<div class="inline-flex rounded-lg border border-base-300 bg-base-200 p-0.5" role="group" aria-label={currentLang === 'ht' ? 'Chwazi lang' : 'Choisir la langue'}>
+					<button type="button" onclick={() => setLanguage('fr')} aria-label="Français" aria-pressed={currentLang === 'fr'} class="rounded-md px-2 py-1.5 text-xs font-bold transition-colors {currentLang === 'fr' ? 'bg-amber-400 text-zinc-950' : 'text-base-content/70 hover:text-base-content'}">FR</button>
+					<button type="button" onclick={() => setLanguage('ht')} aria-label="Kreyòl ayisyen" aria-pressed={currentLang === 'ht'} class="rounded-md px-2 py-1.5 text-xs font-bold transition-colors {currentLang === 'ht' ? 'bg-amber-400 text-zinc-950' : 'text-base-content/70 hover:text-base-content'}">HT</button>
+				</div>
 			</div>
 		</div>
 	</header>
@@ -416,7 +427,7 @@
 			</section>
 
 			<!-- RIGHT MAIN CARD: STEP 1 (SLOTS) & STEP 2 (CUSTOMER INFO) -->
-			<section class="card border border-base-300 bg-base-100 shadow-xs rounded-2xl overflow-hidden">
+			<section class="card relative z-10 border border-base-300 bg-base-100 shadow-xs rounded-2xl overflow-visible">
 				<div class="card-body gap-7 p-6 sm:p-8">
 					<!-- STEP 1: CHOIX DU CRÉNEAU -->
 						<div class="space-y-4">
@@ -566,7 +577,7 @@
 								<label for="booking-whatsapp" class="label-text font-bold text-[11px] uppercase tracking-wider text-base-content/70">
 									{t.whatsappLabel} <span class="text-error">*</span>
 								</label>
-								<PhoneInput bind:value={whatsapp} required showLabel={false} />
+								<PhoneInput id="booking-whatsapp" bind:value={whatsapp} required showLabel={false} label={t.whatsappLabel} lang={currentLang} />
 							</div>
 
 							<button

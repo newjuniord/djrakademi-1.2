@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import type { Order as AdminOrder, OrderStatus, OrderType } from '$lib/types/admin';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import OrderDetailDrawer from '$lib/components/admin/OrderDetailDrawer.svelte';
 	import {
 		Search,
@@ -41,6 +43,11 @@
 	let pendingCount = $derived(summary.pending);
 	let failedCount = $derived(summary.failed);
 	let totalPages = $derived(Math.ceil(totalOrders / pageSize) || 1);
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+	let paginationLabel = $derived(translateAdminMessage(
+		`Affichage de ${totalOrders > 0 ? (currentPage - 1) * pageSize + 1 : 0} à ${Math.min(currentPage * pageSize, totalOrders)} sur ${totalOrders} commandes`,
+		currentLang
+	));
 	let requestNumber = 0;
 
 	async function loadOrders() {
@@ -81,7 +88,7 @@
 </script>
 
 <svelte:head>
-	<title>Commandes · DJR Akademi Admin</title>
+	<title>Commandes · Administration DJR Akademi</title>
 </svelte:head>
 
 <div class="space-y-8 p-1">
@@ -143,7 +150,7 @@
 				/>
 				<input
 					type="text"
-					placeholder="Rechercher par client, email ou référence"
+					placeholder="Rechercher par client, e-mail ou référence"
 					bind:value={searchQuery}
 					oninput={() => (currentPage = 1)}
 					class="input input-ghost bg-base-200/50 w-full pl-12 pr-4 h-11 text-xs rounded-none focus:bg-base-100 focus:shadow-xs border-none"
@@ -199,8 +206,8 @@
 				>
 					<option value="all">Tous les produits</option>
 					<option value="course">Cours</option>
-					<option value="ebook">Ebook</option>
-					<option value="bundle">Bundle</option>
+					<option value="ebook">Livre numérique</option>
+					<option value="bundle">Offre groupée</option>
 					<option value="coaching">Coaching</option>
 				</select>
 
@@ -279,10 +286,10 @@
 										</span>
 									{:else if order.type === 'ebook'}
 										<span class="badge badge-secondary badge-sm font-bold text-[10px] border-none">
-											Ebook
+											Livre numérique
 										</span>
 									{:else if order.type === 'bundle'}
-										<span class="badge badge-warning badge-sm font-bold text-[10px] border-none">Bundle</span>
+										<span class="badge badge-warning badge-sm font-bold text-[10px] border-none">Offre groupée</span>
 									{:else}
 										<span class="badge badge-accent badge-sm font-bold text-[10px] border-none">
 											Coaching
@@ -371,7 +378,7 @@
 		<!-- Pagination Footer (< Précédent   Suivant >) -->
 		<div class="flex items-center justify-between border-t border-base-200/60 pt-4 text-xs">
 			<span class="text-base-content/60 font-medium">
-				Affichage de {totalOrders > 0 ? (currentPage - 1) * pageSize + 1 : 0} à {Math.min(currentPage * pageSize, totalOrders)} sur {totalOrders} commandes
+				{paginationLabel}
 			</span>
 
 			<div class="flex items-center gap-2">

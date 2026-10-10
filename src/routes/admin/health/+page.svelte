@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import type { ApiLogEntry, ApiMethod } from '$lib/types/admin';
 	import {
 		fetchAdminHealth,
@@ -38,6 +40,7 @@
 	let purgeMessage = $state('');
 	let confirmModalOpen = $state(false);
 	let pendingPurgeDays = $state<number | null>(null);
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function promptPurgeLogs(days: number) {
 		pendingPurgeDays = days;
@@ -52,10 +55,12 @@
 		purgeMessage = '';
 		try {
 			const res = await purgeAdminHealthLogs(days);
-			purgeMessage = `${res.deletedCount} log(s) datant de plus de ${days} jours ont été supprimés avec succès.`;
+			purgeMessage = currentLang === 'ht'
+				? `${res.deletedCount} jounal ki gen plis pase ${days} jou efase avèk siksè.`
+				: `${res.deletedCount} ${res.deletedCount > 1 ? 'journaux' : 'journal'} datant de plus de ${days} jours ${res.deletedCount > 1 ? 'ont été supprimés' : 'a été supprimé'} avec succès.`;
 			await loadHealth();
 		} catch (err) {
-			purgeMessage = err instanceof Error ? err.message : 'Erreur lors de la suppression des logs.';
+			purgeMessage = err instanceof Error ? err.message : 'Erreur lors de la suppression des journaux.';
 		} finally {
 			purgingDays = null;
 			pendingPurgeDays = null;
@@ -97,6 +102,10 @@
 			return matchesSearch && matchesMethod && matchesStatusGroup;
 		})
 	);
+	let paginationLabel = $derived(translateAdminMessage(
+		`Affichage de ${filteredLogs.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} à ${Math.min(currentPage * pageSize, filteredLogs.length)} sur ${filteredLogs.length} journaux`,
+		currentLang
+	));
 
 	let totalPages = $derived(Math.ceil(filteredLogs.length / pageSize) || 1);
 	let paginatedLogs = $derived(filteredLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize));
@@ -106,6 +115,14 @@
 		if (status === 'degraded') return 'Système dégradé';
 		if (status === 'down') return 'Système indisponible';
 		return 'État inconnu';
+	}
+
+	function httpStatusLabel(code?: number | null): string {
+		if (code == null) return '';
+		if (code >= 200 && code < 300) return 'Succès';
+		if (code >= 400 && code < 500) return 'Erreur client';
+		if (code >= 500) return 'Erreur serveur';
+		return 'Réponse HTTP';
 	}
 
 	function statusClass(status?: AdminHealthStatus): string {
@@ -153,7 +170,7 @@
 </script>
 
 <svelte:head>
-	<title>Supervision Plopplop · DJR Akademi Admin</title>
+	<title>Supervision Plopplop · Administration DJR Akademi</title>
 </svelte:head>
 
 <div class="space-y-8 p-1">
@@ -172,7 +189,7 @@
 					</span>
 				{/if}
 			</div>
-			<p class="text-xs text-base-content/60 mt-1">Créations et vérifications de paiement enregistrées par le backend sécurisé.</p>
+			<p class="text-xs text-base-content/60 mt-1">Créations et vérifications de paiement enregistrées par le serveur sécurisé.</p>
 		</div>
 		<div class="flex flex-wrap items-center gap-2">
 			<button
@@ -221,7 +238,7 @@
 		<div class="bg-base-100 p-6 shadow-sm rounded-none border-none flex items-center justify-between">
 			<div>
 				<span class="text-xs font-semibold text-base-content/60 block">Statut API</span>
-				<span class="text-xl font-bold text-base-content mt-1 block">{snapshot?.statusCode ?? '—'} {snapshot?.statusText || ''}</span>
+				<span class="text-xl font-bold text-base-content mt-1 block">{snapshot?.statusCode ?? '—'} {httpStatusLabel(snapshot?.statusCode)}</span>
 			</div>
 			<Server
 				size={24}
@@ -238,10 +255,10 @@
 			<CheckCircle2 size={24} class="text-primary shrink-0" />
 		</div>
 
-		<!-- Card 3: Latence Moyenne -->
+		<!-- Card 3: Latence moyenne -->
 		<div class="bg-base-100 p-6 shadow-sm rounded-none border-none flex items-center justify-between">
 			<div>
-				<span class="text-xs font-semibold text-base-content/60 block">Latence Moyenne</span>
+				<span class="text-xs font-semibold text-base-content/60 block">Latence moyenne</span>
 				<span class="text-xl font-bold text-base-content mt-1 block">{avgLatency === null ? '—' : avgLatency + ' ms'}</span>
 			</div>
 			<Clock size={24} class="text-warning shrink-0" />
@@ -269,7 +286,7 @@
 				/>
 				<input
 					type="text"
-					placeholder="Rechercher par endpoint, commande ou transaction..."
+					placeholder="Rechercher par adresse, commande ou transaction…"
 					bind:value={searchQuery}
 					class="input input-ghost bg-base-200/50 w-full pl-12 pr-4 h-11 text-xs rounded-none focus:bg-base-100 focus:shadow-xs border-none"
 				/>
@@ -294,7 +311,7 @@
 					bind:value={filterMethod}
 					class="select select-sm bg-base-200/60 rounded-none text-xs border-none font-semibold text-base-content"
 				>
-					<option value="all">Toutes méthodes</option>
+					<option value="all">Toutes les méthodes</option>
 					<option value="GET">GET</option>
 					<option value="POST">POST</option>
 					<option value="PUT">PUT</option>
@@ -321,7 +338,7 @@
 			<table class="table w-full rounded-none text-left border-collapse">
 				<thead>
 					<tr class="border-b border-base-200 text-xs font-semibold text-base-content/50 uppercase tracking-wider bg-base-100">
-						<th class="py-4 px-4 font-bold">Méthode & Route</th>
+						<th class="py-4 px-4 font-bold">Méthode et route</th>
 						<th class="py-4 px-4 font-bold">Statut</th>
 						<th class="py-4 px-4 font-bold">Latence</th>
 						<th class="py-4 px-4 font-bold">Origine</th>
@@ -333,13 +350,13 @@
 					{#if paginatedLogs.length === 0}
 						<tr>
 							<td colspan="6" class="py-12 text-center text-base-content/50 font-sans">
-								{loading ? 'Chargement des logs…' : loadError ? 'Logs indisponibles.' : 'Aucun appel Plopplop enregistré pour le moment.'}
+								{loading ? 'Chargement des journaux…' : loadError ? 'Journaux indisponibles.' : 'Aucun appel Plopplop enregistré pour le moment.'}
 							</td>
 						</tr>
 					{:else}
 						{#each paginatedLogs as log (log.id)}
 							<tr class="hover:bg-base-200/60 odd:bg-base-200/40 transition-colors">
-								<!-- Column 1: Méthode & Route -->
+								<!-- Column 1: Méthode et route -->
 								<td class="py-4 px-4">
 									<div class="flex items-center gap-2.5">
 										<span
@@ -361,15 +378,15 @@
 								<td class="py-4 px-4">
 									{#if log.statusCode < 300}
 										<span class="badge badge-success badge-sm font-bold text-[11px] bg-success/15 text-success border-none">
-											{log.statusCode} {log.statusText}
+											{log.statusCode} {httpStatusLabel(log.statusCode)}
 										</span>
 									{:else if log.statusCode < 500}
 										<span class="badge badge-warning badge-sm font-bold text-[11px] bg-warning/15 text-warning border-none">
-											{log.statusCode} {log.statusText}
+											{log.statusCode} {httpStatusLabel(log.statusCode)}
 										</span>
 									{:else}
 										<span class="badge badge-error badge-sm font-bold text-[11px] bg-error/15 text-error border-none">
-											{log.statusCode} {log.statusText}
+											{log.statusCode} {httpStatusLabel(log.statusCode)}
 										</span>
 									{/if}
 								</td>
@@ -410,7 +427,7 @@
 		<!-- Pagination Footer (< Précédent   Suivant >) -->
 		<div class="flex items-center justify-between border-t border-base-200/60 pt-4 text-xs font-sans">
 			<span class="text-base-content/60 font-medium">
-				Affichage de {filteredLogs.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} à {Math.min(currentPage * pageSize, filteredLogs.length)} sur {filteredLogs.length} logs
+				{paginationLabel}
 			</span>
 
 			<div class="flex items-center gap-2">
@@ -456,9 +473,9 @@
 					<AlertTriangle size={24} />
 				</div>
 				<div class="space-y-1">
-					<h3 class="text-lg font-bold text-base-content tracking-tight">Suppression de logs</h3>
+					<h3 class="text-lg font-bold text-base-content tracking-tight">Suppression des journaux</h3>
 					<p class="text-xs text-base-content/70 leading-relaxed">
-						Voulez-vous vraiment supprimer les logs datant de plus de <strong class="text-base-content font-mono">{pendingPurgeDays} jours</strong> ?
+						Voulez-vous vraiment supprimer les journaux datant de plus de <strong class="text-base-content font-mono">{pendingPurgeDays} jours</strong> ?
 					</p>
 				</div>
 			</div>
@@ -481,7 +498,7 @@
 					onclick={confirmPurgeLogs}
 				>
 					<Trash2 size={14} />
-					Oui, supprimer les logs
+					Oui, supprimer les journaux
 				</button>
 			</div>
 		</div>

@@ -73,7 +73,7 @@
 
 		<div class="border-b border-base-300">
 			<div class="tabs tabs-border w-full" role="tablist" aria-label="Sections de l’offre">
-				<button class="tab h-12 gap-2 px-4 font-medium" class:tab-active={activeTab === 'availability'} type="button" role="tab" aria-selected={activeTab === 'availability'} onclick={() => (activeTab = 'availability')}><CalendarClock size={17} /> Horaires & indisponibilités</button>
+				<button class="tab h-12 gap-2 px-4 font-medium" class:tab-active={activeTab === 'availability'} type="button" role="tab" aria-selected={activeTab === 'availability'} onclick={() => (activeTab = 'availability')}><CalendarClock size={17} /> Horaires et indisponibilités</button>
 				<button class="tab h-12 gap-2 px-4 font-medium" class:tab-active={activeTab === 'details'} type="button" role="tab" aria-selected={activeTab === 'details'} onclick={() => (activeTab = 'details')}><Info size={17} /> Informations</button>
 			</div>
 		</div>

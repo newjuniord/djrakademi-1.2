@@ -67,7 +67,9 @@ export async function updateOwnedProfileServer(
 ) {
 	const current = await getOrCreateProfileServer(user);
 	const name = input.name === undefined ? current.name : String(input.name).trim();
-	const whatsapp = input.whatsapp === undefined ? current.whatsapp : String(input.whatsapp).trim();
+	const whatsapp = input.whatsapp === undefined
+		? current.whatsapp
+		: String(input.whatsapp).replace(/[\s().-]/g, '');
 	if (!name || name.length > 255) throw new ProfileServerError('Le nom est invalide.', 400);
 	if (whatsapp.length > 16 || (whatsapp && !/^\+[1-9]\d{7,14}$/.test(whatsapp))) {
 		throw new ProfileServerError('Le numéro WhatsApp doit être au format international, par exemple +50937001234.', 400);

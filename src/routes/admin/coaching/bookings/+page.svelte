@@ -73,7 +73,7 @@
 	}
 </script>
 
-<svelte:head><title>Réservations coaching · Administration</title></svelte:head>
+<svelte:head><title>Réservations de coaching · Administration</title></svelte:head>
 <div class="space-y-6">
 	<div>
 		<h2 class="text-2xl font-bold">Réservations</h2>

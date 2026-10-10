@@ -128,7 +128,7 @@
 			class="flex items-center gap-1.5 px-3 py-3 rounded-l-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border-r border-zinc-200 transition-colors font-medium text-xs sm:text-sm shrink-0 disabled:opacity-50"
 			aria-expanded={isOpen}
 			aria-haspopup="listbox"
-			aria-label="Sélectionner le pays"
+			aria-label={lang === 'ht' ? 'Chwazi peyi a' : 'Sélectionner le pays'}
 		>
 			<span class="text-lg leading-none">{selectedCountry.flag}</span>
 			<span class="font-mono font-bold text-zinc-800">{selectedCountry.dialCode}</span>
@@ -153,7 +153,7 @@
 			/>
 			
 			<!-- WhatsApp indicator icon -->
-			<div class="absolute right-3 pointer-events-none flex items-center" title="Numéro formaté pour WhatsApp">
+			<div class="absolute right-3 pointer-events-none flex items-center" title={lang === 'ht' ? 'Nimewo a nan fòma WhatsApp' : 'Numéro au format WhatsApp'}>
 				<img src="/whatsapp.png" alt="WhatsApp" class="size-5 object-contain shrink-0" />
 			</div>
 		</div>

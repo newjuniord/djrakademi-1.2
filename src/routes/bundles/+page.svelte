@@ -82,7 +82,6 @@
 			{:else if !bundles.length}
 				<div class="rounded-2xl border border-zinc-200 bg-white px-6 py-16 text-center">
 					<Layers3 size={34} class="mx-auto mb-4 text-amber-500" />
-					<h2 class="text-xl font-black">{t.emptyTitle}</h2>
 					<p class="mt-2 text-sm text-zinc-500">{t.emptyDesc}</p>
 					<a href={getHref('/catalogue')} class="mt-6 inline-block text-sm font-bold text-amber-700 hover:underline">{t.viewCatalogue}</a>
 				</div>

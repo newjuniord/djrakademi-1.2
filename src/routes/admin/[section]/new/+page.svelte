@@ -3,7 +3,7 @@
 
 	const labels: Record<string, string> = {
 		courses: 'Nouveau cours',
-		ebooks: 'Nouvel ebook',
+		ebooks: 'Nouveau livre numérique',
 		coaching: 'Nouveau coaching'
 	};
 

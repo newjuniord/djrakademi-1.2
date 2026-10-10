@@ -56,7 +56,7 @@
 				return;
 			}
 			if (file.size > 10 * 1024 * 1024) {
-				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 MB.", currentLang));
+				alert(translateAdminMessage("L'image est trop volumineuse. La taille maximale autorisée est de 10 Mo.", currentLang));
 				return;
 			}
 			coverFile = file;
@@ -72,7 +72,7 @@
 				pdfFile = file;
 				fileName = file.name;
 			} else {
-				alert(translateAdminMessage('Seuls les fichiers PDF sont acceptés pour les ebooks.', currentLang));
+				alert(translateAdminMessage('Seuls les fichiers PDF sont acceptés pour les livres numériques.', currentLang));
 			}
 		}
 	}
@@ -85,7 +85,7 @@
 				pdfFile = file;
 				fileName = file.name;
 			} else {
-				alert(translateAdminMessage('Seuls les fichiers PDF sont acceptés pour les ebooks.', currentLang));
+				alert(translateAdminMessage('Seuls les fichiers PDF sont acceptés pour les livres numériques.', currentLang));
 			}
 		}
 	}
@@ -95,7 +95,7 @@
 		onSave(
 			{
 				id: ebook?.id,
-				title: title.trim() || 'Nouvel Ebook',
+				title: title.trim() || 'Nouveau livre numérique',
 				description: description.trim(),
 				cover: cover.trim() || undefined,
 				fileName: fileName.trim() || 'ebook-document.pdf',
@@ -125,13 +125,13 @@
 		<!-- Titre -->
 		<div class="form-control w-full">
 			<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="ebook-title">
-				Titre de l'ebook *
+				Titre du livre numérique *
 			</label>
 			<input
 				id="ebook-title"
 				type="text"
 				required
-				placeholder="Ex: Guide Instagram 2026"
+				placeholder="Ex. : Guide Instagram 2026"
 				bind:value={title}
 				class="input input-sm bg-base-100 w-full rounded-none font-bold text-xs border border-base-300 text-base-content shadow-2xs focus:bg-base-100"
 			/>
@@ -145,7 +145,7 @@
 			<textarea
 				id="ebook-desc"
 				rows="4"
-				placeholder="Présentez le contenu et les avantages de votre ebook..."
+				placeholder="Présentez le contenu et les avantages de votre livre numérique…"
 				bind:value={description}
 				class="textarea textarea-sm bg-base-100 w-full rounded-none text-xs border border-base-300 text-base-content leading-relaxed shadow-2xs focus:bg-base-100"
 			></textarea>
@@ -154,7 +154,7 @@
 		<!-- Image de couverture (Fichier & Preview) -->
 		<div class="form-control w-full space-y-2">
 			<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-0" for="ebook-cover-file">
-				Image de couverture (Optionnel)
+				Image de couverture (facultative)
 			</label>
 
 			<input
@@ -184,7 +184,7 @@
 
 			{#if cover}
 				<div class="mt-3 flex items-center gap-3 p-3 bg-base-200/40 rounded-none border border-base-200/60">
-					<img src={cover} alt="Aperçu couverture" class="w-16 h-20 object-cover rounded-none border border-base-200 shrink-0" />
+					<img src={cover} alt="Aperçu de la couverture" class="w-16 h-20 object-cover rounded-none border border-base-200 shrink-0" />
 					<div class="text-xs">
 						<span class="font-bold text-base-content block">Aperçu de la couverture</span>
 						<span class="text-[11px] text-base-content/60">Visuel qui apparaîtra dans le catalogue</span>
@@ -198,7 +198,7 @@
 	<div class="space-y-5 pt-4">
 		<h2 class="text-base font-bold text-base-content border-b border-base-200/70 pb-3 flex items-center gap-2">
 			<Upload size={18} class="text-primary" />
-			Fichier de l'ebook (PDF uniquement)
+			Fichier du livre numérique (PDF uniquement)
 		</h2>
 
 		<input
@@ -224,7 +224,7 @@
 				<p class="text-xs font-bold text-base-content">
 					Cliquez pour sélectionner un fichier PDF ou glissez-déposez ici
 				</p>
-				<p class="text-[11px] text-base-content/50 mt-0.5">Format PDF stocké sur Appwrite Storage (jusqu'à 50 Mo)</p>
+				<p class="text-[11px] text-base-content/50 mt-0.5">Fichier PDF stocké dans Appwrite Storage (jusqu'à 50 Mo)</p>
 			</div>
 
 			{#if fileName || pdfFile}
@@ -236,17 +236,17 @@
 		</div>
 	</div>
 
-	<!-- Section Tarification & Visibilité -->
+	<!-- Section Tarification et visibilité -->
 	<div class="space-y-5 pt-4">
 		<h2 class="text-base font-bold text-base-content border-b border-base-200/70 pb-3">
-			Tarification & Visibilité
+			Tarification et visibilité
 		</h2>
 
 		<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 			<!-- Toggle Ebook Gratuit -->
 			<div class="flex items-center justify-between p-4 bg-base-200/40 rounded-none border border-base-200/60">
 				<div>
-					<span class="font-bold text-xs text-base-content block">Ebook gratuit</span>
+					<span class="font-bold text-xs text-base-content block">Livre numérique gratuit</span>
 					<span class="text-[11px] text-base-content/60">Disponible sans paiement</span>
 				</div>
 				<input
@@ -284,7 +284,7 @@
 							min="1"
 							required
 							bind:value={price}
-							placeholder="Ex: 750"
+							placeholder="Ex. : 750"
 							class="input input-sm bg-base-100 w-full rounded-none font-bold text-xs border border-base-300 text-base-content shadow-2xs pr-14 focus:bg-base-100"
 						/>
 						<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-base-content/50 select-none">
@@ -296,7 +296,7 @@
 				<!-- Champ Prix USD -->
 				<div class="form-control w-full">
 					<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="ebook-priceusd">
-						Prix (USD $) <span class="text-base-content/40 font-normal">(Optionnel)</span>
+						Prix (USD $) <span class="text-base-content/40 font-normal">(facultatif)</span>
 					</label>
 					<div class="relative">
 						<input
@@ -305,7 +305,7 @@
 							min="1"
 							step="0.01"
 							bind:value={priceUsd}
-							placeholder="Ex: 10"
+							placeholder="Ex. : 10"
 							class="input input-sm bg-base-100 w-full rounded-none text-xs border border-base-300 text-base-content shadow-2xs pr-14 focus:bg-base-100"
 						/>
 						<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-base-content/50 select-none">
@@ -319,16 +319,16 @@
 		<!-- Variant ID Lemon Squeezy -->
 		<div class="form-control w-full sm:w-1/2">
 			<label class="label font-bold text-xs text-base-content/90 tracking-wide pb-1.5" for="ebook-variantId">
-				Lemon Squeezy Variant ID (Paiement par Carte)
+				Identifiant de variante Lemon Squeezy (paiement par carte)
 			</label>
 			<input
 				id="ebook-variantId"
 				type="text"
-				placeholder="Ex: 582910"
+				placeholder="Ex. : 582910"
 				bind:value={variantId}
 				class="input input-sm bg-base-100 w-full rounded-none font-bold text-xs border border-base-300 text-base-content shadow-2xs focus:bg-base-100"
 			/>
-			<p class="mt-1 text-[10px] text-base-content/50">Identifiant du variant de votre produit sur Lemon Squeezy.</p>
+			<p class="mt-1 text-[10px] text-base-content/50">Identifiant de la variante de votre produit sur Lemon Squeezy.</p>
 		</div>
 	</div>
 

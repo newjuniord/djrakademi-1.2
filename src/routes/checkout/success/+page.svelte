@@ -10,7 +10,6 @@
 		CalendarClock,
 		ArrowRight,
 		Receipt,
-		Printer,
 		MessageSquare,
 		Sparkles,
 		ShieldCheck,
@@ -319,28 +318,20 @@
 							</a>
 						{/if}
 
-						<div class="flex flex-col sm:flex-row items-center gap-3">
+						<div class="flex items-center gap-3">
 							<a
 								href={getHref('/transactions')}
-								class="btn btn-outline min-h-10 flex-1 w-full rounded-xl text-xs font-semibold gap-1.5"
+								class="btn btn-outline min-h-10 w-full rounded-xl text-xs font-semibold gap-1.5"
 							>
 								<Receipt size={15} /> {t.viewTransactions}
 							</a>
-
-							<button
-								type="button"
-								onclick={printReceipt}
-								class="btn btn-ghost min-h-10 rounded-xl text-xs font-semibold gap-1.5 border border-base-300"
-							>
-								<Printer size={15} /> {t.printReceipt}
-							</button>
 						</div>
 					</div>
 
 					<!-- Assistance Footer -->
-					<div class="text-center pt-4 border-t border-base-200 text-xs text-base-content/60 print:hidden flex items-center justify-between">
-						<span>{t.questionOrder}</span>
-						{#if order.productType === 'coaching'}
+					{#if order.productType === 'coaching'}
+						<div class="text-center pt-4 border-t border-base-200 text-xs text-base-content/60 print:hidden flex items-center justify-between">
+							<span>{t.questionOrder}</span>
 							<a
 								href={`https://wa.me/50937001234?text=${encodeURIComponent(t.whatsappMessage)}`}
 								target="_blank"
@@ -349,15 +340,8 @@
 							>
 								<MessageSquare size={14} /> {t.supportWhatsapp}
 							</a>
-						{:else}
-							<a
-								href={getHref('/contact')}
-								class="text-primary font-bold hover:underline inline-flex items-center gap-1"
-							>
-								{t.contactPage}
-							</a>
-						{/if}
-					</div>
+						</div>
+					{/if}
 				</div>
 			</div>
 		{/if}

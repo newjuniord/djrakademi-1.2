@@ -18,7 +18,7 @@ export async function _validateBundle(body: any) {
 	const published = Boolean(body?.published);
 	const items = parseBundleItems(body?.items);
 	if (!title || title.length > 255 || !description) throw Object.assign(new Error('Titre et description requis.'), { status: 400 });
-	if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(priceUsd) || priceUsd < 0) throw Object.assign(new Error('Prix du bundle invalide.'), { status: 400 });
+	if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(priceUsd) || priceUsd < 0) throw Object.assign(new Error('Prix de l’offre groupée invalide.'), { status: 400 });
 	if (items.length < 2 || items.length > 30) throw Object.assign(new Error('Choisissez entre 2 et 30 formations ou e-books.'), { status: 400 });
 	if (coverUrl && (!/^https:\/\//i.test(coverUrl) || coverUrl.length > 2048)) throw Object.assign(new Error('La couverture doit être une URL HTTPS.'), { status: 400 });
 	if (variantId.length > 100) throw Object.assign(new Error('Identifiant de variante trop long.'), { status: 400 });
@@ -26,7 +26,7 @@ export async function _validateBundle(body: any) {
 	let contents;
 	try { contents = await bundleContents(tables, items); }
 	catch { throw Object.assign(new Error('Un des produits sélectionnés est introuvable.'), { status: 400 }); }
-	if (published && contents.some((item) => !item.published)) throw Object.assign(new Error('Publiez tous les produits inclus avant de publier ce bundle.'), { status: 400 });
+	if (published && contents.some((item) => !item.published)) throw Object.assign(new Error('Publiez tous les produits inclus avant de publier cette offre groupée.'), { status: 400 });
 	return { title, description, cover_url: coverUrl || undefined, price, price_usd: priceUsd || undefined, variant_id: variantId || undefined, published, items_json: JSON.stringify(items) };
 }
 

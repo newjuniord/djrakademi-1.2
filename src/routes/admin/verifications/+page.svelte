@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import {
 		Search,
 		ShieldCheck,
@@ -29,6 +30,7 @@
 	// Pagination State
 	let pageSize = $state(10);
 	let currentPage = $state(1);
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	// Detail Modal State
 	let selectedLog = $state<VerificationLog | null>(null);
@@ -80,7 +82,7 @@
 </script>
 
 <svelte:head>
-	<title>Journaux de vérification · DJR Akademi Admin</title>
+	<title>Journaux de vérification · Administration DJR Akademi</title>
 </svelte:head>
 
 <div class="space-y-8 p-1">
@@ -113,7 +115,7 @@
 				Rafraîchir
 			</button>
 			<div class="px-4 py-2 bg-base-200/60 rounded-xl text-xs font-bold text-base-content/80 shrink-0 border border-base-200/60">
-				{totalLogs} tentative{totalLogs === 1 ? '' : 's'}
+				{totalLogs} {currentLang === 'ht' ? 'tantativ' : totalLogs === 1 ? 'tentative' : 'tentatives'}
 			</div>
 		</div>
 	</div>
@@ -260,7 +262,7 @@
 			<!-- Pagination Footer -->
 			<div class="p-4 border-t border-base-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium">
 				<div class="text-base-content/60">
-					Affichage de la page <span class="font-bold text-base-content">{currentPage}</span> sur <span class="font-bold text-base-content">{totalPages}</span> ({totalLogs} journaux)
+					{currentLang === 'ht' ? 'Afiche paj' : 'Affichage de la page'} <span class="font-bold text-base-content">{currentPage}</span> {currentLang === 'ht' ? 'sou' : 'sur'} <span class="font-bold text-base-content">{totalPages}</span> ({totalLogs} {currentLang === 'ht' ? 'jounal' : 'journaux'})
 				</div>
 
 				<div class="flex items-center gap-2">

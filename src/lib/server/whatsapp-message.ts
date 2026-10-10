@@ -1,33 +1,15 @@
 import { env } from '$env/dynamic/private';
 import { adminServices, DATABASE_ID, SETTINGS_ROW_ID, SETTINGS_TABLE } from '$lib/server/admin-appwrite';
+import { sendOrderConfirmationTemplate, normalizeWhatsappNumber } from '$lib/server/whatsapp';
+export { normalizeWhatsappNumber };
 
-const ENDPOINT = 'http://wa.djrakademi.net/send/text';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function normalizeWhatsappNumber(value: string): string | null {
-	const number = value.replace(/[\s().-]/g, '').replace(/^\+/, '');
-	return /^[1-9]\d{7,14}$/.test(number) ? number : null;
-}
-
 async function postWhatsapp(number: string, text: string): Promise<void> {
-	const apiKey = env.WHATSAPP_API_KEY?.trim();
-	if (!apiKey) throw new Error('WHATSAPP_API_KEY n’est pas configurée.');
-	const controller = new AbortController();
-	const timeout = setTimeout(() => controller.abort(), 12_000);
-	try {
-		const response = await fetch(ENDPOINT, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json', apikey: apiKey },
-			body: JSON.stringify({ number, text }),
-			signal: controller.signal
-		});
-		const result = await response.json().catch(() => null);
-		if (!response.ok || result?.message !== 'success' || !result?.data?.Info?.ID) {
-			throw new Error(`Réponse WhatsApp invalide (HTTP ${response.status}, message : ${String(result?.message || 'absent').slice(0, 100)}).`);
-		}
-	} finally {
-		clearTimeout(timeout);
-	}
+	await sendOrderConfirmationTemplate({
+		to: number,
+		orderNumberText: text
+	});
 }
 
 async function alertWhatsappFailure(context: string, number: string, reason: string): Promise<void> {

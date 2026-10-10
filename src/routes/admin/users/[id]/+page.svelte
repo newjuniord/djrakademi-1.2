@@ -80,7 +80,7 @@
 </script>
 
 <svelte:head>
-	<title>{user ? user.name : 'Utilisateur'} · Fiche Utilisateur</title>
+	<title>{user ? user.name : 'Utilisateur'} · Fiche utilisateur</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -198,7 +198,7 @@
 						<FileText size={20} />
 					</div>
 					<div>
-						<p class="text-xs font-medium text-base-content/60">Ebooks débloqués</p>
+						<p class="text-xs font-medium text-base-content/60">Livres numériques débloqués</p>
 						<p class="text-2xl font-bold text-base-content">{user.ebookCount}</p>
 					</div>
 				</div>

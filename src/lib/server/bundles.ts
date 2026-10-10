@@ -125,12 +125,12 @@ export async function grantBundleAccess(
 	let items = parseBundleItems(order.bundle_items_json);
 	if (!items.length) {
 		const bundleId = String(order.product_id || '').trim();
-		if (!bundleId) throw new Error('La commande du bundle ne contient aucun identifiant de bundle.');
+		if (!bundleId) throw new Error('La commande de l’offre groupée ne contient aucun identifiant d’offre.');
 		// Historical orders may predate the bundle_items_json snapshot.
 		const bundle = await getBundle(bundleId, false);
 		items = bundle?.items.map(({ type, id }) => ({ type, id })) || [];
 	}
-	if (!items.length) throw new Error('La commande du bundle ne contient aucun produit.');
+	if (!items.length) throw new Error('La commande de l’offre groupée ne contient aucun produit.');
 	for (const item of items) {
 		const existing = await tables.listRows({
 			databaseId: DATABASE_ID, tableId: 'access_grants', transactionId,

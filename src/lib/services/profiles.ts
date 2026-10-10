@@ -27,7 +27,13 @@ async function profileRequest(init: RequestInit = {}): Promise<UserProfile> {
 		}
 	});
 	const data = await response.json().catch(() => ({}));
-	if (!response.ok) throw new Error(data.message || 'Impossible de charger le profil.');
+	if (!response.ok) {
+		const error = new Error(response.status === 400 && typeof data.message === 'string'
+			? data.message
+			: 'Impossible de charger le profil.');
+		Object.assign(error, { status: response.status });
+		throw error;
+	}
 	return data as UserProfile;
 }
 

@@ -35,7 +35,7 @@
 </script>
 
 <svelte:head>
-	<title>Nouveau Coaching · DJR Akademi Admin</title>
+	<title>Nouvelle offre de coaching · Administration DJR Akademi</title>
 </svelte:head>
 
 <div class="mx-auto max-w-5xl space-y-6">
@@ -55,11 +55,11 @@
 					Créer une offre de coaching
 				</h1>
 				<p class="text-xs sm:text-sm text-base-content/60 mt-1 font-medium">
-					Définissez le titre, la durée et le tarif de votre nouvelle consultation 1-on-1.
+					Définissez le titre, la durée et le tarif de votre nouvelle consultation individuelle.
 				</p>
 			</div>
 			<span class="badge badge-primary font-bold text-xs px-3 py-2 shrink-0">
-				Nouveau Service
+				Nouveau service
 			</span>
 		</div>
 	</div>

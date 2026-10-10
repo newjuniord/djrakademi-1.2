@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { toast } from '$lib/toast.svelte';
+	import { page } from '$app/state';
+	import { translateAdminToastMessage } from '$lib/admin/admin-localization';
 	import { CheckCircle2, AlertCircle, Info, X } from 'lucide-svelte';
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
+	let closeLabel = $derived(page.url.searchParams.get('lang') === 'ht' ? 'Fèmen notifikasyon an' : 'Fermer la notification');
 </script>
 
 {#if toast.items.length > 0}
@@ -23,13 +27,13 @@
 					{:else}
 						<CheckCircle2 size={20} class="shrink-0 text-white mt-0.5" />
 					{/if}
-					<span class="break-words whitespace-pre-line leading-relaxed">{item.message}</span>
+					<span class="break-words whitespace-pre-line leading-relaxed">{translateAdminToastMessage(item.message, currentLang, item.type)}</span>
 				</div>
 				<button
 					type="button"
 					class="btn btn-ghost btn-xs btn-square text-white/80 hover:text-white rounded-lg -mr-1 shrink-0 cursor-pointer"
 					onclick={() => toast.remove(item.id)}
-					aria-label="Fermer la notification"
+					aria-label={closeLabel}
 				>
 					<X size={16} />
 				</button>

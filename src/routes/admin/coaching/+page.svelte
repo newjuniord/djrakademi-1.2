@@ -72,7 +72,7 @@
 		</div>
 	</header>
 
-	<section class="overflow-hidden rounded-xl border border-base-300 bg-base-100" aria-label="Résumé coaching">
+	<section class="overflow-hidden rounded-xl border border-base-300 bg-base-100" aria-label="Résumé des activités de coaching">
 		<div class="grid grid-cols-2 divide-x divide-y divide-base-300 sm:grid-cols-4 sm:divide-y-0">
 			<div class="p-4 sm:p-5"><div class="flex items-center gap-2 text-sm text-base-content/55"><span class="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary"><CalendarDays size={17} /></span> Offres actives</div><p class="mt-3 text-2xl font-bold">{activeOffers}</p></div>
 			<div class="p-4 sm:p-5"><div class="flex items-center gap-2 text-sm text-base-content/55"><span class="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary"><CalendarClock size={17} /></span> Horizon ouvert</div><p class="mt-3 text-2xl font-bold">{settings.maxAdvanceDays} j</p></div>
@@ -142,7 +142,7 @@
 								<div class="flex items-start justify-between gap-3">
 									<div class="min-w-0">
 										<p class="truncate text-sm font-semibold">{booking.customerName}</p>
-										<p class="mt-0.5 truncate text-xs text-base-content/50">{service?.title ?? 'Session Coaching'}</p>
+										<p class="mt-0.5 truncate text-xs text-base-content/50">{service?.title ?? 'Séance de coaching'}</p>
 									</div>
 									<BookingStatusBadge status={booking.status} />
 								</div>

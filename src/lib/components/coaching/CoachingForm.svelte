@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import { untrack } from 'svelte';
 	import { AlertCircle, BadgeDollarSign, CheckCircle2, Clock3, Globe2, Save, Link2, Sparkles, Loader2 } from 'lucide-svelte';
 	import { slugify, validateCoaching } from '$lib/coaching/validation';
@@ -21,6 +23,7 @@
 	let error = $state('');
 	let slugEdited = $state(Boolean(defaults?.slug));
 	let submitting = $state(false);
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function updateTitle(value: string) {
 		title = value;
@@ -54,7 +57,7 @@
 	{#if error}
 		<div class="alert alert-error shadow-sm rounded-2xl">
 			<AlertCircle size={18} />
-			<span class="font-bold text-xs">{error}</span>
+			<span class="font-bold text-xs">{translateAdminMessage(error, currentLang)}</span>
 		</div>
 	{/if}
 
@@ -63,7 +66,7 @@
 		<section class="card border border-base-300 bg-base-100 shadow-xs rounded-2xl overflow-hidden">
 			<div class="border-b border-base-200/80 px-6 py-5 flex items-center justify-between">
 				<div>
-					<h3 class="font-extrabold text-base text-base-content tracking-tight">Informations de la Session</h3>
+					<h3 class="font-extrabold text-base text-base-content tracking-tight">Informations sur la séance</h3>
 					<p class="mt-0.5 text-xs text-base-content/60 font-medium">Présentez votre offre de coaching et le programme de la consultation.</p>
 				</div>
 				<span class="size-8 bg-primary/10 text-primary rounded-xl grid place-items-center font-bold">
@@ -83,21 +86,21 @@
 						required
 						value={title}
 						oninput={(event) => updateTitle(event.currentTarget.value)}
-						placeholder="Ex: Coaching 1-on-1 Business DJing & Productivité"
+						placeholder="Ex. : Accompagnement individuel en DJing et productivité"
 					/>
 				</div>
 
 				<!-- Description -->
 				<div class="form-control gap-2">
 					<label for="coaching-desc" class="label-text font-bold text-[11px] uppercase tracking-wider text-base-content/70">
-						Description & Objectifs de la session <span class="text-error">*</span>
+						Description et objectifs de la séance <span class="text-error">*</span>
 					</label>
 					<textarea
 						id="coaching-desc"
 						class="textarea textarea-bordered w-full min-h-40 rounded-xl text-xs text-base-content leading-relaxed bg-base-100 border-base-300 shadow-2xs focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-base-content/30"
 						required
 						bind:value={description}
-						placeholder="Décrivez précisément ce que le client apprendra pendant cette session : analyse de carrière, optimisation du setup audio, stratégie de réservation…"
+						placeholder="Décrivez précisément ce que le client apprendra pendant cette session : analyse de carrière, optimisation du matériel audio, stratégie de réservation…"
 					></textarea>
 					<p class="text-[11px] text-base-content/50 font-medium">💡 Soyez clair sur le résultat concret obtenu à la fin de la séance.</p>
 				</div>
@@ -106,7 +109,7 @@
 				<div class="form-control gap-2">
 					<label for="coaching-slug" class="label-text font-bold text-[11px] uppercase tracking-wider text-base-content/70 flex items-center gap-1.5">
 						<Link2 size={13} class="text-base-content/50" />
-						<span>Adresse personnalisée de la page (URL Slug)</span>
+						<span>Adresse personnalisée de la page (URL)</span>
 					</label>
 					<div class="join w-full shadow-2xs rounded-xl overflow-hidden border border-base-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all bg-base-100">
 						<span class="join-item bg-base-200/60 text-base-content/60 text-xs font-mono font-semibold px-3.5 flex items-center border-r border-base-300 select-none">
@@ -128,7 +131,7 @@
 		<!-- RIGHT SIDEBAR CARD: TARIFICATION & VISIBILITÉ -->
 		<aside class="card border border-base-300 bg-base-100 shadow-xs rounded-2xl overflow-hidden space-y-6 p-6">
 			<div class="pb-4 border-b border-base-200/80">
-				<h3 class="font-extrabold text-base text-base-content tracking-tight">Paramètres d'Accès</h3>
+				<h3 class="font-extrabold text-base text-base-content tracking-tight">Paramètres d’accès</h3>
 				<p class="mt-0.5 text-xs text-base-content/60 font-medium">Durée, tarification et visibilité publique.</p>
 			</div>
 
@@ -187,7 +190,7 @@
 							</div>
 
 							<div class="form-control gap-1">
-								<span class="text-[10px] font-bold uppercase tracking-wider text-base-content/50">Prix (USD $) (Optionnel)</span>
+								<span class="text-[10px] font-bold uppercase tracking-wider text-base-content/50">Prix (USD $) (facultatif)</span>
 								<div class="join w-full shadow-2xs rounded-xl overflow-hidden border border-base-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all bg-base-100">
 									<input
 										class="input input-sm join-item border-none bg-transparent min-w-0 flex-1 text-xs font-mono font-black text-base-content focus:outline-none"
@@ -195,7 +198,7 @@
 										min="1"
 										step="0.01"
 										bind:value={priceUsd}
-										placeholder="Ex: 20"
+										placeholder="Ex. : 20"
 									/>
 									<span class="join-item bg-base-200/60 text-base-content/70 text-xs font-bold px-3 flex items-center border-l border-base-300">
 										USD
@@ -206,8 +209,8 @@
 
 						<div class="form-control gap-1 pt-2 border-t border-base-200/60">
 							<label for="lemonsqueezy-variant-id" class="label-text font-bold text-[10px] uppercase tracking-wider text-base-content/60 flex items-center justify-between">
-								<span>Lemon Squeezy Variant ID</span>
-								<span class="text-[9px] font-normal text-base-content/40 font-mono">Paiement par Kat</span>
+								<span>Identifiant de variante Lemon Squeezy</span>
+								<span class="text-[9px] font-normal text-base-content/40 font-mono">Paiement par carte</span>
 							</label>
 							<input
 								id="lemonsqueezy-variant-id"
@@ -233,7 +236,7 @@
 					<div>
 						<span class="flex items-center gap-1.5 text-xs font-bold text-base-content">
 							<Globe2 size={14} class="text-primary" />
-							Offre active & publiée
+							Offre active et publiée
 						</span>
 						<span class="mt-0.5 block text-[11px] font-medium text-base-content/50 leading-relaxed">
 							Accessible immédiatement pour la réservation.
@@ -258,7 +261,7 @@
 				<span>Enregistrement…</span>
 			{:else}
 				<Save size={18} />
-				<span>{submitLabel}</span>
+				<span>{translateAdminMessage(submitLabel, currentLang)}</span>
 			{/if}
 		</button>
 	</div>

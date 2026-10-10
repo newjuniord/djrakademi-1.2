@@ -1,7 +1,7 @@
 <script lang="ts">
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import { page } from '$app/state';
-	import { User, ChevronLeft, Save, Shield, CheckCircle2, Mail, Phone, Loader2, AlertCircle } from 'lucide-svelte';
+	import { User, ChevronLeft, Save, CheckCircle2, Mail, Phone, Loader2, AlertCircle } from 'lucide-svelte';
 	import { authState } from '$lib/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { updateProfile } from '$lib/services/profiles';
@@ -38,8 +38,9 @@
 			emailLabel: 'Adresse e-mail',
 			emailNote: 'Cette adresse e-mail est liée à votre compte et ne peut pas être modifiée ici.',
 			whatsappLabel: 'Numéro WhatsApp',
-			whatsappPlaceholder: '+509 00 00 0000',
+			whatsappPlaceholder: '+509 37 00 12 34',
 			whatsappNote: 'Utilisez un numéro sur lequel l\'équipe peut vous contacter en cas de besoin.',
+			whatsappInvalid: 'Entrez un numéro au format international, par exemple +50937001234.',
 			checkBeforeSave: 'Vérifiez les informations avant d\'enregistrer.',
 			saving: 'Enregistrement...',
 			saveChanges: 'Enregistrer les modifications',
@@ -68,12 +69,13 @@
 			emailLabel: 'Adrès imèl',
 			emailNote: 'Imèl sa a konekte ak kont ou epi li pa ka chanje isit la.',
 			whatsappLabel: 'Nimewo WhatsApp',
-			whatsappPlaceholder: '+509 00 00 0000',
+			whatsappPlaceholder: '+509 37 00 12 34',
 			whatsappNote: 'Sèvi ak yon nimewo ekip la ka kontakte si ou bezwen sipò.',
+			whatsappInvalid: 'Antre yon nimewo entènasyonal, pa egzanp +50937001234.',
 			checkBeforeSave: 'Verifye enfòmasyon yo anvan ou anrejistre.',
 			saving: 'Anrejistreman...',
 			saveChanges: 'Anrejistre chanjman yo',
-			successMsg: 'Enfòmasyon sou kont ou yo mete ajou.',
+			successMsg: 'Enfòmasyon sou kont ou yo anrejistre.',
 			errorMsg: 'Nou pa ka mete pwofil la ajou kounye a.'
 		}
 	};
@@ -103,6 +105,11 @@
 	async function saveProfile(event: SubmitEvent) {
 		event.preventDefault();
 		if (!authState.user) return;
+		const normalizedWhatsapp = whatsapp.replace(/[\s().-]/g, '');
+		if (normalizedWhatsapp && !/^\+[1-9]\d{7,14}$/.test(normalizedWhatsapp)) {
+			saveErrorMessage = t.whatsappInvalid;
+			return;
+		}
 
 		saving = true;
 		saveSuccessMessage = null;
@@ -111,10 +118,11 @@
 		try {
 			const updated = await updateProfile(authState.user.$id, {
 				name: name.trim(),
-				whatsapp: whatsapp.trim()
+				whatsapp: normalizedWhatsapp
 			});
 			if (updated) {
 				authState.profile = updated;
+				whatsapp = updated.whatsapp;
 				if (authState.user) {
 					authState.user.name = updated.name;
 				}
@@ -125,7 +133,7 @@
 			}, 4000);
 		} catch (e: any) {
 			console.error('Failed to update profile:', e);
-			saveErrorMessage = t.errorMsg;
+			saveErrorMessage = e?.status === 400 && currentLang === 'fr' ? e.message : t.errorMsg;
 		} finally {
 			saving = false;
 		}
@@ -156,7 +164,6 @@
 				<header class="profile-heading">
 					<span>{t.myAccount}</span>
 					<h1>{t.myProfile}</h1>
-					<p>{t.profileDesc}</p>
 				</header>
 
 				{#if saveSuccessMessage}
@@ -168,24 +175,6 @@
 				{/if}
 
 				<div class="profile-layout">
-					<aside class="profile-summary" aria-label={t.myAccount}>
-						<div class="profile-avatar"><User size={30} /></div>
-						<span class="profile-role">{t.student}</span>
-						<h2>{name || t.myAccount}</h2>
-						<p>{email}</p>
-
-						<div class="profile-status">
-							<span><i></i> {t.activeAccount}</span>
-							<small>{t.accountInfoNote}</small>
-						</div>
-
-						<a href={getHref('/dashboard')} class="profile-dashboard-link">{t.goToCourses}</a>
-
-						{#if authState.isAdmin}
-						<a href={getHref('/admin')} class="profile-admin-link"><Shield size={15} /> {t.adminSpace}</a>
-						{/if}
-					</aside>
-
 					<section class="profile-form-panel" aria-labelledby="personal-info-title">
 						<div class="profile-form-heading">
 							<div>
@@ -308,114 +297,15 @@
 		line-height: 1;
 	}
 
-	.profile-heading p {
-		margin: 13px 0 0;
-		color: #746d63;
-		font-size: 14px;
-	}
-
 	.profile-layout {
 		display: grid;
 		align-items: start;
-		grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.65fr);
+		grid-template-columns: 1fr;
+		max-width: 800px;
 		gap: 26px;
 	}
 
-	.profile-summary {
-		padding: 32px;
-		background: #141412;
-		color: #f7f2e9;
-	}
 
-	.profile-avatar {
-		display: grid;
-		width: 66px;
-		height: 66px;
-		margin-bottom: 22px;
-		place-items: center;
-		background: #e2ad3d;
-		color: #17130d;
-	}
-
-	.profile-role {
-		display: inline-flex;
-		padding: 6px 9px;
-		border: 1px solid rgba(226, 173, 61, 0.45);
-		color: #e8be65;
-		font-size: 9px;
-		font-weight: 850;
-		letter-spacing: 0.13em;
-		text-transform: uppercase;
-	}
-
-	.profile-summary h2 {
-		margin: 17px 0 0;
-		font-family: Georgia, 'Times New Roman', serif;
-		font-size: 27px;
-		line-height: 1.15;
-	}
-
-	.profile-summary > p {
-		overflow: hidden;
-		margin: 9px 0 0;
-		color: rgba(247, 242, 233, 0.54);
-		font-size: 12px;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.profile-status {
-		margin-top: 30px;
-		padding: 20px 0;
-		border-top: 1px solid rgba(255, 255, 255, 0.13);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.13);
-	}
-
-	.profile-status span {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-size: 12px;
-		font-weight: 800;
-	}
-
-	.profile-status i {
-		width: 7px;
-		height: 7px;
-		border-radius: 50%;
-		background: #53c477;
-	}
-
-	.profile-status small {
-		display: block;
-		margin-top: 9px;
-		color: rgba(247, 242, 233, 0.45);
-		font-size: 11px;
-		line-height: 1.55;
-	}
-
-	.profile-dashboard-link,
-	.profile-admin-link {
-		display: flex;
-		min-height: 46px;
-		align-items: center;
-		justify-content: center;
-		margin-top: 20px;
-		padding: 0 15px;
-		background: #e2ad3d;
-		color: #17130d;
-		font-size: 11px;
-		font-weight: 850;
-		text-align: center;
-	}
-
-	.profile-admin-link {
-		gap: 7px;
-		margin-top: 10px;
-		border: 1px solid rgba(255, 255, 255, 0.18);
-		background: transparent;
-		color: #fff;
-	}
 
 	.profile-form-panel {
 		border: 1px solid #ddd5ca;
@@ -562,23 +452,11 @@
 	.profile-alert-success { border: 1px solid #b9dec1; background: #edf7ef; color: #276538; }
 	.profile-alert-error { margin: 24px 0 0; border: 1px solid #ebc1bb; background: #fcf0ee; color: #92392f; }
 
-	@media (max-width: 840px) {
-		.profile-layout { grid-template-columns: 1fr; }
-		.profile-summary { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 20px; }
-		.profile-avatar { grid-row: 1 / 5; margin: 0; }
-		.profile-role { width: max-content; align-self: start; }
-		.profile-summary h2 { margin-top: 10px; }
-		.profile-summary > p { margin-top: 6px; }
-		.profile-status, .profile-dashboard-link, .profile-admin-link { grid-column: 1 / -1; }
-	}
-
 	@media (max-width: 560px) {
 		.profile-main { padding: 36px 0 64px; }
 		.profile-shell { width: min(100% - 32px, 1120px); }
 		.profile-heading { margin: 30px 0 26px; }
 		.profile-heading h1 { font-size: 43px; }
-		.profile-summary { padding: 24px; }
-		.profile-avatar { width: 56px; height: 56px; }
 		.profile-form-heading { align-items: flex-start; padding: 23px 20px; flex-direction: column; }
 		.profile-form-heading > p { max-width: none; text-align: left; }
 		.profile-form { padding: 22px 20px; }

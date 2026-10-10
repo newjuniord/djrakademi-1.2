@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { translateAdminMessage } from '$lib/admin/admin-localization';
 	import type { Ebook } from '$lib/types/admin';
 	import { getEbooks, deleteEbook as deleteEbookService } from '$lib/services/ebooks';
 	import {
@@ -29,6 +31,7 @@
 	// Pagination state (20 per page)
 	let pageSize = $state(20);
 	let currentPage = $state(1);
+	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	// Delete Modal state
 	let deleteModalEbook = $state<Ebook | null>(null);
@@ -38,7 +41,7 @@
 		try {
 			ebooks = await getEbooks();
 		} catch (error) {
-			loadError = error instanceof Error ? error.message : "Impossible de charger les ebooks.";
+			loadError = error instanceof Error ? error.message : "Impossible de charger les livres numériques.";
 		} finally {
 			loading = false;
 		}
@@ -65,6 +68,10 @@
 			return matchesSearch && matchesFilter;
 		})
 	);
+	let paginationLabel = $derived(translateAdminMessage(
+		`Affichage de ${filteredEbooks.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} à ${Math.min(currentPage * pageSize, filteredEbooks.length)} sur ${filteredEbooks.length} livres numériques`,
+		currentLang
+	));
 
 	// Pagination slicing
 	let totalPages = $derived(Math.ceil(filteredEbooks.length / pageSize) || 1);
@@ -82,10 +89,10 @@
 			await deleteEbookService(ebook.id);
 			ebooks = ebooks.filter((item) => item.id !== ebook.id);
 			deleteModalEbook = null;
-			toast.success('L\'ebook a été supprimé avec succès.');
+			toast.success('Le livre numérique a été supprimé avec succès.');
 		} catch (e) {
 			console.error("Failed to delete ebook:", e);
-			const msg = e instanceof Error ? e.message : "Impossible de supprimer l’ebook.";
+			const msg = e instanceof Error ? e.message : "Impossible de supprimer le livre numérique.";
 			actionError = msg;
 			toast.error(msg);
 		} finally {
@@ -95,7 +102,7 @@
 </script>
 
 <svelte:head>
-	<title>Ebooks · DJR Akademi Admin</title>
+	<title>Livres numériques · Administration DJR Akademi</title>
 </svelte:head>
 
 <div class="space-y-10 p-1">
@@ -109,10 +116,10 @@
 	<div class="bg-base-100 p-6 sm:p-8 shadow-sm rounded-none border-none flex flex-col sm:flex-row sm:items-center justify-between gap-6">
 		<div>
 			<h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-3xl">
-				Ebooks
+				Livres numériques
 			</h1>
 			<p class="text-xs text-base-content/60 mt-1">
-				Créez et gérez vos ebooks.
+				Créez et gérez vos livres numériques.
 			</p>
 		</div>
 
@@ -121,7 +128,7 @@
 			class="btn bg-black text-white hover:bg-black/90 border-none rounded-none btn-sm font-semibold text-xs gap-2 px-6 self-start sm:self-auto"
 		>
 			<Plus size={16} />
-			Nouvel ebook
+			Nouveau livre numérique
 		</a>
 	</div>
 
@@ -137,7 +144,7 @@
 				/>
 				<input
 					type="text"
-					placeholder="Rechercher un ebook..."
+					placeholder="Rechercher un livre numérique…"
 					bind:value={searchQuery}
 					class="input input-ghost bg-base-200/50 w-full pl-12 pr-4 h-11 text-xs rounded-none focus:bg-base-100 focus:shadow-xs border-none"
 				/>
@@ -174,7 +181,7 @@
 			<table class="table w-full rounded-none text-left border-collapse">
 				<thead>
 					<tr class="border-b border-base-200 text-xs font-semibold text-base-content/50 uppercase tracking-wider bg-base-100">
-						<th class="py-4 px-4 font-bold">Ebook</th>
+						<th class="py-4 px-4 font-bold">Livre numérique</th>
 						<th class="py-4 px-4 font-bold">Prix</th>
 						<th class="py-4 px-4 font-bold">Ventes</th>
 						<th class="py-4 px-4 font-bold">Statut</th>
@@ -185,7 +192,7 @@
 					{#if paginatedEbooks.length === 0}
 						<tr>
 							<td colspan="5" class="py-12 text-center text-base-content/50">
-								Aucun ebook trouvé.
+								Aucun livre numérique trouvé.
 							</td>
 						</tr>
 					{:else}
@@ -305,7 +312,7 @@
 		<!-- Pagination Footer (< Précédent   Suivant >) -->
 		<div class="flex items-center justify-between border-t border-base-200/60 pt-4 text-xs">
 			<span class="text-base-content/60 font-medium">
-				Affichage de {filteredEbooks.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} à {Math.min(currentPage * pageSize, filteredEbooks.length)} sur {filteredEbooks.length} ebooks
+				{paginationLabel}
 			</span>
 
 			<div class="flex items-center gap-2">
@@ -340,10 +347,10 @@
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 		<div class="bg-base-100 rounded-none shadow-2xl p-6 w-full max-w-md space-y-4 border border-base-200">
 			<h3 class="font-bold text-lg text-base-content">
-				Supprimer cet ebook ?
+				Supprimer ce livre numérique ?
 			</h3>
 			<p class="text-xs text-base-content/70 leading-relaxed">
-				Cet ebook ne sera plus disponible dans votre catalogue.
+				Ce livre numérique ne sera plus disponible dans votre catalogue.
 			</p>
 			<div class="flex items-center justify-end gap-3 pt-4 border-t border-base-200">
 				<button
