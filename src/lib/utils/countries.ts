@@ -70,13 +70,111 @@ export const COUNTRIES: Country[] = [
 
 export const DEFAULT_COUNTRY = COUNTRIES[0]; // Haiti (+509)
 
+export function detectCountryFromTimezoneOrLocale(): Country {
+	if (typeof window === 'undefined') return DEFAULT_COUNTRY;
+	try {
+		const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+		if (tz.includes('Port-au-Prince')) return COUNTRIES.find((c) => c.code === 'HT') || DEFAULT_COUNTRY;
+		if (tz.includes('Paris')) return COUNTRIES.find((c) => c.code === 'FR') || DEFAULT_COUNTRY;
+		if (tz.includes('Santo_Domingo')) return COUNTRIES.find((c) => c.code === 'DO') || DEFAULT_COUNTRY;
+		if (tz.includes('Santiago')) return COUNTRIES.find((c) => c.code === 'CL') || DEFAULT_COUNTRY;
+		if (
+			tz.includes('New_York') ||
+			tz.includes('Chicago') ||
+			tz.includes('Los_Angeles') ||
+			tz.includes('Detroit') ||
+			tz.includes('Phoenix') ||
+			tz.includes('Denver')
+		) {
+			return COUNTRIES.find((c) => c.code === 'US') || DEFAULT_COUNTRY;
+		}
+		if (tz.includes('Toronto') || tz.includes('Vancouver') || tz.includes('Montreal')) {
+			return COUNTRIES.find((c) => c.code === 'CA') || DEFAULT_COUNTRY;
+		}
+		if (tz.includes('Guadeloupe')) return COUNTRIES.find((c) => c.code === 'GP') || DEFAULT_COUNTRY;
+		if (tz.includes('Martinique')) return COUNTRIES.find((c) => c.code === 'MQ') || DEFAULT_COUNTRY;
+		if (tz.includes('Cayenne')) return COUNTRIES.find((c) => c.code === 'GF') || DEFAULT_COUNTRY;
+		if (tz.includes('Mexico')) return COUNTRIES.find((c) => c.code === 'MX') || DEFAULT_COUNTRY;
+
+		const lang = navigator.language || '';
+		const countryPart = lang.split('-')[1]?.toUpperCase();
+		if (countryPart) {
+			const matched = COUNTRIES.find((c) => c.code === countryPart);
+			if (matched) return matched;
+		}
+	} catch (e) {
+		console.warn('Auto-detect country error:', e);
+	}
+	return DEFAULT_COUNTRY;
+}
+
+export function getExpectedDigitsRange(countryCode: string): { min: number; max: number; example: string } {
+	switch (countryCode) {
+		case 'HT':
+			return { min: 8, max: 8, example: '37 00 1234' };
+		case 'US':
+		case 'CA':
+		case 'DO':
+		case 'MX':
+		case 'CO':
+			return { min: 10, max: 10, example: '305 123 4567' };
+		case 'FR':
+		case 'GP':
+		case 'MQ':
+		case 'GF':
+		case 'ES':
+		case 'CL':
+			return { min: 9, max: 9, example: '6 12 34 56 78' };
+		case 'BR':
+			return { min: 10, max: 11, example: '11 91234 5678' };
+		default:
+			return { min: 7, max: 12, example: '00000000' };
+	}
+}
+
+export function validateNationalNumber(
+	country: Country,
+	digits: string,
+	lang: 'fr' | 'ht' = 'fr'
+): { isValid: boolean; message: string; status: 'empty' | 'too_short' | 'too_long' | 'valid' } {
+	const clean = digits.replace(/\D/g, '');
+	if (!clean) {
+		return { isValid: false, message: '', status: 'empty' };
+	}
+
+	const range = getExpectedDigitsRange(country.code);
+	const countryName = lang === 'ht' && country.nameHt ? country.nameHt : country.name;
+
+	if (clean.length < range.min) {
+		const msg =
+			lang === 'ht'
+				? `Nimewo a twokout (${clean.length}/${range.min} chif pou ${countryName})`
+				: `Numéro trop court (${clean.length}/${range.min} chiffres pour ${countryName})`;
+		return { isValid: false, message: msg, status: 'too_short' };
+	}
+
+	if (clean.length > range.max) {
+		const msg =
+			lang === 'ht'
+				? `Nimewo a twolòng (${clean.length}/${range.max} chif pou ${countryName})`
+				: `Numéro trop long (${clean.length}/${range.max} chiffres pour ${countryName})`;
+		return { isValid: false, message: msg, status: 'too_long' };
+	}
+
+	const validMsg = lang === 'ht' ? 'Nimewo an kòrèk ✓' : 'Numéro valide ✓';
+	return { isValid: true, message: validMsg, status: 'valid' };
+}
+
 export function parsePhoneNumber(phone: string): { country: Country; nationalNumber: string } {
 	if (!phone) {
-		return { country: DEFAULT_COUNTRY, nationalNumber: '' };
+		return { country: detectCountryFromTimezoneOrLocale(), nationalNumber: '' };
 	}
-	const clean = phone.trim();
+	let clean = phone.trim();
+	if (clean.startsWith('00')) {
+		clean = '+' + clean.slice(2);
+	}
 	if (!clean.startsWith('+')) {
-		return { country: DEFAULT_COUNTRY, nationalNumber: clean.replace(/\D/g, '') };
+		return { country: detectCountryFromTimezoneOrLocale(), nationalNumber: clean.replace(/\D/g, '') };
 	}
 
 	// Try to match longest dialCode from COUNTRIES
@@ -88,5 +186,5 @@ export function parsePhoneNumber(phone: string): { country: Country; nationalNum
 		}
 	}
 
-	return { country: DEFAULT_COUNTRY, nationalNumber: clean.replace(/[^\d]/g, '') };
+	return { country: detectCountryFromTimezoneOrLocale(), nationalNumber: clean.replace(/[^\d]/g, '') };
 }

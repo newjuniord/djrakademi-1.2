@@ -1,13 +1,22 @@
 <script lang="ts">
-	import { COUNTRIES, DEFAULT_COUNTRY, parsePhoneNumber, type Country } from '$lib/utils/countries';
-	import { ChevronDown, Search, MessageSquare, Check, Phone } from 'lucide-svelte';
+	import {
+		COUNTRIES,
+		DEFAULT_COUNTRY,
+		parsePhoneNumber,
+		validateNationalNumber,
+		getExpectedDigitsRange,
+		detectCountryFromTimezoneOrLocale,
+		type Country
+	} from '$lib/utils/countries';
+	import { ChevronDown, Search, Check, AlertCircle, CheckCircle2 } from 'lucide-svelte';
+	import { onMount } from 'svelte';
 
 	let {
 		value = $bindable(''),
 		id = 'phone-input',
 		required = false,
 		disabled = false,
-		placeholder = '37 00 1234',
+		placeholder = '',
 		label = '',
 		showLabel = false,
 		showWhatsAppHint = true,
@@ -34,6 +43,18 @@
 	let dropdownRef = $state<HTMLDivElement | null>(null);
 	let searchInputRef = $state<HTMLInputElement | null>(null);
 
+	onMount(() => {
+		if (!value && !nationalDigits) {
+			const autoDetected = detectCountryFromTimezoneOrLocale();
+			selectedCountry = autoDetected;
+		}
+	});
+
+	let expectedInfo = $derived(getExpectedDigitsRange(selectedCountry.code));
+	let currentPlaceholder = $derived(placeholder || expectedInfo.example);
+
+	let validation = $derived(validateNationalNumber(selectedCountry, nationalDigits, lang));
+
 	// Filtered country list based on search
 	let filteredCountries = $derived(
 		searchQuery.trim() === ''
@@ -55,6 +76,18 @@
 		if (digits.length <= 4) return digits;
 		if (digits.length <= 8) return `${digits.slice(0, 4)} ${digits.slice(4)}`;
 		return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+	}
+
+	function handleInput(e: Event) {
+		const rawInput = (e.currentTarget as HTMLInputElement).value;
+		const trimmed = rawInput.trim();
+		if (trimmed.startsWith('+') || trimmed.startsWith('00')) {
+			const p = parsePhoneNumber(trimmed);
+			selectedCountry = p.country;
+			nationalDigits = p.nationalNumber;
+		} else {
+			nationalDigits = rawInput.replace(/\D/g, '');
+		}
 	}
 
 	// Synchronize outward E.164 formatted value whenever country or digits change
@@ -119,7 +152,9 @@
 		</label>
 	{/if}
 
-	<div class="relative flex items-center w-full rounded-xl bg-zinc-50 border border-zinc-200 hover:border-zinc-300 focus-within:border-amber-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-amber-400/15 transition-all">
+	<div
+		class="relative flex items-center w-full rounded-xl bg-zinc-50 border transition-all {validation.status === 'valid' ? 'border-emerald-500/80 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/15' : validation.status === 'too_short' || validation.status === 'too_long' ? 'border-amber-400 focus-within:border-amber-500 focus-within:ring-4 focus-within:ring-amber-400/20' : 'border-zinc-200 hover:border-zinc-300 focus-within:border-amber-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-amber-400/15'}"
+	>
 		<!-- Country Code Picker Button -->
 		<button
 			type="button"
@@ -144,11 +179,9 @@
 				autocomplete="tel-national"
 				{required}
 				{disabled}
-				placeholder={placeholder}
+				placeholder={currentPlaceholder}
 				value={formatNational(nationalDigits)}
-				oninput={(e) => {
-					nationalDigits = (e.currentTarget as HTMLInputElement).value.replace(/\D/g, '');
-				}}
+				oninput={handleInput}
 				class="w-full bg-transparent py-3 pl-3.5 pr-10 text-sm font-mono font-bold text-zinc-950 placeholder:font-sans placeholder:font-normal placeholder:text-zinc-400 outline-none transition-all disabled:opacity-60"
 			/>
 			
@@ -211,4 +244,18 @@
 		{/if}
 	</div>
 
+	<!-- Realtime Smart Phone Helper & Error Feedback -->
+	{#if validation.status !== 'empty'}
+		<div class="flex items-center gap-1.5 text-[11px] font-bold ml-1 transition-all">
+			{#if validation.isValid}
+				<span class="text-emerald-600 flex items-center gap-1">
+					<CheckCircle2 size={13} /> {validation.message}
+				</span>
+			{:else}
+				<span class="text-amber-600 flex items-center gap-1">
+					<AlertCircle size={13} /> {validation.message}
+				</span>
+			{/if}
+		</div>
+	{/if}
 </div>
