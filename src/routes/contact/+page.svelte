@@ -11,6 +11,8 @@
 		MessageSquareText
 	} from 'lucide-svelte';
 
+	import { whatsappLink } from '$lib/coaching/validation';
+
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 
 	function getHref(path: string) {
@@ -35,6 +37,10 @@
 			fastResponseDesc: 'Nous répondons à votre message en moins de 24 heures',
 			personalizedSupportTitle: 'Support personnalisé',
 			personalizedSupportDesc: 'Une personne dédiée pour vous aider à chaque demande',
+			whatsappTitle: 'Assistance WhatsApp directe',
+			whatsappBadge: 'Réponse rapide',
+			whatsappDesc: 'Besoin d\'une aide immédiate ? Discutez directement avec nous au',
+			contactWhatsappBtn: 'Discuter sur WhatsApp (+1 201-534-2884)',
 			faqTitle: 'Foire aux questions',
 			faqAccessTitle: 'Accès formation :',
 			faqAccessDesc: 'Disponible directement après confirmation du paiement.',
@@ -75,6 +81,10 @@
 			fastResponseDesc: 'N ap reponn mesaj ou a nan mwens pase 24 èdtan',
 			personalizedSupportTitle: 'Sipò pèsonalize',
 			personalizedSupportDesc: 'Yon moun pou ede w ak chak demann',
+			whatsappTitle: 'Sipò WhatsApp dirèk',
+			whatsappBadge: 'Repons rapid',
+			whatsappDesc: 'Ou bezwen yon èd kounye a? Ekri nou dirèkteman sou WhatsApp nan',
+			contactWhatsappBtn: 'Pale sou WhatsApp (+1 201-534-2884)',
 			faqTitle: 'Kesyon moun poze souvan',
 			faqAccessTitle: 'Aksè nan fòmasyon:',
 			faqAccessDesc: 'Disponib dirèkteman apre peman an konfime.',
@@ -193,8 +203,40 @@
 				</div>
 			{/if}
 
-			<!-- CENTERED CONTACT FORM CONTAINER -->
-			<div class="max-w-2xl mx-auto">
+			<!-- CENTERED CONTACT FORM & WHATSAPP CONTAINER -->
+			<div class="max-w-2xl mx-auto space-y-6">
+
+				<!-- WhatsApp Direct Contact Card -->
+				<div class="bg-emerald-950 text-white rounded-3xl border border-emerald-800/80 p-6 sm:p-7 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+					<div class="flex items-center gap-4">
+						<div class="size-12 bg-emerald-500/20 rounded-2xl grid place-items-center shrink-0">
+							<img src="/whatsapp.png" alt="WhatsApp" class="size-7 object-contain shrink-0" />
+						</div>
+						<div class="space-y-0.5">
+							<div class="flex items-center gap-2">
+								<h3 class="font-black text-base text-white">{t.whatsappTitle}</h3>
+								<span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase rounded-full">
+									{t.whatsappBadge}
+								</span>
+							</div>
+							<p class="text-xs text-emerald-200/80 font-medium">
+								{t.whatsappDesc} <strong class="text-white font-mono">+1 201-534-2884</strong>
+							</p>
+						</div>
+					</div>
+
+					<a
+						href={whatsappLink('+12015342884', currentLang === 'ht' ? 'Bonjou, mwen gen yon kesyon konsènan DJR Akademi...' : 'Bonjour, j’ai une question concernant DJR Akademi...')}
+						target="_blank"
+						rel="noreferrer"
+						class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-extrabold text-xs rounded-2xl transition-all shadow-md shrink-0 w-full sm:w-auto"
+					>
+						<img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" />
+						<span>{t.contactWhatsappBtn}</span>
+					</a>
+				</div>
+
+				<!-- Form Card -->
 				<div class="bg-white rounded-3xl border border-zinc-200/80 p-8 sm:p-10 shadow-sm space-y-8">
 
 					<div class="flex items-center justify-between pb-6 border-b border-zinc-100">
