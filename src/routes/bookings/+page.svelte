@@ -205,44 +205,44 @@
 			<span class="loading loading-spinner text-amber-500 loading-lg"></span>
 		</div>
 	{:else if authState.user}
-		<main class="flex-1 py-8 sm:py-10 max-w-4xl mx-auto px-4 w-full space-y-6">
+		<main class="flex-1 py-6 sm:py-10 max-w-4xl mx-auto px-3.5 sm:px-4 w-full space-y-5 sm:space-y-6">
 
 			<!-- Top navigation & header -->
-			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
 				<div class="space-y-1">
 					<a
 						href={getHref('/dashboard')}
-						class="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-900 transition-colors mb-1"
+						class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-zinc-500 hover:text-zinc-900 transition-colors mb-0.5"
 					>
-						<ArrowLeft size={14} />
+						<ArrowLeft size={13} />
 						<span>{t.backToDashboard}</span>
 					</a>
-					<h1 class="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight flex items-center gap-2.5">
-						<CalendarCheck size={28} class="text-amber-500 shrink-0" />
+					<h1 class="text-xl sm:text-3xl font-black text-zinc-950 tracking-tight flex items-center gap-2 sm:gap-2.5">
+						<CalendarCheck size={24} class="text-amber-500 shrink-0 sm:size-[28px]" />
 						<span>{t.title}</span>
 					</h1>
 				</div>
 
 				<a
 					href={getHref('/#coaching')}
-					class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shadow-xs shrink-0 self-start sm:self-auto"
+					class="inline-flex items-center justify-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-[11px] sm:text-xs rounded-xl transition-colors shadow-xs shrink-0 self-start sm:self-auto"
 				>
 					<span>{t.bookNewBtn}</span>
-					<ArrowRight size={14} />
+					<ArrowRight size={13} />
 				</a>
 			</div>
 
 			<!-- Filter Dropdown (Dropdown selector) -->
-			<div class="flex items-center justify-between gap-4 bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-xs">
-				<label for="booking-filter-select" class="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5 pl-1">
-					<Clock size={15} class="text-amber-500" />
+			<div class="flex flex-col min-[600px]:flex-row min-[600px]:items-center justify-between gap-2.5 bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-xs">
+				<label for="booking-filter-select" class="text-[11px] sm:text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5 pl-1">
+					<Clock size={14} class="text-amber-500" />
 					<span>Filtrer les séances</span>
 				</label>
 
 				<select
 					id="booking-filter-select"
 					bind:value={activeTab}
-					class="bg-zinc-100 hover:bg-zinc-200 border border-zinc-300 text-zinc-900 font-bold text-xs rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer transition-colors"
+					class="bg-zinc-100 hover:bg-zinc-200 border border-zinc-300 text-zinc-900 font-bold text-[11px] sm:text-xs rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer transition-colors w-full min-[600px]:w-auto"
 				>
 					<option value="upcoming">
 						{t.tabUpcoming} ({upcomingBookings.length})
@@ -257,18 +257,18 @@
 			</div>
 
 			<!-- Bookings List -->
-			<div class="space-y-4">
+			<div class="space-y-3.5 sm:space-y-4">
 				{#if displayedBookings.length === 0}
-					<div class="bg-white border border-zinc-200/80 rounded-2xl p-10 text-center space-y-3 shadow-xs">
-						<div class="size-12 bg-amber-100 text-amber-600 rounded-xl grid place-items-center mx-auto">
-							<CalendarCheck size={24} />
+					<div class="bg-white border border-zinc-200/80 rounded-2xl p-8 sm:p-10 text-center space-y-3 shadow-xs">
+						<div class="size-11 sm:size-12 bg-amber-100 text-amber-600 rounded-xl grid place-items-center mx-auto">
+							<CalendarCheck size={22} />
 						</div>
 						<p class="text-xs font-medium text-zinc-500">
 							{activeTab === 'upcoming' ? t.noUpcoming : activeTab === 'past' ? t.noPast : t.noBookings}
 						</p>
 						<a
 							href={getHref('/#coaching')}
-							class="inline-flex items-center gap-2 px-4 py-2 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-xs rounded-xl transition-colors shadow-xs mt-1"
+							class="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-[11px] sm:text-xs rounded-xl transition-colors shadow-xs mt-1"
 						>
 							{t.exploreCoaching}
 						</a>
@@ -280,41 +280,41 @@
 						{@const todayState = isToday(booking.startAt)}
 						{@const timeDiff = getTimeDiffText(booking.startAt)}
 
-						<div class="bg-white border border-zinc-200/90 rounded-2xl p-5 sm:p-6 shadow-xs hover:shadow-md transition-shadow space-y-4">
+						<div class="bg-white border border-zinc-200/90 rounded-2xl p-4 sm:p-6 shadow-xs hover:shadow-md transition-shadow space-y-3.5">
 
 							<!-- Top Row: Status badge & Time remaining -->
-							<div class="flex items-center justify-between gap-3 pb-3 border-b border-zinc-100">
-								<div class="flex items-center gap-2">
+							<div class="flex flex-col min-[600px]:flex-row min-[600px]:items-center justify-between gap-2 pb-3 border-b border-zinc-100">
+								<div class="flex flex-wrap items-center gap-2">
 									{#if todayState}
-										<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-400 text-zinc-950 text-[11px] font-black uppercase rounded-full">
+										<span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] sm:text-[11px] font-black uppercase bg-amber-400 text-zinc-950 rounded-full">
 											<span class="size-1.5 rounded-full bg-zinc-950 animate-pulse"></span>
 											{t.today}
 										</span>
 									{:else if upcomingState}
-										<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-bold uppercase rounded-full">
+										<span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold uppercase bg-emerald-100 text-emerald-800 rounded-full">
 											<span class="size-1.5 rounded-full bg-emerald-600"></span>
 											{t.upcoming}
 										</span>
 									{:else}
-										<span class="px-2.5 py-0.5 bg-zinc-100 text-zinc-600 text-[11px] font-bold uppercase rounded-full">
+										<span class="px-2 py-0.5 text-[10px] sm:text-[11px] font-bold uppercase bg-zinc-100 text-zinc-600 rounded-full">
 											{t.completed}
 										</span>
 									{/if}
 
-									<span class="text-[11px] text-zinc-400 font-mono">ID: {booking.id}</span>
+									<span class="text-[10px] sm:text-[11px] text-zinc-400 font-mono truncate max-w-[190px] sm:max-w-none">ID: {booking.id}</span>
 								</div>
 
-								<span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-lg">
+								<span class="text-[10px] sm:text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg self-start min-[600px]:self-auto">
 									{timeDiff}
 								</span>
 							</div>
 
 							<!-- Middle Row: Service title & Date/Time -->
-							<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+							<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
 								<div class="space-y-1">
-									<h2 class="font-black text-lg text-zinc-950 leading-snug">{booking.serviceTitle}</h2>
-									<p class="text-xs text-zinc-600 font-medium flex items-center gap-2">
-										<Clock size={14} class="text-zinc-400 shrink-0" />
+									<h2 class="font-black text-sm sm:text-lg text-zinc-950 leading-snug">{booking.serviceTitle}</h2>
+									<p class="text-[11px] sm:text-xs text-zinc-600 font-medium flex flex-wrap items-center gap-1.5 sm:gap-2">
+										<Clock size={13} class="text-zinc-400 shrink-0" />
 										<span class="capitalize font-bold text-zinc-900">{dateInfo.date}</span>
 										<span>·</span>
 										<span class="font-black text-amber-600">{dateInfo.time}</span>
@@ -322,7 +322,7 @@
 								</div>
 
 								<!-- Action Buttons -->
-								<div class="flex items-center gap-2.5 shrink-0 flex-wrap">
+								<div class="flex items-center gap-2 shrink-0 flex-wrap">
 									{#if booking.coachWhatsapp}
 										<a
 											href={whatsappLink(
@@ -333,9 +333,9 @@
 											)}
 											target="_blank"
 											rel="noreferrer"
-											class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-colors shadow-xs"
+											class="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] sm:text-xs rounded-xl transition-colors shadow-xs"
 										>
-											<img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" />
+											<img src="/whatsapp.png" alt="WhatsApp" class="size-3.5 sm:size-4 object-contain shrink-0" />
 											<span>{t.contactCoach}</span>
 										</a>
 									{/if}
@@ -345,9 +345,9 @@
 											href={getGoogleCalendarUrl(booking)}
 											target="_blank"
 											rel="noreferrer"
-											class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-xs rounded-xl transition-colors"
+											class="inline-flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] sm:text-xs rounded-xl transition-colors"
 										>
-											<CalendarPlus size={14} class="text-zinc-600" />
+											<CalendarPlus size={13} class="text-zinc-600 sm:size-[14px]" />
 											<span>{t.addToCalendar}</span>
 										</a>
 									{/if}
