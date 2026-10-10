@@ -39,6 +39,23 @@ export function mapBooking(row: any) {
 	};
 }
 
+async function withRateLimitRetry<T>(fn: () => Promise<T>, maxRetries = 2, delayMs = 350): Promise<T> {
+	let attempt = 0;
+	while (attempt <= maxRetries) {
+		try {
+			return await fn();
+		} catch (error: any) {
+			if (error?.code === 429 && attempt < maxRetries) {
+				attempt++;
+				await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+				continue;
+			}
+			throw error;
+		}
+	}
+	return await fn();
+}
+
 export async function createBookingServer(body: any, user: Models.User<Models.Preferences>) {
 	const serviceId = typeof body?.serviceId === 'string' ? body.serviceId.trim() : '';
 	const startAt = typeof body?.startAt === 'string' ? body.startAt.trim() : '';
@@ -54,47 +71,63 @@ export async function createBookingServer(body: any, user: Models.User<Models.Pr
 	}
 
 	const { tables } = adminServices();
-	const transaction = await tables.createTransaction({ ttl: 60 });
+
+	// Fetch service details & slot availability concurrently outside of transaction lock to prevent Appwrite rate limit & transaction bottlenecks
+	const [serviceRes, settingsPage, unavailablePage, bookingPage] = await withRateLimitRetry(() =>
+		Promise.all([
+			tables.getRow({ databaseId: DATABASE_ID, tableId: TABLES.services, rowId: serviceId }),
+			tables.listRows({ databaseId: DATABASE_ID, tableId: TABLES.settings, queries: [Query.limit(1)] }),
+			tables.listRows({
+				databaseId: DATABASE_ID,
+				tableId: TABLES.unavailability,
+				queries: [Query.equal('service_id', serviceId), Query.lessThan('start_at', endAt), Query.greaterThan('end_at', startAt), Query.limit(100)]
+			}),
+			tables.listRows({
+				databaseId: DATABASE_ID,
+				tableId: TABLES.bookings,
+				queries: [Query.equal('service_id', serviceId), Query.lessThan('start_at', endAt), Query.greaterThan('end_at', startAt), Query.limit(100)]
+			})
+		])
+	).catch((error: any) => {
+		if (error?.code === 429) {
+			throw new BookingServerError('Trop de requêtes simultanées. Veuillez réessayer dans quelques secondes.', 429);
+		}
+		throw error;
+	});
+
+	const service: any = serviceRes;
+	if (!service || !service.active) throw new BookingServerError('Cette offre de coaching n’est plus disponible.', 409);
+
+	const settings = settingsPage.rows[0] ? mapSettingsDoc(settingsPage.rows[0]) : DEFAULT_SETTINGS;
+	const now = new Date();
+	const bookings = bookingPage.rows.map((booking: any) => ({
+		startAt: booking.start_at, endAt: booking.end_at, status: booking.status, holdExpiresAt: booking.hold_expires_at
+	}));
+	const requestedDays = Math.max(1, Math.ceil((startTime - now.getTime()) / 86_400_000) + 1);
+	const validSlot = generateDynamicSlots(
+		mapServiceDoc(service), settings, bookings,
+		unavailablePage.rows.map((item: any) => ({
+			id: item.$id, serviceId: item.service_id || null, startAt: item.start_at, endAt: item.end_at, reason: item.reason || ''
+		})),
+		{ now, days: requestedDays }
+	).some((slot) => slot.startAt === new Date(startTime).toISOString() && slot.endAt === new Date(endTime).toISOString());
+	if (!validSlot) throw new BookingServerError('Ce créneau n’est plus disponible.', 409);
+
+	const isFree = Boolean(service.is_free) || Number(service.price) <= 0;
+	const amount = isFree ? 0 : Number(service.price);
+	if (!Number.isFinite(amount) || amount < 0) throw new BookingServerError('Le tarif du coaching est invalide.', 409);
+	const bookingId = ID.unique();
+	const holdExpiresAt = isFree ? null : new Date(now.getTime() + HOLD_MINUTES * 60_000).toISOString();
+	const reservationKey = `${serviceId}:${new Date(startTime).toISOString()}`;
+
+	const transaction = await withRateLimitRetry(() => tables.createTransaction({ ttl: 60 })).catch((error: any) => {
+		if (error?.code === 429) {
+			throw new BookingServerError('Le serveur de réservation est très sollicité. Veuillez réessayer dans un instant.', 429);
+		}
+		throw error;
+	});
+
 	try {
-		const service: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: TABLES.services, rowId: serviceId, transactionId: transaction.$id });
-		if (!service.active) throw new BookingServerError('Cette offre de coaching n’est plus disponible.', 409);
-		const settingsPage = await tables.listRows({
-			databaseId: DATABASE_ID, tableId: TABLES.settings, transactionId: transaction.$id, queries: [Query.limit(1)]
-		});
-		const settings = settingsPage.rows[0] ? mapSettingsDoc(settingsPage.rows[0]) : DEFAULT_SETTINGS;
-		const unavailablePage = await tables.listRows({
-			databaseId: DATABASE_ID,
-			tableId: TABLES.unavailability,
-			transactionId: transaction.$id,
-			queries: [Query.equal('service_id', serviceId), Query.lessThan('start_at', endAt), Query.greaterThan('end_at', startAt), Query.limit(100)]
-		});
-		const bookingPage = await tables.listRows({
-			databaseId: DATABASE_ID,
-			tableId: TABLES.bookings,
-			transactionId: transaction.$id,
-			queries: [Query.equal('service_id', serviceId), Query.lessThan('start_at', endAt), Query.greaterThan('end_at', startAt), Query.limit(100)]
-		});
-		const now = new Date();
-		const bookings = bookingPage.rows.map((booking: any) => ({
-			startAt: booking.start_at, endAt: booking.end_at, status: booking.status, holdExpiresAt: booking.hold_expires_at
-		}));
-		const requestedDays = Math.max(1, Math.ceil((startTime - now.getTime()) / 86_400_000) + 1);
-		const validSlot = generateDynamicSlots(
-			mapServiceDoc(service), settings, bookings,
-			unavailablePage.rows.map((item: any) => ({
-				id: item.$id, serviceId: item.service_id || null, startAt: item.start_at, endAt: item.end_at, reason: item.reason || ''
-			})),
-			{ now, days: requestedDays }
-		).some((slot) => slot.startAt === new Date(startTime).toISOString() && slot.endAt === new Date(endTime).toISOString());
-		if (!validSlot) throw new BookingServerError('Ce créneau n’est plus disponible.', 409);
-
-		const isFree = Boolean(service.is_free) || Number(service.price) <= 0;
-		const amount = isFree ? 0 : Number(service.price);
-		if (!Number.isFinite(amount) || amount < 0) throw new BookingServerError('Le tarif du coaching est invalide.', 409);
-		const bookingId = ID.unique();
-		const holdExpiresAt = isFree ? null : new Date(now.getTime() + HOLD_MINUTES * 60_000).toISOString();
-		const reservationKey = `${serviceId}:${new Date(startTime).toISOString()}`;
-
 		await tables.createRow({
 			databaseId: DATABASE_ID, tableId: TABLES.bookings, rowId: bookingId, transactionId: transaction.$id,
 			data: {
@@ -130,10 +163,11 @@ export async function createBookingServer(body: any, user: Models.User<Models.Pr
 			}).catch((error) => console.error('[Booking notifications]', error));
 		}
 		return { bookingId, status: isFree ? 'confirmed' as const : 'pending_payment' as const, holdExpiresAt, amount, currency: 'HTG' as const };
-	} catch (error) {
+	} catch (error: any) {
 		await tables.updateTransaction({ transactionId: transaction.$id, rollback: true }).catch(() => undefined);
 		if (error instanceof BookingServerError) throw error;
-		if ((error as any)?.code === 409) throw new BookingServerError('Ce créneau vient d’être réservé par une autre personne.', 409);
+		if (error?.code === 409) throw new BookingServerError('Ce créneau vient d’être réservé par une autre personne.', 409);
+		if (error?.code === 429) throw new BookingServerError('Trop de requêtes simultanées. Veuillez réessayer dans quelques secondes.', 429);
 		throw error;
 	}
 }
