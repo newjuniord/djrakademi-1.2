@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CheckCircle2, Eye, MessageCircle, XCircle } from 'lucide-svelte';
+	import { Calendar, CheckCircle2, Eye, MessageCircle, XCircle } from 'lucide-svelte';
 	import { formatDateTimeInTimezone } from '$lib/coaching/timezone';
 	import { whatsappLink } from '$lib/coaching/validation';
 	import type { Booking, BookingStatus, CoachingService } from '$lib/types/coaching';
@@ -48,6 +48,29 @@
 		confirmAction = null;
 		confirmInputText = '';
 	}
+
+	function googleCalendarUrl(b: Booking): string {
+		const formatUtc = (isoStr: string) => {
+			try {
+				const d = new Date(isoStr);
+				return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+			} catch {
+				return isoStr;
+			}
+		};
+		const start = formatUtc(b.startAt);
+		const end = b.endAt ? formatUtc(b.endAt) : formatUtc(new Date(new Date(b.startAt).getTime() + 3600000).toISOString());
+		const title = `Coaching: ${serviceTitle(b.serviceId)} - ${b.customerName}`;
+		const details = `Séance de coaching DJR Akademi avec ${b.customerName}\nE-mail: ${b.customerEmail}\nWhatsApp: ${b.customerWhatsapp}\nStatut: ${b.status}`;
+
+		const params = new URLSearchParams({
+			action: 'TEMPLATE',
+			text: title,
+			dates: `${start}/${end}`,
+			details
+		});
+		return `https://calendar.google.com/calendar/render?${params.toString()}`;
+	}
 </script>
 
 <div class="overflow-x-auto">
@@ -60,7 +83,7 @@
 				<td><button class="font-medium hover:text-primary" type="button" onclick={() => (selected = booking)}>{booking.customerName}</button><span class="block text-xs text-base-content/50">{booking.customerEmail}</span></td>
 				<td><a class="link link-primary" href={whatsappLink(booking.customerWhatsapp, `Bonjour ${booking.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer">{booking.customerWhatsapp}</a></td>
 				<td>{serviceTitle(booking.serviceId)}</td><td class="capitalize">{local.date}</td><td>{local.time}</td><td><span class="text-xs font-medium text-base-content/80">{created.date}</span><span class="block text-[11px] text-base-content/45">{created.time}</span></td><td>{formatAmount(booking)}</td><td><BookingStatusBadge status={booking.status} /></td>
-				<td><div class="flex justify-end gap-1"><button class="btn btn-ghost btn-square btn-sm" type="button" aria-label="Voir la réservation" onclick={() => (selected = booking)}><Eye size={17} /></button><a class="btn btn-ghost btn-square btn-sm text-success" aria-label="Ouvrir WhatsApp" href={whatsappLink(booking.customerWhatsapp, `Bonjour ${booking.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer"><img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" /></a>{#if booking.status === 'confirmed'}<button class="btn btn-ghost btn-square btn-sm text-primary" type="button" aria-label="Marquer comme terminée" onclick={() => requestComplete(booking)}><CheckCircle2 size={17} /></button>{/if}{#if booking.status === 'confirmed' || booking.status === 'pending_payment'}<button class="btn btn-ghost btn-square btn-sm text-error" type="button" aria-label="Annuler" onclick={() => requestCancel(booking)}><XCircle size={17} /></button>{/if}</div></td>
+				<td><div class="flex justify-end gap-1"><button class="btn btn-ghost btn-square btn-sm" type="button" aria-label="Voir la réservation" onclick={() => (selected = booking)}><Eye size={17} /></button><a class="btn btn-ghost btn-square btn-sm text-info" aria-label="Ajouter à Google Calendar" href={googleCalendarUrl(booking)} target="_blank" rel="noreferrer" title="Ajouter à Google Calendar"><Calendar size={17} /></a><a class="btn btn-ghost btn-square btn-sm text-success" aria-label="Ouvrir WhatsApp" href={whatsappLink(booking.customerWhatsapp, `Bonjour ${booking.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer"><img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" /></a>{#if booking.status === 'confirmed'}<button class="btn btn-ghost btn-square btn-sm text-primary" type="button" aria-label="Marquer comme terminée" onclick={() => requestComplete(booking)}><CheckCircle2 size={17} /></button>{/if}{#if booking.status === 'confirmed' || booking.status === 'pending_payment'}<button class="btn btn-ghost btn-square btn-sm text-error" type="button" aria-label="Annuler" onclick={() => requestCancel(booking)}><XCircle size={17} /></button>{/if}</div></td>
 			</tr>
 		{/each}</tbody>
 	</table>
@@ -74,7 +97,7 @@
 					<div><p class="text-xs text-base-content/50">{field[0]}</p><p class="mt-1 font-medium">{field[1]}</p></div>
 				{/each}
 			</div>
-			<div class="modal-action flex-wrap"><a class="btn btn-success" href={whatsappLink(selected.customerWhatsapp, `Bonjour ${selected.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer"><img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" /> WhatsApp</a>{#if selected.status === 'confirmed'}<button class="btn btn-primary" type="button" onclick={() => requestComplete(selected!)}>Terminer</button>{/if}{#if selected.status !== 'cancelled' && selected.status !== 'completed'}<button class="btn btn-outline btn-error" type="button" onclick={() => requestCancel(selected!)}>Annuler</button>{/if}</div>
+			<div class="modal-action flex-wrap"><a class="btn btn-info text-white font-bold gap-2" href={googleCalendarUrl(selected)} target="_blank" rel="noreferrer"><Calendar size={17} /> Google Calendar</a><a class="btn btn-success" href={whatsappLink(selected.customerWhatsapp, `Bonjour ${selected.customerName}, au sujet de votre réservation…`)} target="_blank" rel="noreferrer"><img src="/whatsapp.png" alt="WhatsApp" class="size-4 object-contain shrink-0" /> WhatsApp</a>{#if selected.status === 'confirmed'}<button class="btn btn-primary" type="button" onclick={() => requestComplete(selected!)}>Terminer</button>{/if}{#if selected.status !== 'cancelled' && selected.status !== 'completed'}<button class="btn btn-outline btn-error" type="button" onclick={() => requestCancel(selected!)}>Annuler</button>{/if}</div>
 		</div><button class="modal-backdrop" type="button" aria-label="Fermer" onclick={() => (selected = null)}>Fermer</button>
 	</div>
 {/if}
