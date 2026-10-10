@@ -3,7 +3,7 @@ import type { Order } from '$lib/services/orders';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
 import { sendPurchaseConfirmationEmail, purchaseAccessLinks } from '$lib/server/purchase-email';
 import { sendWhatsappMessage } from '$lib/server/whatsapp-message';
-import { sendCoachingBookingTemplate, sendBookingConfirmedTemplate } from '$lib/server/whatsapp';
+import { sendCoachingBookingTemplate, sendBookingConfirmedTemplate, normalizeWhatsappNumber } from '$lib/server/whatsapp';
 
 async function customerPhone(order: Order): Promise<string> {
 	if (order.customerPhone) return order.customerPhone;
@@ -90,12 +90,15 @@ export async function sendPurchaseNotifications(order: Order): Promise<{ emailSe
 			// Si c'est un coaching, on envoie d'abord la confirmation de réservation dédiée au client
 			if (order.productType === 'coaching' && coaching) {
 				try {
+					const coachContact = normalizeWhatsappNumber(coaching.coachPhone);
 					await sendBookingConfirmedTemplate({
 						to: recipient,
 						booking: coaching.title,
 						date: coaching.customerDate,
 						hours: coaching.customerTime,
-						link: accessUrl
+						link: coachContact
+							? `Le numéro du coach : +${coachContact} - Le lien : ${accessUrl}`
+							: `Le lien : ${accessUrl}`
 					});
 					whatsappSent = true;
 				} catch (bookingErr) {
