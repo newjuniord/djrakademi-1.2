@@ -111,7 +111,7 @@ function paymentHealthLog(row: any) {
 	const defaultEndpoint = row.event_type === 'initiation'
 		? 'https://plopplop.solutionip.app/api/paiement-marchand'
 		: row.event_type === 'webhook_received'
-			? '/api/payments/confirm'
+			? '/api/plopplop/webhook'
 			: 'https://plopplop.solutionip.app/api/paiement-verify';
 	const endpoint = expiration
 		? '/maintenance/orders/expire'
@@ -136,8 +136,8 @@ function paymentHealthLog(row: any) {
 		statusCode,
 		statusText: plopplopStatusText(statusCode, endpoint, row.error_message),
 		responseTimeMs: Number.isFinite(duration) ? duration : 0,
-		clientIp: row.event_type === 'cron_verification' ? 'Cron Appwrite' : 'Backend SvelteKit',
-		userAgent: expiration ? 'Appwrite Function · expiration locale' : row.event_type === 'cron_verification' ? 'Appwrite Function → Plopplop' : 'Backend SvelteKit → Plopplop',
+		clientIp: row.event_type === 'cron_verification' ? 'Cron Appwrite' : row.event_type === 'webhook_received' ? 'Plopplop' : 'Backend SvelteKit',
+		userAgent: expiration ? 'Appwrite Function · expiration locale' : row.event_type === 'cron_verification' ? 'Appwrite Function → Plopplop' : row.event_type === 'webhook_received' ? 'Plopplop → Backend SvelteKit' : 'Backend SvelteKit → Plopplop',
 		timestamp: row.created_at || row.$createdAt,
 		requestHeaders: Object.keys(requestHeaders).length ? requestHeaders : { 'Content-Type': 'application/json' },
 		requestPayload: Object.keys(requestBody).length ? { ...normalizedRequest, body: requestBody } : normalizedRequest,

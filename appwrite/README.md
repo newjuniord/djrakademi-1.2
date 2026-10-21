@@ -78,6 +78,14 @@ Never return authorization headers, cookies, passwords, API keys, webhook signat
 
 Required Function variables: `PAYMENTS_DATABASE_ID=djrakademi` and `PLOPPLOP_CLIENT_ID`. `PLOPPLOP_API_KEY` or `PLOPPLOP_SECRET_KEY` can optionally be added as secret variables; `PLOPPLOP_VERIFY_URL` is optional.
 
+### Plopplop webhook
+
+1. Add the three optional `orders` columns from `schema.json` to Appwrite before deploying the updated site (`npm run setup:schema` from `appwrite/` applies missing columns).
+2. Set server-only `PLOPPLOP_CLIENT_SECRET` to the merchant `client_secret` used by Plopplop to sign webhooks. Keep `PLOPPLOP_CLIENT_ID` configured. The webhook refuses all requests when either value is absent.
+3. Deploy the site, then enter `https://djrakademi.net/api/plopplop/webhook` in Plopplop's HTTPS webhook URL field.
+
+The endpoint accepts signed `transaction.created` and `transaction.status_changed` notifications. It grants access only for a signed `new_status: "ok"` matching the merchant, order, amount and transaction ID. Duplicate notifications do not grant access twice. Other statuses are logged; they never automatically revoke an already granted access. The order stores `payment_confirmed_by` (first source), `webhook_confirmed_at`, and `api_confirmed_at`. The last two can both be present when the API is checked after the webhook.
+
 
 
 

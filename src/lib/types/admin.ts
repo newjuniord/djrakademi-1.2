@@ -131,6 +131,9 @@ export type Order = {
 	currency: 'HTG' | 'USD' | string;
 	status: OrderStatus;
 	paymentId?: string;
+	paymentConfirmedBy?: 'webhook' | 'api' | 'cron';
+	webhookConfirmedAt?: string;
+	apiConfirmedAt?: string;
 	paymentProvider?: string;
 	createdAt: string;
 	paidAt?: string;

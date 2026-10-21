@@ -16,6 +16,9 @@ export interface Order {
 	currency: string;
 	paymentProvider: 'moncash' | 'natcash' | 'carte' | 'card' | 'free' | 'admin' | 'lemonsqueezy';
 	paymentId?: string;
+	paymentConfirmedBy?: 'webhook' | 'api' | 'cron';
+	webhookConfirmedAt?: string;
+	apiConfirmedAt?: string;
 	status: 'pending' | 'paid' | 'failed' | 'expired';
 	createdAt: string;
 	paidAt?: string;
@@ -43,6 +46,9 @@ export function mapOrderDoc(doc: any): Order {
 		currency,
 		paymentProvider: provider,
 		paymentId: doc.payment_id,
+		paymentConfirmedBy: doc.payment_confirmed_by || undefined,
+		webhookConfirmedAt: doc.webhook_confirmed_at || undefined,
+		apiConfirmedAt: doc.api_confirmed_at || undefined,
 		status: doc.status || 'pending',
 		createdAt: doc.created_at || doc.$createdAt || new Date().toISOString(),
 		paidAt: doc.paid_at

@@ -180,6 +180,24 @@
 						<span class="text-base-content/60">Statut du paiement :</span>
 						<span class="font-bold text-base-content uppercase">{order.status}</span>
 					</div>
+					{#if order.paymentConfirmedBy}
+						<div class="flex items-center justify-between">
+							<span class="text-base-content/60">Accès accordé après :</span>
+							<span class="font-semibold text-base-content">{order.paymentConfirmedBy === 'webhook' ? 'Webhook Plopplop' : order.paymentConfirmedBy === 'cron' ? 'API Plopplop (automatique)' : 'API Plopplop'}</span>
+						</div>
+					{/if}
+					{#if order.webhookConfirmedAt}
+						<div class="flex items-center justify-between">
+							<span class="text-base-content/60">Webhook signé confirmé :</span>
+							<span class="font-medium text-base-content">{formatDateWithTime(order.webhookConfirmedAt)}</span>
+						</div>
+					{/if}
+					{#if order.apiConfirmedAt}
+						<div class="flex items-center justify-between">
+							<span class="text-base-content/60">API Plopplop confirmée :</span>
+							<span class="font-medium text-base-content">{formatDateWithTime(order.apiConfirmedAt)}</span>
+						</div>
+					{/if}
 					{#if order.paidAt}
 						<div class="flex items-center justify-between pt-1 border-t border-base-200/50">
 							<span class="text-base-content/60">Date du paiement :</span>

@@ -16,7 +16,8 @@ export const GET: RequestHandler = async ({ request }) => {
 				id: row.$id, userId: row.user_id, customerName: row.customer_name || '', customerEmail: row.customer_email || '',
 				customerPhone: row.customer_phone, productType: row.product_type, productId: row.product_id, productTitle: row.product_title || '',
 				amount: Number(row.amount) || 0, currency: row.currency || 'HTG', paymentProvider: row.payment_provider || 'free',
-				paymentId: row.payment_id, status: row.status || 'pending', createdAt: row.created_at || row.$createdAt, paidAt: row.paid_at
+				paymentId: row.payment_id, paymentConfirmedBy: row.payment_confirmed_by, webhookConfirmedAt: row.webhook_confirmed_at,
+				apiConfirmedAt: row.api_confirmed_at, status: row.status || 'pending', createdAt: row.created_at || row.$createdAt, paidAt: row.paid_at
 			}))
 		});
 	} catch (error) {

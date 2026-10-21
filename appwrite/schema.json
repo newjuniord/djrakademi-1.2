@@ -284,6 +284,9 @@
         "payment_provider": "enum[moncash,natcash,carte,card,lemonsqueezy,free,admin] required",
         "payment_id": "varchar(160) optional",
         "status": "enum[pending,paid,failed,expired] required",
+        "payment_confirmed_by": "enum[webhook,api,cron] optional",
+        "webhook_confirmed_at": "datetime optional",
+        "api_confirmed_at": "datetime optional",
         "created_at": "datetime required",
         "paid_at": "datetime optional"
       },

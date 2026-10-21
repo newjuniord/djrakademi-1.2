@@ -151,6 +151,9 @@ function mapOrder(row: any): Order {
 		currency,
 		paymentProvider: provider,
 		paymentId: row.payment_id || undefined,
+		paymentConfirmedBy: row.payment_confirmed_by || undefined,
+		webhookConfirmedAt: row.webhook_confirmed_at || undefined,
+		apiConfirmedAt: row.api_confirmed_at || undefined,
 		status: row.status || 'pending',
 		createdAt: row.created_at || row.$createdAt,
 		paidAt: row.paid_at || undefined
@@ -468,19 +471,27 @@ export async function confirmPlopplopPaymentServer(
 	try { row = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId }); }
 	catch { throw new PaymentServerError('Commande introuvable.', 404); }
 	if (row.user_id !== user.$id) throw new PaymentServerError('Accès refusé à cette commande.', 403);
-	if (row.status === 'paid') {
+	if (row.status === 'paid' && (row.api_confirmed_at || !row.webhook_confirmed_at)) {
 		if (row.product_type === 'bundle') await grantBundleAccess(tables, row, user.$id);
 		return { success: true, order: mapOrder(row), message: 'Paiement déjà confirmé.' };
 	}
-	if (row.status !== 'pending') throw new PaymentServerError('Cette commande ne peut plus être confirmée.', 409);
+	if (row.status !== 'pending' && row.status !== 'paid') throw new PaymentServerError('Cette commande ne peut plus être confirmée.', 409);
+	if (!PAYMENT_METHODS.includes(row.payment_provider) && row.payment_provider !== 'card') throw new PaymentServerError('Cette commande ne correspond pas à Plopplop.', 409);
 
 	const { clientId, headers } = merchantConfig();
-	const verifyData = await postJson(VERIFY_URL, headers, {
-		client_id: clientId,
-		refference_id: orderId,
-		...(row.payment_id ? { transaction_id: row.payment_id } : {})
-	}, onTrace);
+	let verifyData: any;
+	try {
+		verifyData = await postJson(VERIFY_URL, headers, {
+			client_id: clientId,
+			refference_id: orderId,
+			...(row.payment_id ? { transaction_id: row.payment_id } : {})
+		}, onTrace);
+	} catch (error) {
+		if (row.status === 'paid') return { success: true, order: mapOrder(row), message: 'Paiement déjà confirmé par webhook.' };
+		throw error;
+	}
 	if (String(verifyData?.trans_status || '').toLowerCase() !== 'ok') {
+		if (row.status === 'paid') return { success: true, order: mapOrder(row), message: 'Paiement déjà confirmé par webhook.' };
 		return { success: false, order: null, message: 'Le paiement n’a pas encore été validé par la passerelle.' };
 	}
 	const returnedReference = verifyData?.refference_id || verifyData?.reference_id;
@@ -496,11 +507,31 @@ export async function confirmPlopplopPaymentServer(
 	}
 
 	const transactionId = String(verifyData?.transaction_id || verifyData?.id_transaction || row.payment_id || "");
+	if (row.payment_id && transactionId && transactionId !== String(row.payment_id)) {
+		throw new PaymentServerError('La transaction retournée par la passerelle ne correspond pas à la commande.', 409);
+	}
+	return finalizePlopplopPaymentServer(orderId, transactionId, 'api');
+}
+
+export async function finalizePlopplopPaymentServer(
+	orderId: string,
+	transactionId: string,
+	source: 'webhook' | 'api'
+): Promise<PaymentConfirmationResult> {
+	const { tables } = adminServices();
 	const paidAt = new Date().toISOString();
 	const transaction = await tables.createTransaction({ ttl: 60 });
 	try {
 		const current: any = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId, transactionId: transaction.$id });
+		if (!PAYMENT_METHODS.includes(current.payment_provider) && current.payment_provider !== 'card') throw new PaymentServerError('Cette commande ne correspond pas à Plopplop.', 409);
+		if (current.payment_id && transactionId && String(current.payment_id) !== transactionId) throw new PaymentServerError('Identifiant de transaction différent de la commande.', 409);
+		const confirmationField = source === 'webhook' ? 'webhook_confirmed_at' : 'api_confirmed_at';
 		if (current.status === "paid") {
+			if (!current[confirmationField]) {
+				const updated = await tables.updateRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId, transactionId: transaction.$id, data: { [confirmationField]: paidAt } });
+				await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
+				return { success: true, order: mapOrder(updated), message: "Paiement déjà confirmé." };
+			}
 			await tables.updateTransaction({ transactionId: transaction.$id, rollback: true });
 			return { success: true, order: mapOrder(current), message: "Paiement déjà confirmé." };
 		}
@@ -528,12 +559,12 @@ export async function confirmPlopplopPaymentServer(
 					databaseId: DATABASE_ID, tableId: BOOKINGS_TABLE, rowId: booking.$id, transactionId: transaction.$id,
 					data: { status: "confirmed", payment_status: "paid", payment_id: transactionId || undefined, hold_expires_at: null, updated_at: paidAt }
 				});
-			}
+			} else throw new PaymentServerError('Réservation introuvable.', 409);
 		}
 
-		row = await tables.updateRow({
+		const row = await tables.updateRow({
 			databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderId, transactionId: transaction.$id,
-			data: { status: "paid", payment_id: transactionId || undefined, paid_at: paidAt }
+			data: { status: "paid", payment_id: transactionId || undefined, paid_at: paidAt, payment_confirmed_by: source, [confirmationField]: paidAt }
 		});
 		await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
 		const paidOrder = mapOrder(row);

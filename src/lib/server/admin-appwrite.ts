@@ -96,6 +96,9 @@ export function mapOrder(row: any, accessGranted?: boolean) {
 		status: row.status,
 		paymentProvider: row.payment_provider || undefined,
 		paymentId: row.payment_id || undefined,
+		paymentConfirmedBy: row.payment_confirmed_by || undefined,
+		webhookConfirmedAt: row.webhook_confirmed_at || undefined,
+		apiConfirmedAt: row.api_confirmed_at || undefined,
 		createdAt: row.created_at || row.$createdAt,
 		paidAt: row.paid_at || undefined,
 		...(accessGranted === undefined ? {} : { accessGranted })

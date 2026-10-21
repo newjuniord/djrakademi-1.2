@@ -244,7 +244,7 @@ export async function confirmPaidOrder(tables, order, transactionId) {
       tableId: TABLES.orders,
       rowId: current.$id,
       transactionId: tx.$id,
-      data: { status: 'paid', payment_id: transactionId || undefined, paid_at: now }
+      data: { status: 'paid', payment_id: transactionId || undefined, paid_at: now, payment_confirmed_by: 'cron', api_confirmed_at: now }
     });
     await tables.updateTransaction({ transactionId: tx.$id, commit: true });
     return { state: 'confirmed', accessAlreadyExisted };
