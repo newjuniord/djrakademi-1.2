@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X, CreditCard, Smartphone, Check, Loader2, Globe, MapPin } from 'lucide-svelte';
+	import { X, CreditCard, Check, Loader2 } from 'lucide-svelte';
 	import { dev } from '$app/environment';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -7,36 +7,34 @@
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
 	const i18n = {
 		fr: {
-			title: 'Choisissez votre moyen de paiement',
-			free: 'Gratuit',
+			title: 'Moyen de paiement',
 			close: 'Fermer la fenêtre de paiement',
-			localMethods: 'Haïti 🇭🇹 (moyens de paiement locaux)',
-			moncashDesc: 'Paiement mobile rapide avec Digicel MonCash',
-			localCard: 'Carte HTG (locale)',
+			localMethods: 'Haïti · Paiement local',
+			moncashDesc: 'Paiement mobile Digicel',
+			natcashDesc: 'Paiement mobile Natcom',
+			localCard: 'Carte HTG (test local)',
 			testLocalCard: 'Tester le paiement par carte HTG en local',
-			testCard: 'Tester la carte HTG',
-			natcashDesc: 'Paiement mobile avec Natcom NatCash',
-			international: 'International 🌐 (carte bancaire)',
-			card: 'Carte Visa / Mastercard',
-			cardDesc: 'Visa, Mastercard et autres cartes bancaires avec Lemon Squeezy',
-			preparing: 'Préparation du paiement...',
-			continue: (method: string) => `Continuer vers le paiement (${method})`
+			testCard: 'Tester',
+			international: 'International · Carte bancaire',
+			card: 'Carte bancaire',
+			cardDesc: 'Visa, Mastercard via Lemon Squeezy',
+			preparing: 'Redirection en cours...',
+			continueWith: (label: string) => `Continuer avec ${label}`
 		},
 		ht: {
-			title: 'Chwazi fason pou w peye',
-			free: 'Gratis',
+			title: 'Mwayen peman',
 			close: 'Fèmen fenèt peman an',
-			localMethods: 'Ayiti 🇭🇹 (mwayen peman lokal)',
-			moncashDesc: 'Peman mobil rapid ak Digicel MonCash',
-			localCard: 'Kat HTG (lokal)',
+			localMethods: 'Ayiti · Peman lokal',
+			moncashDesc: 'Peman mobil Digicel',
+			natcashDesc: 'Peman mobil Natcom',
+			localCard: 'Kat HTG (tès lokal)',
 			testLocalCard: 'Teste peman ak kat HTG an lokal',
-			testCard: 'Teste kat HTG a',
-			natcashDesc: 'Peman mobil ak Natcom NatCash',
-			international: 'Entènasyonal 🌐 (kat labank)',
-			card: 'Kat Visa / Mastercard',
-			cardDesc: 'Visa, Mastercard ak lòt kat labank avèk Lemon Squeezy',
+			testCard: 'Teste',
+			international: 'Entènasyonal · Kat labank',
+			card: 'Kat labank',
+			cardDesc: 'Visa, Mastercard ak Lemon Squeezy',
 			preparing: 'N ap prepare peman an...',
-			continue: (method: string) => `Kontinye pou w peye (${method})`
+			continueWith: (label: string) => `Kontinye ak ${label}`
 		}
 	};
 	let t = $derived(i18n[currentLang]);
@@ -67,6 +65,17 @@
 	let isLocalhost = $state(false);
 	let localMethodsEnabled = $state(dev);
 	let localLoading = $state(false);
+	let dialogEl = $state<HTMLDialogElement | null>(null);
+
+	const isLoading = $derived(loading || localLoading);
+
+	const selectedLabel = $derived(
+		selectedMethod === 'moncash'
+			? 'MonCash'
+			: selectedMethod === 'natcash'
+				? 'NatCash'
+				: t.card
+	);
 
 	$effect(() => {
 		if (!open) {
@@ -82,7 +91,15 @@
 		}
 	});
 
-	const isLoading = $derived(loading || localLoading);
+	$effect(() => {
+		const el = dialogEl;
+		if (!el) return;
+		if (open) {
+			if (!el.open) el.showModal();
+		} else if (el.open) {
+			el.close();
+		}
+	});
 
 	onMount(() => {
 		const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -95,6 +112,36 @@
 		));
 	});
 
+	function requestClose() {
+		if (isLoading) return;
+		onClose();
+	}
+
+	function handleDialogCancel(event: Event) {
+		if (isLoading) {
+			event.preventDefault();
+			return;
+		}
+		onClose();
+	}
+
+	function handleDialogClick(event: MouseEvent) {
+		const el = dialogEl;
+		if (!el || isLoading) return;
+		// Fallback for browsers without closedby="any" support (e.g. Safari)
+		if (!('closedBy' in HTMLDialogElement.prototype)) {
+			if (event.target !== el) return;
+			const rect = el.getBoundingClientRect();
+			const isDialogContent =
+				rect.top <= event.clientY &&
+				event.clientY <= rect.top + rect.height &&
+				rect.left <= event.clientX &&
+				event.clientX <= rect.left + rect.width;
+			if (isDialogContent) return;
+			requestClose();
+		}
+	}
+
 	function handleConfirm() {
 		if (
 			isLoading ||
@@ -106,186 +153,210 @@
 	}
 </script>
 
-{#if open}
-	<!-- Backdrop Overlay -->
-	<div
-		class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
-		role="dialog"
-		aria-modal="true"
-		aria-labelledby="payment-modal-title"
-	>
-		<!-- Modal Box (BLANC) -->
-		<div
-			class="w-full max-w-md bg-white text-zinc-900 rounded-3xl border border-zinc-200 shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
-		>
-			<!-- Header Blanc -->
-			<div class="p-6 border-b border-zinc-100 flex items-center justify-between gap-4 bg-white">
-				<div>
-					<h3 id="payment-modal-title" class="text-lg font-black text-zinc-950 tracking-tight">
-						{t.title}
-					</h3>
-					<p class="text-xs text-zinc-500 mt-0.5 line-clamp-2 max-w-full font-medium leading-normal">
+<dialog
+	bind:this={dialogEl}
+	{...({ closedby: isLoading ? 'none' : 'any' } as Record<string, string>)}
+	aria-labelledby="payment-modal-title"
+	oncancel={handleDialogCancel}
+	onclose={() => {
+		if (open && !isLoading) onClose();
+	}}
+	onclick={handleDialogClick}
+	class="payment-dialog m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-zinc-200/90 bg-white p-0 text-zinc-900 shadow-xl"
+>
+	<div class="flex flex-col">
+		<!-- Header -->
+		<div class="flex items-start justify-between gap-4 px-6 pt-6 pb-4">
+			<div class="min-w-0">
+				<h2 id="payment-modal-title" class="text-base font-semibold tracking-tight text-zinc-950">
+					{t.title}
+				</h2>
+				{#if productTitle}
+					<p class="mt-0.5 line-clamp-1 text-xs font-normal text-zinc-500">
 						{productTitle}
 					</p>
-				</div>
-
-				<button
-					type="button"
-					onclick={onClose}
-					disabled={isLoading}
-					class="size-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-900 grid place-items-center transition-colors shrink-0 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-					aria-label={t.close}
-				>
-					<X size={16} />
-				</button>
-			</div>
-
-			<!-- Body: Payment Options Categorized -->
-			<div class="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
-				<!-- Section 1: Haïti (Méthodes Locales) -->
-				<div class="space-y-2.5 {localMethodsEnabled ? '' : 'opacity-50'}">
-					<div class="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-						<MapPin size={13} class="text-red-500" />
-						<span>{t.localMethods}</span>
-					</div>
-
-					<!-- Option MonCash -->
-					<div class="space-y-1.5">
-						<button
-							type="button"
-							disabled={isLoading || !localMethodsEnabled}
-							onclick={() => (selectedMethod = 'moncash')}
-							class="w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer disabled:cursor-not-allowed group {selectedMethod === 'moncash'
-								? 'bg-red-50/80 border-red-500 ring-1 ring-red-500/30'
-								: 'bg-zinc-50/80 border-zinc-200/80 hover:border-zinc-300 hover:bg-zinc-100/60'}"
-						>
-							<div class="flex items-center gap-3.5">
-								<div class="size-11 rounded-xl bg-white border border-zinc-200 flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform overflow-hidden p-1">
-									<img src="/moncash.png" alt="MonCash Logo" class="w-full h-full object-contain" />
-								</div>
-								<div>
-									<div class="flex items-center gap-2">
-										<span class="font-bold text-sm text-zinc-950">MonCash</span>
-										<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-extrabold">MonCash</span>
-									</div>
-									<p class="text-xs text-zinc-500">{t.moncashDesc}</p>
-								</div>
-							</div>
-
-							<div class="size-5 rounded-full border grid place-items-center shrink-0 {selectedMethod === 'moncash' ? 'bg-red-500 border-red-500 text-white' : 'border-zinc-300'}">
-								{#if selectedMethod === 'moncash'}
-									<Check size={12} strokeWidth={3} />
-								{/if}
-							</div>
-						</button>
-
-						{#if isLocalhost}
-							<div class="p-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-2 text-xs">
-								<div class="flex items-center gap-1.5 text-amber-900 font-bold text-[11px]">
-									<span class="px-1.5 py-0.5 rounded bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider">DEV TEST</span>
-									<span>{t.localCard}</span>
-								</div>
-								<button
-									type="button"
-									disabled={isLoading}
-									onclick={() => onSelectMethod('plopplop_carte')}
-									class="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-[11px] shadow-xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
-									title={t.testLocalCard}
-								>
-									<CreditCard size={12} />
-									<span>{t.testCard}</span>
-								</button>
-							</div>
-						{/if}
-					</div>
-
-					<!-- Option NatCash -->
-					<button
-						type="button"
-						disabled={isLoading || !localMethodsEnabled}
-						onclick={() => (selectedMethod = 'natcash')}
-						class="w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer disabled:cursor-not-allowed group {selectedMethod === 'natcash'
-							? 'bg-emerald-50/80 border-emerald-500 ring-1 ring-emerald-500/30'
-							: 'bg-zinc-50/80 border-zinc-200/80 hover:border-zinc-300 hover:bg-zinc-100/60'}"
-					>
-						<div class="flex items-center gap-3.5">
-							<div class="size-11 rounded-xl bg-white border border-zinc-200 flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform overflow-hidden p-1">
-								<img src="/natcash.png" alt="NatCash Logo" class="w-full h-full object-contain" />
-							</div>
-							<div>
-								<div class="flex items-center gap-2">
-									<span class="font-bold text-sm text-zinc-950">NatCash</span>
-									<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-extrabold">Natcom</span>
-								</div>
-								<p class="text-xs text-zinc-500">{t.natcashDesc}</p>
-							</div>
-						</div>
-
-						<div class="size-5 rounded-full border grid place-items-center shrink-0 {selectedMethod === 'natcash' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-zinc-300'}">
-							{#if selectedMethod === 'natcash'}
-								<Check size={12} strokeWidth={3} />
-							{/if}
-						</div>
-					</button>
-				</div>
-
-				{#if cardEnabled}
-				<!-- Section 2: International (Carte Bancaire) -->
-				<div class="space-y-2.5 pt-2 border-t border-zinc-100">
-					<div class="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-						<Globe size={13} class="text-blue-500" />
-						<span>{t.international}</span>
-					</div>
-
-					<!-- Option Carte Bancaire -->
-					<button
-						type="button"
-						disabled={isLoading}
-						onclick={() => (selectedMethod = 'carte')}
-						class="w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer disabled:cursor-not-allowed group {selectedMethod === 'carte'
-							? 'bg-blue-50/80 border-blue-500 ring-1 ring-blue-500/30'
-							: 'bg-zinc-50/80 border-zinc-200/80 hover:border-zinc-300 hover:bg-zinc-100/60'}"
-					>
-						<div class="flex items-center gap-3.5">
-							<div class="size-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-black text-xs grid place-items-center shadow-sm shrink-0 group-hover:scale-105 transition-transform">
-								<CreditCard size={20} />
-							</div>
-							<div>
-								<div class="flex items-center gap-2">
-									<span class="font-bold text-sm text-zinc-950">{t.card}</span>
-									<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold">{currentLang === 'ht' ? 'Entènasyonal' : 'International'}</span>
-								</div>
-								<p class="text-xs text-zinc-500">{t.cardDesc}</p>
-							</div>
-						</div>
-
-						<div class="size-5 rounded-full border grid place-items-center shrink-0 {selectedMethod === 'carte' ? 'bg-blue-500 border-blue-500 text-white' : 'border-zinc-300'}">
-							{#if selectedMethod === 'carte'}
-								<Check size={12} strokeWidth={3} />
-							{/if}
-						</div>
-					</button>
-				</div>
 				{/if}
 			</div>
 
-			<!-- Footer CTA (Bouton Noir & Texte Blanc avec Anti-Double Click & Curseur) -->
-			<div class="p-6 border-t border-zinc-100 bg-zinc-50/50 space-y-3">
-				<button
-					type="button"
-					disabled={isLoading}
-					onclick={handleConfirm}
-					class="w-full h-12 rounded-2xl bg-black hover:bg-zinc-800 active:scale-[0.99] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
-				>
-					{#if isLoading}
-						<Loader2 size={18} class="animate-spin text-white shrink-0" />
-						<span class="text-white animate-pulse">{t.preparing}</span>
-					{:else}
-						<CreditCard size={18} class="text-white shrink-0" />
-						<span class="text-white">{t.continue(selectedMethod.toUpperCase())}</span>
+			<button
+				type="button"
+				onclick={requestClose}
+				disabled={isLoading}
+				aria-label={t.close}
+				class="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-40"
+			>
+				<X size={16} />
+			</button>
+		</div>
+
+		<!-- Payment Options -->
+		<div
+			role="radiogroup"
+			aria-labelledby="payment-modal-title"
+			class="max-h-[70vh] space-y-5 overflow-y-auto px-6 py-2"
+		>
+			<!-- Local Methods -->
+			<div class="space-y-2 {localMethodsEnabled ? '' : 'opacity-45'}">
+				<p class="text-[11px] font-medium tracking-wide text-zinc-400 uppercase">
+					{t.localMethods}
+				</p>
+
+				<div class="space-y-2">
+					<!-- MonCash -->
+					<button
+						type="button"
+						role="radio"
+						aria-checked={selectedMethod === 'moncash'}
+						disabled={isLoading || !localMethodsEnabled}
+						onclick={() => (selectedMethod = 'moncash')}
+						class="group flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border p-3.5 text-left transition-colors disabled:cursor-not-allowed {selectedMethod === 'moncash'
+							? 'border-zinc-950 bg-zinc-50/80 ring-1 ring-zinc-950/10'
+							: 'border-zinc-200/80 bg-white hover:border-zinc-300 hover:bg-zinc-50/50'}"
+					>
+						<div class="flex items-center gap-3">
+							<div class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-zinc-200/80 bg-white p-1.5">
+								<img src="/moncash.png" alt="MonCash" class="h-full w-full object-contain" />
+							</div>
+							<div>
+								<span class="block text-sm font-semibold text-zinc-950">MonCash</span>
+								<span class="block text-xs text-zinc-500">{t.moncashDesc}</span>
+							</div>
+						</div>
+
+						<span
+							aria-hidden="true"
+							class="grid size-5 shrink-0 place-items-center rounded-full border transition-colors {selectedMethod === 'moncash'
+								? 'border-zinc-950 bg-zinc-950 text-white'
+								: 'border-zinc-300 bg-white'}"
+						>
+							{#if selectedMethod === 'moncash'}
+								<Check size={12} strokeWidth={2.75} />
+							{/if}
+						</span>
+					</button>
+
+					{#if isLocalhost}
+						<div class="flex items-center justify-between gap-2 rounded-lg border border-zinc-200/80 bg-zinc-50 px-3 py-2 text-xs">
+							<span class="font-medium text-zinc-600">{t.localCard}</span>
+							<button
+								type="button"
+								disabled={isLoading}
+								onclick={() => onSelectMethod('plopplop_carte')}
+								title={t.testLocalCard}
+								class="cursor-pointer rounded-md bg-zinc-900 px-2.5 py-1 text-[11px] font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
+							>
+								{t.testCard}
+							</button>
+						</div>
 					{/if}
-				</button>
+
+					<!-- NatCash -->
+					<button
+						type="button"
+						role="radio"
+						aria-checked={selectedMethod === 'natcash'}
+						disabled={isLoading || !localMethodsEnabled}
+						onclick={() => (selectedMethod = 'natcash')}
+						class="group flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border p-3.5 text-left transition-colors disabled:cursor-not-allowed {selectedMethod === 'natcash'
+							? 'border-zinc-950 bg-zinc-50/80 ring-1 ring-zinc-950/10'
+							: 'border-zinc-200/80 bg-white hover:border-zinc-300 hover:bg-zinc-50/50'}"
+					>
+						<div class="flex items-center gap-3">
+							<div class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-zinc-200/80 bg-white p-1.5">
+								<img src="/natcash.png" alt="NatCash" class="h-full w-full object-contain" />
+							</div>
+							<div>
+								<span class="block text-sm font-semibold text-zinc-950">NatCash</span>
+								<span class="block text-xs text-zinc-500">{t.natcashDesc}</span>
+							</div>
+						</div>
+
+						<span
+							aria-hidden="true"
+							class="grid size-5 shrink-0 place-items-center rounded-full border transition-colors {selectedMethod === 'natcash'
+								? 'border-zinc-950 bg-zinc-950 text-white'
+								: 'border-zinc-300 bg-white'}"
+						>
+							{#if selectedMethod === 'natcash'}
+								<Check size={12} strokeWidth={2.75} />
+							{/if}
+						</span>
+					</button>
+				</div>
 			</div>
+
+			{#if cardEnabled}
+				<!-- International Card -->
+				<div class="space-y-2 border-t border-zinc-100 pt-4">
+					<p class="text-[11px] font-medium tracking-wide text-zinc-400 uppercase">
+						{t.international}
+					</p>
+
+					<button
+						type="button"
+						role="radio"
+						aria-checked={selectedMethod === 'carte'}
+						disabled={isLoading}
+						onclick={() => (selectedMethod = 'carte')}
+						class="group flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border p-3.5 text-left transition-colors disabled:cursor-not-allowed {selectedMethod === 'carte'
+							? 'border-zinc-950 bg-zinc-50/80 ring-1 ring-zinc-950/10'
+							: 'border-zinc-200/80 bg-white hover:border-zinc-300 hover:bg-zinc-50/50'}"
+					>
+						<div class="flex items-center gap-3">
+							<div class="grid size-10 shrink-0 place-items-center rounded-lg border border-zinc-200/80 bg-zinc-50 text-zinc-800">
+								<CreditCard size={18} strokeWidth={1.75} />
+							</div>
+							<div>
+								<span class="block text-sm font-semibold text-zinc-950">{t.card}</span>
+								<span class="block text-xs text-zinc-500">{t.cardDesc}</span>
+							</div>
+						</div>
+
+						<span
+							aria-hidden="true"
+							class="grid size-5 shrink-0 place-items-center rounded-full border transition-colors {selectedMethod === 'carte'
+								? 'border-zinc-950 bg-zinc-950 text-white'
+								: 'border-zinc-300 bg-white'}"
+						>
+							{#if selectedMethod === 'carte'}
+								<Check size={12} strokeWidth={2.75} />
+							{/if}
+						</span>
+					</button>
+				</div>
+			{/if}
+		</div>
+
+		<!-- Footer CTA -->
+		<div class="px-6 pt-4 pb-6">
+			<button
+				type="button"
+				disabled={isLoading}
+				onclick={handleConfirm}
+				class="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-zinc-950 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.99] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55"
+			>
+				{#if isLoading}
+					<Loader2 size={16} class="shrink-0 animate-spin text-white" />
+					<span>{t.preparing}</span>
+				{:else}
+					<span>{t.continueWith(selectedLabel)}</span>
+				{/if}
+			</button>
 		</div>
 	</div>
-{/if}
+</dialog>
+
+<style>
+	.payment-dialog::backdrop {
+		background-color: rgb(9 9 11 / 0.45);
+		backdrop-filter: blur(4px);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.payment-dialog,
+		.payment-dialog * {
+			animation: none !important;
+			transition: none !important;
+		}
+	}
+</style>
