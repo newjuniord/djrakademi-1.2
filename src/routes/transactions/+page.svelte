@@ -3,24 +3,16 @@
 	import PublicHeader from '$lib/components/PublicHeader.svelte';
 	import { page } from '$app/state';
 	import {
-		Receipt,
 		ChevronLeft,
-		Download,
-		CheckCircle2,
-		CreditCard,
-		Calendar,
+		ChevronDown,
 		ArrowRight,
 		Search,
 		FileText,
 		X,
-		Clock,
-		AlertCircle,
-		Sparkles,
-		ShoppingBag,
-		ExternalLink,
 		Copy,
 		Check,
-		ShieldCheck
+		ShoppingBag,
+		Loader2
 	} from 'lucide-svelte';
 	import { toast } from '$lib/toast.svelte';
 	import { authState } from '$lib/auth.svelte';
@@ -40,116 +32,104 @@
 	const i18n = {
 		fr: {
 			pageTitle: 'Mes transactions · DJR Akademi',
-			metaDesc: 'Historique complet de vos commandes, reçus et factures de paiement sur DJR Akademi.',
-			loadingMsg: 'Chargement de vos transactions...',
-			backToSpace: 'Retour à mon espace',
-			title: 'Mes transactions',
-			subtitle: 'Historique de vos commandes, factures et reçus de paiement.',
-			verifyTitle: 'Vous avez un paiement qui ne s\'affiche pas ou un accès bloqué ?',
-			verifySub: 'Utilisez la page de vérification pour chercher et débloquer votre commande immédiatement.',
-			verifyBtn: 'Vérifier mon paiement',
-			searchPlaceholder: 'Rechercher par produit ou ID de transaction...',
+			metaDesc: 'Historique de vos commandes, reçus et paiements sur DJR Akademi.',
+			loadingMsg: 'Chargement...',
+			backToSpace: 'Mon espace',
+			title: 'Transactions',
+			subtitle: 'Historique de vos achats et reçus.',
+			verifyPrompt: 'Un paiement ne s’affiche pas ?',
+			verifyBtn: 'Vérifier un paiement',
+			searchPlaceholder: 'Rechercher un produit ou une référence...',
+			searchLabel: 'Rechercher une transaction',
 			filterAll: 'Tous',
 			filterPaid: 'Payé',
 			filterPending: 'En attente',
-			historyTitle: 'Historique détaillé des paiements',
-			currencyNote: 'Devises officielles : HTG / USD',
-			emptyTitle: 'Aucune transaction trouvée',
+			emptyTitle: 'Aucune transaction',
 			emptySubSearch: 'Aucun résultat ne correspond à votre recherche.',
-			emptySubDefault: 'Vous n\'avez effectué aucun achat pour le moment. Découvrez nos formations et livres électroniques !',
-			exploreCatalog: 'Explorer le catalogue',
+			emptySubDefault: 'Vous n’avez effectué aucun achat pour le moment.',
+			exploreCatalog: 'Voir le catalogue',
 			statusPaid: 'Payé',
 			statusPending: 'En attente',
 			statusFailed: 'Échoué',
-			productTypeLabel: 'Type :',
-			providerLabel: 'Mode :',
-			copyToast: 'Numéro de commande copié.',
-			pdfReceipt: 'Reçu PDF',
+			copyToast: 'Référence copiée.',
+			pdfReceipt: 'Reçu',
 			watchBtn: 'Suivre',
-			ebookBtn: 'Livre électronique',
-			bundleBtn: 'Mes ressources',
-			sessionBtn: 'Mes réservations',
+			ebookBtn: 'Ouvrir',
+			bundleBtn: 'Ressources',
+			sessionBtn: 'Réservations',
 			receiptModalTitle: 'Reçu de paiement',
-			receiptNumber: 'REÇU N°',
-			datePrefix: 'Date :',
-			referencePrefix: 'Réf. :',
-			copyOrderId: 'Copier le numéro de commande',
-			statusLabel: 'Statut :',
-			brandSub: 'Plateforme d\'apprentissage et de suivi',
-			billedTo: 'Facturé à',
-			paymentMethod: 'Mode de paiement',
-			statusPaidTag: 'Statut : Payé ✓',
-			productDescHeader: 'Description du produit',
+			receiptNumber: 'Reçu',
+			datePrefix: 'Date',
+			copyOrderId: 'Copier la référence',
+			statusLabel: 'Statut',
+			brandSub: 'Plateforme d’apprentissage',
+			billedTo: 'Client',
+			paymentMethod: 'Moyen de paiement',
+			productDescHeader: 'Produit',
 			typeHeader: 'Type',
 			amountHeader: 'Montant',
-			subtotal: 'Sous-total :',
-			fees: 'Frais de traitement :',
-			totalAmount: 'Montant total :',
-			receiptThankYou: 'Merci pour votre confiance en DJR Akademi !',
-			receiptElectronicNote: 'Ce reçu électronique constitue une preuve d\'achat officielle.',
+			subtotal: 'Sous-total',
+			fees: 'Frais',
+			totalAmount: 'Total',
+			receiptThankYou: 'Merci pour votre confiance.',
+			receiptElectronicNote: 'Preuve d’achat électronique officielle — DJR Akademi.',
 			close: 'Fermer',
-			printSavePdf: 'Imprimer / Sauvegarder en PDF',
-			courseType: 'Formation vidéo',
-			ebookType: 'Livre électronique PDF',
+			printSavePdf: 'Imprimer / PDF',
+			courseType: 'Formation',
+			ebookType: 'E-book',
 			bundleType: 'Offre groupée',
-			coachingType: 'Séance de coaching',
+			coachingType: 'Coaching',
 			digitalType: 'Produit numérique'
 		},
 		ht: {
 			pageTitle: 'Tranzaksyon mwen yo · DJR Akademi',
-			metaDesc: 'Istwa kòmand, resi ak fakti peman ou yo sou DJR Akademi.',
-			loadingMsg: 'N ap chaje tranzaksyon ou yo...',
-			backToSpace: 'Tounen nan espas mwen',
-			title: 'Tranzaksyon mwen yo',
-			subtitle: 'Istwa kòmand, fakti ak resi peman ou yo.',
-			verifyTitle: 'Ou gen yon peman ki pa parèt oswa yon aksè ki pa debloke?',
-			verifySub: 'Sèvi ak paj verifikasyon an pou chèche epi debloke kòmand ou a imedyatman.',
-			verifyBtn: 'Verifye peman m lan',
-			searchPlaceholder: 'Chèche pa pwodui oswa ID tranzaksyon...',
+			metaDesc: 'Istwa kòmand, resi ak peman ou yo sou DJR Akademi.',
+			loadingMsg: 'N ap chaje...',
+			backToSpace: 'Espas mwen',
+			title: 'Tranzaksyon',
+			subtitle: 'Istwa acha ak resi ou yo.',
+			verifyPrompt: 'Gen yon peman ki pa parèt?',
+			verifyBtn: 'Verifye yon peman',
+			searchPlaceholder: 'Chèche yon pwodui oswa referans...',
+			searchLabel: 'Chèche yon tranzaksyon',
 			filterAll: 'Tout',
 			filterPaid: 'Peye',
 			filterPending: 'Ap tann',
-			historyTitle: 'Istwa detaye peman yo',
-			currencyNote: 'Lajan yo itilize: HTG / USD',
-			emptyTitle: 'Pa gen tranzaksyon pou montre',
-			emptySubSearch: 'Pa gen okenn rezilta ki koresponn ak rechèch ou a.',
-			emptySubDefault: 'Ou poko fè okenn acha. Dekouvri fòmasyon ak liv dijital nou yo pou kòmanse!',
-			exploreCatalog: 'Eksplore katalòg la',
+			emptyTitle: 'Pa gen tranzaksyon',
+			emptySubSearch: 'Pa gen okenn rezilta ki koresponn.',
+			emptySubDefault: 'Ou poko fè okenn acha pou kounye a.',
+			exploreCatalog: 'Wè katalòg la',
 			statusPaid: 'Peye',
 			statusPending: 'Ap tann',
 			statusFailed: 'Echwe',
-			productTypeLabel: 'Kalite:',
-			providerLabel: 'Mwayen peman:',
-			copyToast: 'Nimewo kòmand lan kopye.',
-			pdfReceipt: 'Resi PDF',
+			copyToast: 'Referans kopye.',
+			pdfReceipt: 'Resi',
 			watchBtn: 'Swiv',
-			ebookBtn: 'Liv dijital',
-			bundleBtn: 'Resous mwen yo',
-			sessionBtn: 'Rezèvasyon mwen yo',
+			ebookBtn: 'Louvri',
+			bundleBtn: 'Resous',
+			sessionBtn: 'Rezèvasyon',
 			receiptModalTitle: 'Resi peman',
-			receiptNumber: 'RESI N°',
-			datePrefix: 'Dat:',
-			referencePrefix: 'Nimewo:',
-			copyOrderId: 'Kopye nimewo kòmand lan',
-			statusLabel: 'Estati:',
-			brandSub: 'Platfòm aprantisaj ak swivi',
-			billedTo: 'Faktire bay',
+			receiptNumber: 'Resi',
+			datePrefix: 'Dat',
+			copyOrderId: 'Kopye referans lan',
+			statusLabel: 'Estati',
+			brandSub: 'Platfòm aprantisaj',
+			billedTo: 'Kliyan',
 			paymentMethod: 'Mwayen peman',
-			statusPaidTag: 'Estati: Peye ✓',
-			productDescHeader: 'Deskripsyon pwodui a',
+			productDescHeader: 'Pwodui',
 			typeHeader: 'Kalite',
 			amountHeader: 'Montan',
-			subtotal: 'Sou-total:',
-			fees: 'Frè tretman:',
-			totalAmount: 'Montan total:',
-			receiptThankYou: 'Mèsi paske ou fè DJR Akademi konfyans!',
-			receiptElectronicNote: 'Resi elektwonik sa a se yon prèv acha ofisyèl.',
+			subtotal: 'Sou-total',
+			fees: 'Frè',
+			totalAmount: 'Total',
+			receiptThankYou: 'Mèsi pou konfyans ou.',
+			receiptElectronicNote: 'Prèv acha elektwonik ofisyèl — DJR Akademi.',
 			close: 'Fèmen',
-			printSavePdf: 'Enprime / Sove an PDF',
-			courseType: 'Fòmasyon videyo',
-			ebookType: 'Liv dijital PDF',
-			bundleType: 'Pakèt resous',
-			coachingType: 'Sesyon konsiltasyon',
+			printSavePdf: 'Enprime / PDF',
+			courseType: 'Fòmasyon',
+			ebookType: 'Liv dijital',
+			bundleType: 'Pakèt',
+			coachingType: 'Konsiltasyon',
 			digitalType: 'Pwodui dijital'
 		}
 	};
@@ -158,10 +138,10 @@
 	let loading = $state(true);
 	let orders = $state<Order[]>([]);
 	let searchQuery = $state('');
-	let statusFilter = $state<'all' | 'paid' | 'pending' | 'failed'>('all');
+	let statusFilter = $state<'all' | 'paid' | 'pending'>('all');
 
-	// Receipt Modal state
 	let selectedOrderForInvoice = $state<Order | null>(null);
+	let receiptDialogEl = $state<HTMLDialogElement | null>(null);
 	let copiedOrderId = $state<string | null>(null);
 
 	async function copyOrderId(orderId: string) {
@@ -196,6 +176,16 @@
 		}
 	});
 
+	$effect(() => {
+		const el = receiptDialogEl;
+		if (!el) return;
+		if (selectedOrderForInvoice) {
+			if (!el.open) el.showModal();
+		} else if (el.open) {
+			el.close();
+		}
+	});
+
 	async function fetchUserTransactions() {
 		if (!authState.user) return;
 		loading = true;
@@ -208,36 +198,36 @@
 		}
 	}
 
-	// Filtered orders derivation
+	let paidOrdersCount = $derived(orders.filter((o) => o.status === 'paid').length);
+	let pendingOrdersCount = $derived(orders.filter((o) => o.status === 'pending').length);
+
 	let filteredOrders = $derived(
 		orders.filter((order) => {
+			const q = searchQuery.trim().toLowerCase();
 			const matchesSearch =
-				order.productTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				(order.paymentId && order.paymentId.toLowerCase().includes(searchQuery.toLowerCase()));
+				!q ||
+				order.productTitle.toLowerCase().includes(q) ||
+				order.id.toLowerCase().includes(q) ||
+				(order.paymentId && order.paymentId.toLowerCase().includes(q));
 
 			const matchesStatus =
 				statusFilter === 'all' ||
 				(statusFilter === 'paid' && order.status === 'paid') ||
-				(statusFilter === 'pending' && order.status === 'pending') ||
-				(statusFilter === 'failed' && (order.status === 'failed' || order.status === 'expired'));
+				(statusFilter === 'pending' && order.status === 'pending');
 
 			return matchesSearch && matchesStatus;
 		})
 	);
 
-	let paidCount = $derived(orders.filter((o) => o.status === 'paid').length);
-	let totalSpent = $derived(
-		orders
-			.filter((o) => o.status === 'paid')
-			.reduce((acc, curr) => acc + curr.amount, 0)
-	);
-
 	function formatDate(isoString: string): string {
 		try {
-			const formatted = formatDateTimeInTimezone(isoString, Intl.DateTimeFormat().resolvedOptions().timeZone, currentLang);
+			const formatted = formatDateTimeInTimezone(
+				isoString,
+				Intl.DateTimeFormat().resolvedOptions().timeZone,
+				currentLang
+			);
 			return `${formatted.date} · ${formatted.time}`;
-		} catch (e) {
+		} catch {
 			return isoString;
 		}
 	}
@@ -248,7 +238,10 @@
 				return 'MonCash';
 			case 'natcash':
 				return 'NatCash';
+			case 'lemonsqueezy':
+				return 'Lemon Squeezy';
 			case 'card':
+			case 'carte':
 				return currentLang === 'ht' ? 'Kat labank' : 'Carte bancaire';
 			case 'free':
 				return currentLang === 'ht' ? 'Gratis' : 'Gratuit';
@@ -274,12 +267,41 @@
 		}
 	}
 
+	function getProductHref(order: Order): string {
+		if (order.productType === 'course') return getHref(`/learn/${order.productId}`);
+		if (order.productType === 'ebook') return getHref(`/ebooks/${order.productId}`);
+		if (order.productType === 'bundle') return getHref('/dashboard');
+		return getHref('/bookings');
+	}
+
+	function getProductActionLabel(order: Order): string {
+		if (order.productType === 'course') return t.watchBtn;
+		if (order.productType === 'ebook') return t.ebookBtn;
+		if (order.productType === 'bundle') return t.bundleBtn;
+		return t.sessionBtn;
+	}
+
 	function openInvoiceModal(order: Order) {
 		selectedOrderForInvoice = order;
 	}
 
 	function closeInvoiceModal() {
 		selectedOrderForInvoice = null;
+	}
+
+	function handleDialogClick(event: MouseEvent) {
+		const el = receiptDialogEl;
+		if (!el) return;
+		if (!('closedBy' in HTMLDialogElement.prototype)) {
+			if (event.target !== el) return;
+			const rect = el.getBoundingClientRect();
+			const isInside =
+				rect.top <= event.clientY &&
+				event.clientY <= rect.top + rect.height &&
+				rect.left <= event.clientX &&
+				event.clientX <= rect.left + rect.width;
+			if (!isInside) closeInvoiceModal();
+		}
 	}
 
 	function printInvoice() {
@@ -295,313 +317,271 @@
 	<meta name="description" content={t.metaDesc} />
 </svelte:head>
 
-<div class="min-h-screen bg-zinc-50 flex flex-col font-sans text-zinc-900">
+<div class="min-h-screen bg-zinc-50/70 flex flex-col font-sans text-zinc-900">
 	<PublicHeader />
 
 	{#if authState.loading || loading}
-		<div class="flex-1 flex items-center justify-center py-20">
-			<div class="text-center space-y-3">
-				<span class="loading loading-spinner text-amber-500 loading-lg"></span>
-				<p class="text-xs font-semibold text-zinc-500">{t.loadingMsg}</p>
+		<div class="flex-1 grid place-items-center py-24">
+			<div class="flex flex-col items-center gap-2.5 text-zinc-400">
+				<Loader2 size={22} class="animate-spin text-zinc-900" />
+				<p class="text-xs font-medium">{t.loadingMsg}</p>
 			</div>
 		</div>
 	{:else if authState.user}
-		<main class="flex-1 py-10 sm:py-14">
-			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-
-				<!-- Back navigation button -->
-				<a
-					href={getHref('/dashboard')}
-					class="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-950 transition-colors"
-				>
-					<ChevronLeft size={16} />
-					{t.backToSpace}
-				</a>
-
-
-
-				<!-- Verification Callout Banner -->
-				<div class="bg-amber-500/10 border border-amber-500/20 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
-					<div class="flex items-center gap-3">
-						<div class="size-9 bg-amber-400 text-black rounded-xl grid place-items-center font-bold shrink-0">
-							<ShieldCheck size={18} />
-						</div>
-						<div>
-							<p class="font-bold text-zinc-900 text-sm">{t.verifyTitle}</p>
-							<p class="text-zinc-500 text-xs">{t.verifySub}</p>
-						</div>
-					</div>
+		<main class="flex-1 py-8 sm:py-12">
+			<div class="mx-auto max-w-3xl px-4 sm:px-6 space-y-6">
+				<!-- Top Header -->
+				<div class="space-y-3">
 					<a
-						href={getHref('/verify')}
-						class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl transition-colors shrink-0 shadow-sm"
+						href={getHref('/dashboard')}
+						class="inline-flex items-center gap-1 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-950"
 					>
-						<span>{t.verifyBtn}</span>
-						<ArrowRight size={14} class="text-amber-400" />
+						<ChevronLeft size={14} />
+						<span>{t.backToSpace}</span>
 					</a>
+
+					<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+						<div>
+							<h1 class="text-2xl font-semibold tracking-tight text-zinc-950">{t.title}</h1>
+							<p class="mt-0.5 text-sm text-zinc-500">{t.subtitle}</p>
+						</div>
+
+						<a
+							href={getHref('/verify')}
+							class="inline-flex items-center gap-1.5 self-start rounded-xl border border-zinc-200/90 bg-white px-3.5 py-2 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-950 sm:self-auto"
+						>
+							<span>{t.verifyBtn}</span>
+							<ArrowRight size={13} class="text-zinc-400" />
+						</a>
+					</div>
 				</div>
 
-				<!-- Search & Filter Controls -->
-				<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-					<!-- Search Input -->
+				<!-- Search & Filter Bar -->
+				<div class="flex flex-col gap-3 sm:flex-row sm:items-center">
 					<div class="relative flex-1">
-						<Search size={18} class="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+						<Search size={15} class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-zinc-400" />
 						<input
-							type="text"
+							type="search"
+							aria-label={t.searchLabel}
 							placeholder={t.searchPlaceholder}
 							bind:value={searchQuery}
-							class="w-full pl-11 pr-4 py-3 bg-white border border-zinc-200/80 rounded-2xl text-xs font-medium focus:outline-none focus:border-zinc-950 shadow-2xs transition-colors"
+							class="h-10 w-full rounded-xl border border-zinc-200/90 bg-white pr-4 pl-10 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-950 focus:outline-none"
 						/>
 					</div>
 
-					<!-- Status Filter Tabs -->
-					<div class="flex items-center gap-1.5 p-1.5 bg-zinc-200/60 rounded-2xl shrink-0 overflow-x-auto">
-						<button
-							type="button"
-							class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap {statusFilter === 'all' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'}"
-							onclick={() => (statusFilter = 'all')}
+					<div class="relative self-start sm:self-auto">
+						<select
+							bind:value={statusFilter}
+							aria-label={t.statusLabel}
+							class="h-10 cursor-pointer appearance-none rounded-xl border border-zinc-200/90 bg-white pr-9 pl-3.5 text-xs font-medium text-zinc-900 transition-colors hover:border-zinc-300 focus:border-zinc-950 focus:outline-none"
 						>
-							{t.filterAll} ({orders.length})
-						</button>
-						<button
-							type="button"
-							class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap {statusFilter === 'paid' ? 'bg-white text-emerald-700 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'}"
-							onclick={() => (statusFilter = 'paid')}
-						>
-							{t.filterPaid} ({orders.filter(o => o.status === 'paid').length})
-						</button>
-						<button
-							type="button"
-							class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap {statusFilter === 'pending' ? 'bg-white text-amber-700 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'}"
-							onclick={() => (statusFilter = 'pending')}
-						>
-							{t.filterPending} ({orders.filter(o => o.status === 'pending').length})
-						</button>
+							<option value="all">{t.filterAll} ({orders.length})</option>
+							<option value="paid">{t.filterPaid} ({paidOrdersCount})</option>
+							<option value="pending">{t.filterPending} ({pendingOrdersCount})</option>
+						</select>
+						<ChevronDown
+							size={14}
+							aria-hidden="true"
+							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-zinc-400"
+						/>
 					</div>
 				</div>
 
-				<!-- Transactions List Container -->
-				<div class="bg-white rounded-3xl border border-zinc-200/80 p-6 sm:p-8 shadow-sm space-y-6">
-					<div class="flex items-center justify-between pb-4 border-b border-zinc-100">
-						<h2 class="text-base font-black text-zinc-950 flex items-center gap-2">
-							<CreditCard size={18} class="text-amber-500" />
-							{t.historyTitle}
-						</h2>
-					</div>
-
+				<!-- Transactions List -->
+				<div class="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white">
 					{#if filteredOrders.length === 0}
-						<!-- Empty State -->
-						<div class="py-14 text-center space-y-4 max-w-sm mx-auto">
-							<div class="size-14 bg-zinc-100 text-zinc-400 rounded-2xl grid place-items-center mx-auto">
-								<ShoppingBag size={28} />
+						<div class="mx-auto max-w-xs px-6 py-16 text-center space-y-3">
+							<div class="mx-auto grid size-11 place-items-center rounded-xl bg-zinc-100 text-zinc-400">
+								<ShoppingBag size={20} strokeWidth={1.75} />
 							</div>
 							<div class="space-y-1">
-								<h3 class="font-black text-base text-zinc-950">{t.emptyTitle}</h3>
+								<h2 class="text-sm font-semibold text-zinc-950">{t.emptyTitle}</h2>
 								<p class="text-xs text-zinc-500">
-									{#if searchQuery || statusFilter !== 'all'}
-										{t.emptySubSearch}
-									{:else}
-										{t.emptySubDefault}
-									{/if}
+									{searchQuery || statusFilter !== 'all' ? t.emptySubSearch : t.emptySubDefault}
 								</p>
 							</div>
 							<a
 								href={getHref('/catalogue')}
-								class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-zinc-950 text-white font-bold text-xs hover:bg-zinc-800 transition-colors shadow-sm"
+								class="inline-flex items-center gap-1.5 rounded-xl bg-zinc-950 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
 							>
-								<Sparkles size={14} class="text-amber-400" />
-								{t.exploreCatalog}
+								<span>{t.exploreCatalog}</span>
+								<ArrowRight size={13} />
 							</a>
 						</div>
 					{:else}
-						<div class="space-y-4">
+						<ul class="divide-y divide-zinc-100">
 							{#each filteredOrders as order (order.id)}
-								<div class="p-5 rounded-2xl border border-zinc-200/90 hover:border-zinc-300 hover:shadow-md transition-all space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4">
-									<div class="flex items-start gap-4">
-										<div class="size-11 rounded-2xl grid place-items-center font-mono text-xs font-bold shrink-0 {order.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600' : order.status === 'pending' ? 'bg-amber-500/10 text-amber-600' : 'bg-red-500/10 text-red-600'}">
-											<Receipt size={20} />
+								<li class="flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-zinc-50/70 sm:flex-row sm:items-center sm:justify-between">
+									<div class="min-w-0 space-y-1">
+										<div class="flex flex-wrap items-center gap-2">
+											<span class="truncate text-sm font-semibold text-zinc-950">
+												{order.productTitle}
+											</span>
+
+											{#if order.status === 'paid'}
+												<span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+													<span class="size-1.5 rounded-full bg-emerald-500"></span>
+													{t.statusPaid}
+												</span>
+											{:else if order.status === 'pending'}
+												<span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+													<span class="size-1.5 rounded-full bg-amber-500"></span>
+													{t.statusPending}
+												</span>
+											{:else}
+												<span class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
+													<span class="size-1.5 rounded-full bg-red-500"></span>
+													{t.statusFailed}
+												</span>
+											{/if}
 										</div>
 
-										<div class="space-y-1.5 min-w-0">
-											<div class="flex flex-wrap items-center gap-2">
-												<h3 class="font-black text-sm text-zinc-950 truncate max-w-sm sm:max-w-md">
-													{order.productTitle}
-												</h3>
-
-												{#if order.status === 'paid'}
-													<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase rounded-md inline-flex items-center gap-1">
-														<CheckCircle2 size={10} /> {t.statusPaid}
-													</span>
-												{:else if order.status === 'pending'}
-													<span class="px-2.5 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-extrabold uppercase rounded-md inline-flex items-center gap-1">
-														<Clock size={10} /> {t.statusPending}
-													</span>
+										<div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-zinc-500">
+											<span>{getProductTypeLabel(order.productType)}</span>
+											<span class="text-zinc-300">·</span>
+											<span>{getProviderLabel(order.paymentProvider)}</span>
+											<span class="text-zinc-300">·</span>
+											<span>{formatDate(order.createdAt)}</span>
+											<span class="text-zinc-300">·</span>
+											<button
+												type="button"
+												onclick={() => copyOrderId(order.id)}
+												title={t.copyOrderId}
+												class="inline-flex cursor-pointer items-center gap-1 font-mono text-[11px] text-zinc-400 transition-colors hover:text-zinc-900"
+											>
+												<span>{order.id.slice(0, 12)}</span>
+												{#if copiedOrderId === order.id}
+													<Check size={11} class="text-emerald-600" />
 												{:else}
-													<span class="px-2.5 py-0.5 bg-red-100 text-red-800 text-[10px] font-extrabold uppercase rounded-md inline-flex items-center gap-1">
-														<AlertCircle size={10} /> {t.statusFailed}
-													</span>
+													<Copy size={11} />
 												{/if}
-											</div>
-
-											<p class="text-xs text-zinc-500 font-medium flex flex-wrap items-center gap-2">
-												<span>{t.productTypeLabel} <strong class="text-zinc-700">{getProductTypeLabel(order.productType)}</strong></span>
-												<span>·</span>
-												<span>{t.providerLabel} <strong class="text-zinc-700">{getProviderLabel(order.paymentProvider)}</strong></span>
-											</p>
-
-											<p class="text-[11px] text-zinc-400 font-mono flex items-center gap-1.5">
-								<span>{t.referencePrefix} {order.id.slice(0, 16)}</span>
-												<button
-													type="button"
-													onclick={() => copyOrderId(order.id)}
-													class="p-1 hover:bg-zinc-200/60 hover:text-zinc-950 rounded transition-colors text-zinc-400 cursor-pointer inline-flex items-center"
-									title={t.copyOrderId}
-												>
-													{#if copiedOrderId === order.id}
-														<Check size={13} class="text-emerald-500" />
-													{:else}
-														<Copy size={13} />
-													{/if}
-												</button>
-												<span>· {formatDate(order.createdAt)}</span>
-											</p>
+											</button>
 										</div>
 									</div>
 
-									<div class="flex flex-col sm:items-end justify-between sm:justify-center gap-2.5 pt-3 sm:pt-0 border-t sm:border-t-0 border-zinc-100 shrink-0">
-										<div class="text-left sm:text-right">
-											<span class="block text-base sm:text-lg font-black text-zinc-950 font-mono">
-												{order.amount.toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR')} {order.currency}
-											</span>
-										</div>
+									<div class="flex items-center justify-between gap-4 sm:justify-end shrink-0">
+										<span class="font-mono text-sm font-semibold tabular-nums text-zinc-950">
+											{order.amount.toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR')} {order.currency}
+										</span>
 
-										<div class="flex items-center gap-2">
-											{#if order.status === 'paid'}
+										{#if order.status === 'paid'}
+											<div class="flex items-center gap-1.5">
 												<button
 													type="button"
 													onclick={() => openInvoiceModal(order)}
-													class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] rounded-xl transition-colors"
+													class="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-950"
 												>
 													<FileText size={12} />
 													<span>{t.pdfReceipt}</span>
 												</button>
-
-												{#if order.productType === 'course'}
-													<a
-														href={getHref(`/learn/${order.productId}`)}
-														class="inline-flex items-center gap-1 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-[11px] rounded-xl transition-colors"
-													>
-														<span>{t.watchBtn}</span>
-														<ArrowRight size={12} />
-													</a>
-												{:else if order.productType === 'ebook'}
-													<a
-														href={getHref(`/ebooks/${order.productId}`)}
-														class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-black font-bold text-[11px] rounded-xl transition-colors"
-													>
-														<span>{t.ebookBtn}</span>
-														<Download size={12} />
-													</a>
-												{:else if order.productType === 'bundle'}
-													<a
-														href={getHref('/dashboard')}
-														class="inline-flex items-center gap-1 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-[11px] rounded-xl transition-colors"
-													>
-														<span>{t.bundleBtn}</span>
-														<ExternalLink size={12} />
-													</a>
-												{:else}
-													<a
-														href={getHref('/bookings')}
-														class="inline-flex items-center gap-1 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-[11px] rounded-xl transition-colors"
-													>
-														<span>{t.sessionBtn}</span>
-														<ExternalLink size={12} />
-													</a>
-												{/if}
-											{/if}
-										</div>
+												<a
+													href={getProductHref(order)}
+													class="inline-flex items-center gap-1 rounded-lg bg-zinc-950 px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
+												>
+													<span>{getProductActionLabel(order)}</span>
+													<ArrowRight size={12} />
+												</a>
+											</div>
+										{/if}
 									</div>
-								</div>
+								</li>
 							{/each}
-						</div>
+						</ul>
 					{/if}
 				</div>
 
+				<!-- Subtle verify footer hint -->
+				<p class="text-center text-xs text-zinc-400">
+					{t.verifyPrompt}
+					<a href={getHref('/verify')} class="font-medium text-zinc-600 underline underline-offset-2 hover:text-zinc-950">
+						{t.verifyBtn}
+					</a>
+				</p>
 			</div>
 		</main>
 	{/if}
 </div>
 
-<!-- Invoice / Receipt Modal -->
-{#if selectedOrderForInvoice}
-	<div class="invoice-print-overlay fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-		<div class="invoice-print-area bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden border border-zinc-200">
-			<!-- Header Modal -->
-			<div class="p-6 bg-zinc-950 text-white flex items-center justify-between print:hidden">
-				<div class="flex items-center gap-2">
-					<Receipt size={20} class="text-amber-400" />
-					<h3 class="font-black text-base">{t.receiptModalTitle}</h3>
-				</div>
+<!-- Minimalist Receipt Dialog -->
+<dialog
+	bind:this={receiptDialogEl}
+	{...({ closedby: 'any' } as Record<string, string>)}
+	aria-labelledby="receipt-modal-title"
+	oncancel={closeInvoiceModal}
+	onclose={() => {
+		if (selectedOrderForInvoice) closeInvoiceModal();
+	}}
+	onclick={handleDialogClick}
+	class="receipt-dialog invoice-print-area m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-zinc-200/90 bg-white p-0 text-zinc-900 shadow-xl"
+>
+	{#if selectedOrderForInvoice}
+		<div class="flex flex-col">
+			<!-- Header -->
+			<div class="flex items-center justify-between border-b border-zinc-100 px-6 py-4 print:hidden">
+				<h2 id="receipt-modal-title" class="text-sm font-semibold text-zinc-950">
+					{t.receiptModalTitle}
+				</h2>
 				<button
 					type="button"
 					onclick={closeInvoiceModal}
-					class="size-8 rounded-full bg-white/10 hover:bg-white/20 text-white grid place-items-center transition-colors"
 					aria-label={t.close}
+					class="grid size-8 cursor-pointer place-items-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
 				>
 					<X size={16} />
 				</button>
 			</div>
 
-			<!-- Printable Receipt Body -->
-			<div class="invoice-print-body p-6 sm:p-8 space-y-6 text-zinc-900">
-				<!-- Brand Header -->
-				<div class="flex items-start justify-between border-b border-zinc-200 pb-6">
+			<!-- Printable Body -->
+			<div class="invoice-print-body space-y-6 p-6">
+				<div class="flex items-start justify-between border-b border-zinc-100 pb-5">
 					<div>
-						<h2 class="text-2xl font-black tracking-tight text-zinc-950">DJR AKADEMI</h2>
-						<p class="text-xs text-zinc-500 mt-0.5">{t.brandSub}</p>
-						<p class="text-[11px] text-zinc-400 font-mono mt-1">contact@djrakademi.net · {currentLang === 'ht' ? 'Ayiti' : 'Haïti'}</p>
+						<p class="text-base font-semibold tracking-tight text-zinc-950">DJR Akademi</p>
+						<p class="text-xs text-zinc-500">{t.brandSub}</p>
+						<p class="mt-1 font-mono text-[11px] text-zinc-400">contact@djrakademi.net</p>
 					</div>
 					<div class="text-right">
-						<span class="px-3 py-1 bg-zinc-100 text-zinc-800 font-mono font-bold text-xs rounded-lg inline-block">
-							{t.receiptNumber} {selectedOrderForInvoice.id.slice(0, 12).toUpperCase()}
+						<span class="inline-block rounded-md bg-zinc-100 px-2.5 py-1 font-mono text-[11px] font-medium text-zinc-700">
+							{t.receiptNumber} #{selectedOrderForInvoice.id.slice(0, 10).toUpperCase()}
 						</span>
-						<p class="text-[11px] text-zinc-400 font-mono mt-1">
-							{t.datePrefix} {formatDate(selectedOrderForInvoice.createdAt)}
+						<p class="mt-1 font-mono text-[11px] text-zinc-400">
+							{formatDate(selectedOrderForInvoice.createdAt)}
 						</p>
 					</div>
 				</div>
 
-				<!-- Customer & Transaction Info -->
-				<div class="grid grid-cols-2 gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-200/80 text-xs">
-					<div class="space-y-1">
-						<span class="text-[10px] font-bold uppercase text-zinc-400 block">{t.billedTo}</span>
-						<p class="font-bold text-zinc-950">{selectedOrderForInvoice.customerName}</p>
-						<p class="text-zinc-500 font-mono text-[11px]">{selectedOrderForInvoice.customerEmail}</p>
+				<div class="grid grid-cols-2 gap-4 rounded-xl bg-zinc-50 p-4 text-xs">
+					<div class="space-y-0.5">
+						<span class="text-[11px] text-zinc-400">{t.billedTo}</span>
+						<p class="font-medium text-zinc-950">{selectedOrderForInvoice.customerName}</p>
+						<p class="font-mono text-[11px] text-zinc-500">{selectedOrderForInvoice.customerEmail}</p>
 					</div>
-					<div class="space-y-1 text-right">
-						<span class="text-[10px] font-bold uppercase text-zinc-400 block">{t.paymentMethod}</span>
-						<p class="font-bold text-zinc-950">{getProviderLabel(selectedOrderForInvoice.paymentProvider)}</p>
-						<p class="text-emerald-700 font-bold uppercase text-[11px]">
-							{selectedOrderForInvoice.status === 'paid' ? t.statusPaidTag : `${t.statusLabel} ${selectedOrderForInvoice.status === 'pending' ? t.statusPending : t.statusFailed}`}
+					<div class="space-y-0.5 text-right">
+						<span class="text-[11px] text-zinc-400">{t.paymentMethod}</span>
+						<p class="font-medium text-zinc-950">{getProviderLabel(selectedOrderForInvoice.paymentProvider)}</p>
+						<p class="text-[11px] font-medium text-emerald-700">
+							{selectedOrderForInvoice.status === 'paid'
+								? t.statusPaid
+								: selectedOrderForInvoice.status === 'pending'
+									? t.statusPending
+									: t.statusFailed}
 						</p>
 					</div>
 				</div>
 
-				<!-- Item Details Table -->
-				<div class="border border-zinc-200 rounded-2xl overflow-hidden">
-					<table class="w-full text-xs text-left">
-						<thead class="bg-zinc-100 text-zinc-500 font-bold uppercase text-[10px]">
+				<div class="overflow-hidden rounded-xl border border-zinc-200/80">
+					<table class="w-full text-left text-xs">
+						<thead class="bg-zinc-50 text-[11px] font-medium text-zinc-500">
 							<tr>
-								<th class="p-3.5">{t.productDescHeader}</th>
-								<th class="p-3.5 text-center">{t.typeHeader}</th>
-								<th class="p-3.5 text-right">{t.amountHeader}</th>
+								<th class="px-3.5 py-2.5">{t.productDescHeader}</th>
+								<th class="px-3.5 py-2.5">{t.typeHeader}</th>
+								<th class="px-3.5 py-2.5 text-right">{t.amountHeader}</th>
 							</tr>
 						</thead>
-						<tbody class="divide-y divide-zinc-100 font-medium">
+						<tbody class="divide-y divide-zinc-100">
 							<tr>
-								<td class="p-3.5 font-bold text-zinc-950">{selectedOrderForInvoice.productTitle}</td>
-								<td class="p-3.5 text-center text-zinc-500">{getProductTypeLabel(selectedOrderForInvoice.productType)}</td>
-								<td class="p-3.5 text-right font-mono font-bold text-zinc-950">
+								<td class="px-3.5 py-3 font-medium text-zinc-950">{selectedOrderForInvoice.productTitle}</td>
+								<td class="px-3.5 py-3 text-zinc-500">{getProductTypeLabel(selectedOrderForInvoice.productType)}</td>
+								<td class="px-3.5 py-3 text-right font-mono font-medium tabular-nums text-zinc-950">
 									{selectedOrderForInvoice.amount.toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR')} {selectedOrderForInvoice.currency}
 								</td>
 							</tr>
@@ -609,45 +589,47 @@
 					</table>
 				</div>
 
-				<!-- Total Summary -->
-				<div class="flex justify-end pt-2">
-					<div class="w-64 space-y-2 text-right">
-						<div class="flex justify-between text-xs text-zinc-500">
+				<div class="flex justify-end">
+					<div class="w-56 space-y-1.5 text-xs">
+						<div class="flex justify-between text-zinc-500">
 							<span>{t.subtotal}</span>
-							<span class="font-mono font-bold text-zinc-950">
+							<span class="font-mono tabular-nums text-zinc-900">
 								{selectedOrderForInvoice.amount.toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR')} {selectedOrderForInvoice.currency}
 							</span>
 						</div>
-						<div class="flex justify-between text-xs text-zinc-500">
+						<div class="flex justify-between text-zinc-500">
 							<span>{t.fees}</span>
-							<span class="font-mono font-bold text-emerald-600">0 {selectedOrderForInvoice.currency}</span>
+							<span class="font-mono tabular-nums text-zinc-900">0 {selectedOrderForInvoice.currency}</span>
 						</div>
-						<div class="flex justify-between text-base font-black text-zinc-950 pt-2 border-t border-zinc-200">
+						<div class="flex justify-between border-t border-zinc-200 pt-2 text-sm font-semibold text-zinc-950">
 							<span>{t.totalAmount}</span>
-							<span class="font-mono text-amber-600">
+							<span class="font-mono tabular-nums">
 								{selectedOrderForInvoice.amount.toLocaleString(currentLang === 'ht' ? 'ht-HT' : 'fr-FR')} {selectedOrderForInvoice.currency}
 							</span>
 						</div>
 					</div>
 				</div>
 
-				<!-- Footer Receipt Note -->
-				<div class="pt-6 border-t border-zinc-200 text-center text-[10px] text-zinc-400 space-y-1">
-					<p class="font-bold">{t.receiptThankYou}</p>
+				<div class="border-t border-zinc-100 pt-4 text-center text-[11px] text-zinc-400">
+					<p class="font-medium text-zinc-500">{t.receiptThankYou}</p>
 					<p>{t.receiptElectronicNote}</p>
 				</div>
 			</div>
-
-			<!-- Actions Modal Footer -->
-			<div class="p-4 bg-zinc-50 border-t border-zinc-200 flex items-center justify-end gap-3 print:hidden">
-				<button
-					type="button"
-					onclick={closeInvoiceModal}
-					class="px-4 py-2 text-xs font-bold text-zinc-600 hover:text-zinc-950 transition-colors"
-				>
-					{t.close}
-				</button>
-			</div>
 		</div>
-	</div>
-{/if}
+	{/if}
+</dialog>
+
+<style>
+	.receipt-dialog::backdrop {
+		background-color: rgb(9 9 11 / 0.45);
+		backdrop-filter: blur(4px);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.receipt-dialog,
+		.receipt-dialog * {
+			animation: none !important;
+			transition: none !important;
+		}
+	}
+</style>
