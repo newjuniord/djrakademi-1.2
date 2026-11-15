@@ -181,9 +181,10 @@
 						<span class="font-bold text-base-content uppercase">{order.status}</span>
 					</div>
 					{#if order.paymentConfirmedBy}
+						{@const providerLabel = order.paymentProvider === 'lemonsqueezy' ? 'Lemon Squeezy' : 'Plopplop'}
 						<div class="flex items-center justify-between">
 							<span class="text-base-content/60">Accès accordé après :</span>
-							<span class="font-semibold text-base-content">{order.paymentConfirmedBy === 'webhook' ? 'Webhook Plopplop' : order.paymentConfirmedBy === 'cron' ? 'API Plopplop (automatique)' : 'API Plopplop'}</span>
+							<span class="font-semibold text-base-content">{order.paymentConfirmedBy === 'webhook' ? `Webhook ${providerLabel}` : order.paymentConfirmedBy === 'cron' ? `API ${providerLabel} (automatique)` : `API ${providerLabel}`}</span>
 						</div>
 					{/if}
 					{#if order.webhookConfirmedAt}
@@ -193,8 +194,9 @@
 						</div>
 					{/if}
 					{#if order.apiConfirmedAt}
+						{@const providerLabel = order.paymentProvider === 'lemonsqueezy' ? 'Lemon Squeezy' : 'Plopplop'}
 						<div class="flex items-center justify-between">
-							<span class="text-base-content/60">API Plopplop confirmée :</span>
+							<span class="text-base-content/60">API {providerLabel} confirmée :</span>
 							<span class="font-medium text-base-content">{formatDateWithTime(order.apiConfirmedAt)}</span>
 						</div>
 					{/if}

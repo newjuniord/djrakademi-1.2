@@ -85,6 +85,18 @@
 			year: 'numeric'
 		}).format(date);
 	}
+
+	function formatDateTimeShort(dateString?: string): string {
+		if (!dateString) return '—';
+		const date = new Date(dateString);
+		if (isNaN(date.getTime())) return dateString;
+		return new Intl.DateTimeFormat('fr-FR', {
+			day: 'numeric',
+			month: 'short',
+			hour: '2-digit',
+			minute: '2-digit'
+		}).format(date);
+	}
 </script>
 
 <svelte:head>
@@ -236,18 +248,20 @@
 						<th class="py-4 px-4 font-bold">Type</th>
 						<th class="py-4 px-4 font-bold">Montant</th>
 						<th class="py-4 px-4 font-bold">Paiement</th>
+						<th class="py-4 px-4 font-bold">Webhook</th>
+						<th class="py-4 px-4 font-bold">API</th>
 						<th class="py-4 px-4 font-bold">Date</th>
 						<th class="py-4 px-4 font-bold text-right">Actions</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-base-200/60 text-xs">
 					{#if loading}
-						<tr><td colspan="8" class="py-12 text-center text-base-content/60"><Loader2 size={24} class="mx-auto animate-spin text-primary" /><span class="mt-2 block">Chargement des commandes…</span></td></tr>
+						<tr><td colspan="10" class="py-12 text-center text-base-content/60"><Loader2 size={24} class="mx-auto animate-spin text-primary" /><span class="mt-2 block">Chargement des commandes…</span></td></tr>
 					{:else if loadError}
-						<tr><td colspan="8" class="py-12 text-center text-error"><XCircle size={22} class="mx-auto" /><span class="mt-2 block">{loadError}</span><button type="button" class="btn btn-sm mt-3" onclick={loadOrders}>Réessayer</button></td></tr>
+						<tr><td colspan="10" class="py-12 text-center text-error"><XCircle size={22} class="mx-auto" /><span class="mt-2 block">{loadError}</span><button type="button" class="btn btn-sm mt-3" onclick={loadOrders}>Réessayer</button></td></tr>
 					{:else if orders.length === 0}
 						<tr>
-							<td colspan="8" class="py-12 text-center text-base-content/50">
+							<td colspan="10" class="py-12 text-center text-base-content/50">
 								Aucune commande trouvée.
 							</td>
 						</tr>
@@ -323,12 +337,34 @@
 									{/if}
 								</td>
 
-								<!-- Column 7: Date -->
+								<!-- Column 7: Webhook confirmed at -->
+								<td class="py-4 px-4 text-base-content/70 whitespace-nowrap font-mono text-[11px]">
+									{#if order.webhookConfirmedAt}
+										<span class={order.paymentConfirmedBy === 'webhook' ? 'text-success font-semibold' : ''}>
+											{formatDateTimeShort(order.webhookConfirmedAt)}
+										</span>
+									{:else}
+										<span class="text-base-content/35">—</span>
+									{/if}
+								</td>
+
+								<!-- Column 8: API confirmed at -->
+								<td class="py-4 px-4 text-base-content/70 whitespace-nowrap font-mono text-[11px]">
+									{#if order.apiConfirmedAt}
+										<span class={order.paymentConfirmedBy === 'api' || order.paymentConfirmedBy === 'cron' ? 'text-success font-semibold' : ''}>
+											{formatDateTimeShort(order.apiConfirmedAt)}
+										</span>
+									{:else}
+										<span class="text-base-content/35">—</span>
+									{/if}
+								</td>
+
+								<!-- Column 9: Date -->
 								<td class="py-4 px-4 text-base-content/70 whitespace-nowrap">
 									{formatDateShort(order.createdAt)}
 								</td>
 
-								<!-- Column 8: Actions Menu -->
+								<!-- Column 10: Actions Menu -->
 								<td class="py-4 px-4 text-right">
 									<div class="dropdown dropdown-end dropdown-bottom focus-within:z-50 hover:z-50 relative">
 										<button

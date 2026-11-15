@@ -32,7 +32,12 @@ function verifySignature(rawBody: string, signatureHeader: string | null, secret
 /**
  * Traite et valide une commande payée depuis Lemon Squeezy.
  */
-async function fulfillOrder(orderId?: string, customData?: Record<string, any>, lqOrderId?: string) {
+async function fulfillOrder(
+	orderId?: string,
+	customData?: Record<string, any>,
+	lqOrderId?: string,
+	source: 'webhook' | 'api' = 'api'
+) {
 	const { tables } = adminServices();
 	const paidAt = new Date().toISOString();
 
@@ -141,14 +146,20 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 		}
 	}
 
+	const confirmationField = source === 'webhook' ? 'webhook_confirmed_at' : 'api_confirmed_at';
+
 	if (orderRow.status === 'paid') {
 		if (productType === 'bundle') await grantBundleAccess(tables, orderRow, userId);
-		if (userId && (!orderRow.user_id || orderRow.user_id === 'admin')) {
+		const patch: Record<string, any> = {};
+		if (userId && (!orderRow.user_id || orderRow.user_id === 'admin')) patch.user_id = userId;
+		if (!orderRow.payment_confirmed_by) patch.payment_confirmed_by = source;
+		if (!orderRow[confirmationField]) patch[confirmationField] = paidAt;
+		if (Object.keys(patch).length > 0) {
 			await tables.updateRow({
 				databaseId: DATABASE_ID,
 				tableId: ORDERS_TABLE,
 				rowId: targetOrderId,
-				data: { user_id: userId }
+				data: patch
 			}).catch(() => undefined);
 		}
 		if (productType === 'coaching' && productId) {
@@ -205,7 +216,9 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 				status: 'paid',
 				user_id: userId || orderRow.user_id,
 				payment_id: lqOrderId || undefined,
-				paid_at: paidAt
+				paid_at: paidAt,
+				payment_confirmed_by: orderRow.payment_confirmed_by || source,
+				[confirmationField]: orderRow[confirmationField] || paidAt
 			}
 		});
 
@@ -288,7 +301,14 @@ async function fulfillVerifiedBundleByEmail(
 			tableId: ORDERS_TABLE,
 			rowId: orderRow.$id,
 			transactionId: transaction.$id,
-			data: { status: 'paid', user_id: userId, payment_id: lemonsqueezyOrderId || undefined, paid_at: paidAt }
+			data: {
+				status: 'paid',
+				user_id: userId,
+				payment_id: lemonsqueezyOrderId || undefined,
+				paid_at: paidAt,
+				payment_confirmed_by: orderRow.payment_confirmed_by || 'api',
+				api_confirmed_at: orderRow.api_confirmed_at || paidAt
+			}
 		});
 		await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
 		return true;
@@ -520,7 +540,9 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 						status: 'paid',
 						user_id: targetUserId,
 						payment_id: lqOrderId,
-						paid_at: paidAt
+						paid_at: paidAt,
+						payment_confirmed_by: 'api',
+						api_confirmed_at: paidAt
 					}
 				}).catch((e) => console.warn('[Order update to paid failed]:', e));
 			} else {
@@ -543,7 +565,9 @@ async function verifyAndFulfillByEmail(userEmail: string, targetOrderId?: string
 								status: 'paid',
 								user_id: targetUserId,
 								payment_id: lqOrderId,
-								paid_at: paidAt
+								paid_at: paidAt,
+								payment_confirmed_by: 'api',
+								api_confirmed_at: paidAt
 							}
 						}).catch(() => undefined);
 					}
@@ -708,7 +732,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				return json({ success: false, message: 'ID de commande manquant dans custom_data.' }, { status: 400 });
 			}
 
-			await fulfillOrder(orderId, customData, lqOrderId);
+			await fulfillOrder(orderId, customData, lqOrderId, 'webhook');
 			return json({ success: true, message: 'Commande vérifiée et validée avec succès.' });
 		}
 
@@ -765,8 +789,18 @@ export const GET: RequestHandler = async ({ request, url }) => {
 		}
 		const targetUserId = orderRow.product_type === 'bundle' ? (orderOwnerId || user?.$id || null) : (user?.$id || orderOwnerId);
 
-		// 2. Toujours s'assurer atomiquement que l'accès existe dans access_grants pour cet utilisateur
-		if (targetUserId && orderRow.product_id && (orderRow.product_type === 'course' || orderRow.product_type === 'ebook')) {
+		// 2. Fallback: Interroger Lemon Squeezy API par email si la commande n'est pas encore payée
+		if (orderRow.status !== 'paid' && orderRow.customer_email) {
+			try {
+				await verifyAndFulfillByEmail(orderRow.customer_email, orderRow.$id, targetUserId || undefined);
+				orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderRow.$id }).catch(() => orderRow);
+			} catch (e) {
+				console.warn('[Lemon Squeezy GET Verify Fallback Error]:', e);
+			}
+		}
+
+		// 3. Si la commande est payée, garantir l'accès dans access_grants (auto-réparation idempotente)
+		if (orderRow.status === 'paid' && targetUserId && orderRow.product_id && (orderRow.product_type === 'course' || orderRow.product_type === 'ebook')) {
 			const existingAccess = await tables.listRows({
 				databaseId: DATABASE_ID,
 				tableId: ACCESS_TABLE,
@@ -793,23 +827,13 @@ export const GET: RequestHandler = async ({ request, url }) => {
 				}).catch((e) => console.error('[Access grant create error]:', e));
 			}
 
-			if (orderRow.status !== 'paid' || !orderRow.user_id || orderRow.user_id === 'admin') {
+			if (!orderRow.user_id || orderRow.user_id === 'admin') {
 				orderRow = await tables.updateRow({
 					databaseId: DATABASE_ID,
 					tableId: ORDERS_TABLE,
 					rowId: orderRow.$id,
-					data: { status: 'paid', user_id: targetUserId, paid_at: new Date().toISOString() }
+					data: { user_id: targetUserId }
 				}).catch(() => orderRow);
-			}
-		}
-
-		// 3. Fallback: Interroger Lemon Squeezy API par email si toujours pas marked paid
-		if (orderRow.status !== 'paid' && orderRow.customer_email) {
-			try {
-				await verifyAndFulfillByEmail(orderRow.customer_email, orderRow.$id, targetUserId || undefined);
-				orderRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: ORDERS_TABLE, rowId: orderRow.$id }).catch(() => orderRow);
-			} catch (e) {
-				console.warn('[Lemon Squeezy GET Verify Fallback Error]:', e);
 			}
 		}
 
@@ -829,6 +853,9 @@ export const GET: RequestHandler = async ({ request, url }) => {
 				amount: orderRow.amount || 0,
 				currency: 'USD',
 				paymentProvider: 'lemonsqueezy',
+				paymentConfirmedBy: orderRow.payment_confirmed_by || undefined,
+				webhookConfirmedAt: orderRow.webhook_confirmed_at || undefined,
+				apiConfirmedAt: orderRow.api_confirmed_at || undefined,
 				status: orderRow.status,
 				createdAt: orderRow.created_at || orderRow.$createdAt,
 				paidAt: orderRow.paid_at

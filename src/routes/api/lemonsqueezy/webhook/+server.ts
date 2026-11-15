@@ -148,12 +148,16 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 
 	if (orderRow.status === 'paid') {
 		if (productType === 'bundle') await grantBundleAccess(tables, orderRow, userId);
-		if (userId && (!orderRow.user_id || orderRow.user_id === 'admin')) {
+		const patch: Record<string, any> = {};
+		if (userId && (!orderRow.user_id || orderRow.user_id === 'admin')) patch.user_id = userId;
+		if (!orderRow.payment_confirmed_by) patch.payment_confirmed_by = 'webhook';
+		if (!orderRow.webhook_confirmed_at) patch.webhook_confirmed_at = paidAt;
+		if (Object.keys(patch).length > 0) {
 			await tables.updateRow({
 				databaseId: DATABASE_ID,
 				tableId: ORDERS_TABLE,
 				rowId: targetOrderId,
-				data: { user_id: userId }
+				data: patch
 			}).catch(() => undefined);
 		}
 		if (productType === 'coaching' && productId) {
@@ -211,7 +215,9 @@ async function fulfillOrder(orderId?: string, customData?: Record<string, any>, 
 				status: 'paid',
 				user_id: userId || orderRow.user_id,
 				payment_id: lqOrderId || undefined,
-				paid_at: paidAt
+				paid_at: paidAt,
+				payment_confirmed_by: orderRow.payment_confirmed_by || 'webhook',
+				webhook_confirmed_at: orderRow.webhook_confirmed_at || paidAt
 			}
 		});
 
@@ -257,9 +263,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		const signature = request.headers.get('x-signature');
 		const webhookSecret = (env.LEMONSQUEEZY_WEBHOOK_SECRET || env.LEMONSQUEEZY_SIGNING_SECRET || '').trim();
 
-		if (webhookSecret && !verifySignature(rawBody, signature, webhookSecret)) {
-			console.warn('[Lemon Squeezy Webhook]: Signature HMAC invalide. Vérifiez LEMONSQUEEZY_WEBHOOK_SECRET.');
-			return json({ success: false, message: 'Signature Webhook invalide.' }, { status: 401 });
+		if (!webhookSecret || !verifySignature(rawBody, signature, webhookSecret)) {
+			console.warn('[Lemon Squeezy Webhook]: Signature HMAC invalide ou LEMONSQUEEZY_WEBHOOK_SECRET manquant.');
+			return json({ success: false, message: 'Signature Webhook invalide ou absente.' }, { status: 401 });
 		}
 
 		let payload: any = {};
