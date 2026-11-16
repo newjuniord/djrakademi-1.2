@@ -59,7 +59,7 @@
 			backToDashboard: 'Retounen nan Espas Mwen',
 			title: 'Rezèvasyon m yo',
 			bookNewBtn: 'Rezève yon sesyon',
-			tabUpcoming: 'Sesyon k ap vini (Dat ki proche)',
+			tabUpcoming: 'Sesyon k ap vini (Dat ki pi pre)',
 			tabPast: 'Sesyon ki pase yo',
 			tabAll: 'Tout',
 			noUpcoming: 'Pa gen sesyon k ap vini',

@@ -10,26 +10,16 @@
 		CheckCircle2,
 		Circle,
 		BookOpen,
-		FileText,
 		ArrowRight,
 		ArrowLeft,
-		Menu,
 		X,
-		List,
-		Sparkles
+		List
 	} from 'lucide-svelte';
 	import { authState } from '$lib/auth.svelte';
 	import { parseVideoUrl } from '$lib/utils/video';
 	import { toast } from '$lib/toast.svelte';
 
 	let currentLang = $derived<'fr' | 'ht'>(page.url.searchParams.get('lang') === 'ht' ? 'ht' : 'fr');
-
-	function setLanguage(language: 'fr' | 'ht') {
-		const url = new URL(page.url);
-		if (language === 'ht') url.searchParams.set('lang', 'ht');
-		else url.searchParams.delete('lang');
-		void goto(`${url.pathname}${url.search}${url.hash}`, { replaceState: true, noScroll: true });
-	}
 
 	function getHref(path: string) {
 		if (currentLang !== 'ht') return path;
@@ -213,259 +203,207 @@
 
 <svelte:head>
 	<title>{activeLesson ? activeLesson.title : t.pageTitleLesson} · {course ? course.title : t.pageTitleCourse}</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet" />
 </svelte:head>
 
-<div class="min-h-screen bg-zinc-950 text-white flex flex-col font-sans overflow-x-hidden">
-
-	<!-- ═══════════════════════════════════════════════════
-	     TOP HEADER / NAVIGATION (Fully Responsive)
-	     ═══════════════════════════════════════════════════ -->
-	<header class="h-16 bg-zinc-900 border-b border-zinc-800 px-3 sm:px-6 flex items-center justify-between gap-3 shrink-0 z-30">
-		<div class="flex items-center gap-2 sm:gap-4 min-w-0">
+<div class="min-h-dvh bg-zinc-950 text-zinc-100 flex flex-col font-sans overflow-x-clip">
+	<!-- Minimal Top Bar -->
+	<header class="h-14 border-b border-zinc-800/80 px-4 sm:px-6 flex items-center justify-between gap-4 shrink-0 bg-zinc-950 z-30">
+		<div class="flex items-center gap-3 min-w-0">
 			<button
 				type="button"
 				onclick={() => goto(getHref('/dashboard'))}
-				class="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-xs font-bold rounded-lg transition-colors border border-white/10 shrink-0"
+				class="inline-flex items-center gap-1 text-xs font-medium text-zinc-400 hover:text-white transition-colors shrink-0 cursor-pointer"
 			>
 				<ChevronLeft size={16} />
 				<span>{t.mySpace}</span>
 			</button>
 
-			<div class="h-5 w-px bg-white/10 shrink-0 hidden sm:block"></div>
-
-			<!-- Course title on header -->
-			<div class="min-w-0 hidden sm:block">
-				<p class="text-[10px] sm:text-xs text-white/40 font-medium truncate">{t.courseLabel}</p>
-				<h1 class="text-xs sm:text-sm font-black text-white truncate">{course ? course.title : t.loading}</h1>
-			</div>
+			{#if course}
+				<span class="text-zinc-700 hidden sm:inline">/</span>
+				<h1 class="text-xs sm:text-sm font-medium text-zinc-200 truncate hidden sm:block">
+					{course.title}
+				</h1>
+			{/if}
 		</div>
 
-		<!-- Right Header Actions -->
-		<div class="flex items-center gap-2 shrink-0">
-			<select
-				value={currentLang}
-				onchange={(e) => setLanguage(e.currentTarget.value as 'fr' | 'ht')}
-				aria-label="Langue / Lang"
-				class="rounded-lg border border-white/10 bg-white/5 text-amber-400 font-bold text-xs px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer transition-colors"
-			>
-				<option value="fr" class="bg-zinc-900 text-white">FR</option>
-				<option value="ht" class="bg-zinc-900 text-white">HT</option>
-			</select>
+		<div class="flex items-center gap-3 shrink-0">
+			{#if totalCount > 0}
+				<span class="text-xs font-mono text-zinc-400">{progressPercent}%</span>
+			{/if}
 
-			<!-- Progress Pill -->
-			<div class="flex items-center gap-2 px-2.5 py-1 bg-white/5 rounded-lg border border-white/10 text-xs">
-				<div class="w-12 sm:w-24 h-1.5 bg-zinc-800 rounded-full overflow-hidden hidden xs:block">
-					<div class="h-full bg-amber-400 rounded-full transition-all duration-300" style="width: {progressPercent}%"></div>
-				</div>
-				<span class="font-mono text-[11px] text-amber-400 font-bold">{progressPercent}%</span>
-			</div>
-
-			<!-- Mobile Curriculum Drawer Toggle -->
 			<button
 				type="button"
 				onclick={() => (sidebarOpen = !sidebarOpen)}
-				class="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-amber-400 text-black text-xs font-black rounded-lg transition-colors shadow-sm shrink-0"
+				aria-label={sidebarOpen ? t.closeProgram : t.curriculumMobile}
+				class="lg:hidden inline-flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white px-2.5 py-1.5 rounded-lg border border-zinc-800 cursor-pointer"
 			>
 				{#if sidebarOpen}
-					<X size={16} />
+					<X size={15} />
 				{:else}
-					<List size={16} />
-					<span class="hidden sm:inline">{t.curriculumMobile}</span>
+					<List size={15} />
+					<span>{t.curriculumMobile}</span>
 				{/if}
 			</button>
 		</div>
 	</header>
 
-	<!-- ═══════════════════════════════════════════════════
-	     MAIN CONTENT + SIDEBAR LAYOUT
-	     ═══════════════════════════════════════════════════ -->
-	<div class="flex-1 flex overflow-hidden relative">
-
+	<!-- Main Layout -->
+	<div class="flex-1 flex min-h-0 relative">
 		{#if authState.loading || courseLoading}
 			<div class="flex-1 flex flex-col items-center justify-center gap-3">
-				<span class="loading loading-spinner text-amber-500 loading-lg"></span>
-				<p class="text-xs text-white/50 font-medium">{t.loading}</p>
+				<span class="loading loading-spinner text-amber-400 loading-md"></span>
+				<p class="text-xs text-zinc-500">{t.loading}</p>
 			</div>
 		{:else if loadError && !course}
-			<div class="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
-				<div class="size-14 bg-red-500/10 text-red-400 rounded-2xl grid place-items-center mb-2">
-					<BookOpen size={28} />
-				</div>
-				<p class="text-white/80 text-sm max-w-md font-medium">{loadError}</p>
+			<div class="flex-1 flex flex-col items-center justify-center p-6 text-center gap-4">
+				<p class="text-zinc-300 text-sm max-w-md">{loadError}</p>
 				<button
 					type="button"
 					onclick={() => courseId && loadCourse(courseId)}
-					class="px-6 py-3 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs rounded-xl transition-colors cursor-pointer"
+					class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-black font-semibold text-xs rounded-lg transition-colors cursor-pointer"
 				>
 					Réessayer
 				</button>
 			</div>
 		{:else if authState.user && course}
-			<!-- LEFT / CENTER: VIDEO PLAYER & LESSON DETAILS -->
-			<main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 flex flex-col gap-5 sm:gap-6">
-
-			{#if activeLesson}
-				<!-- Video Container (Universal YouTube / Vimeo / Direct Video Embed) -->
-				<div class="relative w-full aspect-video bg-black rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
-					{#if activeLesson.type === 'video'}
-						{@const videoSource = parseVideoUrl(activeLesson.videoUrl)}
-						{#if videoSource}
-							<div class="absolute inset-0 bg-black">
-								{#if videoSource.type === 'iframe'}
-									<iframe
-										src={videoSource.embedUrl}
-										title={activeLesson.title}
-										class="w-full h-full border-0"
-										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-										allowfullscreen
-									></iframe>
+			<main class="flex-1 overflow-y-auto">
+				<div class="max-w-4xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
+					{#if activeLesson}
+						<!-- Media / Lesson View -->
+						<div class="w-full aspect-video bg-black rounded-lg overflow-hidden border border-zinc-800/80">
+							{#if activeLesson.type === 'video'}
+								{@const videoSource = parseVideoUrl(activeLesson.videoUrl)}
+								{#if videoSource}
+									{#if videoSource.type === 'iframe'}
+										<iframe
+											src={videoSource.embedUrl}
+											title={activeLesson.title}
+											class="block w-full h-full border-0"
+											allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+											allowfullscreen
+										></iframe>
+									{:else}
+										<video
+											src={videoSource.src}
+											controls
+											autoplay
+											class="block w-full h-full object-contain"
+										>
+											<track kind="captions" />
+										</video>
+									{/if}
 								{:else}
-									<video
-										src={videoSource.src}
-										controls
-										autoplay
-										class="w-full h-full object-contain"
-									>
-										<track kind="captions" />
-									</video>
+									<div class="w-full h-full bg-zinc-900/50 p-6 flex flex-col justify-center items-center text-center gap-2">
+										<BookOpen size={24} class="text-zinc-500" />
+										<p class="text-sm font-medium text-zinc-200">{activeLesson.title}</p>
+										<p class="text-xs text-zinc-500 max-w-md">{t.invalidVideo}</p>
+									</div>
 								{/if}
-							</div>
-						{:else}
-							<div class="w-full h-full bg-zinc-900 p-6 sm:p-8 flex flex-col justify-center items-center text-center space-y-3 sm:space-y-4">
-								<div class="size-12 sm:size-16 bg-amber-400/20 text-amber-400 rounded-2xl grid place-items-center">
-									<BookOpen size={24} class="sm:w-8 sm:h-8" />
+							{:else}
+								<div class="w-full h-full bg-zinc-900/50 p-6 flex flex-col justify-center items-center text-center gap-2">
+									<BookOpen size={24} class="text-zinc-500" />
+									<p class="text-sm font-medium text-zinc-200">{activeLesson.title}</p>
+									<p class="text-xs text-zinc-500 max-w-md">{t.textLessonNote}</p>
 								</div>
-								<h3 class="text-base sm:text-xl font-black text-white">{activeLesson.title}</h3>
-								<p class="text-white/60 text-xs sm:text-sm max-w-md">{t.invalidVideo}</p>
+							{/if}
+						</div>
+
+						<!-- Lesson Title & Completion -->
+						<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+							<div class="space-y-1 min-w-0">
+								<p class="text-xs text-zinc-500">{activeLesson.moduleTitle}</p>
+								<h2 class="font-['Poppins',sans-serif] text-lg sm:text-xl font-semibold text-white leading-snug">{activeLesson.title}</h2>
+							</div>
+
+							<button
+								type="button"
+								onclick={() => toggleLessonCompletion(activeLesson.id)}
+								class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors border shrink-0 cursor-pointer {completedLessonIds.has(activeLesson.id) ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white'}"
+							>
+								{#if completedLessonIds.has(activeLesson.id)}
+									<CheckCircle2 size={15} class="text-emerald-400" />
+									<span>{t.lessonCompletedBtn}</span>
+								{:else}
+									<Circle size={15} class="text-zinc-500" />
+									<span>{t.markCompletedBtn}</span>
+								{/if}
+							</button>
+						</div>
+
+						<!-- Lesson Notes -->
+						{#if activeLesson.content}
+							<div class="pt-4 border-t border-zinc-800/70 space-y-2 text-sm text-zinc-300 leading-relaxed">
+								<p class="text-xs font-medium text-zinc-500">{t.notesHeading}</p>
+								<p class="whitespace-pre-line">{activeLesson.content}</p>
 							</div>
 						{/if}
-					{:else}
-						<!-- Text / Article Lesson View -->
-						<div class="w-full h-full bg-zinc-900 p-6 sm:p-8 flex flex-col justify-center items-center text-center space-y-3 sm:space-y-4">
-							<div class="size-12 sm:size-16 bg-amber-400/20 text-amber-400 rounded-2xl grid place-items-center">
-								<BookOpen size={24} class="sm:w-8 sm:h-8" />
-							</div>
-							<h3 class="text-base sm:text-xl font-black text-white">{activeLesson.title}</h3>
-							<p class="text-white/60 text-xs sm:text-sm max-w-md">{t.textLessonNote}</p>
+
+						<!-- Prev / Next Navigation -->
+						<div class="pt-4 border-t border-zinc-800/70 flex items-center justify-between gap-4">
+							<button
+								type="button"
+								disabled={activeLessonIndex === 0}
+								onclick={goToPreviousLesson}
+								class="inline-flex items-center gap-2 py-2 px-3 text-xs font-medium text-zinc-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+							>
+								<ArrowLeft size={15} />
+								<span>{t.prevLesson}</span>
+							</button>
+
+							<button
+								type="button"
+								disabled={activeLessonIndex === allLessons.length - 1}
+								onclick={goToNextLesson}
+								class="inline-flex items-center gap-2 px-4 py-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-30 disabled:pointer-events-none text-black font-semibold text-xs rounded-lg transition-colors cursor-pointer"
+							>
+								<span>{t.nextLesson}</span>
+								<ArrowRight size={15} />
+							</button>
 						</div>
 					{/if}
 				</div>
+			</main>
 
-				<!-- Quick Mobile Curriculum Trigger Button -->
-				<div class="lg:hidden">
-					<button
-						type="button"
-						onclick={() => (sidebarOpen = true)}
-						class="w-full flex items-center justify-between p-3.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold text-white/90 hover:bg-zinc-850 transition-colors"
-					>
-						<span class="flex items-center gap-2">
-							<List size={16} class="text-amber-400" />
-							{t.curriculumLessons}
-						</span>
-						<span class="text-amber-400 font-mono">{completedCount}/{totalCount}</span>
-					</button>
-				</div>
-
-				<!-- Lesson Info & Actions Bar (Mobile Responsive) -->
-				<div class="bg-zinc-900 rounded-xl sm:rounded-2xl border border-zinc-800 p-4 sm:p-6 space-y-5 sm:space-y-6">
-
-					<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-						<div>
-							<span class="text-[10px] sm:text-xs font-bold text-amber-400 uppercase tracking-widest">{activeLesson.moduleTitle}</span>
-							<h2 class="text-lg sm:text-2xl font-black text-white mt-0.5 leading-snug">{activeLesson.title}</h2>
-						</div>
-
-						<!-- Mark Completed Toggle -->
-						<button
-							type="button"
-							onclick={() => toggleLessonCompletion(activeLesson.id)}
-							class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border shrink-0 {completedLessonIds.has(activeLesson.id) ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-white/5 text-white/80 border-white/10 hover:bg-white/10'}"
-						>
-							{#if completedLessonIds.has(activeLesson.id)}
-								<CheckCircle2 size={16} class="text-emerald-400" />
-								<span>{t.lessonCompletedBtn}</span>
-							{:else}
-								<Circle size={16} class="text-white/40" />
-								<span>{t.markCompletedBtn}</span>
-							{/if}
-						</button>
-					</div>
-
-					<!-- Lesson Text Content / Notes -->
-					{#if activeLesson.content}
-						<div class="p-4 sm:p-5 bg-zinc-950 rounded-xl border border-zinc-800 text-white/70 text-xs sm:text-sm leading-relaxed space-y-2.5">
-							<p class="font-bold text-white text-[11px] uppercase tracking-wider">{t.notesHeading}</p>
-							<p>{activeLesson.content}</p>
-						</div>
-					{/if}
-
-					<!-- Previous / Next Navigation Buttons (Mobile Optimized) -->
-					<div class="pt-4 border-t border-zinc-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-						<button
-							type="button"
-							disabled={activeLessonIndex === 0}
-							onclick={goToPreviousLesson}
-							class="inline-flex items-center justify-center gap-2 h-11 px-4 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none text-white text-xs font-bold rounded-xl transition-colors border border-white/10"
-						>
-							<ArrowLeft size={15} />
-							{t.prevLesson}
-						</button>
-
-						<button
-							type="button"
-							disabled={activeLessonIndex === allLessons.length - 1}
-							onclick={goToNextLesson}
-							class="inline-flex items-center justify-center gap-2 h-11 px-5 bg-amber-400 hover:bg-amber-300 disabled:opacity-30 disabled:pointer-events-none text-black font-black text-xs rounded-xl transition-colors shadow-lg shadow-amber-500/10"
-						>
-							{t.nextLesson}
-							<ArrowRight size={15} />
-						</button>
-					</div>
-
-				</div>
-			{/if}
-
-		</main>
-
-		<!-- MOBILE BACKDROP OVERLAY -->
-		{#if sidebarOpen}
-			<button
-				type="button"
-				onclick={() => (sidebarOpen = false)}
-				class="lg:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-30 transition-opacity"
-				aria-label={t.closeProgram}
-			></button>
-		{/if}
-
-		<!-- RIGHT SIDEBAR / MOBILE DRAWER: CURRICULUM ACCORDION -->
-		<aside
-			class="w-full sm:w-80 lg:w-96 bg-zinc-900 border-l border-zinc-800 flex flex-col shrink-0 transition-transform duration-300 fixed lg:relative right-0 top-16 lg:top-0 bottom-0 z-40 {sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}"
-		>
-			<div class="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900 sticky top-0 z-10">
-				<div>
-					<h3 class="font-black text-sm text-white uppercase tracking-wider">{t.curriculumTitle}</h3>
-					<p class="text-[11px] text-white/40 font-mono mt-0.5">{t.lessonsDone.replace('{completed}', String(completedCount)).replace('{total}', String(totalCount))}</p>
-				</div>
+			<!-- Mobile Backdrop -->
+			{#if sidebarOpen}
 				<button
 					type="button"
 					onclick={() => (sidebarOpen = false)}
-					class="lg:hidden p-1.5 text-white/60 hover:text-white rounded-lg bg-white/5"
-				>
-					<X size={18} />
-				</button>
-			</div>
+					class="lg:hidden fixed inset-0 bg-black/60 z-30"
+					aria-label={t.closeProgram}
+				></button>
+			{/if}
 
-			<!-- Modules List -->
-			<div class="flex-1 overflow-y-auto divide-y divide-zinc-800/60 pb-16 lg:pb-0">
-				{#if course}
+			<!-- Minimal Curriculum Sidebar -->
+			<aside
+				class="w-72 sm:w-80 bg-zinc-950 border-l border-zinc-800/80 flex flex-col shrink-0 transition-transform duration-200 fixed lg:relative right-0 top-14 lg:top-0 bottom-0 z-40 {sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}"
+			>
+				<div class="px-4 py-3 border-b border-zinc-800/80 flex items-center justify-between">
+					<span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">{t.curriculumTitle}</span>
+					<div class="flex items-center gap-2">
+						<span class="text-xs font-mono text-zinc-500">{completedCount}/{totalCount}</span>
+						<button
+							type="button"
+							onclick={() => (sidebarOpen = false)}
+							aria-label={t.closeProgram}
+							class="lg:hidden p-1 text-zinc-400 hover:text-white"
+						>
+							<X size={16} />
+						</button>
+					</div>
+				</div>
+
+				<div class="flex-1 overflow-y-auto overscroll-contain p-2 space-y-4">
 					{#each course.modules as module, mi}
-						<div class="p-4 space-y-2.5">
-							<h4 class="text-xs font-black text-white/80 uppercase tracking-wide">
+						<div>
+							<h4 class="text-[11px] font-medium text-zinc-500 px-3 py-1.5">
 								{t.modulePrefix} {mi + 1} — {module.title}
 							</h4>
 
-							<!-- Lessons in Module -->
-							<div class="space-y-1">
+							<div class="space-y-0.5">
 								{#each module.lessons as lesson}
 									{@const isActive = lesson.id === activeLessonId}
 									{@const isCompleted = completedLessonIds.has(lesson.id)}
@@ -473,34 +411,24 @@
 									<button
 										type="button"
 										onclick={() => selectLesson(lesson.id)}
-										class="w-full text-left flex items-center gap-3 p-3 rounded-xl transition-colors text-xs font-medium {isActive ? 'bg-amber-400/15 border border-amber-400/30 text-amber-300 font-bold' : 'hover:bg-white/5 text-white/70'}"
+										class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors cursor-pointer {isActive ? 'bg-white/10 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'}"
 									>
-										<!-- Icon status -->
 										{#if isCompleted}
-											<CheckCircle2 size={16} class="text-emerald-400 shrink-0" />
+											<CheckCircle2 size={14} class="text-emerald-400 shrink-0" />
 										{:else if isActive}
-											<Play size={16} class="text-amber-400 fill-amber-400 shrink-0" />
+											<Play size={14} class="text-amber-400 fill-amber-400 shrink-0" />
 										{:else}
-											<Circle size={16} class="text-white/30 shrink-0" />
+											<Circle size={14} class="text-zinc-600 shrink-0" />
 										{/if}
 
 										<span class="flex-1 line-clamp-1">{lesson.title}</span>
-
-										{#if lesson.type === 'video'}
-											<span class="text-[10px] text-white/40 font-mono shrink-0">{t.videoLabel}</span>
-										{:else}
-											<span class="text-[10px] text-white/40 font-mono shrink-0">{t.textLabel}</span>
-										{/if}
 									</button>
 								{/each}
 							</div>
 						</div>
 					{/each}
-				{/if}
-			</div>
-
+				</div>
 			</aside>
 		{/if}
 	</div>
-
 </div>

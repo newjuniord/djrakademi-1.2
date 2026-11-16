@@ -118,8 +118,8 @@
 			heroTitle1: "Aprann.",
 			heroTitle2: "Avanse.",
 			heroTitle3: "Reyisi.",
-			heroIntro1: "Aprann sèvi ak entelijans atifisyèl pou w ka amelyore konpetans ou ak revni w.",
-			heroIntro2: "DJR Akademi kreye pou tout moun ki pa vle rete dèyè nan epòk entelijans atifisyèl la.",
+			heroIntro1: "Aprann sèvi ak entèlijans atifisyèl pou w ka amelyore konpetans ou ak revni w.",
+			heroIntro2: "DJR Akademi kreye pou tout moun ki pa vle rete dèyè nan epòk entèlijans atifisyèl la.",
 			ctaCourses: "Gade fòmasyon yo",
 			ctaCoaching: "Rezève yon konsiltasyon",
 			ratingText: "Evalyasyon 4.9 sou 5, plis pase 600 etidyan",
@@ -133,12 +133,12 @@
 
 			coursesKicker: "Fòmasyon",
 			coursesTitle: "Fòmasyon yo",
-			coursesDesc: "Fòmasyon konplè epi byen òganize pou w ka mèt sou nouvo konpetans.",
+			coursesDesc: "Fòmasyon konplè epi byen òganize pou w ka metrize nouvo konpetans.",
 			coursesCount: (n: number) => `${n} disponib`,
 			freeLabel: "Gratis",
 
 			ebooksKicker: "Bibliyotèk DJR",
-			ebooksTitle: "Liv dijital pratik pou w li, pou aplike.",
+			ebooksTitle: "Liv dijital yo (ebook)",
 			ebooksDesc: "Liv dijital pratik pou w li, aplike epi grandi nan ritm pa w.",
 			ebooksCount: (n: number) => `${n} liv dijital disponib`,
 			ebookFormat: "LIV DIJITAL",
@@ -146,7 +146,7 @@
 
 			bundlesKicker: "Pakèt resous",
 			bundlesTitle: "Pakèt fòmasyon + liv dijital",
-			bundlesDesc: "Yon sèl pak pou jwenn resous ki mache ansanm, ak yon pri espesyal.",
+			bundlesDesc: "Yon sèl pakèt pou jwenn resous ki mache ansanm, ak yon pri espesyal.",
 			bundlesLink: "Gade tout pakèt yo",
 
 			coachingKicker: "Konsiltasyon",
@@ -163,14 +163,14 @@
 			supportTabCard: "Kat bankè",
 			supportTabMobile: "MonCash / NatCash",
 			supportCardLabel: "Adrès imèl kont ou a (menm ak sa w te itilize pou acha a sou Lemon Squeezy) *",
-			supportCardHelp: "Pou sekirite w, itilize imèl kont ou an:",
+			supportCardHelp: "Pou sekirite w, itilize imèl kont ou a:",
 			supportRefLabel: "Nimewo referans tranzaksyon MonCash / NatCash la *",
 			supportRefHelp: "Antre nimewo referans ki nan mesaj konfimasyon MonCash / NatCash ou a.",
 			supportBtnLoading: "N ap verifye...",
-			supportBtnSubmit: "Verifye ak debloke aksè mwen",
+			supportBtnSubmit: "Verifye epi debloke aksè mwen",
 			supportNeedLogin: "Ou dwe konekte sou kont ou pou w ka verifye yon peman.",
 			supportInvalidEmail: "Tanpri antre yon adrès imèl ki valab.",
-			supportCardSuccess: "Peman pa kat ou an verifye ak siksè! N ap redirije w pou w kòmanse fòmasyon an...",
+			supportCardSuccess: "Peman pa kat ou a verifye ak siksè! N ap redirije w pou w kòmanse fòmasyon an...",
 			supportCardError: (email: string) => `Nou pa jwenn okenn peman konfime sou Lemon Squeezy pou imèl "${email}".`,
 			supportInvalidRef: "Tanpri antre nimewo referans tranzaksyon an.",
 			supportRefSuccess: "Peman verifye ak siksè! N ap redirije w pou w kòmanse fòmasyon an...",
@@ -364,19 +364,30 @@
 						<a href={getHref(`/cours/${course.id}`)} class="course-showcase-card">
 							<div class="course-showcase-visual">
 								{#if course.cover}
-									<img src={course.cover} alt={course.title} loading="lazy" />
+									<img
+										src={course.cover}
+										alt=""
+										aria-hidden="true"
+										loading="lazy"
+										class="course-showcase-backdrop"
+									/>
+									<img
+										src={course.cover}
+										alt={course.title}
+										loading="lazy"
+										class="course-showcase-image"
+									/>
 								{:else}
 									<div class="course-showcase-placeholder">
 										<BookOpen size={42} />
 									</div>
 								{/if}
-								<div class="course-showcase-tint" aria-hidden="true"></div>
 							</div>
 
 							<div class="course-showcase-meta">
 								<div class="course-showcase-copy">
 									<h3><span>{String(index + 1).padStart(2, '0')}.</span> {course.title}</h3>
-									<p>
+									<p class="course-showcase-price">
 										{#if course.isFree || course.price === 0}
 											{t.freeLabel}
 										{:else}
@@ -480,28 +491,25 @@
 					{#each activeCoaching as coaching (coaching.id)}
 						<a
 							href={getHref(`/coaching/${coaching.slug}`)}
-							class="group relative text-left flex flex-col p-7 sm:p-8 bg-gradient-to-b from-white via-white to-zinc-50/70 rounded-3xl border border-zinc-200/90 shadow-xs hover:shadow-2xl hover:border-amber-400/70 hover:-translate-y-1.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-zinc-950 overflow-hidden"
+							class="group relative text-left flex flex-col p-6 sm:p-7 bg-white rounded-2xl border border-zinc-200/90 hover:border-zinc-300 hover:shadow-[0_20px_45px_-20px_rgba(24,24,27,0.18)] hover:-translate-y-1 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 overflow-hidden"
 						>
-							<!-- Background Ambient Glow -->
-							<div class="absolute -right-12 -top-12 size-40 bg-amber-400/10 rounded-full blur-2xl group-hover:bg-amber-400/25 transition-all duration-500 pointer-events-none"></div>
-
-							<!-- Top Accent Gradient Line -->
-							<div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+							<!-- Subtle Ambient Glow -->
+							<div class="absolute -right-14 -top-14 size-44 bg-amber-400/12 rounded-full blur-3xl group-hover:scale-110 group-hover:bg-amber-400/20 transition-all duration-500 pointer-events-none"></div>
 
 							<!-- Header Row (Icon + Duration Badge) -->
-							<div class="flex items-center justify-between gap-4 mb-6 relative z-10">
-								<div class="size-13 rounded-2xl bg-zinc-950 text-amber-400 grid place-items-center shadow-md shadow-zinc-950/10 group-hover:bg-amber-400 group-hover:text-zinc-950 group-hover:scale-105 transition-all duration-300">
-									<CalendarCheck size={24} />
+							<div class="flex items-center justify-between gap-4 mb-5 relative z-10">
+								<div class="size-11 rounded-xl bg-zinc-100 text-zinc-900 grid place-items-center group-hover:bg-zinc-950 group-hover:text-amber-400 transition-colors duration-300">
+									<CalendarCheck size={20} />
 								</div>
-								<span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-950 text-xs font-bold transition-colors">
-									<Clock size={13} class="text-amber-700" />
+								<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 text-xs font-semibold">
+									<Clock size={12} class="text-zinc-500" />
 									{t.coachingDuration(coaching.durationMinutes)}
 								</span>
 							</div>
 
 							<!-- Content -->
 							<div class="relative z-10 flex-1 flex flex-col">
-								<h3 class="font-black text-xl text-zinc-950 group-hover:text-amber-700 transition-colors leading-tight mb-2.5">
+								<h3 class="font-bold text-lg sm:text-xl text-zinc-950 tracking-tight leading-snug mb-2">
 									{coaching.title}
 								</h3>
 
@@ -511,21 +519,21 @@
 							</div>
 
 							<!-- Price Row -->
-							<div class="relative z-10 pt-4 border-t border-zinc-100 mb-5 flex items-center justify-between">
-								<span class="text-xs font-bold uppercase tracking-wider text-zinc-400">{currentLang === 'ht' ? 'Pri' : 'Tarif'}</span>
+							<div class="relative z-10 pt-4 border-t border-zinc-100 mb-4 flex items-baseline justify-between">
+								<span class="text-xs font-medium text-zinc-400">{currentLang === 'ht' ? 'Pri' : 'Tarif'}</span>
 								<div>
 									{#if coaching.isFree || coaching.price === 0}
-										<span class="font-black text-lg text-emerald-600">{t.freeLabel}</span>
+										<span class="font-bold text-base text-emerald-600">{t.freeLabel}</span>
 									{:else}
-										<span class="font-black text-2xl text-zinc-950 tracking-tight">{formatPublicPrice(coaching.price, coaching.priceUsd)}</span>
+										<span class="font-bold text-xl text-zinc-950 tracking-tight">{formatPublicPrice(coaching.price, coaching.priceUsd)}</span>
 									{/if}
 								</div>
 							</div>
 
-							<!-- Primary CTA Button Bar -->
-							<div class="relative z-10 w-full h-11 rounded-2xl bg-zinc-950 group-hover:bg-amber-400 text-white group-hover:text-zinc-950 font-bold text-xs flex items-center justify-center gap-2 transition-all duration-300 shadow-sm group-hover:shadow-md">
+							<!-- Primary CTA -->
+							<div class="relative z-10 w-full h-10 rounded-xl bg-zinc-950 group-hover:bg-amber-400 text-white group-hover:text-zinc-950 font-semibold text-xs flex items-center justify-center gap-2 transition-colors duration-300">
 								<span>{t.coachingCTA}</span>
-								<ArrowRight size={15} class="group-hover:translate-x-1 transition-transform duration-200" />
+								<ArrowRight size={14} class="group-hover:translate-x-0.5 transition-transform duration-200" />
 							</div>
 						</a>
 					{/each}
@@ -1209,26 +1217,35 @@
 	.courses-grid {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 30px;
+		gap: 28px;
 	}
 
 	.course-showcase-card {
+		container-type: inline-size;
 		display: flex;
 		min-width: 0;
-		padding: 30px 30px 22px;
-		border: 1px solid #dedfe3;
-		border-radius: 22px;
-		background: rgba(255, 255, 255, 0.94);
-		box-shadow: 0 16px 40px rgba(54, 37, 23, 0.035);
-		color: #172044;
 		flex-direction: column;
-		transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 400ms ease, border-color 400ms ease;
+		justify-content: space-between;
+		padding: 16px;
+		border: 1px solid rgba(23, 32, 68, 0.1);
+		border-radius: 24px;
+		background: #ffffff;
+		box-shadow:
+			0 4px 12px rgba(23, 32, 68, 0.03),
+			0 18px 42px rgba(54, 37, 23, 0.05);
+		color: #172044;
+		transition:
+			transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 360ms ease,
+			border-color 360ms ease;
 	}
 
 	.course-showcase-card:hover {
-		border-color: rgba(23, 32, 68, 0.25);
-		box-shadow: 0 26px 56px rgba(54, 37, 23, 0.11);
-		transform: translateY(-5px);
+		border-color: rgba(229, 170, 45, 0.55);
+		box-shadow:
+			0 8px 20px rgba(23, 32, 68, 0.06),
+			0 26px 56px rgba(54, 37, 23, 0.11);
+		transform: translateY(-4px);
 	}
 
 	.course-showcase-card:focus-visible {
@@ -1238,53 +1255,62 @@
 
 	.course-showcase-visual {
 		position: relative;
-		aspect-ratio: 1.18 / 1;
-		overflow: hidden;
-		border-radius: 18px;
-		background: linear-gradient(135deg, #432475, #a995c8);
+		display: grid;
+		place-items: center;
+		inline-size: 100%;
+		aspect-ratio: 4 / 3;
+		overflow: clip;
+		border-radius: 16px;
+		background: linear-gradient(145deg, #f6f3ec 0%, #ebe5d9 100%);
+		box-shadow: inset 0 0 0 1px rgba(23, 32, 68, 0.06);
 	}
 
-	.course-showcase-visual img {
+	.course-showcase-backdrop {
+		position: absolute;
+		inset: 0;
 		display: block;
-		width: 100%;
-		height: 100%;
+		inline-size: 100%;
+		block-size: 100%;
 		object-fit: cover;
-		transform: scale(1.001);
-		transition: transform 900ms cubic-bezier(0.2, 0.72, 0.2, 1);
+		filter: blur(26px) saturate(1.15);
+		transform: scale(1.18);
+		opacity: 0.28;
+		pointer-events: none;
+	}
+
+	.course-showcase-image {
+		position: relative;
+		z-index: 1;
+		display: block;
+		inline-size: 100%;
+		block-size: 100%;
+		padding: 12px;
+		object-fit: contain;
+		filter: drop-shadow(0 10px 24px rgba(17, 24, 54, 0.14));
+		transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 		will-change: transform;
 	}
 
-	.course-showcase-card:hover .course-showcase-visual img {
-		transform: scale(1.085);
+	.course-showcase-card:hover .course-showcase-image {
+		transform: scale(1.025);
 	}
 
 	.course-showcase-placeholder {
 		display: grid;
-		width: 100%;
-		height: 100%;
+		inline-size: 100%;
+		block-size: 100%;
 		place-items: center;
-		color: rgba(255, 255, 255, 0.58);
-	}
-
-	.course-showcase-tint {
-		position: absolute;
-		inset: 0;
-		pointer-events: none;
-		background: linear-gradient(135deg, rgba(79, 38, 135, 0.08), rgba(17, 24, 54, 0.16));
-		transition: opacity 500ms ease;
-	}
-
-	.course-showcase-card:hover .course-showcase-tint {
-		opacity: 0.45;
+		background: linear-gradient(135deg, #27325c, #4b397a);
+		color: rgba(255, 255, 255, 0.65);
 	}
 
 	.course-showcase-meta {
 		display: flex;
-		min-height: 78px;
-		align-items: center;
+		align-items: flex-end;
 		justify-content: space-between;
-		gap: 22px;
-		padding-top: 22px;
+		gap: 16px;
+		padding-block: 18px 4px;
+		padding-inline: 6px;
 	}
 
 	.course-showcase-copy {
@@ -1293,35 +1319,45 @@
 
 	.course-showcase-copy h3 {
 		margin: 0;
-		color: #182044;
-		font-size: clamp(20px, 1.7vw, 25px);
+		color: #172044;
+		font-size: clamp(18px, 1.55vw, 22px);
 		font-weight: 750;
-		letter-spacing: -0.035em;
-		line-height: 1.25;
+		letter-spacing: -0.025em;
+		line-height: 1.28;
 	}
 
 	.course-showcase-copy h3 span {
+		margin-inline-end: 4px;
+		color: #a66f16;
 		font-variant-numeric: tabular-nums;
 	}
 
-	.course-showcase-copy p {
-		margin: 7px 0 0;
-		color: #a66f16;
-		font-size: 15px;
+	.course-showcase-price {
+		display: inline-flex;
+		align-items: center;
+		margin: 10px 0 0;
+		padding: 5px 12px;
+		border-radius: 999px;
+		background: rgba(230, 174, 50, 0.14);
+		color: #8c5a08;
+		font-size: 13.5px;
 		font-weight: 800;
 		letter-spacing: 0.01em;
 	}
 
 	.course-showcase-arrow {
 		display: grid;
-		width: 47px;
-		height: 47px;
-		flex: 0 0 47px;
+		inline-size: 42px;
+		block-size: 42px;
+		flex: 0 0 42px;
 		place-items: center;
 		border-radius: 50%;
-		background: #1d284e;
+		background: #172044;
 		color: #fff;
-		transition: background-color 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+		transition:
+			background-color 280ms ease,
+			color 280ms ease,
+			transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
 	.course-showcase-arrow :global(svg) {
@@ -1331,7 +1367,29 @@
 	.course-showcase-card:hover .course-showcase-arrow {
 		background: #e5aa2d;
 		color: #14100a;
-		transform: translate(2px, -2px) scale(1.04);
+		transform: translate(2px, -2px) scale(1.05);
+	}
+
+	@container (min-width: 460px) {
+		.course-showcase-card {
+			padding: 20px;
+		}
+
+		.course-showcase-image {
+			padding: 16px;
+		}
+
+		.course-showcase-meta {
+			padding-block: 20px 4px;
+			padding-inline: 8px;
+			gap: 20px;
+		}
+
+		.course-showcase-arrow {
+			inline-size: 48px;
+			block-size: 48px;
+			flex-basis: 48px;
+		}
 	}
 
 
@@ -1592,13 +1650,11 @@
 		}
 
 		.course-showcase-card {
-			padding: 20px 20px 18px;
-			border-radius: 18px;
+			border-radius: 20px;
 		}
 
 		.course-showcase-meta {
-			padding-top: 16px;
-			min-height: auto;
+			padding-block: 14px 2px;
 		}
 
 		.ebooks-showcase {

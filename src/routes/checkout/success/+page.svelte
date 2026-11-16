@@ -83,7 +83,7 @@
 			retryBtn: 'Eseye verifye ankò',
 			contactSupport: 'Kontakte sipò a',
 			paymentConfirmed: 'Peman an konfime',
-			thanksOrder: 'Mèsi pou kòmand ou an!',
+			thanksOrder: 'Mèsi pou kòmand ou a!',
 			txConfirmed: 'Tranzaksyon ou an konfime avèk siksè.',
 			emailSentSuccess: 'Yon imèl aksè voye bay',
 			emailSentFail: 'Acha w la disponib nan kont ou; imèl la pa t ka voye pou kounye a.',
@@ -105,7 +105,7 @@
 			viewBookings: 'Gade rezèvasyon mwen yo',
 			viewTransactions: 'Gade tout tranzaksyon m yo',
 			printReceipt: 'Enprime resi a',
-			questionOrder: 'Ou gen yon kesyon sou kòmand ou an?',
+			questionOrder: 'Ou gen yon kesyon sou kòmand ou a?',
 			supportWhatsapp: 'Asistans WhatsApp',
 			contactPage: 'Kontakte nou',
 			whatsappMessage: 'Bonjou, mwen gen yon kesyon sou rezèvasyon konsiltasyon mwen an.'

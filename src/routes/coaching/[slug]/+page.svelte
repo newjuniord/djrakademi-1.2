@@ -84,7 +84,7 @@
 		},
 		ht: {
 			metaTitle: (t: string) => `${t} · DJR Akademi`,
-			metaDesc: (d: string) => d || "Yon randevou ak coach la pou ou sèlman",
+			metaDesc: (d: string) => d || "Yon randevou ak konseye a pou ou sèlman",
 			loading: "N ap chaje detay randevou a...",
 			notFoundTitle: "Sèvis sa a pa disponib",
 			notFoundDesc: "Nou pa jwenn sèvis sa a, oswa li pa disponib ankò.",
@@ -122,7 +122,7 @@
 			bookingError: "Nou pa rive anrejistre randevou a. Tanpri eseye ankò.",
 			paymentError: "Nou pa rive ouvri paj peman an. Tanpri eseye ankò.",
 			namePlaceholder: "Egzanp: Jean-Marc Baptiste",
-			emailPlaceholder: "imel@egzanp.com",
+			emailPlaceholder: "imèl@egzanp.com",
 			benefitsKicker: "POUKISA PATISIPE?",
 			benefitsTitle: "PALE AK PLIS KONFYANS",
 			benefitsIntro: "Aprann pale klè epi santi w pi alèz ak konsèy ou ka sèvi ak yo chak jou.",
@@ -330,10 +330,15 @@
 				<span class="hidden min-[430px]:inline-block">DJR Akademi</span>
 			</a>
 			<div class="flex shrink-0 items-center gap-2">
-				<div class="inline-flex rounded-lg border border-base-300 bg-base-200 p-0.5" role="group" aria-label={currentLang === 'ht' ? 'Chwazi lang' : 'Choisir la langue'}>
-					<button type="button" onclick={() => setLanguage('fr')} aria-label="Français" aria-pressed={currentLang === 'fr'} class="rounded-md px-2 py-1.5 text-xs font-bold transition-colors {currentLang === 'fr' ? 'bg-amber-400 text-zinc-950' : 'text-base-content/70 hover:text-base-content'}">FR</button>
-					<button type="button" onclick={() => setLanguage('ht')} aria-label="Kreyòl ayisyen" aria-pressed={currentLang === 'ht'} class="rounded-md px-2 py-1.5 text-xs font-bold transition-colors {currentLang === 'ht' ? 'bg-amber-400 text-zinc-950' : 'text-base-content/70 hover:text-base-content'}">HT</button>
-				</div>
+				<select
+					value={currentLang}
+					onchange={(e) => setLanguage(e.currentTarget.value as 'fr' | 'ht')}
+					aria-label={currentLang === 'ht' ? 'Chwazi lang' : 'Choisir la langue'}
+					class="rounded-lg border border-base-300 bg-base-100 px-2.5 py-1.5 text-xs font-bold text-base-content focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
+				>
+					<option value="fr">FR</option>
+					<option value="ht">HT</option>
+				</select>
 			</div>
 		</div>
 	</header>

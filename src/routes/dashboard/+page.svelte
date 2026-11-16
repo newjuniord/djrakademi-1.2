@@ -110,7 +110,7 @@
 			lessons: 'leson',
 			defaultLesson: 'Byenveni nan fòmasyon sa a',
 			continueCourse: 'Kontinye fòmasyon an',
-			reviewCourse: 'Revwa fòmasyon an',
+			reviewCourse: 'Gade fòmasyon an ankò',
 			ebooksTitle: 'Liv dijital PDF mwen yo',
 			ebooksSub: 'Gid pratik ou ka telechaje nenpòt lè',
 			unlimitedDownload: 'Telechajman san limit',
@@ -132,7 +132,7 @@
 			whatsappCoach: 'WhatsApp konseye a:',
 			contactCoach: 'Kontakte konseye a',
 			whatsappMsg: 'Bonjou, mwen gen yon kesyon sou rezèvasyon konsiltasyon mwen an ({title}).',
-			viewAllBookingsBtn: 'Gade paj spesyal pou rezèvasyon m yo (Dat k ap vini & sa ki pase)',
+			viewAllBookingsBtn: 'Gade paj espesyal pou rezèvasyon m yo (Dat k ap vini & sa ki pase)',
 			viewBookingsPage: 'Jere tout rezèvasyon konsiltasyon m yo'
 		}
 	};

@@ -227,7 +227,7 @@
 			faqs: [
 				{
 					q: 'Kijan pou m jwenn aksè nan kou mwen yo apre peman an?',
-					a: 'Depi peman an konfime (MonCash, NatCash oswa kat labank), aksè w la debloke tousuit nan espas etidyan ou an.'
+					a: 'Depi peman an konfime (MonCash, NatCash oswa kat labank), aksè w la debloke tousuit nan espas etidyan ou a.'
 				},
 				{
 					q: 'Èske fòmasyon yo disponib sou telefòn?',

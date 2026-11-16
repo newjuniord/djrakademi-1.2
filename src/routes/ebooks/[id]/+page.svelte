@@ -82,14 +82,14 @@
 			featGrid: [
 				{ icon: '📄', title: 'Fòma PDF', desc: 'Konpatib ak òdinatè, tablèt ak telefòn' },
 				{ icon: '⚡', title: 'Aksè imedyat', desc: 'Telechajman osito peman an konfime' },
-				{ icon: '🎯', title: 'Kontni pratik', desc: 'Eksèsis ak ka pratik enkli' },
+				{ icon: '🎯', title: 'Kontni pratik', desc: 'Egzèsis ak ka pratik enkli' },
 				{ icon: '🔄', title: 'Mizajou gratis', desc: 'Nouvo vèsyon yo enkli pou tout tan' }
 			],
 			questions: "Kesyon?",
 			contactForm: "Fòm kontak",
 			loginToast: "Tanpri konekte sou kont ou pou w ka achte liv dijital sa a.",
 			loginFreeToast: "Tanpri konekte sou kont ou pou w ka telechaje liv dijital sa a.",
-			alreadyOwnedToast: "Ou gen liv dijital sa a deja! N ap redirije w nan espas ou an.",
+			alreadyOwnedToast: "Ou gen liv dijital sa a deja! N ap redirije w nan espas ou a.",
 			freeClaimToast: "Liv dijital la debloke! Ou ka telechaje l kounye a.",
 			paymentVerifiedToast: "Peman an konfime! N ap redirije w nan liv dijital ou yo...",
 			errorClaimToast: "Nou pa ka debloke liv dijital sa a.",

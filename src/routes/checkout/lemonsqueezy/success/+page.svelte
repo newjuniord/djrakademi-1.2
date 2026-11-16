@@ -113,7 +113,7 @@
 			paidAlreadyDesc: 'Si tranzaksyon ou an konfime sou kat ou men li toujou endisponib, kontakte sipò nou an.',
 			contactSupportBtn: 'Kontakte sèvis kliyan an',
 			cardConfirmedBadge: 'Peman ak kat la konfime (Lemon Squeezy)',
-			thanksOrderTitle: 'Mèsi pou kòmand ou an!',
+			thanksOrderTitle: 'Mèsi pou kòmand ou a!',
 			unlockedDesc: 'Tranzaksyon ou an konfime. Ou ka jwenn sa w achte a nan kont ou.',
 			typeCourse: 'Fòmasyon sou entènèt',
 			typeEbook: 'Liv dijital PDF',
@@ -139,8 +139,8 @@
 			contactPageLink: 'Kontakte nou',
 			whatsappMessage: 'Bonjou, mwen gen yon kesyon sou rezèvasyon konsiltasyon mwen an.',
 			defaultErrorText: 'Peman ak kat la toujou ap trete oswa li poko konfime. Si w te peye deja, klike sou bouton anba a pou verifye aksè w ankò.',
-			verifyErrorText: 'Nou pa t ka verifye tranzaksyon Lemon Squeezy an.',
-			networkErrorText: 'Erè rezo lè n t ap verifye peman Lemon Squeezy an.'
+			verifyErrorText: 'Nou pa t ka verifye tranzaksyon Lemon Squeezy a.',
+			networkErrorText: 'Erè rezo lè n t ap verifye peman Lemon Squeezy a.'
 		}
 	};
 

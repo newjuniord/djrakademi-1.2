@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, CheckCircle2, Eye, EyeOff, Home, KeyRound, Loader2, ShieldCheck } from 'lucide-svelte';
+	import { ArrowLeft, CheckCircle2, Eye, EyeOff, Loader2 } from 'lucide-svelte';
 
 	import { translateAuthError } from '$lib/auth.svelte';
 
@@ -16,48 +16,50 @@
 
 	const i18n = {
 		fr: {
-			title: 'Nouveau mot de passe · DJR Akademi',
-			backHome: 'Retour à l\'accueil',
-			changedTitle: 'Mot de passe modifié',
-			changedSubtitle: 'Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.',
-			createTitle: 'Créer un nouveau mot de passe',
-			createSubtitle: 'Choisissez un mot de passe d\'au moins 8 caractères.',
-			newPasswordLabel: 'Nouveau mot de passe',
-			confirmPasswordLabel: 'Confirmer le mot de passe',
-			minCharPlaceholder: '8 caractères minimum',
-			confirmPlaceholder: 'Saisissez-le une seconde fois',
-			submitting: 'Modification en cours…',
-			submitBtn: 'Enregistrer le nouveau mot de passe',
+			title: 'Mot de passe · DJR Akademi',
+			backHome: 'Accueil',
+			imageAlt: 'Studio DJR Akademi',
+			changedTitle: 'Mot de passe mis à jour',
+			changedSubtitle: 'Vous pouvez maintenant vous connecter.',
+			createTitle: 'Nouveau mot de passe',
+			createSubtitle: '8 caractères minimum.',
+			newPasswordLabel: 'Mot de passe',
+			confirmPasswordLabel: 'Confirmation',
+			minCharPlaceholder: '8+ caractères',
+			confirmPlaceholder: 'Répéter',
+			submitting: 'Enregistrement…',
+			submitBtn: 'Enregistrer',
 			hidePassword: 'Masquer le mot de passe',
 			showPassword: 'Afficher le mot de passe',
 			hideConfirmation: 'Masquer la confirmation',
 			showConfirmation: 'Afficher la confirmation',
-			errMinLength: 'Le mot de passe doit comporter au moins 8 caractères.',
-			errMismatch: 'Les mots de passe ne correspondent pas.',
-			errIncompleteLink: 'Le lien de récupération est invalide ou incomplet.',
-			errGeneric: 'Impossible de modifier le mot de passe.'
+			errMinLength: '8 caractères minimum.',
+			errMismatch: 'Mots de passe différents.',
+			errIncompleteLink: 'Lien invalide.',
+			errGeneric: 'Échec de la modification.'
 		},
 		ht: {
-			title: 'Nouvo modpas · DJR Akademi',
-			backHome: 'Tounen nan akèy',
-			changedTitle: 'Modpas la chanje',
-			changedSubtitle: 'Ou ka konekte kounye a ak nouvo modpas ou a.',
-			createTitle: 'Kreye yon nouvo modpas',
-			createSubtitle: 'Chwazi yon modpas ki gen omwen 8 karaktè.',
-			newPasswordLabel: 'Nouvo modpas',
-			confirmPasswordLabel: 'Konfime modpas la',
-			minCharPlaceholder: 'Omwen 8 karaktè',
-			confirmPlaceholder: 'Mete l yon dezyèm fwa',
-			submitting: 'N ap chanje modpas la…',
-			submitBtn: 'Anrejistre nouvo modpas la',
+			title: 'Modpas · DJR Akademi',
+			backHome: 'Akèy',
+			imageAlt: 'Estidyo DJR Akademi',
+			changedTitle: 'Modpas chanje',
+			changedSubtitle: 'Ou ka konekte kounye a.',
+			createTitle: 'Nouvo modpas',
+			createSubtitle: 'Omwen 8 karaktè.',
+			newPasswordLabel: 'Modpas',
+			confirmPasswordLabel: 'Konfimasyon',
+			minCharPlaceholder: '8+ karaktè',
+			confirmPlaceholder: 'Repete',
+			submitting: 'Ap anrejistre…',
+			submitBtn: 'Anrejistre',
 			hidePassword: 'Kache modpas la',
 			showPassword: 'Montre modpas la',
 			hideConfirmation: 'Kache konfimasyon an',
 			showConfirmation: 'Montre konfimasyon an',
-			errMinLength: 'Modpas la dwe gen omwen 8 karaktè.',
+			errMinLength: 'Omwen 8 karaktè.',
 			errMismatch: 'Modpas yo pa menm.',
-			errIncompleteLink: 'Lyen rekiperasyon an pa bon oswa li pa konplè.',
-			errGeneric: 'Nou pa ka chanje modpas la.'
+			errIncompleteLink: 'Lyen an pa bon.',
+			errGeneric: 'Chanjman an echwe.'
 		}
 	};
 
@@ -111,48 +113,113 @@
 	<meta name="robots" content="noindex,nofollow" />
 </svelte:head>
 
-<main class="grid min-h-dvh place-items-center bg-zinc-950 p-4 text-zinc-950">
-	<section class="w-full max-w-md rounded-3xl border border-white/10 bg-white p-7 shadow-2xl sm:p-9">
-		<a href={getHref('/')} class="mb-7 inline-flex items-center gap-2 text-xs font-bold text-zinc-500 transition-colors hover:text-zinc-950">
-			<ArrowLeft size={15} /> {t.backHome}
-		</a>
-		<div class="mb-6 grid size-12 place-items-center rounded-2xl bg-amber-100 text-amber-600">
-			{#if completed}<CheckCircle2 size={24} />{:else}<KeyRound size={22} />{/if}
+<main class="grid min-h-dvh place-items-center bg-white p-4 sm:p-8 text-zinc-950">
+	<section class="grid w-full max-w-[946px] overflow-hidden rounded-2xl border border-zinc-200 bg-white lg:min-h-[530px] lg:grid-cols-2">
+		<div class="relative hidden min-h-[530px] bg-zinc-100 lg:block">
+			<img
+				src="/login-studio.png"
+				alt={t.imageAlt}
+				class="absolute inset-0 block size-full object-cover"
+			/>
 		</div>
-		{#if completed}
-			<h1 class="text-2xl font-black">{t.changedTitle}</h1>
-			<p class="mt-2 text-sm text-zinc-500">{t.changedSubtitle}</p>
-			<button class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-950 py-3.5 text-sm font-bold text-white transition-colors hover:bg-zinc-800" onclick={() => goto(getHref('/'))}>
-				<Home size={17} /> {t.backHome}
-			</button>
-		{:else}
-			<h1 class="text-2xl font-black">{t.createTitle}</h1>
-			<p class="mt-2 text-sm text-zinc-500">{t.createSubtitle}</p>
-			<form class="mt-7 space-y-5" onsubmit={updatePassword}>
-				<div class="space-y-2">
-					<label for="new-password" class="ml-1 text-xs font-bold text-zinc-700">{t.newPasswordLabel}</label>
-					<div class="relative">
-						<input id="new-password" class="h-12 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 pr-12 text-sm outline-none transition focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-100" type={showPassword ? 'text' : 'password'} bind:value={password} required minlength="8" maxlength="256" autocomplete="new-password" placeholder={t.minCharPlaceholder} />
-						<button type="button" class="absolute inset-y-0 right-0 grid w-12 place-items-center text-zinc-400 transition hover:text-zinc-700" onclick={() => (showPassword = !showPassword)} aria-label={showPassword ? t.hidePassword : t.showPassword} aria-pressed={showPassword}>
-							{#if showPassword}<EyeOff size={18} />{:else}<Eye size={18} />{/if}
-						</button>
+
+		<div class="flex items-center p-6 sm:p-10 lg:p-12">
+			<div class="mx-auto w-full max-w-sm">
+				<a href={getHref('/')} class="mb-8 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-950">
+					<ArrowLeft size={14} /> {t.backHome}
+				</a>
+
+				{#if completed}
+					<div class="space-y-2">
+						<CheckCircle2 size={24} class="text-emerald-600" />
+						<h1 class="text-2xl font-semibold tracking-tight">{t.changedTitle}</h1>
+						<p class="text-sm text-zinc-500">{t.changedSubtitle}</p>
 					</div>
-				</div>
-				<div class="space-y-2">
-					<label for="confirm-password" class="ml-1 text-xs font-bold text-zinc-700">{t.confirmPasswordLabel}</label>
-					<div class="relative">
-						<input id="confirm-password" class="h-12 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 pr-12 text-sm outline-none transition focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-100" type={showConfirmation ? 'text' : 'password'} bind:value={confirmation} required minlength="8" maxlength="256" autocomplete="new-password" placeholder={t.confirmPlaceholder} />
-						<button type="button" class="absolute inset-y-0 right-0 grid w-12 place-items-center text-zinc-400 transition hover:text-zinc-700" onclick={() => (showConfirmation = !showConfirmation)} aria-label={showConfirmation ? t.hideConfirmation : t.showConfirmation} aria-pressed={showConfirmation}>
-							{#if showConfirmation}<EyeOff size={18} />{:else}<Eye size={18} />{/if}
-						</button>
+					<button
+						type="button"
+						class="mt-6 h-11 w-full rounded-lg bg-zinc-950 text-sm font-medium text-white transition-colors hover:bg-zinc-800 cursor-pointer"
+						onclick={() => goto(getHref('/'))}
+					>
+						{t.backHome}
+					</button>
+				{:else}
+					<div class="space-y-1">
+						<h1 class="text-2xl font-semibold tracking-tight">{t.createTitle}</h1>
+						<p class="text-sm text-zinc-500">{t.createSubtitle}</p>
 					</div>
-				</div>
-				{#if errorMessage}<div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">{errorMessage}</div>{/if}
-				<button class="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-950 py-3.5 text-sm font-bold text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60" disabled={loading}>
-					{#if loading}<Loader2 class="animate-spin" size={16} />{:else}<ShieldCheck size={17} />{/if}
-					{loading ? t.submitting : t.submitBtn}
-				</button>
-			</form>
-		{/if}
+
+					<form class="mt-7 space-y-5" onsubmit={updatePassword}>
+						<div class="space-y-1.5">
+							<label for="new-password" class="block text-xs font-medium text-zinc-700">{t.newPasswordLabel}</label>
+							<div class="relative">
+								<input
+									id="new-password"
+									name="password"
+									class="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3.5 pr-11 text-sm outline-none transition focus:border-zinc-900"
+									type={showPassword ? 'text' : 'password'}
+									bind:value={password}
+									required
+									minlength="8"
+									maxlength="256"
+									autocomplete="new-password"
+									enterkeyhint="next"
+									placeholder={t.minCharPlaceholder}
+								/>
+								<button
+									type="button"
+									class="absolute inset-y-0 right-0 grid w-11 place-items-center text-zinc-400 transition hover:text-zinc-700 cursor-pointer"
+									onclick={() => (showPassword = !showPassword)}
+									aria-label={showPassword ? t.hidePassword : t.showPassword}
+									aria-pressed={showPassword}
+								>
+									{#if showPassword}<EyeOff size={16} />{:else}<Eye size={16} />{/if}
+								</button>
+							</div>
+						</div>
+
+						<div class="space-y-1.5">
+							<label for="confirm-password" class="block text-xs font-medium text-zinc-700">{t.confirmPasswordLabel}</label>
+							<div class="relative">
+								<input
+									id="confirm-password"
+									name="confirm-password"
+									class="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3.5 pr-11 text-sm outline-none transition focus:border-zinc-900"
+									type={showConfirmation ? 'text' : 'password'}
+									bind:value={confirmation}
+									required
+									minlength="8"
+									maxlength="256"
+									autocomplete="new-password"
+									enterkeyhint="done"
+									placeholder={t.confirmPlaceholder}
+								/>
+								<button
+									type="button"
+									class="absolute inset-y-0 right-0 grid w-11 place-items-center text-zinc-400 transition hover:text-zinc-700 cursor-pointer"
+									onclick={() => (showConfirmation = !showConfirmation)}
+									aria-label={showConfirmation ? t.hideConfirmation : t.showConfirmation}
+									aria-pressed={showConfirmation}
+								>
+									{#if showConfirmation}<EyeOff size={16} />{:else}<Eye size={16} />{/if}
+								</button>
+							</div>
+						</div>
+
+						{#if errorMessage}
+							<p role="alert" class="text-xs font-medium text-red-600">{errorMessage}</p>
+						{/if}
+
+						<button
+							type="submit"
+							class="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-zinc-950 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+							disabled={loading}
+						>
+							{#if loading}<Loader2 class="animate-spin" size={16} />{/if}
+							{loading ? t.submitting : t.submitBtn}
+						</button>
+					</form>
+				{/if}
+			</div>
+		</div>
 	</section>
 </main>

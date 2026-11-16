@@ -87,7 +87,7 @@
 			mobileRefPlaceholder: 'Egzanp: 6a94b44a001655dbf38d',
 			mobileRefNote: 'Antre nimewo referans ki nan mesaj konfimasyon MonCash / NatCash ou a.',
 			verifying: 'N ap verifye peman an...',
-			verifyBtn: 'Verifye ak debloke aksè mwen',
+			verifyBtn: 'Verifye epi debloke aksè mwen',
 			successTitle: 'Peman an verifye!',
 			accessDashboard: 'Ale nan espas etidyan mwen',
 			loginError: 'Ou dwe konekte sou kont ou pou w ka verifye yon peman.',

@@ -80,7 +80,7 @@
 			myCourses: 'Kou mwen yo',
 			myBookings: 'Rezèvasyon mwen',
 			myProfile: 'Pwofil mwen',
-			myTransactions: 'Transaksyon mwen',
+			myTransactions: 'Tranzaksyon mwen',
 			adminSection: 'Administrasyon',
 			adminManage: 'Jere platfòm nan',
 			logout: 'Dekonekte'

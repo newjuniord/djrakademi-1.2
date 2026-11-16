@@ -50,8 +50,8 @@
 			sec4Item2Desc: 'Si ou bezwen ranvwaye yon sesyon konsiltasyon, tanpri kontakte nou omwen 24 èdtan anvan lè ki te konfime a. Yon rezèvasyon k ap tann peman ap ekspire otomatikman si peman an pa fèt nan delè yo bay la.',
 			sec5Title: '5. Pwopriyete entelektyèl',
 			sec5Desc: 'Tout videyo, tèks, liv dijital, materyèl ak lòt kontni ki sou DJR Akademi se pwopriyete eksklizif DJR Akademi. Li entèdi pou kopye, redistribiye, anrejistre pou revann oswa pibliye nenpòt kontni san otorizasyon alekri davans.',
-			sec6Title: '6. Konfidansyalite ak bonbon',
-			sec6Desc: 'DJR Akademi pa sèvi ak bonbon pou piblisite oswa pou swiv itilizatè yo. Se sèlman bonbon teknik ki nesesè pou kenbe koneksyon ak kont ou an sekirite ki itilize.'
+			sec6Title: '6. Konfidansyalite ak cookies',
+			sec6Desc: 'DJR Akademi pa sèvi ak cookies pou piblisite oswa pou swiv itilizatè yo. Se sèlman cookies teknik ki nesesè pou kenbe koneksyon ak kont ou an sekirite ki itilize.'
 		}
 	};
 	let t = $derived(i18n[currentLang]);

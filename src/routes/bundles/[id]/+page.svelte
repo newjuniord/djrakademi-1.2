@@ -84,8 +84,8 @@
 			btnBuyLoading: "N ap prepare peman an…",
 			securePaymentText: "Peman sekirize. Aksè yo aktive apre konfimasyon.",
 			loginToast: "Tanpri konekte pou w achte pakèt sa a.",
-			ownedToast: "Ou gen tout fòmasyon ak liv dijital ki nan pak sa a deja! N ap redirije w nan espas ou an.",
-			paymentVerifiedToast: "Peman an konfime! N ap redirije w nan espas ou an...",
+			ownedToast: "Ou gen tout fòmasyon ak liv dijital ki nan pakèt sa a deja! N ap redirije w nan espas ou a.",
+			paymentVerifiedToast: "Peman an konfime! N ap redirije w nan espas ou a...",
 			errorToast: "Nou pa ka lanse peman an."
 		}
 	};
