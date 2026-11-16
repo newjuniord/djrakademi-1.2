@@ -1,25 +1,57 @@
 import { Query } from 'node-appwrite';
 import type { Order } from '$lib/services/orders';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
-import { sendPurchaseConfirmationEmail, purchaseAccessLinks } from '$lib/server/purchase-email';
+import { sendPurchaseConfirmationEmail, purchaseAccessLinks, publicAppUrl } from '$lib/server/purchase-email';
 import { sendWhatsappMessage } from '$lib/server/whatsapp-message';
-import { sendCoachingBookingTemplate, sendBookingConfirmedTemplate, normalizeWhatsappNumber } from '$lib/server/whatsapp';
+import { sendCoachingBookingTemplate, sendBookingConfirmedTemplate, sendCourseAccessV2Template, normalizeWhatsappNumber } from '$lib/server/whatsapp';
 
-async function customerPhone(order: Order): Promise<string> {
-	if (order.customerPhone) return order.customerPhone;
-	if (!order.userId) return '';
+async function resolveUserWhatsappPhone(userId?: string, fallbackPhone?: string): Promise<string> {
+	if (fallbackPhone) return fallbackPhone;
+	if (!userId) return '';
 	try {
 		const { tables, users } = adminServices();
 		const result = await tables.listRows({
 			databaseId: DATABASE_ID, tableId: 'profiles',
-			queries: [Query.equal('user_id', order.userId), Query.limit(1)]
+			queries: [Query.equal('user_id', userId), Query.limit(1)]
 		});
 		if (result.rows[0]?.whatsapp) return String(result.rows[0].whatsapp);
-		const user = await users.get({ userId: order.userId });
+		const user = await users.get({ userId });
 		return String(user.phone || '');
 	} catch (error) {
 		console.error('[Purchase WhatsApp] Profil indisponible :', error);
 		return '';
+	}
+}
+
+async function customerPhone(order: Order): Promise<string> {
+	return resolveUserWhatsappPhone(order.userId, order.customerPhone);
+}
+
+/**
+ * Envoie le template WhatsApp `course_access_v2` une fois l'accès au cours accordé.
+ */
+export async function notifyCourseAccessGranted(input: {
+	userId?: string;
+	phone?: string;
+	courseId: string;
+	courseTitle: string;
+	customerName?: string;
+	accessUrl?: string;
+}): Promise<boolean> {
+	const recipient = await resolveUserWhatsappPhone(input.userId, input.phone);
+	if (!recipient) return false;
+	const accessUrl = input.accessUrl || `${publicAppUrl()}/learn/${encodeURIComponent(input.courseId)}`;
+	try {
+		await sendCourseAccessV2Template({
+			to: recipient,
+			courseTitle: input.courseTitle || 'Formation',
+			accessUrl,
+			customerName: input.customerName || undefined
+		});
+		return true;
+	} catch (error) {
+		console.warn('[Course Access WhatsApp] Échec envoi template course_access_v2 :', error);
+		return false;
 	}
 }
 
@@ -103,6 +135,19 @@ export async function sendPurchaseNotifications(order: Order): Promise<{ emailSe
 					whatsappSent = true;
 				} catch (bookingErr) {
 					console.warn('[Purchase WhatsApp] Échec envoi booking_confirmed au client, tentative repli order :', bookingErr);
+					whatsappSent = await sendWhatsappMessage(recipient, text, `Commande ${order.id}`);
+				}
+			} else if (order.productType === 'course') {
+				try {
+					await sendCourseAccessV2Template({
+						to: recipient,
+						courseTitle: order.productTitle || 'Formation',
+						accessUrl,
+						customerName: order.customerName || undefined
+					});
+					whatsappSent = true;
+				} catch (courseErr) {
+					console.warn('[Purchase WhatsApp] Échec envoi course_access_v2 au client, tentative repli order :', courseErr);
 					whatsappSent = await sendWhatsappMessage(recipient, text, `Commande ${order.id}`);
 				}
 			} else {

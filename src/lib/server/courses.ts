@@ -1,5 +1,6 @@
 import { ID, Query, type Models } from 'node-appwrite';
 import { adminServices, DATABASE_ID } from '$lib/server/admin-appwrite';
+import { notifyCourseAccessGranted } from '$lib/server/purchase-notifications';
 
 export class CourseServerError extends Error {
 	constructor(message: string, public status = 500) {
@@ -197,6 +198,13 @@ export async function claimFreeCourseServer(courseId: string, user: Models.User<
 			}
 		});
 		await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
+		notifyCourseAccessGranted({
+			userId: user.$id,
+			phone: user.phone || undefined,
+			courseId,
+			courseTitle: course.title || 'Formation',
+			customerName: user.name || undefined
+		}).catch((e) => console.warn('[Free Course WhatsApp] Échec notification :', e));
 		return { owned: true, created: true };
 	} catch (error: any) {
 		await tables.updateTransaction({ transactionId: transaction.$id, rollback: true }).catch(() => undefined);

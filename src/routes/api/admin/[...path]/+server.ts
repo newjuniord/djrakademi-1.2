@@ -1,5 +1,6 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import { notifyCourseAccessGranted } from '$lib/server/purchase-notifications';
 import {
 	AdminServerError,
 	BRANDING_BUCKET_ID,
@@ -603,12 +604,20 @@ export const POST: RequestHandler = async ({ request, params }) => {
 				}
 			});
 		}
-		try { await tables.getRow({ databaseId: DATABASE_ID, tableId: body.itemType === 'course' ? 'courses' : 'ebooks', rowId: body.itemId }); }
+		let itemRow: any;
+		try { itemRow = await tables.getRow({ databaseId: DATABASE_ID, tableId: body.itemType === 'course' ? 'courses' : 'ebooks', rowId: body.itemId }); }
 		catch { throw new AdminServerError('Produit introuvable.', 404); }
 		const existing = await tables.listRows({ databaseId: DATABASE_ID, tableId: 'access_grants', queries: [Query.equal('user_id', body.userId), Query.equal('item_type', body.itemType), Query.equal('item_id', body.itemId), Query.limit(1)] });
 		if (existing.rows.length) return json({ created: false });
 		try {
 			await tables.createRow({ databaseId: DATABASE_ID, tableId: 'access_grants', rowId: ID.unique(), data: { user_id: body.userId, item_type: body.itemType, item_id: body.itemId, granted_by: 'admin', created_at: new Date().toISOString() } });
+			if (body.itemType === 'course') {
+				notifyCourseAccessGranted({
+					userId: body.userId,
+					courseId: body.itemId,
+					courseTitle: itemRow?.title || 'Formation'
+				}).catch((e) => console.warn('[Admin Grant WhatsApp] Échec notification :', e));
+			}
 			return json({ created: true }, { status: 201 });
 		} catch (error: any) {
 			if (error?.code === 409) return json({ created: false });
