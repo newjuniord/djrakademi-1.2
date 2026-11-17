@@ -64,15 +64,32 @@
 		}
 	}
 
+	const ALLOWED_EBOOK_EXTENSIONS = ['.pdf', '.epub', '.doc', '.docx'];
+	const ALLOWED_EBOOK_MIME_TYPES = new Set([
+		'application/pdf',
+		'application/epub+zip',
+		'application/msword',
+		'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+	]);
+	const INVALID_EBOOK_FILE_MSG = 'Seuls les fichiers PDF, EPUB, DOC ou DOCX sont acceptés pour les livres numériques.';
+
+	function isAllowedEbookFile(file: File): boolean {
+		const lowerName = file.name.toLowerCase();
+		return (
+			ALLOWED_EBOOK_MIME_TYPES.has(file.type) ||
+			ALLOWED_EBOOK_EXTENSIONS.some((ext) => lowerName.endsWith(ext))
+		);
+	}
+
 	function handlePdfSelect(e: Event) {
 		const target = e.target as HTMLInputElement;
 		if (target.files && target.files.length > 0) {
 			const file = target.files[0];
-			if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+			if (isAllowedEbookFile(file)) {
 				pdfFile = file;
 				fileName = file.name;
 			} else {
-				alert(translateAdminMessage('Seuls les fichiers PDF sont acceptés pour les livres numériques.', currentLang));
+				alert(translateAdminMessage(INVALID_EBOOK_FILE_MSG, currentLang));
 			}
 		}
 	}
@@ -81,11 +98,11 @@
 		e.preventDefault();
 		if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
 			const file = e.dataTransfer.files[0];
-			if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+			if (isAllowedEbookFile(file)) {
 				pdfFile = file;
 				fileName = file.name;
 			} else {
-				alert(translateAdminMessage('Seuls les fichiers PDF sont acceptés pour les livres numériques.', currentLang));
+				alert(translateAdminMessage(INVALID_EBOOK_FILE_MSG, currentLang));
 			}
 		}
 	}
@@ -194,16 +211,16 @@
 		</div>
 	</div>
 
-	<!-- Section Fichier PDF -->
+	<!-- Section Fichier du livre numérique -->
 	<div class="space-y-5 pt-4">
 		<h2 class="text-base font-bold text-base-content border-b border-base-200/70 pb-3 flex items-center gap-2">
 			<Upload size={18} class="text-primary" />
-			Fichier du livre numérique (PDF uniquement)
+			Fichier du livre numérique (PDF, EPUB, DOC, DOCX)
 		</h2>
 
 		<input
 			type="file"
-			accept=".pdf,application/pdf"
+			accept=".pdf,.epub,.doc,.docx,application/pdf,application/epub+zip,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 			class="hidden"
 			bind:this={pdfInputRef}
 			onchange={handlePdfSelect}
@@ -222,9 +239,9 @@
 			<Upload size={32} class="mx-auto text-base-content/40" />
 			<div>
 				<p class="text-xs font-bold text-base-content">
-					Cliquez pour sélectionner un fichier PDF ou glissez-déposez ici
+					Cliquez pour sélectionner un fichier (PDF, EPUB, DOC, DOCX) ou glissez-déposez ici
 				</p>
-				<p class="text-[11px] text-base-content/50 mt-0.5">Fichier PDF stocké dans Appwrite Storage (jusqu'à 50 Mo)</p>
+				<p class="text-[11px] text-base-content/50 mt-0.5">Fichier stocké dans Appwrite Storage (jusqu'à 50 Mo)</p>
 			</div>
 
 			{#if fileName || pdfFile}
