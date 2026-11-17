@@ -2,6 +2,7 @@
 type Language = 'fr' | 'ht';
 
 const ht: Record<string, string> = {
+  'Un paiement est déjà en cours pour cet achat. Vous pourrez réessayer 2 minutes après votre première demande.': 'Gen yon peman ki deja ankou pou acha sa a. Ou ka eseye ankò 2 minit apre premye demann ou an.',
   'Vue d’ensemble': 'Apèsi jeneral',
   'Vue d’ensemble · DJR Akademi': 'Apèsi jeneral · DJR Akademi',
   'Vue d’ensemble de l’administration DJR Akademi': 'Apèsi jeneral sou administrasyon DJR Akademi',

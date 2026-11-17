@@ -13,7 +13,7 @@ const BOOKINGS_TABLE = 'bookings';
 const PAYMENT_METHODS = ['moncash', 'natcash', 'carte'] as const;
 const MERCHANT_URL = 'https://plopplop.solutionip.app/api/paiement-marchand';
 const VERIFY_URL = 'https://plopplop.solutionip.app/api/paiement-verify';
-const RECENT_PENDING_ORDER_MS = 10 * 60 * 1000;
+const RECENT_PENDING_ORDER_MS = 2 * 60 * 1000;
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 type AuthenticatedUser = Models.User<Models.Preferences>;
@@ -249,7 +249,7 @@ async function rejectRecentPendingOrder(
 	});
 	if (recentPending.rows.length) {
 		throw new PaymentServerError(
-			'Une première demande de paiement est déjà en cours de vérification. Veuillez patienter quelques minutes avant de réessayer.',
+			'Un paiement est déjà en cours pour cet achat. Vous pourrez réessayer 2 minutes après votre première demande.',
 			409
 		);
 	}
