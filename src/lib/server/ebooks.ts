@@ -13,9 +13,24 @@ export class EbookServerError extends Error {
 	}
 }
 
-function safeFilename(value: string): string {
-	const normalized = value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
-	return (normalized.replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 100) || 'ebook') + '.pdf';
+const MIME_EXTENSION_MAP: Record<string, string> = {
+	'application/pdf': '.pdf',
+	'application/epub+zip': '.epub',
+	'application/msword': '.doc',
+	'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx'
+};
+
+function resolveExtension(originalName?: string, mimeType?: string): string {
+	const extMatch = originalName?.trim().match(/\.([a-zA-Z0-9]{1,10})$/);
+	if (extMatch) return `.${extMatch[1].toLowerCase()}`;
+	if (mimeType && MIME_EXTENSION_MAP[mimeType]) return MIME_EXTENSION_MAP[mimeType];
+	return '.pdf';
+}
+
+function safeFilename(value: string, extension: string): string {
+	const base = value.toLowerCase().endsWith(extension) ? value.slice(0, -extension.length) : value;
+	const normalized = base.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+	return (normalized.replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 100) || 'ebook') + extension;
 }
 
 export async function hasEbookAccessServer(ebookId: string, userId: string): Promise<boolean> {
@@ -82,7 +97,12 @@ export async function getEbookFileServer(ebookId: string, userId: string) {
 			storage.getFile({ bucketId: BUCKET_ID, fileId: ebook.pdf_file_id }),
 			storage.getFileDownload({ bucketId: BUCKET_ID, fileId: ebook.pdf_file_id })
 		]);
-		return { bytes, mimeType: file.mimeType || 'application/pdf', filename: safeFilename(String(ebook.title || file.name || 'ebook')) };
+		const extension = resolveExtension(file.name, file.mimeType);
+		return {
+			bytes,
+			mimeType: file.mimeType || 'application/octet-stream',
+			filename: safeFilename(String(ebook.title || file.name || 'ebook'), extension)
+		};
 	} catch {
 		throw new EbookServerError('Impossible de récupérer le fichier PDF.', 502);
 	}
