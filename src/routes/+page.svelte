@@ -423,7 +423,7 @@
 								{#if ebook.cover}
 									<img src={ebook.cover} alt={ebook.title} loading="lazy" />
 								{:else}
-									<div class="ebook-placeholder"><FileText size={34} /><span>PDF</span></div>
+									<div class="ebook-placeholder"><FileText size={34} /><span>Ebook</span></div>
 								{/if}
 								<div class="ebook-showcase-overlay"></div>
 								<span class="ebook-format">{t.ebookFormat}</span>

@@ -27,7 +27,7 @@
 	const i18n = {
 		fr: {
 			metaTitle: "Catalogue complet · DJR Akademi",
-			metaDesc: "Explorez toutes nos formations vidéo, nos livres électroniques PDF et nos consultations individuelles sur DJR Akademi.",
+			metaDesc: "Explorez toutes nos formations vidéo, nos livres numériques et nos consultations individuelles sur DJR Akademi.",
 			emptyTitle: (q: string) => `Aucun résultat pour « ${q} »`,
 			emptyDesc: "Essayez un autre mot-clé pour trouver ce que vous cherchez.",
 			emptyReset: "Effacer la recherche",
@@ -40,9 +40,9 @@
 			sec01More: (n: number) => `Voir ${n} autre${n > 1 ? 's' : ''} formation${n > 1 ? 's' : ''}`,
 			
 			sec02Kicker: "02 · Lisez et appliquez",
-			sec02Title: "Livres électroniques & Guides PDF",
+			sec02Title: "Livres numériques & Guides",
 			sec02Desc: "Des ressources pratiques à conserver et consulter à tout moment.",
-			sec02Type: "PDF",
+			sec02Type: "Ebook",
 			sec02Action: "Lire le livre",
 			sec02More: (n: number) => `Voir ${n} autre${n > 1 ? 's' : ''} livre${n > 1 ? 's' : ''} électronique${n > 1 ? 's' : ''}`,
 			
@@ -75,9 +75,9 @@
 			sec01More: (n: number) => `Gade ${n} lòt fòmasyon`,
 			
 			sec02Kicker: "02 · Li epi aplike",
-			sec02Title: "Liv dijital ak gid PDF",
+			sec02Title: "Liv dijital ak gid",
 			sec02Desc: "Resous pratik pou w konsève epi konsilte nenpòt ki lè.",
-			sec02Type: "PDF",
+			sec02Type: "Ebook",
 			sec02Action: "Li gid la",
 			sec02More: (n: number) => `Gade ${n} lòt liv dijital`,
 			

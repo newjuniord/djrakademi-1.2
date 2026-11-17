@@ -24,9 +24,9 @@
 			notFound: "Livre électronique introuvable.",
 			backHome: "Retour à l'accueil",
 			backEbooks: "Tous les livres électroniques",
-			kicker: "Livre électronique PDF",
+			kicker: "Livre numérique",
 			salesCount: (n: number) => `${n} vente${n > 1 ? 's' : ''}`,
-			formatPdf: "Format PDF",
+			formatPdf: "Format numérique",
 			free: "Gratuit",
 			btnFree: "Télécharger gratuitement",
 			btnBuy: "Acheter ce livre électronique",
@@ -36,12 +36,12 @@
 			aboutDescSuffix: "Ce guide est conçu pour une mise en pratique immédiate : chaque section vous donne des outils, des exemples et des étapes concrètes.",
 			features: [
 				"Accès immédiat après paiement",
-				"Format PDF téléchargeable",
+				"Format numérique téléchargeable",
 				"Contenu clair et pratique",
 				"Support par e-mail inclus"
 			],
 			featGrid: [
-				{ icon: '📄', title: 'Format PDF', desc: 'Compatible ordinateur, tablette et téléphone' },
+				{ icon: '📄', title: 'Format numérique', desc: 'Compatible ordinateur, tablette et téléphone' },
 				{ icon: '⚡', title: 'Accès immédiat', desc: 'Téléchargement dès la confirmation du paiement' },
 				{ icon: '🎯', title: 'Contenu pratique', desc: 'Exercices et cas pratiques inclus' },
 				{ icon: '🔄', title: 'Mises à jour gratuites', desc: 'Nouvelles versions incluses à vie' }
@@ -63,9 +63,9 @@
 			notFound: "Liv dijital la pa disponib.",
 			backHome: "Retounen nan akèy",
 			backEbooks: "Tout liv dijital yo",
-			kicker: "Gid PDF",
+			kicker: "Gid dijital",
 			salesCount: (n: number) => `${n} vant`,
-			formatPdf: "Fòma PDF",
+			formatPdf: "Fòma dijital",
 			free: "Gratis",
 			btnFree: "Telechaje gratis",
 			btnBuy: "Achte liv dijital sa a",
@@ -75,12 +75,12 @@
 			aboutDescSuffix: "Gid sa a fèt pou w ka aplike l dirèkteman: chak seksyon ba w zouti, egzanp ak etap konkrè pou w avanse byen vit.",
 			features: [
 				"Aksè imedyat apre peman",
-				"Fòma PDF ou ka telechaje",
+				"Fòma dijital ou ka telechaje",
 				"Kontni klè epi pratik",
 				"Sipò pa imèl enkli"
 			],
 			featGrid: [
-				{ icon: '📄', title: 'Fòma PDF', desc: 'Konpatib ak òdinatè, tablèt ak telefòn' },
+				{ icon: '📄', title: 'Fòma dijital', desc: 'Konpatib ak òdinatè, tablèt ak telefòn' },
 				{ icon: '⚡', title: 'Aksè imedyat', desc: 'Telechajman osito peman an konfime' },
 				{ icon: '🎯', title: 'Kontni pratik', desc: 'Egzèsis ak ka pratik enkli' },
 				{ icon: '🔄', title: 'Mizajou gratis', desc: 'Nouvo vèsyon yo enkli pou tout tan' }
@@ -368,12 +368,12 @@
 									{:else}
 										<div class="w-full h-full flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-zinc-700 to-zinc-800">
 											<FileText size={48} class="text-zinc-500" />
-											<span class="text-zinc-400 font-bold text-sm">PDF</span>
+											<span class="text-zinc-400 font-bold text-sm">Ebook</span>
 										</div>
 									{/if}
 									<!-- Overlay badge -->
 									<div class="absolute top-4 right-4 px-2.5 py-1 bg-amber-400 text-black text-[10px] font-black uppercase tracking-widest rounded-full">
-										PDF
+										Ebook
 									</div>
 								</div>
 							</div>

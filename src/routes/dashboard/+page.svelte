@@ -63,14 +63,14 @@
 			defaultLesson: 'Bienvenue dans ce cours',
 			continueCourse: 'Continuer la formation',
 			reviewCourse: 'Revoir la formation',
-			ebooksTitle: 'Mes livres électroniques PDF',
+			ebooksTitle: 'Mes livres numériques',
 			ebooksSub: 'Vos guides pratiques téléchargeables à tout moment',
 			unlimitedDownload: 'Téléchargement illimité',
 			noEbooksTitle: 'Aucun livre électronique disponible',
-			noEbooksSub: 'Vous n\'avez aucun livre électronique PDF. Découvrez nos guides pratiques dans le catalogue.',
+			noEbooksSub: 'Vous n\'avez aucun livre numérique. Découvrez nos guides pratiques dans le catalogue.',
 			exploreEbooks: 'Découvrir les livres électroniques',
 			preparingDownload: 'Préparation…',
-			downloadPdf: 'Télécharger (PDF)',
+			downloadPdf: 'Télécharger',
 			downloadStarted: 'Téléchargement de "{title}" démarré.',
 			downloadError: 'Téléchargement impossible.',
 			coachingTitle: 'Mes séances de coaching',
@@ -111,14 +111,14 @@
 			defaultLesson: 'Byenveni nan fòmasyon sa a',
 			continueCourse: 'Kontinye fòmasyon an',
 			reviewCourse: 'Gade fòmasyon an ankò',
-			ebooksTitle: 'Liv dijital PDF mwen yo',
+			ebooksTitle: 'Liv dijital mwen yo',
 			ebooksSub: 'Gid pratik ou ka telechaje nenpòt lè',
 			unlimitedDownload: 'Telechajman san limit',
 			noEbooksTitle: 'Pa gen liv dijital ki disponib',
-			noEbooksSub: 'Ou poko gen liv dijital PDF. Dekouvri gid pratik nou yo nan katalòg la.',
+			noEbooksSub: 'Ou poko gen liv dijital. Dekouvri gid pratik nou yo nan katalòg la.',
 			exploreEbooks: 'Dekouvri liv dijital yo',
 			preparingDownload: 'N ap prepare telechajman an…',
-			downloadPdf: 'Telechaje (PDF)',
+			downloadPdf: 'Telechaje',
 			downloadStarted: 'Telechajman "{title}" a kòmanse.',
 			downloadError: 'Telechajman pa posib.',
 			coachingTitle: 'Sesyon konsiltasyon mwen yo',
@@ -379,11 +379,11 @@
 										{:else}
 											<div class="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-zinc-100 to-zinc-200">
 												<FileText size={32} class="text-zinc-400" />
-												<span class="text-[10px] font-bold text-zinc-400">PDF</span>
+												<span class="text-[10px] font-bold text-zinc-400">Ebook</span>
 											</div>
 										{/if}
 										<div class="absolute top-2.5 right-2.5 px-2 py-0.5 bg-zinc-950/80 backdrop-blur-sm text-white text-[9px] font-black uppercase rounded">
-											PDF
+											Ebook
 										</div>
 									</div>
 
